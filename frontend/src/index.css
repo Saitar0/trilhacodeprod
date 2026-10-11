@@ -1,0 +1,107 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 42% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 215 25% 22%;
+    --ring: 160 84% 39%;
+    --sidebar: 221 46% 8%;
+    --radius: 0.65rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-heading tracking-tight;
+  }
+  ::selection {
+    background: rgba(16, 185, 129, 0.3);
+  }
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+.grid-bg {
+  background-image: linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.md {
+  @apply text-[15px] leading-7 text-slate-300;
+}
+.md h1, .md h2, .md h3 {
+  @apply text-slate-50 font-semibold mt-6 mb-3;
+}
+.md h1 { @apply text-2xl; }
+.md h2 { @apply text-xl; }
+.md h3 { @apply text-lg; }
+.md p { @apply my-3; }
+.md ul { @apply list-disc pl-6 my-3; }
+.md ol { @apply list-decimal pl-6 my-3; }
+.md a { @apply text-emerald-400 underline underline-offset-4; }
+.md code { @apply font-mono text-[13px] bg-slate-800/80 px-1.5 py-0.5 rounded text-emerald-300; }
+.md pre { @apply bg-slate-950 border border-slate-800 rounded-lg p-4 overflow-x-auto my-4; }
+.md pre code { @apply bg-transparent p-0; }
+.md blockquote { @apply border-l-2 border-emerald-500/60 pl-4 text-slate-400 italic my-4; }
+.md table { @apply w-full text-sm my-4; }
+.md th, .md td { @apply border border-slate-800 px-3 py-2 text-left; }
+
+.fade-up {
+  animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+
+@layer base {
+  [data-debug-wrapper="true"] {
+    display: contents !important;
+  }
+}

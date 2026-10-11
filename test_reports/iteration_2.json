@@ -1,0 +1,37 @@
+{
+  "summary": "Phase 2 end-to-end testing. Backend: 18/18 phase-2 pytest tests pass (locks + cycles/validate + submissions lifecycle + notes + reviews + versions compare/restore). Phase-1 regression still green (27/27). Frontend: student + admin + editor flows all green. Blocked topic (HTTP e REST) renders locked-panel + topic-locked-indicator + locked-pending-* with 'JavaScript no navegador' listed as pending prereq; unlocked 'Variáveis e tipos' shows topic-notes-toggle, topic-note-editor with autosave 'salvo' indicator, review-menu-topic → soon triggers 'Revisão agendada' toast, per-block review-menu-* and block-note-open-* on every content block, exercise-submission-* and exercise-status-* for the approved exercise. /estudos page has mystudy-tab-reviews/notes/submissions tabs. Admin /admin/correcoes shows all grading-tab-*, grading-filter-track, grading-filter-type, grading-search, grading-item-* with status chips (3 submitted from this test run). Track editor renders track-progression-mode, track-validation-ok, editor-versions-button; versions page renders versions-list, compare-base-select, compare-target-select, diff-view, diff-summary, version-restore-* per published snapshot. Brute-force fix from iteration 1 confirmed via test_brute_force_lockout success (uses X-Forwarded-For). No bugs found this iteration.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_phase2.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/phase2_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routes_content.py at 612 lines approaches the 700-line split threshold; still manageable but consider splitting tracks/nodes/blocks/relations when adding more features.",
+    "learning.py.compute_locks returns ancestor-based lock inheritance by scanning up via parent chain for every node (O(n·depth)) — fine today (<20 nodes/track) but a cached version would scale better for 1000+ node trees.",
+    "routes_versions.py._to_doc converts any ISO-format string ending with '_at' back to datetime but swallows ValueError silently; could mask data corruption. Prefer explicit allowlist of datetime fields.",
+    "routes_submissions.py.list_submissions.counts aggregation computes global counts across ALL tracks regardless of filters — editorial-queue counts will include unrelated tracks when a track_id filter is applied. Minor UX inconsistency.",
+    "learning.py.find_cycles returns path slices that may include unrelated prefix nodes (path[path.index(m):] + [m]); edge case but presentation only. Backend validate endpoint deduplicates nicely.",
+    "Rate-limit login_attempts collection still lacks a MongoDB TTL index on `last` to self-prune (noted in iteration 1, still applicable).",
+    "RegisterIn enforces name min_length=2 silently — error returns pydantic validation payload (422); UI should surface this clearly (not tested here)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_phase2.py"
+  ],
+  "success_rate": {"backend": "100% (45/45: 18 phase-2 + 27 phase-1)", "frontend": "100% of exercised flows"},
+  "test_credentials": "/app/memory/test_credentials.md — admin@trilhacode.dev/Admin@123, editor@trilhacode.dev/Editor@123, aluno@trilhacode.dev/Aluno@123",
+  "seed_data_creation": "Tests use TEST_* tracks created+deleted within each test. 'aluno@trilhacode.dev' now has reviews pending for the 'Variáveis e tipos' topic (scheduled during UI test). Three TEST_subs tracks' submissions remain in the editorial queue briefly during submission tests but tracks are torn down at class end, cascading submissions.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Phase 2 backend coverage lives in /app/backend/tests/test_phase2.py (18 tests). Pytest config forces -n 2 --dist loadscope. The seeded track id is 6acb0b40ef07136c920e83c2 and the only exercise block for 'Variáveis e tipos' is approved for the seeded aluno (so submission UI shows the 'Corrigido / Aprovado' state). To test a fresh exercise flow use /cadastro to register a new test_*@trilhacode.dev user (name ≥ 2 chars — the register endpoint 422s on 1-char names). HTTP e REST topic (6acb0b40ef07136c920e83e7) is locked for students pending JavaScript no navegador. Never restore versions or delete nodes on the seeded Trilha Code track.",
+  "rca_of_the_issue": "No new bugs this iteration. Phase-1 brute-force bug (iteration 1 RCA) is fixed and verified."
+}

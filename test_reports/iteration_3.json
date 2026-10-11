@@ -1,0 +1,27 @@
+{
+  "summary": "Iteration 3 hardening-pack verification: ALL tests GREEN. Backend: smoke_hardening.py prints 19/19 PASS over public URL (chunked zlib snapshots, import dry-run + idempotent re-import, access leaks blocked for students, concurrent review/submit/claim atomicity, orphaned submissions hidden from student and badged for staff). Regression: pytest backend_test.py + test_phase2.py = 45/45 passed in 14.6s on public URL. Frontend: (1) /admin/importar flow — load-example → dry-run (import-status 'Simulação válida', import-summary rendered) → confirm (import-open-track appears) → re-dry-run shows 'itens atualizados 4' (idempotent, no duplicates) → introduce invalid kind='phase' under module → import-errors visible + import-confirm-button disabled; imported 'minha-trilha' track cleaned up via API DELETE. (2) Track settings dialog Regras tab shows ONLY enforce switch + track-form-coming-soon ('EM BREVE' note); no unlock-strategy or visual-style controls present. (3) Node details form renders node-release-coming-soon with no date/datetime inputs. (4) /admin/trilhas/{id}/versoes lists v2 (2.3 KB) and v3 (2.5 KB) with compare-base-select + compare-target-select; chunked-zlib storage confirmed via API ('snapshot' absent from version doc, packed_bytes=916B on test track). (5) Student regression: catalog shows Trilha Code; track viewer loads; HTTP e REST → locked-panel visible; Variáveis e tipos → topic-notes-toggle + review-menu-topic visible; /estudos shows mystudy-tab-reviews/notes/submissions. Seeded Trilha Code untouched.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/smoke_hardening.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_phase2.py",
+    "/app/test_reports/pytest/iter3_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "smoke_hardening.py reads frontend/.env directly with a regex instead of python-dotenv; harmless but inconsistent with pytest suites that use os.environ via BASE_URL. Minor.",
+    "Imported track did not appear immediately in /admin/trilhas list after dialog close (page cached); refresh picks it up. Consider invalidating the tracks query on import success. Low priority — API DELETE confirmed the track was created and findable.",
+    "Versions page still formats sizes as 'KB' with one decimal only — consider showing bytes for <1KB artifacts (test track showed 916B packed via API but UI would round to 0.9 KB).",
+    "No TTL index on login_attempts collection (carried over from iteration 1-2) — self-pruning still absent.",
+    "routes_content.py remains >600 lines; approaching the 700-line split threshold flagged in iteration 2."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (45/45 pytest + 19/19 smoke_hardening)", "frontend": "100% of exercised flows (import, Regras, node form, versions, student)"},
+  "test_credentials": "/app/memory/test_credentials.md — admin@trilhacode.dev/Admin@123, editor@trilhacode.dev/Editor@123, aluno@trilhacode.dev/Aluno@123",
+  "seed_data_creation": "Smoke test created+deleted track 'test-import-hardening'. UI import test created 'minha-trilha' track; cleaned up via API DELETE /api/tracks/{id}. Seeded Trilha Code untouched.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All hardening features verified. For future iterations: smoke_hardening.py is the canonical hardening regression; it depends on admin+aluno seeded users and the exercise_open block type. Email validator rejects .test TLD (noted in request). Never restore versions or delete nodes on seeded Trilha Code; current Trilha Code is at v3 (seed=v1, main agent's smoke runs produced v2 baseline + v3 'Progressão bloqueante + primeiro exercício'). Chunked-zlib storage: version_chunks collection holds snapshots; track_versions has only metadata (storage='chunked-zlib', chunks, sha256, raw/packed_bytes); GET /versions/{id} still returns inline snapshot via loader for backwards-compat.",
+  "rca_of_the_issue": "N/A — no bugs found this iteration."
+}

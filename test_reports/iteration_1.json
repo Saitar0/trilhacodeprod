@@ -1,0 +1,33 @@
+{
+  "summary": "First test run (both). Backend pytest suite created (27 tests, 26 pass, 1 fail). Confirmed 1 critical bug: brute-force rate-limit does NOT trigger over the public ingress because `request.client.host` varies per internal proxy pod (10.208.133.66, 10.208.133.69, ...), so each proxy IP gets its own counter and the limit never trips in practice. Verified via localhost it works. Frontend student + admin + editor flows all work end-to-end: catalog shows seeded Trilha Code card, track overview with resume card, reader with quiz/checklist/next, mark-completed, resume-card return, admin dashboard stats, create track, add root node, publish, versions dialog shows v1, editor cannot see Users nav link (students never see /admin). Permissions enforcement verified via API (student 403s on tracks/nodes/users, editor 403s on users/taxonomies).",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/auth/login", "issue": "Brute-force lockout ineffective over public ingress — identifier uses request.client.host, which differs per internal proxy pod so counter never reaches 5 for a single email. Should use the first X-Forwarded-For hop (or just the email) in the identifier. Confirmed by DB inspection: multiple identifiers like '10.208.133.66:email', '10.208.133.69:email' each count=1-3 after many attempts.", "priority": "CRITICAL"}
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "FIX (HIGH): In backend/routes_auth.py `login`, derive client IP from X-Forwarded-For header (first non-trusted hop) or key brute-force attempts solely by email. Current implementation gives attackers unlimited retries via natural ingress distribution across proxy pods."
+  ],
+  "critical_code_review_comments": [
+    "Brute-force identifier (routes_auth.py line 62) uses `request.client.host` which under Kubernetes ingress returns the per-request proxy pod IP, not the real client IP; mitigation fails silently. Prefer X-Forwarded-For[0] or key by email only.",
+    "routes_content.py is 593 lines — nearing the recommended 700-line split threshold but still manageable; consider separating tracks/nodes/blocks/relations modules as it grows.",
+    "`_visible_nodes` recursion in routes_content.py uses `n.get('parent_id')` presence combined with ancestor visibility — fine for small trees but no memoization reset; acceptable at current scale.",
+    "login_attempts has no TTL index — stale entries accumulate indefinitely; add TTL index on `last` to self-prune.",
+    "Email validator rejects `.test` TLDs (expected pydantic/email-validator strict mode); documented in tests."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "96% (26/27)", "frontend": "100% of flows exercised"},
+  "test_credentials": "/app/memory/test_credentials.md — admin@trilhacode.dev/Admin@123, editor@trilhacode.dev/Editor@123, aluno@trilhacode.dev/Aluno@123",
+  "seed_data_creation": "Did not add seed data; test suite creates+deletes TEST_ prefixed tracks within each run. Student progress on seeded 'Variáveis e tipos' topic was auto-created by progress tests.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend tests at /app/backend/tests/backend_test.py. pytest.ini forces `-n 2 --dist loadscope`; run serial with `-n 0`. Email validator rejects reserved TLDs (.test), use .dev in test emails. Seeded track slug 'trilha-code' must be preserved — tests only touch TEST_* tracks. The brute-force test uses the public URL (fails as expected until fixed); localhost works and triggers 429 on attempt 6.",
+  "rca_of_the_issue": "Brute-force lockout bug RCA — Repro: hit `POST https://<public>/api/auth/login` 6 times with same email/wrong password → every response is 401 (should be 429 on #6). Root cause: `identifier = f\"{request.client.host}:{email}\"` in routes_auth.py:62. Behind the k8s ingress, FastAPI sees the ingress/proxy pod as the client, and the ingress load-balances across multiple proxy pods, so successive requests arrive with different `request.client.host` values. Each gets its own `login_attempts` document with count=1-2. Mitigation: use `request.headers.get('x-forwarded-for','').split(',')[0].strip() or request.client.host` (or key brute force by email alone). Also add a MongoDB TTL index on `last` to purge old attempts."
+}

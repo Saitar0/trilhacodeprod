@@ -1,0 +1,148 @@
+{
+  "project_name": "Trilha Code",
+  "archetype": "Architectural Technical Workspace & Precision LMS",
+  "theme": "Dark Charcoal / Slate Precision with High-Contrast Emerald Accent & Warm Monospace Code Accents (Supports Light & Dark modes, defaults to slate-950 deep focus theme)",
+  "language": "pt-BR",
+  "typography": {
+    "heading_font": "Outfit, sans-serif",
+    "body_font": "Plus Jakarta Sans, sans-serif",
+    "code_font": "JetBrains Mono, Fira Code, monospace",
+    "weights": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+      "black": 800
+    },
+    "hierarchy": {
+      "h1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-semibold tracking-tight",
+      "h4": "text-lg sm:text-xl font-semibold",
+      "body": "text-sm sm:text-base leading-relaxed text-slate-300",
+      "caption": "text-xs font-medium text-slate-400 uppercase tracking-widest",
+      "code_block": "font-mono text-xs sm:text-sm leading-6"
+    }
+  },
+  "colors": {
+    "dark": {
+      "bg_primary": "#090D16",
+      "bg_surface": "#0F172A",
+      "bg_surface_elevated": "#1E293B",
+      "bg_sidebar": "#0B111E",
+      "border": "#1E293B",
+      "border_active": "#334155",
+      "text_main": "#F8FAFC",
+      "text_muted": "#94A3B8",
+      "text_dim": "#64748B",
+      "accent_emerald": "#10B981",
+      "accent_emerald_glow": "rgba(16, 185, 129, 0.15)",
+      "accent_cyan": "#06B6D4",
+      "accent_amber": "#F59E0B",
+      "accent_violet": "#8B5CF6",
+      "accent_rose": "#F43F5E"
+    },
+    "light": {
+      "bg_primary": "#F8FAFC",
+      "bg_surface": "#FFFFFF",
+      "bg_surface_elevated": "#F1F5F9",
+      "bg_sidebar": "#F1F5F9",
+      "border": "#E2E8F0",
+      "border_active": "#CBD5E1",
+      "text_main": "#0F172A",
+      "text_muted": "#475569",
+      "text_dim": "#94A3B8",
+      "accent_emerald": "#059669",
+      "accent_cyan": "#0891B2",
+      "accent_amber": "#D97706",
+      "accent_violet": "#7C3AED",
+      "accent_rose": "#E11D48"
+    },
+    "pedagogical_types": {
+      "TEORIA": { "color": "sky", "label": "Teoria", "bg": "bg-sky-500/10", "border": "border-sky-500/30", "text": "text-sky-400" },
+      "PRATICA": { "color": "emerald", "label": "Prática", "bg": "bg-emerald-500/10", "border": "border-emerald-500/30", "text": "text-emerald-400" },
+      "DESAFIO": { "color": "amber", "label": "Desafio", "bg": "bg-amber-500/10", "border": "border-amber-500/30", "text": "text-amber-400" },
+      "PROJETO": { "color": "violet", "label": "Projeto", "bg": "bg-violet-500/10", "border": "border-violet-500/30", "text": "text-violet-400" },
+      "QUIZ": { "color": "rose", "label": "Quiz", "bg": "bg-rose-500/10", "border": "border-rose-500/30", "text": "text-rose-400" }
+    },
+    "status": {
+      "draft": { "label": "Rascunho", "badge": "bg-slate-800 text-slate-300 border-slate-700" },
+      "published": { "label": "Publicado", "badge": "bg-emerald-950/60 text-emerald-400 border-emerald-800" },
+      "archived": { "label": "Arquivado", "badge": "bg-rose-950/60 text-rose-400 border-rose-800" }
+    }
+  },
+  "visual_enhancers": {
+    "card_style": "rounded-xl border border-slate-800 bg-slate-900/80 backdrop-blur-md shadow-sm hover:border-slate-700 transition-all duration-200",
+    "active_card_style": "rounded-xl border border-emerald-500/40 bg-slate-900/95 shadow-[0_0_20px_rgba(16,185,129,0.08)]",
+    "glass_panel": "bg-slate-900/70 backdrop-blur-xl border border-slate-800/80",
+    "code_editor_panel": "bg-slate-950 border border-slate-800 font-mono text-xs sm:text-sm rounded-lg p-4 leading-6 text-emerald-300",
+    "tree_node_hover": "hover:bg-slate-800/60 hover:text-slate-100 transition-colors duration-150 rounded-lg"
+  },
+  "layout_and_structure": {
+    "navigation_bar": "Sticky header with backdrop blur (bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-40), displaying logo, mode switcher (Admin vs Aluno), path breadcrumbs, search shortcut (Cmd+K), user profile avatar.",
+    "admin_layout": {
+      "structure": "Dual-panel or tree-editor workspace",
+      "left_panel": "Tree Editor (Trilhas -> Fases -> Módulos -> Submódulos -> Tópicos) with drag-and-drop reorder triggers, add node buttons, filter by status & depth.",
+      "right_panel": "Node Property & Content Block Editor (Node form, pedagogical type, depth, dependencies, content blocks: Markdown text, Code sandbox, Quiz, Callout, Video embed)."
+    },
+    "student_layout": {
+      "structure": "Three-column modular learning suite",
+      "left_sidebar": "Tree Navigation Sidebar with lock status on dependencies, progress indicators per phase/module, collapsible tree depth.",
+      "center_content": "Topic Content Reader with pedagogical badges, step-by-step progress, code viewer, interactive quiz/code tasks, and 'Marcar como Concluído' action bar.",
+      "right_sidebar": "Next Steps, Dependencies list, Estimated Reading Time, Prerequisites & Related Topics."
+    }
+  },
+  "image_urls": [
+    {
+      "category": "hero_workspace",
+      "url": "https://images.unsplash.com/photo-1547658719-da2b51169166?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTN8MHwxfHNlYXJjaHwzfHxkZXZlbG9wZXIlMjBjb2RpbmclMjBmb2N1c2VkJTIwd29ya3NwYWNlfGVufDB8fHx8MTc5MTY5MTIwN3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Developer screen displaying modern clean workspace interface"
+    },
+    {
+      "category": "code_preview",
+      "url": "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTN8MHwxfHNlYXJjaHwyfHxkZXZlbG9wZXIlMjBjb2RpbmclMjBmb2N1c2VkJTIwd29ya3NwYWNlfGVufDB8fHx8MTc5MTY5MTIwN3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Clean code view on dark workstation"
+    },
+    {
+      "category": "student_banner",
+      "url": "https://images.unsplash.com/photo-1587620962725-abab7fe55159?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTN8MHwxfHNlYXJjaHw0fHxkZXZlbG9wZXIlMjBjb2RpbmclMjBmb2N1c2VkJTIwd29ya3NwYWNlfGVufDB8fHx8MTc5MTY5MTIwN3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Focused coding session environment"
+    }
+  ],
+  "testing_guidelines": {
+    "rule": "Every button, input, accordion, node tree item, tab, modal trigger, filter control, and completion checkbox MUST contain a data-testid attribute in kebab-case.",
+    "examples": [
+      "data-testid=\"admin-tree-add-phase-button\"",
+      "data-testid=\"node-pedagogical-type-select\"",
+      "data-testid=\"topic-mark-completed-button\"",
+      "data-testid=\"student-tree-node-topic-123\"",
+      "data-testid=\"filter-status-published\"",
+      "data-testid=\"content-block-code-editor\"",
+      "data-testid=\"reorder-node-up-button\"",
+      "data-testid=\"reorder-node-down-button\""
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Ensure UI is completely in Portuguese (pt-BR) as specified: Trilha, Fase, Módulo, Submódulo, Tópico, Rascunho, Publicado, Arquivado, Marcar como Concluído, Progresso, Reordenar, Dependências.",
+    "Provide seamless toggle between Admin CMS (Managing & Building learning trees) and Student Workspace (Catalog & Tree Navigation Reader).",
+    "Use clean modular cards, Lucide icons, Shadcn UI primitives (Dialog, Tabs, Accordion, Select, DropdownMenu, Badge, Progress, Switch, ScrollArea, Tooltip).",
+    "Implement rich tree visualization for tracks with depth levels, collapse/expand states, and visual status badges.",
+    "Implement interactive content block creation: Markdown, Code snippet with syntax display, Quiz with immediate feedback, Callout alert boxes.",
+    "Always maintain contrast accessibility standards on dark slate surfaces (#090D16 base background)."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms.",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style.",
+    "NEVER use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 etc for icons. Use Lucide or Radix icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "All interactive and key informational elements MUST include a data-testid attribute."
+  ]
+}
