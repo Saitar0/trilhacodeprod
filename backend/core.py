@@ -104,6 +104,7 @@ async def current_user(request: Request) -> dict:
     if not user:
         raise HTTPException(status_code=401, detail="Usuário não encontrado")
     user = ser(user)
+    request.state.user_id = user["id"]
     user["permissions"] = sorted(PERMISSIONS.get(user["role"], set()))
     return user
 

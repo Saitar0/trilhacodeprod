@@ -69,6 +69,17 @@ def test_search_filters_and_pagination(admin):
         admin.delete(f"{API}/taxonomies/{taxonomy.json()['id']}")
 
 
+def test_health_request_id_and_error_envelope(admin):
+    health = requests.get(f"{BASE_URL}/health", headers={"X-Request-ID": "test-request-42"}, timeout=20)
+    assert health.status_code == 200
+    assert health.headers["X-Request-ID"] == "test-request-42"
+    assert health.json() == {"ok": True}
+    response = admin.get(f"{API}/tracks/000000000000000000000000")
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "not_found"
+    assert response.json()["error"]["request_id"]
+
+
 @pytest.fixture(scope="module")
 def admin():
     return _login(*ADMIN)
