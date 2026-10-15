@@ -31,7 +31,6 @@ from services.tracks import list_tracks as list_tracks_service
 from services.tracks import publish_track as publish_track_service
 from services.tracks import reorder_tracks as reorder_tracks_service
 from services.tracks import update_track as update_track_service
-from services.tracks import snapshot_track
 
 router = APIRouter(prefix="/api")
 
@@ -184,10 +183,6 @@ async def delete_track(track_id: str, user: dict = Depends(require("content.dele
 @router.post("/tracks/{track_id}/duplicate")
 async def duplicate_track(track_id: str, user: dict = Depends(require("content.write"))):
     return ser(await duplicate_track_service(track_id, user))
-
-
-async def _snapshot(track_id):
-    return await snapshot_track(track_id)
 
 
 @router.post("/tracks/{track_id}/publish")

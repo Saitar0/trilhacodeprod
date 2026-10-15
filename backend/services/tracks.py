@@ -3,11 +3,12 @@ import re
 
 from fastapi import HTTPException
 
-from core import audit, db, is_staff, now, oid, ser
+from core import audit, db, is_staff, now, oid
 from integrity import reconcile_orphans, save_version
 from learning import find_cycles
 from services.common import check_status, get_document, next_order, slugify
 from services.nodes import clone_nodes, parents_first
+from services.versions import snapshot_track
 
 
 async def list_tracks(status: str | None, query_text: str | None, user: dict) -> list[dict]:
@@ -132,14 +133,6 @@ async def duplicate_track(track_id: str, user: dict) -> dict:
             await db.relations.insert_one(new_relation)
     await audit(user, "track", new_id, "duplicated", new_id, f"derivada de {track['title']}")
     return await db.tracks.find_one({"_id": result.inserted_id})
-
-
-async def snapshot_track(track_id: str) -> dict:
-    track = await get_document("tracks", track_id)
-    nodes = await db.nodes.find({"track_id": track_id}).to_list(10000)
-    blocks = await db.content_blocks.find({"track_id": track_id}).to_list(50000)
-    relations = await db.relations.find({"track_id": track_id}).to_list(10000)
-    return ser({"track": track, "nodes": nodes, "blocks": blocks, "relations": relations})
 
 
 async def publish_track(track_id: str, note: str, publish_children: bool, user: dict) -> dict:

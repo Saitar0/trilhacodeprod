@@ -11,7 +11,7 @@ from routes_progress import router as progress_router  # noqa: E402
 from routes_taxonomy import router as taxonomy_router  # noqa: E402
 from seed import run_seed  # noqa: E402
 from integrity import migrate_legacy_snapshots  # noqa: E402
-from routes_versions import resume_restore_jobs  # noqa: E402
+from services.versions import resume_restore_jobs  # noqa: E402
 from routes_import import router as import_router  # noqa: E402
 from learning import router as learning_router  # noqa: E402
 from routes_submissions import router as submissions_router  # noqa: E402
