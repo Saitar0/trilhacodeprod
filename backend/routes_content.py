@@ -4,10 +4,13 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from integrity import can_view_node, reconcile_orphans, save_version, visible_ids, load_snapshot
+from integrity import can_view_node, reconcile_orphans, save_version, load_snapshot
 from learning import find_cycles, prerequisite_cycle, track_locks, visible_nodes
 from core import (DEFAULT_HIERARCHY, DEFAULT_LABELS, STATUSES, audit, current_user, db, is_staff, now, oid,
                   require, ser)
+from services.history import list_history
+from services.search import search_nodes
+from services.stats import get_stats
 
 router = APIRouter(prefix="/api")
 
@@ -582,39 +585,15 @@ async def delete_relation(rel_id: str, user: dict = Depends(require("content.wri
 # ---------- Search, history, stats ----------
 @router.get("/search")
 async def search(q: str, track_id: Optional[str] = None, user: dict = Depends(current_user)):
-    rx = {"$regex": re.escape(q), "$options": "i"}
-    query = {"$or": [{"title": rx}, {"summary": rx}]}
-    if track_id:
-        query["track_id"] = track_id
-    if not is_staff(user):
-        query["status"] = "published"
-    nodes = await db.nodes.find(query).limit(200).to_list(200)
-    if not is_staff(user):
-        allowed = await visible_ids(user, [n["track_id"] for n in nodes])
-        nodes = [n for n in nodes if str(n["_id"]) in allowed]
-    nodes = nodes[:40]
-    tracks = {str(t["_id"]): t["title"] for t in await db.tracks.find({}, {"title": 1}).to_list(500)}
-    return [{**ser(n), "track_title": tracks.get(n["track_id"], "")} for n in nodes]
+    results = await search_nodes(q, track_id, user)
+    return [{**ser(result["node"]), "track_title": result["track_title"]} for result in results]
 
 
 @router.get("/history")
 async def history(track_id: Optional[str] = None, limit: int = 50, _: dict = Depends(require("content.read"))):
-    query = {"track_id": track_id} if track_id else {}
-    items = await db.edit_history.find(query).sort("at", -1).limit(min(limit, 200)).to_list(200)
-    return ser(items)
+    return ser(await list_history(track_id, limit))
 
 
 @router.get("/admin/stats")
 async def stats(_: dict = Depends(require("content.read"))):
-    async def group(coll, field):
-        rows = await db[coll].aggregate([{"$group": {"_id": f"${field}", "n": {"$sum": 1}}}]).to_list(100)
-        return {r["_id"]: r["n"] for r in rows}
-    return {
-        "tracks": await group("tracks", "status"),
-        "nodes": await group("nodes", "kind"),
-        "node_status": await group("nodes", "status"),
-        "blocks": await group("content_blocks", "type"),
-        "users": await group("users", "role"),
-        "relations": await db.relations.count_documents({}),
-        "versions": await db.track_versions.count_documents({}),
-    }
+    return await get_stats()
