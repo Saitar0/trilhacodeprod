@@ -31,3 +31,12 @@ class ValidationIssueOut(BaseModel):
 class TrackValidationOut(BaseModel):
     ok: bool
     issues: list[ValidationIssueOut]
+
+
+class ImportReportOut(BaseModel):
+    model_config = {"extra": "allow"}
+    ok: bool
+    errors: list[dict]
+    warnings: list[dict]
+    summary: dict
+    dry_run: bool

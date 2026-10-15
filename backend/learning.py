@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pymongo.errors import DuplicateKeyError
 
 from core import DEFAULT_HIERARCHY, current_user, db, is_staff, now, oid, require, ser
+from schemas.content import OkOut
 from schemas.learning import NoteIn, NoteOut, ReviewDone, ReviewIn, ReviewOut
 from schemas.versions import DeletedOut, TrackValidationOut
 
@@ -271,7 +272,7 @@ async def complete_review(review_id: str, body: ReviewDone, user: dict = Depends
     return ser(await db.reviews.find_one({"_id": rev["_id"]}))
 
 
-@router.delete("/reviews/{review_id}")
+@router.delete("/reviews/{review_id}", response_model=OkOut)
 async def delete_review(review_id: str, user: dict = Depends(current_user)):
     await db.reviews.update_one({"_id": oid(review_id), "user_id": user["id"]},
                                 {"$set": {"status": "dismissed", "updated_at": now()}})
