@@ -55,14 +55,16 @@ async def reorder_nodes(ordered_ids: list[str]) -> dict:
     return {"ok": True}
 
 
-async def get_node(node_id: str, user: dict) -> dict:
+async def get_node(node_id: str, user: dict, blocks_limit: int = 1000, blocks_skip: int = 0) -> dict:
     node = await get_document("nodes", node_id)
     staff = is_staff(user)
     if not staff and not await can_view_node(node, user):
         raise HTTPException(status_code=404, detail="Conteúdo não encontrado")
     block_query = {"node_id": node_id} if staff else {"node_id": node_id, "status": "published"}
     lock = (await track_locks(node["track_id"], user)).get(node_id)
-    blocks = [] if lock and not staff else await db.content_blocks.find(block_query).sort("order", 1).to_list(1000)
+    block_page_size = min(max(blocks_limit, 1), 1000)
+    blocks = [] if lock and not staff else await db.content_blocks.find(block_query).sort("order", 1).skip(
+        max(blocks_skip, 0)).limit(block_page_size).to_list(block_page_size)
     relations = await db.relations.find({"$or": [{"node_id": node_id}, {"target_id": node_id}]}).to_list(1000)
     other_ids = {rel["target_id"] if rel["node_id"] == node_id else rel["node_id"] for rel in relations}
     others = {
@@ -170,7 +172,7 @@ async def duplicate_node(node_id: str, user: dict) -> dict:
     return await db.nodes.find_one({"_id": oid(new_id)})
 
 
-async def get_track_tree(track_id: str, user: dict) -> dict:
+async def get_track_tree(track_id: str, user: dict, limit: int = 100000, skip: int = 0) -> dict:
     track = await get_document("tracks", track_id)
     staff = is_staff(user)
     if not staff and (track["status"] != "published" or track.get("visibility") == "private"):
@@ -178,6 +180,7 @@ async def get_track_tree(track_id: str, user: dict) -> dict:
     nodes = await db.nodes.find({"track_id": track_id}).sort("order", 1).to_list(100000)
     if not staff:
         nodes = visible_nodes(nodes)
+    nodes = nodes[max(skip, 0):max(skip, 0) + min(max(limit, 1), 100000)]
     ids = {str(node["_id"]) for node in nodes}
     relations = [relation for relation in await db.relations.find({"track_id": track_id}).to_list(10000)
                  if relation["node_id"] in ids and relation["target_id"] in ids]

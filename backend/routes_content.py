@@ -59,8 +59,9 @@ router = APIRouter(prefix="/api")
 
 # ---------- Tracks ----------
 @router.get("/tracks", response_model=list[TrackOut], response_model_exclude_unset=True)
-async def list_tracks(status: Optional[str] = None, q: Optional[str] = None, user: dict = Depends(current_user)):
-    return ser(await list_tracks_service(status, q, user))
+async def list_tracks(status: Optional[str] = None, q: Optional[str] = None, limit: int = 500, skip: int = 0,
+                      user: dict = Depends(current_user)):
+    return ser(await list_tracks_service(status, q, user, limit, skip))
 
 
 @router.post("/tracks", response_model=TrackOut, response_model_exclude_unset=True)
@@ -111,8 +112,8 @@ async def get_version(version_id: str, _: dict = Depends(require("content.read")
 
 
 @router.get("/tracks/{track_id}/tree", response_model=TrackTreeOut, response_model_exclude_unset=True)
-async def track_tree(track_id: str, user: dict = Depends(current_user)):
-    result = await get_track_tree_service(track_id, user)
+async def track_tree(track_id: str, limit: int = 100000, skip: int = 0, user: dict = Depends(current_user)):
+    result = await get_track_tree_service(track_id, user, limit, skip)
     return {**result, "track": ser(result["track"]), "nodes": ser(result["nodes"]),
             "relations": ser(result["relations"])}
 
@@ -129,8 +130,9 @@ async def reorder_nodes(body: ReorderIn, _: dict = Depends(require("content.writ
 
 
 @router.get("/nodes/{node_id}", response_model=NodeDetailOut, response_model_exclude_unset=True)
-async def get_node(node_id: str, user: dict = Depends(current_user)):
-    result = await get_node_service(node_id, user)
+async def get_node(node_id: str, blocks_limit: int = 1000, blocks_skip: int = 0,
+                   user: dict = Depends(current_user)):
+    result = await get_node_service(node_id, user, blocks_limit, blocks_skip)
     return {**result, "node": ser(result["node"]), "blocks": ser(result["blocks"]),
             "relations": ser(result["relations"])}
 

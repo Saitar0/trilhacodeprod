@@ -11,7 +11,9 @@ from services.nodes import clone_nodes, parents_first
 from services.versions import snapshot_track
 
 
-async def list_tracks(status: str | None, query_text: str | None, user: dict) -> list[dict]:
+async def list_tracks(
+    status: str | None, query_text: str | None, user: dict, limit: int = 500, skip: int = 0,
+) -> list[dict]:
     query = {}
     if not is_staff(user):
         query = {"status": "published", "visibility": "public"}
@@ -19,7 +21,8 @@ async def list_tracks(status: str | None, query_text: str | None, user: dict) ->
         query["status"] = status
     if query_text:
         query["title"] = {"$regex": re.escape(query_text), "$options": "i"}
-    tracks = await db.tracks.find(query).sort("order", 1).to_list(500)
+    page_size = min(max(limit, 1), 500)
+    tracks = await db.tracks.find(query).sort("order", 1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
     track_ids = [str(track["_id"]) for track in tracks]
     match = {"track_id": {"$in": track_ids}}
     if not is_staff(user):
