@@ -5,12 +5,24 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from integrity import can_view_node, reconcile_orphans, save_version, load_snapshot
-from learning import find_cycles, prerequisite_cycle, track_locks, visible_nodes
-from core import (DEFAULT_HIERARCHY, DEFAULT_LABELS, STATUSES, audit, current_user, db, is_staff, now, oid,
+from learning import find_cycles, track_locks, visible_nodes
+from core import (DEFAULT_HIERARCHY, DEFAULT_LABELS, audit, current_user, db, is_staff, now, oid,
                   require, ser)
 from services.history import list_history
 from services.search import search_nodes
 from services.stats import get_stats
+from services.blocks import create_block as create_block_service
+from services.blocks import delete_block as delete_block_service
+from services.blocks import reorder_blocks as reorder_blocks_service
+from services.blocks import update_block as update_block_service
+from services.common import ancestors as _ancestors
+from services.common import check_status as _check_status
+from services.common import descendants as _descendants
+from services.common import get_document as _get
+from services.common import next_order as _next_order
+from services.relations import create_relation as create_relation_service
+from services.relations import delete_relation as delete_relation_service
+from services.relations import update_relation as update_relation_service
 
 router = APIRouter(prefix="/api")
 
@@ -134,23 +146,6 @@ class ReorderIn(BaseModel):
 class PublishIn(BaseModel):
     note: str = ""
     publish_children: bool = True
-
-
-def _check_status(status):
-    if status is not None and status not in STATUSES:
-        raise HTTPException(status_code=400, detail="Status inválido")
-
-
-async def _get(coll, _id):
-    found = await db[coll].find_one({"_id": oid(_id)})
-    if found is None:
-        raise HTTPException(status_code=404, detail="Recurso não encontrado")
-    return dict(found)
-
-
-async def _next_order(coll, query):
-    last = await db[coll].find(query).sort("order", -1).limit(1).to_list(1)
-    return (last[0]["order"] + 1) if last else 0
 
 
 # ---------- Tracks ----------
@@ -392,17 +387,6 @@ async def reorder_nodes(body: ReorderIn, _: dict = Depends(require("content.writ
     return {"ok": True}
 
 
-async def _ancestors(node):
-    chain = []
-    cur = node
-    while cur.get("parent_id"):
-        cur = await db.nodes.find_one({"_id": oid(cur["parent_id"])})
-        if not cur:
-            break
-        chain.insert(0, {"id": str(cur["_id"]), "title": cur["title"], "kind": cur["kind"]})
-    return chain
-
-
 @router.get("/nodes/{node_id}")
 async def get_node(node_id: str, user: dict = Depends(current_user)):
     node = await _get("nodes", node_id)
@@ -454,19 +438,6 @@ async def update_node(node_id: str, body: NodeUpdate, user: dict = Depends(requi
     return ser(await db.nodes.find_one({"_id": oid(node_id)}))
 
 
-async def _descendants(track_id, node_id):
-    nodes = await db.nodes.find({"track_id": track_id}, {"parent_id": 1}).to_list(10000)
-    children = {}
-    for n in nodes:
-        children.setdefault(n.get("parent_id"), []).append(str(n["_id"]))
-    out, stack = [], [node_id]
-    while stack:
-        cur = stack.pop()
-        out.append(cur)
-        stack.extend(children.get(cur, []))
-    return out
-
-
 @router.delete("/nodes/{node_id}")
 async def delete_node(node_id: str, user: dict = Depends(require("content.delete"))):
     node = await _get("nodes", node_id)
@@ -502,84 +473,38 @@ async def duplicate_node(node_id: str, user: dict = Depends(require("content.wri
 # ---------- Content blocks ----------
 @router.post("/blocks")
 async def create_block(body: BlockIn, user: dict = Depends(require("content.write"))):
-    _check_status(body.status)
-    node = await _get("nodes", body.node_id)
-    if not await db.block_types.find_one({"key": body.type}):
-        raise HTTPException(status_code=400, detail="Tipo de bloco desconhecido")
-    doc = body.model_dump()
-    doc.update(track_id=node["track_id"], order=await _next_order("content_blocks", {"node_id": body.node_id}),
-               schema_version=1, created_by=user["id"], created_at=now(), updated_at=now())
-    res = await db.content_blocks.insert_one(doc)
-    await audit(user, "block", str(res.inserted_id), "created", node["track_id"], f"{body.type} em {node['title']}")
-    return ser(await db.content_blocks.find_one({"_id": res.inserted_id}))
+    return ser(await create_block_service(body.model_dump(), user))
 
 
 @router.post("/blocks/reorder")
 async def reorder_blocks(body: ReorderIn, _: dict = Depends(require("content.write"))):
-    for i, _id in enumerate(body.ordered_ids):
-        await db.content_blocks.update_one({"_id": oid(_id)}, {"$set": {"order": i}})
-    return {"ok": True}
+    return await reorder_blocks_service(body.ordered_ids)
 
 
 @router.put("/blocks/{block_id}")
 async def update_block(block_id: str, body: BlockUpdate, user: dict = Depends(require("content.write"))):
-    block = await _get("content_blocks", block_id)
-    data = body.model_dump(exclude_unset=True)
-    _check_status(data.get("status"))
-    data["updated_at"] = now()
-    await db.content_blocks.update_one({"_id": oid(block_id)}, {"$set": data})
-    await audit(user, "block", block_id, "updated", block["track_id"], block["type"])
-    return ser(await db.content_blocks.find_one({"_id": oid(block_id)}))
+    return ser(await update_block_service(block_id, body.model_dump(exclude_unset=True), user))
 
 
 @router.delete("/blocks/{block_id}")
 async def delete_block(block_id: str, user: dict = Depends(require("content.write"))):
-    block = await _get("content_blocks", block_id)
-    await db.content_blocks.delete_one({"_id": oid(block_id)})
-    await reconcile_orphans(block["track_id"])
-    await audit(user, "block", block_id, "deleted", block["track_id"], block["type"])
-    return {"ok": True}
+    return await delete_block_service(block_id, user)
 
 
 # ---------- Relations ----------
 @router.post("/relations")
 async def create_relation(body: RelationIn, user: dict = Depends(require("content.write"))):
-    if body.node_id == body.target_id:
-        raise HTTPException(status_code=400, detail="Um nó não pode se relacionar consigo mesmo")
-    src = await _get("nodes", body.node_id)
-    tgt = await _get("nodes", body.target_id)
-    if src["track_id"] != tgt["track_id"]:
-        raise HTTPException(status_code=400, detail="Relações devem ser dentro da mesma trilha")
-    if await db.relations.find_one({"node_id": body.node_id, "target_id": body.target_id, "type": body.type}):
-        raise HTTPException(status_code=400, detail="Relação já existe")
-    if body.type == "prerequisite":
-        lineage = set(await _descendants(src["track_id"], body.node_id)) | {a["id"] for a in await _ancestors(src)}
-        if body.target_id in lineage:
-            raise HTTPException(status_code=400, detail="Um item não pode ter como pré-requisito seu próprio pai ou filho")
-        rels = await db.relations.find({"track_id": src["track_id"]}).to_list(10000)
-        if prerequisite_cycle(rels, body.node_id, body.target_id):
-            raise HTTPException(status_code=400, detail="Esta relação criaria um ciclo de pré-requisitos")
-    doc = {**body.model_dump(), "track_id": src["track_id"], "created_at": now()}
-    res = await db.relations.insert_one(doc)
-    await audit(user, "relation", str(res.inserted_id), "created", src["track_id"],
-                f"{src['title']} → {body.type} → {tgt['title']}")
-    return ser(await db.relations.find_one({"_id": res.inserted_id}))
+    return ser(await create_relation_service(body.model_dump(), user))
 
 
 @router.put("/relations/{rel_id}")
 async def update_relation(rel_id: str, body: RelationUpdate, user: dict = Depends(require("content.write"))):
-    rel = await _get("relations", rel_id)
-    await db.relations.update_one({"_id": oid(rel_id)}, {"$set": body.model_dump(exclude_unset=True)})
-    await audit(user, "relation", rel_id, "updated", rel["track_id"], rel["type"])
-    return ser(await db.relations.find_one({"_id": oid(rel_id)}))
+    return ser(await update_relation_service(rel_id, body.model_dump(exclude_unset=True), user))
 
 
 @router.delete("/relations/{rel_id}")
 async def delete_relation(rel_id: str, user: dict = Depends(require("content.write"))):
-    rel = await _get("relations", rel_id)
-    await db.relations.delete_one({"_id": oid(rel_id)})
-    await audit(user, "relation", rel_id, "deleted", rel["track_id"], rel["type"])
-    return {"ok": True}
+    return await delete_relation_service(rel_id, user)
 
 
 # ---------- Search, history, stats ----------
