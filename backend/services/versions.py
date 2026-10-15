@@ -1,8 +1,11 @@
 # ruff: noqa: EXE002
-from datetime import datetime
+import asyncio
+import secrets
+from datetime import datetime, timedelta
 
 from bson import ObjectId
 from fastapi import HTTPException
+from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
 
 from core import audit, db, now, oid, ser
@@ -15,6 +18,33 @@ NODE_FIELDS = ["title", "kind", "parent_id", "order", "status", "summary", "desc
                "pedagogical_type", "requirement", "depth", "estimated_minutes", "tag_ids", "release"]
 BLOCK_FIELDS = ["node_id", "type", "title", "data", "status", "order"]
 RELATION_FIELDS = ["type", "enforced", "note"]
+RESTORE_LEASE = timedelta(minutes=2)
+RESTORE_HEARTBEAT_SECONDS = 20
+
+
+async def _heartbeat_restore(job_id, owner: str) -> None:
+    while True:
+        await asyncio.sleep(RESTORE_HEARTBEAT_SECONDS)
+        result = await db.restore_jobs.update_one(
+            {"_id": job_id, "status": "running", "lease_owner": owner},
+            {"$set": {"lease_until": now() + RESTORE_LEASE, "heartbeat_at": now()}},
+        )
+        if not result.matched_count:
+            return
+
+
+async def _claim_restore(job: dict) -> dict | None:
+    owner = secrets.token_hex(16)
+    timestamp = now()
+    return await db.restore_jobs.find_one_and_update(
+        {
+            "_id": job["_id"],
+            "status": "running",
+            "$or": [{"lease_until": {"$lt": timestamp}}, {"lease_until": {"$exists": False}}],
+        },
+        {"$set": {"lease_owner": owner, "lease_until": timestamp + RESTORE_LEASE, "heartbeat_at": timestamp}},
+        return_document=ReturnDocument.AFTER,
+    )
 
 
 async def snapshot_track(track_id: str) -> dict:
@@ -109,10 +139,29 @@ async def apply_snapshot(track_id: str, snapshot: dict) -> None:
 
 
 async def resume_restore_jobs() -> None:
-    async for job in db.restore_jobs.find({"status": "running"}):
-        version = await db.track_versions.find_one({"_id": oid(job["version_id"])})
-        await apply_snapshot(job["track_id"], await load_snapshot(version))
-        await db.restore_jobs.update_one({"_id": job["_id"]}, {"$set": {"status": "recovered", "finished_at": now()}})
+    query = {
+        "status": "running",
+        "$or": [{"lease_until": {"$lt": now()}}, {"lease_until": {"$exists": False}}],
+    }
+    async for candidate in db.restore_jobs.find(query):
+        job = await _claim_restore(candidate)
+        if not job:
+            continue
+        owner = job["lease_owner"]
+        heartbeat = asyncio.create_task(_heartbeat_restore(job["_id"], owner))
+        try:
+            version = await db.track_versions.find_one({"_id": oid(job["version_id"])})
+            if not version:
+                raise ValueError(f"Versão de restore {job['version_id']} não encontrada")
+            await apply_snapshot(job["track_id"], await load_snapshot(version))
+            await db.restore_jobs.update_one(
+                {"_id": job["_id"], "lease_owner": owner},
+                {"$set": {"status": "recovered", "finished_at": now()},
+                 "$unset": {"lease_owner": "", "lease_until": ""}},
+            )
+        finally:
+            heartbeat.cancel()
+            await asyncio.gather(heartbeat, return_exceptions=True)
 
 
 async def restore_version(track_id: str, version_id: str, confirm: str, note: str, user: dict) -> dict:
@@ -123,24 +172,36 @@ async def restore_version(track_id: str, version_id: str, confirm: str, note: st
     if confirm.strip().lower() != f"v{version['version']}":
         raise HTTPException(status_code=400, detail=f"Confirmação inválida: digite v{version['version']}")
     snapshot = await load_snapshot(version)
+    owner = secrets.token_hex(16)
+    started = now()
     try:
         job = await db.restore_jobs.insert_one({
             "track_id": track_id, "version_id": version_id, "status": "running",
-            "user_id": user["id"], "started_at": now(),
+            "user_id": user["id"], "started_at": started, "heartbeat_at": started,
+            "lease_owner": owner, "lease_until": started + RESTORE_LEASE,
         })
     except DuplicateKeyError:
         raise HTTPException(status_code=409, detail="Já existe uma restauração em andamento nesta trilha")
-    await save_version(track_id, track.get("version", 0), "backup",
-                       f"Backup automático antes de restaurar v{version['version']}", user,
-                       await snapshot_track(track_id))
-    await apply_snapshot(track_id, snapshot)
-    new_version = track.get("version", 0) + 1
-    fields = {field: snapshot["track"].get(field) for field in TRACK_FIELDS if field in snapshot["track"]}
-    fields.update(status="published", version=new_version, published_at=now(), updated_at=now())
-    await db.tracks.update_one({"_id": track["_id"]}, {"$set": fields})
-    version_note = note or f"Restaurada a partir da v{version['version']}"
-    await save_version(track_id, new_version, "restore", version_note, user, await snapshot_track(track_id),
-                       {"restored_from": version_id, "restored_from_version": version["version"]})
-    await db.restore_jobs.update_one({"_id": job.inserted_id}, {"$set": {"status": "done", "finished_at": now()}})
-    await audit(user, "track", track_id, "restored", track_id, f"v{version['version']} → nova v{new_version}")
-    return await db.tracks.find_one({"_id": track["_id"]})
+    heartbeat = asyncio.create_task(_heartbeat_restore(job.inserted_id, owner))
+    try:
+        await save_version(track_id, track.get("version", 0), "backup",
+                           f"Backup automático antes de restaurar v{version['version']}", user,
+                           await snapshot_track(track_id))
+        await apply_snapshot(track_id, snapshot)
+        new_version = track.get("version", 0) + 1
+        fields = {field: snapshot["track"].get(field) for field in TRACK_FIELDS if field in snapshot["track"]}
+        fields.update(status="published", version=new_version, published_at=now(), updated_at=now())
+        await db.tracks.update_one({"_id": track["_id"]}, {"$set": fields})
+        version_note = note or f"Restaurada a partir da v{version['version']}"
+        await save_version(track_id, new_version, "restore", version_note, user, await snapshot_track(track_id),
+                           {"restored_from": version_id, "restored_from_version": version["version"]})
+        await db.restore_jobs.update_one(
+            {"_id": job.inserted_id, "lease_owner": owner},
+            {"$set": {"status": "done", "finished_at": now()},
+             "$unset": {"lease_owner": "", "lease_until": ""}},
+        )
+        await audit(user, "track", track_id, "restored", track_id, f"v{version['version']} → nova v{new_version}")
+        return await db.tracks.find_one({"_id": track["_id"]})
+    finally:
+        heartbeat.cancel()
+        await asyncio.gather(heartbeat, return_exceptions=True)
