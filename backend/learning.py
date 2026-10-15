@@ -165,13 +165,15 @@ async def validate_track(track_id: str, _: dict = Depends(require("content.read"
 
 # ---------- Notes ----------
 @router.get("/notes", response_model=list[NoteOut], response_model_exclude_unset=True)
-async def list_notes(track_id: Optional[str] = None, node_id: Optional[str] = None, user: dict = Depends(current_user)):
+async def list_notes(track_id: Optional[str] = None, node_id: Optional[str] = None, limit: int = 2000,
+                     skip: int = 0, user: dict = Depends(current_user)):
     q = {"user_id": user["id"], "orphaned": {"$ne": True}}
     if track_id:
         q["track_id"] = track_id
     if node_id:
         q["node_id"] = node_id
-    notes = await db.notes.find(q).sort("updated_at", -1).to_list(2000)
+    page_size = min(max(limit, 1), 2000)
+    notes = await db.notes.find(q).sort("updated_at", -1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
     return await _with_titles(notes, user)
 
 
@@ -244,11 +246,13 @@ async def _upsert_review(key, body, node, due):
 
 
 @router.get("/reviews", response_model=list[ReviewOut], response_model_exclude_unset=True)
-async def list_reviews(status: str = "pending", track_id: Optional[str] = None, user: dict = Depends(current_user)):
+async def list_reviews(status: str = "pending", track_id: Optional[str] = None, limit: int = 2000,
+                       skip: int = 0, user: dict = Depends(current_user)):
     q = {"user_id": user["id"], "status": status, "orphaned": {"$ne": True}}
     if track_id:
         q["track_id"] = track_id
-    items = await db.reviews.find(q).sort("due_at", 1).to_list(2000)
+    page_size = min(max(limit, 1), 2000)
+    items = await db.reviews.find(q).sort("due_at", 1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
     return await _with_titles(items, user)
 
 

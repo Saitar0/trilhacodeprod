@@ -40,8 +40,9 @@ async def submit(body: AnswerIn, user: dict = Depends(require("progress.write"))
 @router.get("", response_model=SubmissionListOut, response_model_exclude_unset=True)
 async def list_submissions(track_id: Optional[str] = None, node_id: Optional[str] = None, user_id: Optional[str] = None,
                            block_type: Optional[str] = None, status: Optional[str] = None, q: Optional[str] = None,
+                           limit: int = 500, skip: int = 0,
                            _: dict = Depends(require("submissions.grade"))):
-    result = await list_submissions_service(track_id, node_id, user_id, block_type, status, q)
+    result = await list_submissions_service(track_id, node_id, user_id, block_type, status, q, limit, skip)
     return {"items": ser(result["items"]), "counts": result["counts"]}
 
 

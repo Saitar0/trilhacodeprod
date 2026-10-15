@@ -100,8 +100,9 @@ async def update_profile(body: ProfileIn, user: dict = Depends(current_user)):
 
 
 @router.get("/users", response_model=list[UserOut], response_model_exclude_unset=True)
-async def list_users(_: dict = Depends(require("users.manage"))):
-    users = await db.users.find({}).sort("created_at", 1).to_list(1000)
+async def list_users(limit: int = 1000, skip: int = 0, _: dict = Depends(require("users.manage"))):
+    page_size = min(max(limit, 1), 1000)
+    users = await db.users.find({}).sort("created_at", 1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
     return [ser(u) for u in users]
 
 

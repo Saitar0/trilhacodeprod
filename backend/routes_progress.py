@@ -63,8 +63,9 @@ async def visit(body: VisitIn, user: dict = Depends(current_user)):
 
 
 @router.get("/tracks/{track_id}", response_model=TrackProgressOut, response_model_exclude_unset=True)
-async def track_progress(track_id: str, user: dict = Depends(current_user)):
-    records = await db.progress.find({"user_id": user["id"], "track_id": track_id}).to_list(20000)
+async def track_progress(track_id: str, limit: int = 20000, skip: int = 0, user: dict = Depends(current_user)):
+    page_size = min(max(limit, 1), 20000)
+    records = await db.progress.find({"user_id": user["id"], "track_id": track_id}).sort("_id", 1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
     state = await db.user_track_state.find_one({"user_id": user["id"], "track_id": track_id})
     nodes, blocks = {}, {}
     for r in records:
@@ -88,11 +89,13 @@ async def overview(user: dict = Depends(current_user)):
 
 
 @router.get("/history", response_model=list[HistoryOut], response_model_exclude_unset=True)
-async def progress_history(track_id: Optional[str] = None, limit: int = 20, user: dict = Depends(current_user)):
+async def progress_history(track_id: Optional[str] = None, limit: int = 20, skip: int = 0,
+                           user: dict = Depends(current_user)):
     query = {"user_id": user["id"]}
     if track_id:
         query["track_id"] = track_id
-    events = await db.learning_events.find(query).sort("at", -1).limit(min(limit, 100)).to_list(100)
+    page_size = min(max(limit, 1), 100)
+    events = await db.learning_events.find(query).sort("at", -1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
     ids = list({e["node_id"] for e in events})
     titles = {str(n["_id"]): n["title"] for n in await db.nodes.find(
         {"_id": {"$in": [oid(i) for i in ids]}}, {"title": 1}).to_list(200)}

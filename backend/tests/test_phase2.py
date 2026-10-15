@@ -38,6 +38,37 @@ def _login(email, password):
     return s
 
 
+def test_search_filters_and_pagination(admin):
+    suffix = uuid.uuid4().hex[:8]
+    track_id = admin.post(f"{API}/tracks", json={"title": f"TEST_search_{suffix}"}).json()["id"]
+    taxonomy_key = f"test-{suffix}"
+    taxonomy = admin.post(f"{API}/taxonomies", json={
+        "group": "pedagogical_type", "key": taxonomy_key, "label": "Search test"})
+    tag = admin.post(f"{API}/tags", json={"name": f"search-{suffix}"})
+    assert taxonomy.status_code == tag.status_code == 200
+    tag_id = tag.json()["id"]
+    try:
+        created = []
+        for title in (f"Needle {suffix} first", f"Needle {suffix} second"):
+            response = admin.post(f"{API}/nodes", json={
+                "track_id": track_id, "kind": "topic", "title": title,
+                "pedagogical_type": taxonomy_key, "tag_ids": [tag_id]})
+            assert response.status_code == 200, response.text
+            created.append(response.json()["id"])
+        params = {"q": f"Needle {suffix}", "track_id": track_id,
+                  "tag_id": tag_id, "taxonomy_group": "pedagogical_type", "taxonomy_key": taxonomy_key}
+        first = admin.get(f"{API}/search", params={**params, "limit": 1, "skip": 0})
+        second = admin.get(f"{API}/search", params={**params, "limit": 1, "skip": 1})
+        assert first.status_code == second.status_code == 200
+        assert len(first.json()) == len(second.json()) == 1
+        assert first.json()[0]["id"] != second.json()[0]["id"]
+        assert {first.json()[0]["id"], second.json()[0]["id"]} == set(created)
+    finally:
+        admin.delete(f"{API}/tracks/{track_id}")
+        admin.delete(f"{API}/tags/{tag_id}")
+        admin.delete(f"{API}/taxonomies/{taxonomy.json()['id']}")
+
+
 @pytest.fixture(scope="module")
 def admin():
     return _login(*ADMIN)

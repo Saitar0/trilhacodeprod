@@ -110,7 +110,7 @@ async def submit_answer(block_id: str, answer: dict, user: dict) -> dict:
 
 async def list_submissions(
     track_id: str | None, node_id: str | None, user_id: str | None, block_type: str | None,
-    status: str | None, query_text: str | None,
+    status: str | None, query_text: str | None, limit: int = 500, skip: int = 0,
 ) -> dict:
     query = {"status": {"$in": STAFF_STATUSES}}
     for key, value in (("track_id", track_id), ("node_id", node_id), ("user_id", user_id), ("block_type", block_type)):
@@ -124,7 +124,8 @@ async def list_submissions(
             {"user_name": {"$regex": re.escape(query_text), "$options": "i"}},
             {"node_title": {"$regex": re.escape(query_text), "$options": "i"}},
         ]
-    items = await db.submissions.find(query, {"history": 0}).sort("submitted_at", 1).to_list(500)
+    page_size = min(max(limit, 1), 500)
+    items = await db.submissions.find(query, {"history": 0}).sort("submitted_at", 1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
     counts = await db.submissions.aggregate([
         {"$match": base}, {"$group": {"_id": "$status", "n": {"$sum": 1}}}
     ]).to_list(20)

@@ -50,6 +50,7 @@ async def startup():
     await db.login_attempts.create_index("identifier")
     await db.login_attempts.create_index("last", expireAfterSeconds=3600)
     await db.nodes.create_index([("track_id", 1), ("parent_id", 1), ("order", 1)])
+    await db.nodes.create_index([("title", "text"), ("summary", "text")], name="node_search_text")
     await db.content_blocks.create_index([("node_id", 1), ("order", 1)])
     await db.relations.create_index([("track_id", 1)])
     await db.progress.create_index([("user_id", 1), ("track_id", 1)])

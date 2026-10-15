@@ -189,14 +189,17 @@ async def delete_relation(rel_id: str, user: dict = Depends(require("content.wri
 
 # ---------- Search, history, stats ----------
 @router.get("/search", response_model=list[SearchResultOut], response_model_exclude_unset=True)
-async def search(q: str, track_id: Optional[str] = None, user: dict = Depends(current_user)):
-    results = await search_nodes(q, track_id, user)
+async def search(q: str, track_id: Optional[str] = None, limit: int = 40, skip: int = 0,
+                 tag_id: str | None = None, taxonomy_group: str | None = None,
+                 taxonomy_key: str | None = None, user: dict = Depends(current_user)):
+    results = await search_nodes(q, track_id, user, limit, skip, tag_id, taxonomy_group, taxonomy_key)
     return [{**ser(result["node"]), "track_title": result["track_title"]} for result in results]
 
 
 @router.get("/history", response_model=list[HistoryOut], response_model_exclude_unset=True)
-async def history(track_id: Optional[str] = None, limit: int = 50, _: dict = Depends(require("content.read"))):
-    return ser(await list_history(track_id, limit))
+async def history(track_id: Optional[str] = None, limit: int = 50, skip: int = 0,
+                  _: dict = Depends(require("content.read"))):
+    return ser(await list_history(track_id, limit, skip))
 
 
 @router.get("/admin/stats", response_model=StatsOut)
