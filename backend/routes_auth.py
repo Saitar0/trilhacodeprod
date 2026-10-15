@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, EmailStr, Field
+from settings import settings
 
 from core import (ROLES, audit, create_access_token, create_refresh_token, current_user, db,
                   decode_token, hash_password, now, oid, require, ser, verify_password, PERMISSIONS)
@@ -31,10 +32,10 @@ class RoleIn(BaseModel):
 
 
 def _set_cookies(response: Response, user_id: str, email: str):
-    response.set_cookie("access_token", create_access_token(user_id, email), httponly=True, secure=True,
-                        samesite="none", max_age=900, path="/")
-    response.set_cookie("refresh_token", create_refresh_token(user_id), httponly=True, secure=True,
-                        samesite="none", max_age=604800, path="/")
+    options = {"httponly": True, "secure": settings.effective_cookie_secure,
+               "samesite": settings.effective_cookie_samesite, "path": "/", "domain": settings.cookie_domain}
+    response.set_cookie("access_token", create_access_token(user_id, email), max_age=900, **options)
+    response.set_cookie("refresh_token", create_refresh_token(user_id), max_age=604800, **options)
 
 
 def _public(user: dict) -> dict:
@@ -59,8 +60,10 @@ async def register(body: RegisterIn, response: Response):
 @router.post("/auth/login")
 async def login(body: LoginIn, request: Request, response: Response):
     email = body.email.lower()
+    peer_ip = request.client.host if request.client else None
     forwarded = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
-    identifier = f"{forwarded or (request.client.host if request.client else 'x')}:{email}"
+    client_ip = forwarded if settings.trusts_proxy(peer_ip) and forwarded else (peer_ip or "x")
+    identifier = f"{client_ip}:{email}"
     attempt = await db.login_attempts.find_one({"identifier": identifier})
     if attempt and attempt.get("count", 0) >= 5 and attempt["last"] > now() - timedelta(minutes=15):
         raise HTTPException(status_code=429, detail="Muitas tentativas. Tente novamente em 15 minutos.")
@@ -76,8 +79,10 @@ async def login(body: LoginIn, request: Request, response: Response):
 
 @router.post("/auth/logout")
 async def logout(response: Response):
-    response.delete_cookie("access_token", path="/", secure=True, samesite="none")
-    response.delete_cookie("refresh_token", path="/", secure=True, samesite="none")
+    options = {"path": "/", "secure": settings.effective_cookie_secure,
+               "samesite": settings.effective_cookie_samesite, "domain": settings.cookie_domain}
+    response.delete_cookie("access_token", **options)
+    response.delete_cookie("refresh_token", **options)
     return {"ok": True}
 
 
@@ -96,7 +101,8 @@ async def refresh(request: Request, response: Response):
     if not user:
         raise HTTPException(status_code=401, detail="Usuário não encontrado")
     response.set_cookie("access_token", create_access_token(str(user["_id"]), user["email"]), httponly=True,
-                        secure=True, samesite="none", max_age=900, path="/")
+                        secure=settings.effective_cookie_secure, samesite=settings.effective_cookie_samesite,
+                        max_age=900, path="/", domain=settings.cookie_domain)
     return {"ok": True}
 
 

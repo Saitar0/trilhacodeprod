@@ -1,13 +1,8 @@
-from dotenv import load_dotenv
-from pathlib import Path
-
-load_dotenv(Path(__file__).parent / ".env")
-
 import logging  # noqa: E402
-import os  # noqa: E402
 
 from fastapi import FastAPI  # noqa: E402
 from starlette.middleware.cors import CORSMiddleware  # noqa: E402
+from settings import settings  # noqa: E402
 
 from core import client, db  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
@@ -24,7 +19,12 @@ from routes_versions import router as versions_router  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-app = FastAPI(title="Trilha Code API")
+app = FastAPI(
+    title="Trilha Code API",
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    openapi_url=None if settings.is_production else "/openapi.json",
+)
 for r in (auth_router, taxonomy_router, content_router, progress_router, learning_router, submissions_router,
           versions_router, import_router):
     app.include_router(r)
@@ -37,10 +37,10 @@ async def root():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.environ["FRONTEND_URL"], "http://localhost:3000"],
+    allow_origins=settings.effective_cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 

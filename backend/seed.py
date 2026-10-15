@@ -1,6 +1,5 @@
-import os
-
-from core import db, hash_password, now, verify_password
+from core import db, hash_password, now
+from settings import settings
 
 TAXONOMIES = [
     ("pedagogical_type", "solo", "Tema solo", "Estudo isolado e focado em um assunto", "sky"),
@@ -97,15 +96,16 @@ async def _seed_user(email, password, name, role):
     if not email or not password:
         return
     existing = await db.users.find_one({"email": email})
-    if existing is None:
-        await db.users.insert_one({"email": email, "name": name, "role": role, "password_hash": hash_password(password),
-                                   "profile": {"bio": "", "goals": "", "preferences": {}}, "created_at": now()})
-    elif not verify_password(password, existing["password_hash"]):
-        await db.users.update_one({"email": email}, {"$set": {"password_hash": hash_password(password)}})
+    if existing is not None:
+        return
+    await db.users.insert_one({"email": email, "name": name, "role": role, "password_hash": hash_password(password),
+                               "is_demo": not settings.is_production,
+                               "profile": {"bio": "", "goals": "", "preferences": {}}, "created_at": now()})
 
 
 async def _insert_node(track_id, parent_id, kind, title, order, **extra):
     doc = {"track_id": track_id, "parent_id": parent_id, "kind": kind, "title": title, "slug": title.lower(),
+           "is_demo": True,
            "summary": extra.pop("summary", ""), "description": "", "notes": "", "guidance": "",
            "pedagogical_type": extra.pop("ptype", ""), "requirement": extra.pop("req", ""),
            "depth": extra.pop("depth", ""), "status": "published", "estimated_minutes": extra.pop("minutes", 0),
@@ -130,6 +130,7 @@ async def _seed_topic(track_id, parent_id, item, order, titles):
         ]
     for i, (btype, btitle, data) in enumerate(blocks):
         await db.content_blocks.insert_one({"node_id": nid, "track_id": track_id, "type": btype, "title": btitle,
+                                            "is_demo": True,
                                             "data": data, "status": "published", "order": i, "schema_version": 1,
                                             "created_at": now(), "updated_at": now()})
 
@@ -149,6 +150,7 @@ async def _seed_track():
         return
     res = await db.tracks.insert_one({
         "title": "Trilha Code", "slug": "trilha-code",
+        "is_demo": True,
         "subtitle": "Ultra cronograma de estudos em desenvolvimento de software",
         "description": "Trilha principal da plataforma. Conteúdo demonstrativo — edite livremente no painel.",
         "cover_url": "", "status": "published", "visibility": "public", "audience": ["iniciante", "intermediário"],
@@ -174,9 +176,13 @@ async def _seed_track():
 
 
 async def run_seed():
-    await _seed_user(os.environ.get("ADMIN_EMAIL"), os.environ.get("ADMIN_PASSWORD"), "Administrador", "admin")
-    await _seed_user(os.environ.get("EDITOR_EMAIL"), os.environ.get("EDITOR_PASSWORD"), "Editora Demo", "editor")
-    await _seed_user(os.environ.get("STUDENT_EMAIL"), os.environ.get("STUDENT_PASSWORD"), "Aluno Demo", "student")
+    if settings.is_production:
+        if not await db.users.find_one({"role": "admin"}):
+            await _seed_user(settings.admin_email, settings.admin_password, "Administrador", "admin")
+    else:
+        await _seed_user(settings.admin_email, settings.admin_password, "Administrador", "admin")
+        await _seed_user(settings.editor_email, settings.editor_password, "Editora Demo", "editor")
+        await _seed_user(settings.student_email, settings.student_password, "Aluno Demo", "student")
     for i, (group, key, label, desc, color) in enumerate(TAXONOMIES):
         await db.taxonomies.update_one({"group": group, "key": key}, {"$setOnInsert": {
             "label": label, "description": desc, "color": color, "order": i, "created_at": now()}}, upsert=True)
@@ -199,4 +205,5 @@ async def run_seed():
     for name, color in [("fundamentos", "sky"), ("web", "emerald"), ("ferramentas", "amber")]:
         await db.tags.update_one({"slug": name}, {"$setOnInsert": {"name": name, "color": color, "created_at": now()}},
                                  upsert=True)
-    await _seed_track()
+    if not settings.is_production:
+        await _seed_track()
