@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timezone, timedelta
 
 import bcrypt
@@ -6,9 +5,10 @@ import jwt
 from bson import ObjectId
 from fastapi import Depends, HTTPException, Request
 from motor.motor_asyncio import AsyncIOMotorClient
+from settings import settings
 
-client = AsyncIOMotorClient(os.environ["MONGO_URL"], tz_aware=True)
-db = client[os.environ["DB_NAME"]]
+client = AsyncIOMotorClient(settings.mongo_url, tz_aware=True)
+db = client[settings.db_name]
 
 JWT_ALGORITHM = "HS256"
 STATUSES = ["draft", "published", "archived"]
@@ -66,7 +66,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def _secret():
-    return os.environ["JWT_SECRET"]
+    return settings.jwt_secret
 
 
 def create_access_token(user_id: str, email: str) -> str:
