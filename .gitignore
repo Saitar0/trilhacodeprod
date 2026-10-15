@@ -49,3 +49,20 @@ Thumbs.db
 
 # Debug / generated
 *.tsbuildinfo
+# Environment and secrets
+.env*
+!.env.example
+backend/.env
+backend/env.txt
+frontend/.env
+
+# Local database and logs
+mongo-data/
+mongo.log
+*.log
+
+# Generated/local project data
+.antigravity/
+frontend/.emergent/
+test_reports/
+memory/
