@@ -1,23 +1,12 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
-
 from core import PROGRESS_STATUSES, current_user, db, now, oid, require, ser
 from learning import assert_unlocked, assert_visible, track_locks
+from schemas.content import HistoryOut, OkOut
+from schemas.progress import ProgressIn, ProgressOut, ProgressOverviewOut, TrackProgressOut, VisitIn
 
 router = APIRouter(prefix="/api/progress")
-
-
-class ProgressIn(BaseModel):
-    node_id: str
-    status: str
-    block_id: Optional[str] = None
-    data: dict = {}
-
-
-class VisitIn(BaseModel):
-    node_id: str
 
 
 async def _node(node_id):
@@ -33,7 +22,7 @@ async def _event(user_id, node, kind, block_id=None, data=None):
         "type": kind, "data": data or {}, "at": now()})
 
 
-@router.post("")
+@router.post("", response_model=ProgressOut, response_model_exclude_unset=True)
 async def set_progress(body: ProgressIn, user: dict = Depends(require("progress.write"))):
     if body.status not in PROGRESS_STATUSES:
         raise HTTPException(status_code=400, detail="Status de progresso inválido")
@@ -57,7 +46,7 @@ async def set_progress(body: ProgressIn, user: dict = Depends(require("progress.
     return ser(await db.progress.find_one(key))
 
 
-@router.post("/visit")
+@router.post("/visit", response_model=OkOut)
 async def visit(body: VisitIn, user: dict = Depends(current_user)):
     node = await _node(body.node_id)
     await assert_unlocked(node, user)
@@ -73,7 +62,7 @@ async def visit(body: VisitIn, user: dict = Depends(current_user)):
     return {"ok": True}
 
 
-@router.get("/tracks/{track_id}")
+@router.get("/tracks/{track_id}", response_model=TrackProgressOut, response_model_exclude_unset=True)
 async def track_progress(track_id: str, user: dict = Depends(current_user)):
     records = await db.progress.find({"user_id": user["id"], "track_id": track_id}).to_list(20000)
     state = await db.user_track_state.find_one({"user_id": user["id"], "track_id": track_id})
@@ -88,7 +77,7 @@ async def track_progress(track_id: str, user: dict = Depends(current_user)):
             "locks": await track_locks(track_id, user)}
 
 
-@router.get("/overview")
+@router.get("/overview", response_model=ProgressOverviewOut, response_model_exclude_unset=True)
 async def overview(user: dict = Depends(current_user)):
     states = await db.user_track_state.find({"user_id": user["id"]}).sort("last_at", -1).to_list(200)
     rows = await db.progress.aggregate([
@@ -98,7 +87,7 @@ async def overview(user: dict = Depends(current_user)):
     return {"states": ser(states), "completed": completed}
 
 
-@router.get("/history")
+@router.get("/history", response_model=list[HistoryOut], response_model_exclude_unset=True)
 async def progress_history(track_id: Optional[str] = None, limit: int = 20, user: dict = Depends(current_user)):
     query = {"user_id": user["id"]}
     if track_id:

@@ -2,33 +2,14 @@ from datetime import timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from pydantic import BaseModel, EmailStr, Field
 from settings import settings
+from schemas.content import OkOut
+from schemas.users import LoginIn, ProfileIn, RegisterIn, RoleIn, UserOut
 
 from core import (ROLES, audit, create_access_token, create_refresh_token, current_user, db,
                   decode_token, hash_password, now, oid, require, ser, verify_password, PERMISSIONS)
 
 router = APIRouter(prefix="/api")
-
-
-class RegisterIn(BaseModel):
-    name: str = Field(min_length=2)
-    email: EmailStr
-    password: str = Field(min_length=6)
-
-
-class LoginIn(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class ProfileIn(BaseModel):
-    name: Optional[str] = None
-    profile: Optional[dict] = None
-
-
-class RoleIn(BaseModel):
-    role: str
 
 
 def _set_cookies(response: Response, user_id: str, email: str):
@@ -44,7 +25,7 @@ def _public(user: dict) -> dict:
     return out
 
 
-@router.post("/auth/register")
+@router.post("/auth/register", response_model=UserOut, response_model_exclude_unset=True)
 async def register(body: RegisterIn, response: Response):
     email = body.email.lower()
     if await db.users.find_one({"email": email}):
@@ -57,7 +38,7 @@ async def register(body: RegisterIn, response: Response):
     return _public(doc)
 
 
-@router.post("/auth/login")
+@router.post("/auth/login", response_model=UserOut, response_model_exclude_unset=True)
 async def login(body: LoginIn, request: Request, response: Response):
     email = body.email.lower()
     peer_ip = request.client.host if request.client else None
@@ -77,7 +58,7 @@ async def login(body: LoginIn, request: Request, response: Response):
     return _public(user)
 
 
-@router.post("/auth/logout")
+@router.post("/auth/logout", response_model=OkOut)
 async def logout(response: Response):
     options = {"path": "/", "secure": settings.effective_cookie_secure,
                "samesite": settings.effective_cookie_samesite, "domain": settings.cookie_domain}
@@ -86,12 +67,12 @@ async def logout(response: Response):
     return {"ok": True}
 
 
-@router.get("/auth/me")
+@router.get("/auth/me", response_model=UserOut, response_model_exclude_unset=True)
 async def me(user: dict = Depends(current_user)):
     return user
 
 
-@router.post("/auth/refresh")
+@router.post("/auth/refresh", response_model=OkOut)
 async def refresh(request: Request, response: Response):
     token = request.cookies.get("refresh_token")
     if not token:
@@ -106,25 +87,25 @@ async def refresh(request: Request, response: Response):
     return {"ok": True}
 
 
-@router.get("/profile")
+@router.get("/profile", response_model=UserOut, response_model_exclude_unset=True)
 async def get_profile(user: dict = Depends(current_user)):
     return user
 
 
-@router.put("/profile")
+@router.put("/profile", response_model=UserOut, response_model_exclude_unset=True)
 async def update_profile(body: ProfileIn, user: dict = Depends(current_user)):
     data = body.model_dump(exclude_unset=True)
     await db.users.update_one({"_id": oid(user["id"])}, {"$set": {**data, "updated_at": now()}})
     return _public(await db.users.find_one({"_id": oid(user["id"])}))
 
 
-@router.get("/users")
+@router.get("/users", response_model=list[UserOut], response_model_exclude_unset=True)
 async def list_users(_: dict = Depends(require("users.manage"))):
     users = await db.users.find({}).sort("created_at", 1).to_list(1000)
     return [ser(u) for u in users]
 
 
-@router.put("/users/{user_id}/role")
+@router.put("/users/{user_id}/role", response_model=UserOut, response_model_exclude_unset=True)
 async def set_role(user_id: str, body: RoleIn, actor: dict = Depends(require("users.manage"))):
     if body.role not in ROLES:
         raise HTTPException(status_code=400, detail="Papel inválido")

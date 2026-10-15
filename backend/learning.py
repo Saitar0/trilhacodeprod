@@ -2,10 +2,11 @@ from datetime import timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 
 from core import DEFAULT_HIERARCHY, current_user, db, is_staff, now, oid, require, ser
+from schemas.learning import NoteIn, NoteOut, ReviewDone, ReviewIn, ReviewOut
+from schemas.versions import DeletedOut, TrackValidationOut
 
 router = APIRouter(prefix="/api")
 
@@ -142,7 +143,7 @@ def find_cycles(relations):
     return cycles
 
 
-@router.get("/tracks/{track_id}/validate")
+@router.get("/tracks/{track_id}/validate", response_model=TrackValidationOut, response_model_exclude_unset=True)
 async def validate_track(track_id: str, _: dict = Depends(require("content.read"))):
     nodes = await db.nodes.find({"track_id": track_id}).to_list(10000)
     by_id = {str(n["_id"]): n for n in nodes}
@@ -162,13 +163,7 @@ async def validate_track(track_id: str, _: dict = Depends(require("content.read"
 
 
 # ---------- Notes ----------
-class NoteIn(BaseModel):
-    node_id: str
-    block_id: Optional[str] = None
-    body: str
-
-
-@router.get("/notes")
+@router.get("/notes", response_model=list[NoteOut], response_model_exclude_unset=True)
 async def list_notes(track_id: Optional[str] = None, node_id: Optional[str] = None, user: dict = Depends(current_user)):
     q = {"user_id": user["id"], "orphaned": {"$ne": True}}
     if track_id:
@@ -179,7 +174,7 @@ async def list_notes(track_id: Optional[str] = None, node_id: Optional[str] = No
     return await _with_titles(notes, user)
 
 
-@router.put("/notes")
+@router.put("/notes", response_model=NoteOut | DeletedOut, response_model_exclude_unset=True)
 async def upsert_note(body: NoteIn, user: dict = Depends(current_user)):
     node = await db.nodes.find_one({"_id": oid(body.node_id)})
     if not node:
@@ -209,19 +204,6 @@ async def _with_titles(items, user):
 
 
 # ---------- Reviews ----------
-class ReviewIn(BaseModel):
-    node_id: str
-    block_id: Optional[str] = None
-    when: str = "soon"
-    due_at: Optional[str] = None
-    note: str = ""
-
-
-class ReviewDone(BaseModel):
-    outcome: str = "ok"
-    reschedule: Optional[str] = None
-
-
 def _due(when: str, node: dict, due_at: Optional[str]):
     if when == "custom":
         if not due_at:
@@ -236,7 +218,7 @@ def _due(when: str, node: dict, due_at: Optional[str]):
     return now() + timedelta(days=REVIEW_BUCKETS[when])
 
 
-@router.post("/reviews")
+@router.post("/reviews", response_model=ReviewOut, response_model_exclude_unset=True)
 async def schedule_review(body: ReviewIn, user: dict = Depends(current_user)):
     node = await db.nodes.find_one({"_id": oid(body.node_id)})
     if not node:
@@ -260,7 +242,7 @@ async def _upsert_review(key, body, node, due):
                          "ease": None, "interval_days": None}}, upsert=True)
 
 
-@router.get("/reviews")
+@router.get("/reviews", response_model=list[ReviewOut], response_model_exclude_unset=True)
 async def list_reviews(status: str = "pending", track_id: Optional[str] = None, user: dict = Depends(current_user)):
     q = {"user_id": user["id"], "status": status, "orphaned": {"$ne": True}}
     if track_id:
@@ -269,7 +251,7 @@ async def list_reviews(status: str = "pending", track_id: Optional[str] = None, 
     return await _with_titles(items, user)
 
 
-@router.post("/reviews/{review_id}/complete")
+@router.post("/reviews/{review_id}/complete", response_model=ReviewOut, response_model_exclude_unset=True)
 async def complete_review(review_id: str, body: ReviewDone, user: dict = Depends(current_user)):
     rev = await db.reviews.find_one({"_id": oid(review_id), "user_id": user["id"]})
     if not rev:
