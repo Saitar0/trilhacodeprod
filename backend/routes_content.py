@@ -1,13 +1,10 @@
-import re
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from integrity import reconcile_orphans, save_version, load_snapshot
-from learning import find_cycles
-from core import (DEFAULT_HIERARCHY, DEFAULT_LABELS, audit, current_user, db, is_staff, now, oid,
-                  require, ser)
+from integrity import load_snapshot
+from core import DEFAULT_HIERARCHY, DEFAULT_LABELS, current_user, db, require, ser
 from services.history import list_history
 from services.search import search_nodes
 from services.stats import get_stats
@@ -15,22 +12,26 @@ from services.blocks import create_block as create_block_service
 from services.blocks import delete_block as delete_block_service
 from services.blocks import reorder_blocks as reorder_blocks_service
 from services.blocks import update_block as update_block_service
-from services.common import check_status as _check_status
 from services.common import get_document as _get
-from services.common import next_order as _next_order
-from services.common import slugify
-from services.nodes import clone_nodes as _clone_nodes
 from services.nodes import create_node as create_node_service
 from services.nodes import delete_node as delete_node_service
 from services.nodes import duplicate_node as duplicate_node_service
 from services.nodes import get_node as get_node_service
 from services.nodes import get_track_tree as get_track_tree_service
-from services.nodes import parents_first as _parents_first
 from services.nodes import reorder_nodes as reorder_nodes_service
 from services.nodes import update_node as update_node_service
 from services.relations import create_relation as create_relation_service
 from services.relations import delete_relation as delete_relation_service
 from services.relations import update_relation as update_relation_service
+from services.tracks import create_track as create_track_service
+from services.tracks import delete_track as delete_track_service
+from services.tracks import duplicate_track as duplicate_track_service
+from services.tracks import get_track as get_track_service
+from services.tracks import list_tracks as list_tracks_service
+from services.tracks import publish_track as publish_track_service
+from services.tracks import reorder_tracks as reorder_tracks_service
+from services.tracks import update_track as update_track_service
+from services.tracks import snapshot_track
 
 router = APIRouter(prefix="/api")
 
@@ -152,133 +153,46 @@ class PublishIn(BaseModel):
 # ---------- Tracks ----------
 @router.get("/tracks")
 async def list_tracks(status: Optional[str] = None, q: Optional[str] = None, user: dict = Depends(current_user)):
-    query = {}
-    if not is_staff(user):
-        query = {"status": "published", "visibility": "public"}
-    elif status:
-        query["status"] = status
-    if q:
-        query["title"] = {"$regex": re.escape(q), "$options": "i"}
-    tracks = await db.tracks.find(query).sort("order", 1).to_list(500)
-    ids = [str(t["_id"]) for t in tracks]
-    match = {"track_id": {"$in": ids}}
-    if not is_staff(user):
-        match["status"] = "published"
-    counts = await db.nodes.aggregate([
-        {"$match": match}, {"$group": {"_id": {"t": "$track_id", "k": "$kind"}, "n": {"$sum": 1}}}
-    ]).to_list(5000)
-    by_track = {}
-    for c in counts:
-        by_track.setdefault(c["_id"]["t"], {})[c["_id"]["k"]] = c["n"]
-    out = []
-    for t in tracks:
-        item = ser(t)
-        item["counts"] = by_track.get(item["id"], {})
-        out.append(item)
-    return out
+    return ser(await list_tracks_service(status, q, user))
 
 
 @router.post("/tracks")
 async def create_track(body: TrackIn, user: dict = Depends(require("content.write"))):
-    _check_status(body.status)
-    doc = body.model_dump()
-    doc["slug"] = body.slug or slugify(body.title)
-    doc.update(order=await _next_order("tracks", {}), version=0, derived_from=None, created_by=user["id"],
-               created_at=now(), updated_at=now(), published_at=None)
-    res = await db.tracks.insert_one(doc)
-    await audit(user, "track", str(res.inserted_id), "created", str(res.inserted_id), body.title)
-    return ser(await db.tracks.find_one({"_id": res.inserted_id}))
+    return ser(await create_track_service(body.model_dump(), user))
 
 
 @router.put("/tracks/reorder")
 async def reorder_tracks(body: ReorderIn, _: dict = Depends(require("content.write"))):
-    for i, _id in enumerate(body.ordered_ids):
-        await db.tracks.update_one({"_id": oid(_id)}, {"$set": {"order": i}})
-    return {"ok": True}
+    return await reorder_tracks_service(body.ordered_ids)
 
 
 @router.get("/tracks/{track_id}")
 async def get_track(track_id: str, user: dict = Depends(current_user)):
-    track = await _get("tracks", track_id)
-    if not is_staff(user) and track["status"] != "published":
-        raise HTTPException(status_code=404, detail="Trilha não encontrada")
-    return ser(track)
+    return ser(await get_track_service(track_id, user))
 
 
 @router.put("/tracks/{track_id}")
 async def update_track(track_id: str, body: TrackUpdate, user: dict = Depends(require("content.write"))):
-    await _get("tracks", track_id)
-    data = body.model_dump(exclude_unset=True)
-    _check_status(data.get("status"))
-    if data.get("status") == "published":
-        raise HTTPException(status_code=400, detail="Use a ação Publicar para publicar a trilha")
-    if (data.get("settings") or {}).get("enforce_prerequisites"):
-        if find_cycles(await db.relations.find({"track_id": track_id}).to_list(10000)):
-            raise HTTPException(status_code=400, detail="Há ciclos de pré-requisitos. Corrija-os antes de ativar a progressão bloqueante")
-    data["updated_at"] = now()
-    await db.tracks.update_one({"_id": oid(track_id)}, {"$set": data})
-    await audit(user, "track", track_id, "updated", track_id, ", ".join(k for k in data if k != "updated_at"))
-    return ser(await db.tracks.find_one({"_id": oid(track_id)}))
+    return ser(await update_track_service(track_id, body.model_dump(exclude_unset=True), user))
 
 
 @router.delete("/tracks/{track_id}")
 async def delete_track(track_id: str, user: dict = Depends(require("content.delete"))):
-    track = await _get("tracks", track_id)
-    for coll in ["nodes", "content_blocks", "relations", "progress", "learning_events"]:
-        await db[coll].delete_many({"track_id": track_id})
-    await db.user_track_state.delete_many({"track_id": track_id})
-    vids = [str(v["_id"]) for v in await db.track_versions.find({"track_id": track_id}, {"_id": 1}).to_list(10000)]
-    await db.version_chunks.delete_many({"version_id": {"$in": vids}})
-    await db.track_versions.delete_many({"track_id": track_id})
-    await reconcile_orphans(track_id)
-    await db.tracks.delete_one({"_id": oid(track_id)})
-    await audit(user, "track", track_id, "deleted", track_id, track["title"])
-    return {"ok": True}
+    return await delete_track_service(track_id, user)
 
 
 @router.post("/tracks/{track_id}/duplicate")
 async def duplicate_track(track_id: str, user: dict = Depends(require("content.write"))):
-    track = await _get("tracks", track_id)
-    new = {k: v for k, v in track.items() if k != "_id"}
-    new.update(title=f"{track['title']} (cópia)", slug=f"{track['slug']}-copia", status="draft", version=0,
-               derived_from=track_id, order=await _next_order("tracks", {}), created_by=user["id"],
-               created_at=now(), updated_at=now(), published_at=None)
-    res = await db.tracks.insert_one(new)
-    new_id = str(res.inserted_id)
-    nodes = _parents_first(await db.nodes.find({"track_id": track_id}).to_list(10000))
-    id_map = {}
-    await _clone_nodes(nodes, new_id, id_map)
-    rels = await db.relations.find({"track_id": track_id}).to_list(10000)
-    for r in rels:
-        if r["node_id"] in id_map and r["target_id"] in id_map:
-            nr = {k: v for k, v in r.items() if k != "_id"}
-            nr.update(track_id=new_id, node_id=id_map[r["node_id"]], target_id=id_map[r["target_id"]])
-            await db.relations.insert_one(nr)
-    await audit(user, "track", new_id, "duplicated", new_id, f"derivada de {track['title']}")
-    return ser(await db.tracks.find_one({"_id": res.inserted_id}))
+    return ser(await duplicate_track_service(track_id, user))
 
 
 async def _snapshot(track_id):
-    track = await _get("tracks", track_id)
-    nodes = await db.nodes.find({"track_id": track_id}).to_list(10000)
-    blocks = await db.content_blocks.find({"track_id": track_id}).to_list(50000)
-    rels = await db.relations.find({"track_id": track_id}).to_list(10000)
-    return ser({"track": track, "nodes": nodes, "blocks": blocks, "relations": rels})
+    return await snapshot_track(track_id)
 
 
 @router.post("/tracks/{track_id}/publish")
 async def publish_track(track_id: str, body: PublishIn, user: dict = Depends(require("content.publish"))):
-    track = await _get("tracks", track_id)
-    if body.publish_children:
-        await db.nodes.update_many({"track_id": track_id, "status": "draft"}, {"$set": {"status": "published"}})
-        await db.content_blocks.update_many({"track_id": track_id, "status": "draft"},
-                                            {"$set": {"status": "published"}})
-    version = track.get("version", 0) + 1
-    await db.tracks.update_one({"_id": oid(track_id)}, {"$set": {
-        "status": "published", "version": version, "published_at": now(), "updated_at": now()}})
-    await save_version(track_id, version, "publish", body.note, user, await _snapshot(track_id))
-    await audit(user, "track", track_id, "published", track_id, f"v{version} {body.note}".strip())
-    return ser(await db.tracks.find_one({"_id": oid(track_id)}))
+    return ser(await publish_track_service(track_id, body.note, body.publish_children, user))
 
 
 @router.get("/tracks/{track_id}/versions")
