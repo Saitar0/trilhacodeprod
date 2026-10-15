@@ -191,17 +191,6 @@ async def run_seed():
             "label": label, "category": cat, "icon": icon, "fields": fields, "description": "", "enabled": True,
             "capabilities": ["submission"] if key in SUBMITTABLE else [],
             "order": i, "created_at": now()}}, upsert=True)
-    if not await db.migrations.find_one({"key": "block_types_submission_v1"}):
-        for key, _l, _c, _i, fields in BLOCK_TYPES:
-            existing = await db.block_types.find_one({"key": key})
-            names = {fd["name"] for fd in existing.get("fields", [])}
-            missing = [fd for fd in fields if fd["name"] not in names]
-            update = {"$addToSet": {"capabilities": "submission"}} if key in SUBMITTABLE else {}
-            if missing:
-                update["$push"] = {"fields": {"$each": missing}}
-            if update:
-                await db.block_types.update_one({"key": key}, update)
-        await db.migrations.insert_one({"key": "block_types_submission_v1", "applied_at": now()})
     for name, color in [("fundamentos", "sky"), ("web", "emerald"), ("ferramentas", "amber")]:
         await db.tags.update_one({"slug": name}, {"$setOnInsert": {"name": name, "color": color, "created_at": now()}},
                                  upsert=True)

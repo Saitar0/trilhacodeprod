@@ -23,6 +23,9 @@ if (-not (Test-Path (Join-Path $backendDir ".venv"))) {
 & (Join-Path $backendDir ".venv\Scripts\Activate.ps1")
 Set-Location $backendDir
 python -m pip install -r requirements.txt
+python -m manage ensure-indexes
+python -m manage migrate
+python -m manage seed
 $env:FRONTEND_URL = "http://localhost:3000"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$backendDir'; . '.\.venv\Scripts\Activate.ps1'; uvicorn server:app --reload --host 0.0.0.0 --port 8000" -WorkingDirectory $backendDir
 
