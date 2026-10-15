@@ -5,7 +5,8 @@ Plataforma full stack para organizar e estudar trilhas de aprendizagem. Administ
 ## Arquitetura
 
 - `frontend`: React 19 com TypeScript, CRA e CRACO; servidor de desenvolvimento na porta 3000.
-- `api`: FastAPI/Uvicorn na porta 8000; cria índices, executa migrações e seed na inicialização.
+- `backend/routes_*.py`: validação HTTP, permissões e serialização; `backend/services/` contém serviços por domínio, e `backend/schemas/` os contratos Pydantic.
+- `api`: FastAPI/Uvicorn na porta 8000; no startup verifica a versão do banco. Índices, migrações, seed e retomada de restores são comandos explícitos.
 - `mongo`: MongoDB 7, acessível à API na rede Compose como `mongo:27017`; dados persistidos no volume nomeado `mongo_data`.
 
 O Compose é uma configuração de desenvolvimento: monta o código local e permite recarga durante a edição. O servidor CRA não é apropriado para produção. Para produção, gere o bundle com `npm run build` e sirva os arquivos por um servidor web apropriado; publique a API ASGI e o MongoDB em uma infraestrutura com autenticação, TLS, gestão de segredos, backups e controles de rede. Este repositório não fornece uma configuração de produção.
@@ -56,6 +57,8 @@ Use o último comando depois de alterar `frontend/package.json` ou `frontend/pac
 
 - Aplicação: [http://localhost:3000](http://localhost:3000)
 - API: [http://localhost:8000/api/](http://localhost:8000/api/)
+- Liveness: [http://localhost:8000/health](http://localhost:8000/health) (não acessa o MongoDB)
+- Readiness: [http://localhost:8000/ready](http://localhost:8000/ready) (ping no MongoDB e versão de migração)
 - Swagger: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ## Variáveis de ambiente
@@ -97,11 +100,16 @@ docker compose down --volumes
 
 Esse comando remove o volume `mongo_data` e apaga permanentemente os dados nele. Não o use se quiser preservar o banco. Ele não remove a pasta local `mongo-data/`.
 
-Índices, migração de snapshots legados, retomada de restaurações pendentes e seed rodam durante a inicialização da API. Não há um comando separado de migração; reinicie a API para executar novamente essa sequência:
+Na raiz do repositório, os comandos explícitos são:
 
 ```sh
-docker compose restart api
+python -m backend.manage ensure-indexes
+python -m backend.manage migrate
+python -m backend.manage seed
+python -m backend.manage resume-restores
 ```
+
+`migrate` aplica migrações numeradas de `backend/migrations/` e registra a versão na coleção `migrations`, sob uma trava distribuída. `ensure-indexes` é idempotente. `seed` é idempotente e não redefine senhas. `resume-restores` recupera jobs pendentes usando lease e heartbeat. O Compose de desenvolvimento executa esses comandos antes da API; `run_local.ps1` faz o mesmo no Windows. A API apenas verifica a versão esperada e falha em produção quando faltam migrações.
 
 Em development e staging, o seed cria a trilha demonstrativa e as contas configuradas; documentos da trilha, nós, blocos e usuários de demonstração recebem `is_demo: true`. Em production, esse conteúdo e as contas demo não são criados. O primeiro administrador só é criado com `ADMIN_EMAIL` e `ADMIN_PASSWORD`, e apenas quando ainda não há nenhum admin. Se a conta informada já existir, o seed não altera seus dados nem senha.
 
@@ -170,7 +178,12 @@ Não há um arquivo de licença nem um guia de contribuição formal neste repos
 
 ## Estrutura
 
-- `backend/`: API, rotas, migrações, seed e dependências Python.
+- `backend/routes_*.py`: endpoints e validação HTTP.
+- `backend/services/`: regras de negócio e acesso ao MongoDB por domínio.
+- `backend/schemas/`: modelos de entrada e saída da API.
+- `backend/migrations/`: migrações de dados numeradas e versionadas.
+- `backend/manage.py`: CLI para migrações, seed, índices e retomada de restores.
+- `frontend/src/components/`: componentes de tela; `frontend/src/types/` contém tipos TypeScript compartilhados da aplicação.
 - `frontend/`: aplicação React, estilos e dependências Node.
 - `compose.yaml`: ambiente local de desenvolvimento com MongoDB, API e frontend.
 - `run_local.ps1`: inicialização local no Windows sem Compose.
