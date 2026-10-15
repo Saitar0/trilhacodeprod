@@ -1,7 +1,17 @@
 # ruff: noqa: EXE002
+import re
+
 from fastapi import HTTPException
 
 from core import STATUSES, db, oid
+
+
+def slugify(text: str) -> str:
+    text = text.lower().strip()
+    for source, replacement in [("áàãâä", "a"), ("éèêë", "e"), ("íìîï", "i"), ("óòõôö", "o"),
+                               ("úùûü", "u"), ("ç", "c")]:
+        text = re.sub(f"[{source}]", replacement, text)
+    return re.sub(r"[^a-z0-9]+", "-", text).strip("-") or "item"
 
 
 def check_status(status: str | None) -> None:

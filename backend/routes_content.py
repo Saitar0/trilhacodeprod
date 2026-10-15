@@ -4,8 +4,8 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from integrity import can_view_node, reconcile_orphans, save_version, load_snapshot
-from learning import find_cycles, track_locks, visible_nodes
+from integrity import reconcile_orphans, save_version, load_snapshot
+from learning import find_cycles
 from core import (DEFAULT_HIERARCHY, DEFAULT_LABELS, audit, current_user, db, is_staff, now, oid,
                   require, ser)
 from services.history import list_history
@@ -15,23 +15,24 @@ from services.blocks import create_block as create_block_service
 from services.blocks import delete_block as delete_block_service
 from services.blocks import reorder_blocks as reorder_blocks_service
 from services.blocks import update_block as update_block_service
-from services.common import ancestors as _ancestors
 from services.common import check_status as _check_status
-from services.common import descendants as _descendants
 from services.common import get_document as _get
 from services.common import next_order as _next_order
+from services.common import slugify
+from services.nodes import clone_nodes as _clone_nodes
+from services.nodes import create_node as create_node_service
+from services.nodes import delete_node as delete_node_service
+from services.nodes import duplicate_node as duplicate_node_service
+from services.nodes import get_node as get_node_service
+from services.nodes import get_track_tree as get_track_tree_service
+from services.nodes import parents_first as _parents_first
+from services.nodes import reorder_nodes as reorder_nodes_service
+from services.nodes import update_node as update_node_service
 from services.relations import create_relation as create_relation_service
 from services.relations import delete_relation as delete_relation_service
 from services.relations import update_relation as update_relation_service
 
 router = APIRouter(prefix="/api")
-
-
-def slugify(text: str) -> str:
-    text = text.lower().strip()
-    for a, b in [("áàãâä", "a"), ("éèêë", "e"), ("íìîï", "i"), ("óòõôö", "o"), ("úùûü", "u"), ("ç", "c")]:
-        text = re.sub(f"[{a}]", b, text)
-    return re.sub(r"[^a-z0-9]+", "-", text).strip("-") or "item"
 
 
 # ---------- Models ----------
@@ -235,39 +236,6 @@ async def delete_track(track_id: str, user: dict = Depends(require("content.dele
     return {"ok": True}
 
 
-async def _clone_nodes(nodes, track_id, id_map, parent_override=None, root_ids=None):
-    """Clone nodes (sorted parents-first) and their blocks, filling id_map old->new."""
-    for n in nodes:
-        old = str(n["_id"])
-        new = {k: v for k, v in n.items() if k != "_id"}
-        new["track_id"] = track_id
-        if root_ids is not None and old in root_ids:
-            new["parent_id"] = parent_override
-        else:
-            new["parent_id"] = id_map.get(n.get("parent_id"), n.get("parent_id"))
-        new["created_at"] = new["updated_at"] = now()
-        res = await db.nodes.insert_one(new)
-        id_map[old] = str(res.inserted_id)
-        blocks = await db.content_blocks.find({"node_id": old}).to_list(1000)
-        for b in blocks:
-            nb = {k: v for k, v in b.items() if k != "_id"}
-            nb.update(node_id=id_map[old], track_id=track_id, created_at=now(), updated_at=now())
-            await db.content_blocks.insert_one(nb)
-
-
-def _parents_first(nodes):
-    by_id = {str(n["_id"]): n for n in nodes}
-    depth = {}
-
-    def d(n):
-        k = str(n["_id"])
-        if k not in depth:
-            p = by_id.get(n.get("parent_id"))
-            depth[k] = 0 if not p else d(p) + 1
-        return depth[k]
-    return sorted(nodes, key=lambda n: (d(n), n.get("order", 0)))
-
-
 @router.post("/tracks/{track_id}/duplicate")
 async def duplicate_track(track_id: str, user: dict = Depends(require("content.write"))):
     track = await _get("tracks", track_id)
@@ -325,149 +293,44 @@ async def get_version(version_id: str, _: dict = Depends(require("content.read")
     return ser({**v, "snapshot": await load_snapshot(v)})
 
 
-_visible_nodes = visible_nodes
-
-
 @router.get("/tracks/{track_id}/tree")
 async def track_tree(track_id: str, user: dict = Depends(current_user)):
-    track = await _get("tracks", track_id)
-    staff = is_staff(user)
-    if not staff and (track["status"] != "published" or track.get("visibility") == "private"):
-        raise HTTPException(status_code=404, detail="Trilha não encontrada")
-    nodes = await db.nodes.find({"track_id": track_id}).sort("order", 1).to_list(100000)
-    if not staff:
-        nodes = _visible_nodes(nodes)
-    ids = {str(n["_id"]) for n in nodes}
-    rels = [r for r in await db.relations.find({"track_id": track_id}).to_list(10000)
-            if r["node_id"] in ids and r["target_id"] in ids]
-    bmatch = {"track_id": track_id} if staff else {"track_id": track_id, "status": "published"}
-    bcounts = await db.content_blocks.aggregate([
-        {"$match": bmatch}, {"$group": {"_id": "$node_id", "n": {"$sum": 1}}}]).to_list(10000)
-    return {"track": ser(track), "nodes": ser(nodes), "relations": ser(rels),
-            "block_counts": {c["_id"]: c["n"] for c in bcounts}}
+    result = await get_track_tree_service(track_id, user)
+    return {**result, "track": ser(result["track"]), "nodes": ser(result["nodes"]),
+            "relations": ser(result["relations"])}
 
 
 # ---------- Nodes ----------
-async def _validate_parent(track, kind, parent_id, node_id=None):
-    hierarchy = track.get("hierarchy") or DEFAULT_HIERARCHY
-    if kind not in hierarchy:
-        raise HTTPException(status_code=400, detail="Tipo de nó não pertence à hierarquia da trilha")
-    if not parent_id:
-        return
-    parent = await _get("nodes", parent_id)
-    if parent["track_id"] != str(track["_id"]):
-        raise HTTPException(status_code=400, detail="Pai pertence a outra trilha")
-    if hierarchy.index(kind) <= hierarchy.index(parent["kind"]):
-        raise HTTPException(status_code=400, detail="Nível do nó deve ser mais profundo que o do pai")
-    cur = parent
-    while node_id and cur:
-        if str(cur["_id"]) == node_id:
-            raise HTTPException(status_code=400, detail="Não é possível mover um nó para dentro de si mesmo")
-        cur = await db.nodes.find_one({"_id": oid(cur["parent_id"])}) if cur.get("parent_id") else None
-
-
 @router.post("/nodes")
 async def create_node(body: NodeIn, user: dict = Depends(require("content.write"))):
-    _check_status(body.status)
-    track = await _get("tracks", body.track_id)
-    await _validate_parent(track, body.kind, body.parent_id)
-    doc = body.model_dump()
-    doc.update(slug=slugify(body.title), order=await _next_order("nodes", {"track_id": body.track_id,
-                                                                           "parent_id": body.parent_id}),
-               created_by=user["id"], created_at=now(), updated_at=now())
-    res = await db.nodes.insert_one(doc)
-    await audit(user, "node", str(res.inserted_id), "created", body.track_id, body.title)
-    return ser(await db.nodes.find_one({"_id": res.inserted_id}))
+    return ser(await create_node_service(body.model_dump(), user))
 
 
 @router.post("/nodes/reorder")
 async def reorder_nodes(body: ReorderIn, _: dict = Depends(require("content.write"))):
-    for i, _id in enumerate(body.ordered_ids):
-        await db.nodes.update_one({"_id": oid(_id)}, {"$set": {"order": i}})
-    return {"ok": True}
+    return await reorder_nodes_service(body.ordered_ids)
 
 
 @router.get("/nodes/{node_id}")
 async def get_node(node_id: str, user: dict = Depends(current_user)):
-    node = await _get("nodes", node_id)
-    staff = is_staff(user)
-    if not staff and not await can_view_node(node, user):
-        raise HTTPException(status_code=404, detail="Conteúdo não encontrado")
-    bq = {"node_id": node_id} if staff else {"node_id": node_id, "status": "published"}
-    lock = (await track_locks(node["track_id"], user)).get(node_id)
-    blocks = [] if lock and not staff else await db.content_blocks.find(bq).sort("order", 1).to_list(1000)
-    rels = await db.relations.find({"$or": [{"node_id": node_id}, {"target_id": node_id}]}).to_list(1000)
-    other_ids = {r["target_id"] if r["node_id"] == node_id else r["node_id"] for r in rels}
-    others = {str(n["_id"]): n for n in await db.nodes.find({"_id": {"$in": [oid(i) for i in other_ids]}}).to_list(1000)}
-    out_rels = []
-    for r in rels:
-        outgoing = r["node_id"] == node_id
-        other = others.get(r["target_id"] if outgoing else r["node_id"])
-        if not other or (not staff and other["status"] != "published"):
-            continue
-        item = ser(r)
-        item.update(direction="outgoing" if outgoing else "incoming",
-                    other={"id": str(other["_id"]), "title": other["title"], "kind": other["kind"]})
-        out_rels.append(item)
-    if lock and not staff:
-        node = {**node, "description": "", "guidance": ""}
-    if not staff:
-        node = {k: v for k, v in node.items() if k != "notes"}
-    return {"node": ser(node), "blocks": ser(blocks), "relations": out_rels, "ancestors": await _ancestors(node),
-            "lock": lock}
+    result = await get_node_service(node_id, user)
+    return {**result, "node": ser(result["node"]), "blocks": ser(result["blocks"]),
+            "relations": ser(result["relations"])}
 
 
 @router.put("/nodes/{node_id}")
 async def update_node(node_id: str, body: NodeUpdate, user: dict = Depends(require("content.write"))):
-    node = await _get("nodes", node_id)
-    data = body.model_dump(exclude_unset=True)
-    _check_status(data.get("status"))
-    if "parent_id" in data or "kind" in data:
-        track = await _get("tracks", node["track_id"])
-        new_parent = data.get("parent_id", node.get("parent_id")) or None
-        await _validate_parent(track, data.get("kind", node["kind"]), new_parent, node_id)
-        if "parent_id" in data and new_parent != node.get("parent_id"):
-            data["parent_id"] = new_parent
-            data["order"] = await _next_order("nodes", {"track_id": node["track_id"], "parent_id": new_parent})
-    if "title" in data:
-        data["slug"] = slugify(data["title"])
-    data["updated_at"] = now()
-    await db.nodes.update_one({"_id": oid(node_id)}, {"$set": data})
-    await audit(user, "node", node_id, "updated", node["track_id"],
-                f"{node['title']}: " + ", ".join(k for k in data if k not in ("updated_at", "slug", "order")))
-    return ser(await db.nodes.find_one({"_id": oid(node_id)}))
+    return ser(await update_node_service(node_id, body.model_dump(exclude_unset=True), user))
 
 
 @router.delete("/nodes/{node_id}")
 async def delete_node(node_id: str, user: dict = Depends(require("content.delete"))):
-    node = await _get("nodes", node_id)
-    ids = await _descendants(node["track_id"], node_id)
-    await db.nodes.delete_many({"_id": {"$in": [oid(i) for i in ids]}})
-    await db.content_blocks.delete_many({"node_id": {"$in": ids}})
-    await db.relations.delete_many({"$or": [{"node_id": {"$in": ids}}, {"target_id": {"$in": ids}}]})
-    await db.progress.delete_many({"node_id": {"$in": ids}})
-    await reconcile_orphans(node["track_id"])
-    await audit(user, "node", node_id, "deleted", node["track_id"], f"{node['title']} (+{len(ids) - 1} filhos)")
-    return {"ok": True, "deleted": len(ids)}
+    return await delete_node_service(node_id, user)
 
 
 @router.post("/nodes/{node_id}/duplicate")
 async def duplicate_node(node_id: str, user: dict = Depends(require("content.write"))):
-    node = await _get("nodes", node_id)
-    ids = set(await _descendants(node["track_id"], node_id))
-    subtree = _parents_first(await db.nodes.find({"_id": {"$in": [oid(i) for i in ids]}}).to_list(10000))
-    id_map = {}
-    await _clone_nodes(subtree, node["track_id"], id_map, parent_override=node.get("parent_id"), root_ids={node_id})
-    new_id = id_map[node_id]
-    siblings = await db.nodes.find({"track_id": node["track_id"], "parent_id": node.get("parent_id")}).sort(
-        "order", 1).to_list(10000)
-    ordered = [str(s["_id"]) for s in siblings if str(s["_id"]) != new_id]
-    ordered.insert(ordered.index(node_id) + 1, new_id)
-    for i, _id in enumerate(ordered):
-        await db.nodes.update_one({"_id": oid(_id)}, {"$set": {"order": i}})
-    await db.nodes.update_one({"_id": oid(new_id)}, {"$set": {"title": f"{node['title']} (cópia)", "status": "draft"}})
-    await audit(user, "node", new_id, "duplicated", node["track_id"], node["title"])
-    return ser(await db.nodes.find_one({"_id": oid(new_id)}))
+    return ser(await duplicate_node_service(node_id, user))
 
 
 # ---------- Content blocks ----------
