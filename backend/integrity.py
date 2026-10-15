@@ -25,13 +25,21 @@ async def store_snapshot(version_id, snapshot: dict) -> dict:
 async def load_snapshot(version: dict) -> dict:
     if "snapshot" in version:
         return version["snapshot"]
-    chunks = await db.version_chunks.find({"version_id": str(version["_id"])}).sort("seq", 1).to_list(10000)
-    if len(chunks) != version.get("chunks"):
+    decompressor = zlib.decompressobj()
+    raw_parts, digest, count = [], hashlib.sha256(), 0
+    async for chunk in db.version_chunks.find({"version_id": str(version["_id"])}).sort("seq", 1):
+        data = decompressor.decompress(bytes(chunk["data"]))
+        raw_parts.append(data)
+        digest.update(data)
+        count += 1
+    tail = decompressor.flush()
+    raw_parts.append(tail)
+    digest.update(tail)
+    if count != version.get("chunks"):
         raise ValueError("Snapshot incompleto")
-    raw = zlib.decompress(b"".join(bytes(c["data"]) for c in chunks))
-    if hashlib.sha256(raw).hexdigest() != version.get("sha256"):
+    if digest.hexdigest() != version.get("sha256"):
         raise ValueError("Snapshot corrompido (checksum)")
-    return json.loads(raw)
+    return json.loads(b"".join(raw_parts))
 
 
 async def save_version(track_id, version, kind, note, user, snapshot, extra=None):
@@ -71,8 +79,8 @@ async def can_view_node(node: dict, user: dict) -> bool:
 # ---------- Orphans ----------
 async def reconcile_orphans(track_id: str):
     """Flag submissions/notes/reviews whose node no longer exists; unflag if it came back (restore)."""
-    alive = {str(n["_id"]) for n in await db.nodes.find({"track_id": track_id}, {"_id": 1}).to_list(100000)}
-    alive_blocks = {str(b["_id"]) for b in await db.content_blocks.find({"track_id": track_id}, {"_id": 1}).to_list(200000)}
+    alive = {str(n["_id"]) async for n in db.nodes.find({"track_id": track_id}, {"_id": 1})}
+    alive_blocks = {str(b["_id"]) async for b in db.content_blocks.find({"track_id": track_id}, {"_id": 1})}
     for coll in ("submissions", "notes", "reviews"):
         async for d in db[coll].find({"track_id": track_id}, {"node_id": 1, "block_id": 1, "orphaned": 1}):
             dead = d["node_id"] not in alive or bool(d.get("block_id") and d["block_id"] not in alive_blocks)
