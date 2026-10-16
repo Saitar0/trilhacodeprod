@@ -30,11 +30,11 @@ export default function Grading() {
   });
   const types = (meta?.block_types || []).filter((b) => b.capabilities?.includes("submission"));
   return (
-    <div className="max-w-7xl">
+    <div className="min-w-0 max-w-7xl">
       <PageHeader eyebrow="operação editorial" title="Correções" description="Fila de respostas enviadas. Corrija com rubrica, devolva para ajuste ou aprove." />
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <Tabs value={status} onValueChange={(v) => { setStatus(v); setSelected(null); }}>
-          <TabsList className="bg-slate-900">
+          <TabsList className="h-auto max-w-full flex-wrap justify-start bg-slate-900">
             {STATUS_TABS.map(([k, l]) => <TabsTrigger key={k} value={k} data-testid={`grading-tab-${k}`}>{l} <span className="ml-1.5 font-mono text-[10px] text-slate-500">{data?.counts[k] || 0}</span></TabsTrigger>)}
           </TabsList>
         </Tabs>
@@ -49,12 +49,12 @@ export default function Grading() {
         <div className="relative w-56"><Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
           <Input data-testid="grading-search" placeholder="Aluno ou tópico" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" /></div>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
-        <div className="space-y-2">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-2">
           {isLoading ? <Loader /> : !data?.items.length ? <EmptyState icon="ClipboardCheck" title="Nada por aqui" description="Nenhuma submissão com estes filtros." /> : data.items.map((s) => (
             <button key={s.id} data-testid={`grading-item-${s.id}`} onClick={() => setSelected(s.id)}
-              className={cn("w-full rounded-xl border px-4 py-3 text-left transition-colors", selected === s.id ? "border-emerald-500/40 bg-emerald-500/5" : "border-slate-800 bg-slate-900/50 hover:border-slate-600")}>
-              <div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-medium text-slate-100">{s.user_name}</span><SubmissionBadge status={s.status} testId={`grading-item-status-${s.id}`} /></div>
+              className={cn("min-w-0 w-full rounded-xl border px-4 py-3 text-left transition-colors", selected === s.id ? "border-emerald-500/40 bg-emerald-500/5" : "border-slate-800 bg-slate-900/50 hover:border-slate-600")}>
+              <div className="flex min-w-0 items-center justify-between gap-2"><span className="min-w-0 truncate text-sm font-medium text-slate-100">{s.user_name}</span><SubmissionBadge status={s.status} testId={`grading-item-status-${s.id}`} /></div>
               <p className="truncate text-xs text-slate-400">{s.orphaned && <span data-testid={`grading-item-orphan-${s.id}`} className="mr-1.5 rounded border border-slate-600 px-1 font-mono text-[9px] uppercase text-slate-400">órfão</span>}{s.node_title} · {s.block_title || s.block_type}</p>
               <p className="font-mono text-[10px] text-slate-600">#{s.attempt} · {formatDate(s.submitted_at)}</p>
             </button>

@@ -47,6 +47,23 @@ def _options(index: dict) -> dict:
             if key in index}
 
 
+def _same_keys(index: dict, expected_keys: tuple) -> bool:
+    actual_keys = tuple(index["key"].items())
+    if actual_keys == expected_keys:
+        return True
+    # MongoDB stores text index fields as an internal _fts key and a weights map.
+    return (expected_keys and all(direction == "text" for _, direction in expected_keys)
+            and actual_keys == (("_fts", "text"), ("_ftsx", 1)))
+
+
+def _keys_match(index: dict, expected_keys: tuple) -> bool:
+    if not _same_keys(index, expected_keys):
+        return False
+    if expected_keys and all(direction == "text" for _, direction in expected_keys):
+        return index.get("weights") == {field: 1 for field, _ in expected_keys}
+    return True
+
+
 async def _duplicates(collection, fields: tuple[str, ...], partial_filter: dict | None = None) -> list[dict]:
     # Unique indexes treat missing and null as the same key value.
     group_id = {field: {"$ifNull": [f"${field}", None]} for field in fields}
@@ -68,16 +85,17 @@ async def preflight_indexes() -> list[str]:
     for collection_name, keys, options, unique_fields in INDEXES:
         collection = db[collection_name]
         collection_exists = collection_name in existing_collections
-        existing = await collection.list_indexes().to_list(1000) if collection_exists else []
+        existing = await (await collection.list_indexes()).to_list(1000) if collection_exists else []
         expected_keys = tuple(keys)
-        same_keys = [index for index in existing if tuple(index["key"].items()) == expected_keys]
+        same_keys = [index for index in existing if _same_keys(index, expected_keys)]
         expected_options = {key: value for key, value in options.items()
                             if key in ("unique", "sparse", "expireAfterSeconds", "partialFilterExpression",
                                        "collation", "hidden", "wildcardProjection")}
-        expected_name = options.get("name") or ",".join(f"{field}_{direction}" for field, direction in keys)
+        expected_name = options.get("name") or "_".join(f"{field}_{direction}" for field, direction in keys)
         matches = [index for index in same_keys
-                   if _options(index) == expected_options and index["name"] == expected_name]
-        label = options.get("name") or ",".join(f"{field}_{direction}" for field, direction in keys)
+                   if _keys_match(index, expected_keys) and _options(index) == expected_options
+                   and index["name"] == expected_name]
+        label = expected_name
         if matches:
             findings.append(f"OK {collection_name}.{label}: índice compatível presente")
         elif same_keys:

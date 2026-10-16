@@ -5,9 +5,32 @@ from types import SimpleNamespace
 from bson import ObjectId
 
 from database import db
-from indexes import INDEXES, preflight_indexes
+from indexes import INDEXES, _keys_match, preflight_indexes
 from services.progress import visit_node
 from services.taxonomy import create_block_type, create_tag, create_taxonomy
+
+
+def test_preflight_compound_and_text_index_key_matching():
+    assert len(INDEXES) == 23
+    assert _keys_match(
+        {"key": {"user_id": 1, "at": -1}},
+        (("user_id", 1), ("at", -1)),
+    )
+    assert not _keys_match(
+        {"key": {"at": -1, "user_id": 1}},
+        (("user_id", 1), ("at", -1)),
+    )
+
+    expected_text_keys = (("title", "text"), ("summary", "text"))
+    mongo_text_index = {
+        "key": {"_fts": "text", "_ftsx": 1},
+        "weights": {"title": 1, "summary": 1},
+    }
+    assert _keys_match(mongo_text_index, expected_text_keys)
+    assert not _keys_match(
+        {**mongo_text_index, "weights": {"title": 1}},
+        expected_text_keys,
+    )
 
 
 def test_concurrent_user_registration_returns_one_conflict(async_client, event_loop):
@@ -156,7 +179,7 @@ def test_unique_index_preflight_reports_duplicates_and_respects_partial_indexes(
             self.name = name
             self.pipelines = []
 
-        def list_indexes(self):
+        async def list_indexes(self):
             return IndexCursor()
 
         async def aggregate(self, pipeline):

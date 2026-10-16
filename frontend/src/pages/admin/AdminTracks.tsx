@@ -38,12 +38,12 @@ export default function AdminTracks() {
   };
 
   return (
-    <div className="max-w-6xl">
+    <div className="min-w-0 max-w-6xl">
       <PageHeader eyebrow="estrutura" title="Trilhas" description="Crie, duplique, reordene e publique trilhas. Trilhas derivadas mantêm vínculo com a original."
         actions={<Button data-testid="create-track-button" className="rounded-full" onClick={() => setCreating(true)}><Plus />Nova trilha</Button>} />
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs value={status} onValueChange={setStatus}>
-          <TabsList className="bg-slate-900">
+          <TabsList className="h-auto max-w-full flex-wrap justify-start bg-slate-900">
             {[["all", "Todas"], ["draft", "Rascunhos"], ["published", "Publicadas"], ["archived", "Arquivadas"]].map(([k, l]) => (
               <TabsTrigger key={k} value={k} data-testid={`tracks-filter-${k}`}>{l}</TabsTrigger>
             ))}

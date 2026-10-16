@@ -1,3 +1,5 @@
+from pydantic import EmailStr, TypeAdapter
+
 from core_utils import now
 from database import db
 from security import hash_password
@@ -31,6 +33,7 @@ CRITERIA = f("criteria", "Critérios da rubrica (um por linha)", "list")
 RESUBMIT = f("allow_resubmit", "Permitir nova tentativa após reprovação", "boolean")
 MAX_SCORE = f("max_score", "Nota máxima (opcional)", "number")
 SUBMITTABLE = {"exercise_objective", "exercise_open", "practical_challenge"}
+_EMAIL = TypeAdapter(EmailStr)
 BLOCK_TYPES = [
     ("theory_text", "Texto teórico", "teoria", "BookOpen", [f("body", "Conteúdo", "markdown")]),
     ("summary", "Resumo curto", "teoria", "AlignLeft", [f("body", "Resumo", "textarea")]),
@@ -97,6 +100,7 @@ SEED_TREE = [
 async def _seed_user(email, password, name, role):
     if not email or not password:
         return
+    email = str(_EMAIL.validate_python(email)).lower()
     existing = await db.users.find_one({"email": email})
     if existing is not None:
         return

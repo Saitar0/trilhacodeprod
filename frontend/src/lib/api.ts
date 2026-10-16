@@ -27,7 +27,8 @@ api.interceptors.response.use(
 );
 
 export function apiError(e: unknown): string {
-  const detail = (e as AxiosError<{ detail?: unknown }>)?.response?.data?.detail;
+  const body = (e as AxiosError<{ detail?: unknown; error?: { message?: unknown } }>)?.response?.data;
+  const detail = body?.detail ?? body?.error?.message;
   if (detail == null) return (e as Error)?.message || "Algo deu errado. Tente novamente.";
   if (typeof detail === "string") return detail;
   if (Array.isArray(detail))
