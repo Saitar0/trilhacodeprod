@@ -2,39 +2,15 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends
 
-from integrity import load_snapshot
 from core import current_user, db, require, ser
-from services.history import list_history
-from services.search import search_nodes
-from services.stats import get_stats
-from services.blocks import create_block as create_block_service
-from services.blocks import delete_block as delete_block_service
-from services.blocks import reorder_blocks as reorder_blocks_service
-from services.blocks import update_block as update_block_service
-from services.common import get_document as _get
-from services.nodes import create_node as create_node_service
-from services.nodes import delete_node as delete_node_service
-from services.nodes import duplicate_node as duplicate_node_service
-from services.nodes import get_node as get_node_service
-from services.nodes import get_track_tree as get_track_tree_service
-from services.nodes import reorder_nodes as reorder_nodes_service
-from services.nodes import update_node as update_node_service
-from services.relations import create_relation as create_relation_service
-from services.relations import delete_relation as delete_relation_service
-from services.relations import update_relation as update_relation_service
-from services.tracks import create_track as create_track_service
-from services.tracks import delete_track as delete_track_service
-from services.tracks import duplicate_track as duplicate_track_service
-from services.tracks import get_track as get_track_service
-from services.tracks import list_tracks as list_tracks_service
-from services.tracks import publish_track as publish_track_service
-from services.tracks import reorder_tracks as reorder_tracks_service
-from services.tracks import update_track as update_track_service
+from integrity import load_snapshot
 from schemas.content import (
     BlockIn,
+    BlockOut,
     BlockUpdate,
-    NodeIn,
+    HistoryOut,
     NodeDetailOut,
+    NodeIn,
     NodeOut,
     NodeUpdate,
     OkOut,
@@ -50,9 +26,33 @@ from schemas.content import (
     TrackTreeOut,
     TrackUpdate,
     VersionOut,
-    HistoryOut,
-    BlockOut,
 )
+from services.blocks import create_block as create_block_service
+from services.blocks import delete_block as delete_block_service
+from services.blocks import reorder_blocks as reorder_blocks_service
+from services.blocks import update_block as update_block_service
+from services.common import get_document as _get
+from services.history import list_history
+from services.nodes import create_node as create_node_service
+from services.nodes import delete_node as delete_node_service
+from services.nodes import duplicate_node as duplicate_node_service
+from services.nodes import get_node as get_node_service
+from services.nodes import get_track_tree as get_track_tree_service
+from services.nodes import reorder_nodes as reorder_nodes_service
+from services.nodes import update_node as update_node_service
+from services.relations import create_relation as create_relation_service
+from services.relations import delete_relation as delete_relation_service
+from services.relations import update_relation as update_relation_service
+from services.search import search_nodes
+from services.stats import get_stats
+from services.tracks import create_track as create_track_service
+from services.tracks import delete_track as delete_track_service
+from services.tracks import duplicate_track as duplicate_track_service
+from services.tracks import get_track as get_track_service
+from services.tracks import list_tracks as list_tracks_service
+from services.tracks import publish_track as publish_track_service
+from services.tracks import reorder_tracks as reorder_tracks_service
+from services.tracks import update_track as update_track_service
 
 router = APIRouter(prefix="/api")
 

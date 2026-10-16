@@ -6,7 +6,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 import httpx
 import pytest
-
+from pymongo import MongoClient
 
 MONGO_URL = os.environ.get("MONGO_URL_TEST", "mongodb://localhost:27017")
 _db_name = f"test_{uuid.uuid4().hex}"
@@ -18,27 +18,30 @@ _mongo_url = urlunsplit((_parts.scheme, _parts.netloc, f"/{_db_name}", _query, _
 os.environ["MONGO_URL"] = _mongo_url
 os.environ["DB_NAME"] = _db_name
 os.environ["ENV"] = "development"
-os.environ.setdefault("JWT_SECRET", "isolated-tests-only-secret")
+os.environ["JWT_SECRET"] = "isolated-tests-only-secret-key-32-bytes"
 
 if not _db_name.startswith("test_"):
     raise RuntimeError(f"Refusing to run tests against unsafe database: {_db_name!r}")
 
-from core import client as mongo_client, db, hash_password  # noqa: E402
-from server import app  # noqa: E402
+from core import client as mongo_client
+from core import db, hash_password
+from indexes import ensure_indexes
+from migrations import migrate
+from seed import BLOCK_TYPES, SUBMITTABLE, TAXONOMIES
+from server import app
 
 
 class TestSession:
     """Small requests-like sync adapter for tests using an AsyncClient transport."""
-    def __init__(self, async_client):
+    def __init__(self, async_client, event_loop):
         self._client = async_client
-        self.cookies = httpx.Cookies()
+        self._event_loop = event_loop
+        self.cookies = async_client.cookies
 
     def request(self, method, url, **kwargs):
         async def send():
-            response = await self._client.request(method, url, cookies=self.cookies, **kwargs)
-            self.cookies.update(response.cookies)
-            return response
-        return asyncio.run(send())
+            return await self._client.request(method, url, **kwargs)
+        return self._event_loop.run_until_complete(send())
 
     def get(self, url, **kwargs): return self.request("GET", url, **kwargs)
     def post(self, url, **kwargs): return self.request("POST", url, **kwargs)
@@ -47,44 +50,67 @@ class TestSession:
 
 
 @pytest.fixture(scope="session")
-def async_client():
-    client = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver")
-    yield client
-    asyncio.run(client.aclose())
+def event_loop():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    yield loop
+    loop.close()
+    asyncio.set_event_loop(None)
 
 
 @pytest.fixture(scope="session")
-def session_factory():
+def async_client(event_loop):
+    client = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver")
+    yield client
+    event_loop.run_until_complete(client.aclose())
+
+
+@pytest.fixture(scope="session")
+def session_factory(event_loop):
     clients = []
 
     def create():
         client = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver")
         clients.append(client)
-        return TestSession(client)
+        return TestSession(client, event_loop)
 
+    create.close_all = lambda: [event_loop.run_until_complete(client.aclose()) for client in clients]
     yield create
-    for client in clients:
-        asyncio.run(client.aclose())
 
 
 @pytest.fixture(scope="session", autouse=True)
-def disposable_database(session_factory):
+def disposable_database(session_factory, event_loop):
     async def prepare():
         await db.command("ping")
-        for role, email in (("admin", "admin@test.local"), ("editor", "editor@test.local"),
-                            ("student", "student@test.local")):
+        await ensure_indexes()
+        for role, email in (("admin", "admin@example.com"), ("editor", "editor@example.com"),
+                            ("student", "student@example.com")):
             await db.users.insert_one({
                 "email": email, "name": role.title(), "password_hash": hash_password("Test@1234"),
                 "role": role, "profile": {"bio": "", "goals": "", "preferences": {}},
             })
-    asyncio.run(prepare())
-    yield
-    async def cleanup():
-        if not _db_name.startswith("test_"):
-            raise RuntimeError(f"Refusing to drop unsafe database: {_db_name!r}")
-        await mongo_client.drop_database(_db_name)
-        mongo_client.close()
-    asyncio.run(cleanup())
+        for index, (group, key, label, description, color) in enumerate(TAXONOMIES):
+            await db.taxonomies.insert_one({"group": group, "key": key, "label": label,
+                                            "description": description, "color": color, "order": index})
+        for index, (key, label, category, icon, fields) in enumerate(BLOCK_TYPES):
+            await db.block_types.insert_one({
+                "key": key, "label": label, "category": category, "icon": icon,
+                "fields": fields, "description": "", "enabled": True,
+                "capabilities": ["submission"] if key in SUBMITTABLE else [], "order": index,
+            })
+        await migrate()
+    try:
+        event_loop.run_until_complete(prepare())
+        yield
+    finally:
+        try:
+            session_factory.close_all()
+        finally:
+            mongo_client.close()
+            if not _db_name.startswith("test_"):
+                raise RuntimeError(f"Refusing to drop unsafe database: {_db_name!r}")
+            with MongoClient(MONGO_URL) as cleanup_client:
+                cleanup_client.drop_database(_db_name)
 
 
 def _login(session_factory, email, password="Test@1234"):
@@ -96,17 +122,17 @@ def _login(session_factory, email, password="Test@1234"):
 
 @pytest.fixture(scope="session")
 def admin(session_factory, disposable_database):
-    return _login(session_factory, "admin@test.local")
+    return _login(session_factory, "admin@example.com")
 
 
 @pytest.fixture(scope="session")
 def editor(session_factory, disposable_database):
-    return _login(session_factory, "editor@test.local")
+    return _login(session_factory, "editor@example.com")
 
 
 @pytest.fixture(scope="session")
 def student(session_factory, disposable_database):
-    return _login(session_factory, "student@test.local")
+    return _login(session_factory, "student@example.com")
 
 
 @pytest.fixture(scope="session")
@@ -126,7 +152,21 @@ def student_session(student):
 
 @pytest.fixture(scope="session")
 def login(session_factory, disposable_database):
-    return lambda email, password="Test@1234": _login(session_factory, email, password)
+    def log_in(role_or_email, password="Test@1234"):
+        aliases = {"admin": "admin@example.com", "editor": "editor@example.com", "student": "student@example.com"}
+        email = aliases.get(role_or_email, role_or_email)
+        return _login(session_factory, email, password)
+    return log_in
+
+
+@pytest.fixture
+def fresh_student(login, event_loop):
+    email = f"student_{uuid.uuid4().hex}@example.com"
+    event_loop.run_until_complete(db.users.insert_one({
+        "email": email, "name": "Isolated student", "password_hash": hash_password("Test@1234"),
+        "role": "student", "profile": {"bio": "", "goals": "", "preferences": {}},
+    }))
+    return login(email)
 
 
 @pytest.fixture(scope="session")
@@ -135,11 +175,16 @@ def seeded_track(admin):
     assert response.status_code == 200
     track = response.json()
     track_id = track["id"]
-    first = admin.post("/api/nodes", json={"track_id": track_id, "kind": "topic", "title": "Prerequisite"}).json()
-    second = admin.post("/api/nodes", json={"track_id": track_id, "kind": "topic", "title": "Locked topic"}).json()
-    admin.post("/api/relations", json={"node_id": second["id"], "target_id": first["id"], "type": "prerequisite", "enforced": True})
-    admin.post(f"/api/tracks/{track_id}/publish", json={})
-    return track
+    first = admin.post("/api/nodes", json={"track_id": track_id, "kind": "topic", "title": "Prerequisite",
+                                           "status": "published"}).json()
+    second = admin.post("/api/nodes", json={"track_id": track_id, "kind": "topic", "title": "Locked topic",
+                                            "status": "published"}).json()
+    relation = admin.post("/api/relations", json={"node_id": second["id"], "target_id": first["id"],
+                                                   "type": "prerequisite", "enforced": True})
+    assert relation.status_code == 200, relation.text
+    published = admin.post(f"/api/tracks/{track_id}/publish", json={})
+    assert published.status_code == 200, published.text
+    return published.json()
 
 
 @pytest.fixture(scope="session", autouse=True)

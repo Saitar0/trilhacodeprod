@@ -1,11 +1,18 @@
-from typing import List, Optional
-
 from fastapi import APIRouter, Depends, HTTPException
 
-from core import (DEFAULT_HIERARCHY, DEFAULT_LABELS, PROGRESS_STATUSES, ROLES, STATUSES, current_user, db, now,
-                  oid, require, ser)
-
-router = APIRouter(prefix="/api")
+from core import (
+    DEFAULT_HIERARCHY,
+    DEFAULT_LABELS,
+    PROGRESS_STATUSES,
+    ROLES,
+    STATUSES,
+    current_user,
+    db,
+    now,
+    oid,
+    require,
+    ser,
+)
 from schemas.content import OkOut
 from schemas.taxonomy import (
     BlockTypeIn,
@@ -16,6 +23,8 @@ from schemas.taxonomy import (
     TaxonomyOut,
     TaxonomyUpdate,
 )
+
+router = APIRouter(prefix="/api")
 
 TAXONOMY_GROUPS = ["pedagogical_type", "requirement", "depth", "relation_type"]
 

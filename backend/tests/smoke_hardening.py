@@ -1,9 +1,10 @@
 """Smoke tests for the hardening pack. Run: python tests/smoke_hardening.py (backend on localhost:8001)."""
 import concurrent.futures as cf
 import json
+import re
+
 import requests
 
-import re
 U = re.search(r"VITE_BACKEND_URL=(\S+)", open("/app/frontend/.env").read()).group(1) + "/api"
 
 

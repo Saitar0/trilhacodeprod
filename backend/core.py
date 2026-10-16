@@ -1,10 +1,11 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
 from bson import ObjectId
 from fastapi import Depends, HTTPException, Request
 from motor.motor_asyncio import AsyncIOMotorClient
+
 from settings import settings
 
 client = AsyncIOMotorClient(settings.mongo_url, tz_aware=True)

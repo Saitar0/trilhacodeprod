@@ -56,7 +56,7 @@ def test_health_request_id_and_error_envelope(admin, session_factory):
 @pytest.fixture(scope="module")
 def fresh_student(session_factory):
     session = session_factory()
-    email = f"new_{uuid.uuid4().hex[:8]}@test.local"
+    email = f"new_{uuid.uuid4().hex[:8]}@example.com"
     response = session.post(f"{API}/auth/register", json={"name": "Test", "email": email, "password": "Test@1234"})
     assert response.status_code == 200
     return session
@@ -70,7 +70,7 @@ class TestLocks:
         data = r.json()
         assert "locks" in data
         # expect at least some locks since enforce_prerequisites=true per spec
-        assert isinstance(data["locks"], dict)
+        assert isinstance(data["locks"], dict) and data["locks"]
 
     def test_staff_never_locked(self, admin, seeded_track):
         r = admin.get(f"{API}/progress/tracks/{seeded_track['id']}")
@@ -117,7 +117,7 @@ class TestLocks:
             admin.put(f"{API}/tracks/{tid}", json={"settings": {"enforce_prerequisites": True}})
             admin.post(f"{API}/tracks/{tid}/publish", json={})
             # student view
-            s = login("student@test.local")
+            s = login("student@example.com")
             tp = s.get(f"{API}/progress/tracks/{tid}").json()
             assert b["id"] in (tp.get("locks") or {})
             # Turn off enforce
@@ -136,7 +136,7 @@ class TestLocks:
                 "node_id": b["id"], "target_id": a["id"], "type": "prerequisite", "enforced": True})
             admin.put(f"{API}/tracks/{tid}", json={"settings": {"enforce_prerequisites": True}})
             admin.post(f"{API}/tracks/{tid}/publish", json={})
-            s = login("student@test.local")
+            s = login("student@example.com")
             tp = s.get(f"{API}/progress/tracks/{tid}").json()
             assert b["id"] in (tp.get("locks") or {})
             # Complete the prerequisite
@@ -213,7 +213,7 @@ class TestSubmissions:
     @pytest.fixture(scope="class")
     @classmethod
     def ctx(cls, login):
-        admin = login("admin@test.local")
+        admin = login("admin@example.com")
         tid = admin.post(f"{API}/tracks", json={"title": "TEST_subs"}).json()["id"]
         node = admin.post(f"{API}/nodes", json={"track_id": tid, "kind": "topic", "title": "T"}).json()
         # find submittable block type
@@ -235,20 +235,20 @@ class TestSubmissions:
         admin.delete(f"{API}/tracks/{tid}")
 
     def test_non_submittable_block_rejected(self, ctx, login):
-        s = login("student@test.local")
+        s = login("student@example.com")
         r = s.post(f"{API}/submissions/submit",
                    json={"block_id": ctx["theory"]["id"], "answer": {"text": "hi"}})
         assert r.status_code == 400
 
     def test_empty_answer_rejected(self, ctx, login):
-        s = login("student@test.local")
+        s = login("student@example.com")
         r = s.post(f"{API}/submissions/submit",
                    json={"block_id": ctx["block"]["id"], "answer": {"text": ""}})
         assert r.status_code == 400
 
     def test_draft_submit_claim_grade_approve(self, ctx, session_factory):
         # Use a fresh student to avoid pre-existing submissions
-        email = f"test_stu_{uuid.uuid4().hex[:8]}@trilhacode.dev"
+        email = f"test_stu_{uuid.uuid4().hex[:8]}@example.com"
         s = session_factory()
         r = s.post(f"{API}/auth/register",
                    json={"name": "Grad", "email": email, "password": "Test@1234"})
@@ -307,7 +307,7 @@ class TestSubmissions:
         assert tp["blocks"][bid]["status"] == "completed"
 
     def test_returned_resubmit_same_attempt(self, ctx, session_factory):
-        email = f"test_stu_{uuid.uuid4().hex[:8]}@trilhacode.dev"
+        email = f"test_stu_{uuid.uuid4().hex[:8]}@example.com"
         s = session_factory()
         s.post(f"{API}/auth/register", json={"name": "Rt", "email": email, "password": "Test@1234"})
         bid = ctx["block"]["id"]
@@ -323,7 +323,7 @@ class TestSubmissions:
         assert r2.json()["attempt"] == r.json()["attempt"]
 
     def test_rejected_allow_resubmit_new_attempt(self, ctx, session_factory):
-        email = f"test_stu_{uuid.uuid4().hex[:8]}@trilhacode.dev"
+        email = f"test_stu_{uuid.uuid4().hex[:8]}@example.com"
         s = session_factory()
         s.post(f"{API}/auth/register", json={"name": "Rj", "email": email, "password": "Test@1234"})
         bid = ctx["block"]["id"]
@@ -390,8 +390,8 @@ class TestVersionsRestore:
             v1_num = p1["version"]
 
             # Modify: add second node, publish v2
-            n2 = admin.post(f"{API}/nodes",
-                           json={"track_id": tid, "kind": "topic", "title": "N2"}).json()
+            admin.post(f"{API}/nodes",
+                       json={"track_id": tid, "kind": "topic", "title": "N2"}).json()
             admin.post(f"{API}/tracks/{tid}/publish", json={"note": "v2"})
 
             # Compare v1 vs current

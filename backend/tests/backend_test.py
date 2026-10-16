@@ -19,9 +19,9 @@ def test_root(session_factory):
 # ---------- Auth ----------
 class TestAuth:
     def test_login_sets_cookies(self, login):
-        s = login("admin@test.local")
+        s = login("admin@example.com")
         data = s.get(f"{API}/auth/me").json()
-        assert data["email"] == "admin@test.local"
+        assert data["email"] == "admin@example.com"
         assert data["role"] == "admin"
         assert "access_token" in s.cookies
         assert "refresh_token" in s.cookies
@@ -37,19 +37,19 @@ class TestAuth:
         assert r.status_code == 401
 
     def test_logout_clears_cookies(self, login):
-        s = login("student@test.local")
+        s = login("student@example.com")
         r = s.post(f"{API}/auth/logout")
         assert r.status_code == 200
         r2 = s.get(f"{API}/auth/me")
         assert r2.status_code == 401
 
     def test_refresh(self, login):
-        s = login("student@test.local")
+        s = login("student@example.com")
         r = s.post(f"{API}/auth/refresh")
         assert r.status_code == 200
 
     def test_register_creates_student(self, session_factory):
-        email = f"test_{uuid.uuid4().hex[:8]}@trilhacode.dev"
+        email = f"test_{uuid.uuid4().hex[:8]}@example.com"
         s = session_factory()
         r = s.post(f"{API}/auth/register", json={"name": "Test User", "email": email, "password": "Test@1234"})
         assert r.status_code == 200
@@ -57,7 +57,7 @@ class TestAuth:
         assert r.json()["email"] == email
 
     def test_brute_force_lockout(self, session_factory):
-        email = f"bf_{uuid.uuid4().hex[:6]}@trilhacode.dev"
+        email = f"bf_{uuid.uuid4().hex[:6]}@example.com"
         statuses = []
         for _ in range(6):
             r = session_factory().post(f"{API}/auth/login", json={"email": email, "password": "wrong"})
@@ -129,7 +129,7 @@ class TestTracks:
                 "track_id": tid, "kind": "phase", "title": "TEST phase"}).json()
             nid = n["id"]
             btypes = admin_session.get(f"{API}/meta").json()["block_types"]
-            theory = next(b for b in btypes if b["key"] == "theory_text")
+            next(b for b in btypes if b["key"] == "theory_text")
             b = admin_session.post(f"{API}/blocks", json={
                 "node_id": nid, "type": "theory_text", "title": "intro",
                 "data": {"body": "hi"}, "status": "draft"})
@@ -277,21 +277,21 @@ class TestBlocksRelations:
 
 # ---------- Progress ----------
 class TestProgress:
-    def test_visit_and_complete(self, student_session, seeded_track):
-        tree = student_session.get(f"{API}/tracks/{seeded_track['id']}/tree").json()
+    def test_visit_and_complete(self, fresh_student, seeded_track):
+        tree = fresh_student.get(f"{API}/tracks/{seeded_track['id']}/tree").json()
         topic = next((n for n in tree["nodes"] if n["kind"] == "topic"), None)
         assert topic
-        v = student_session.post(f"{API}/progress/visit", json={"node_id": topic["id"]})
+        v = fresh_student.post(f"{API}/progress/visit", json={"node_id": topic["id"]})
         assert v.status_code == 200
-        p = student_session.post(f"{API}/progress", json={
+        p = fresh_student.post(f"{API}/progress", json={
             "node_id": topic["id"], "status": "completed"})
         assert p.status_code == 200 and p.json()["status"] == "completed"
 
-        tp = student_session.get(f"{API}/progress/tracks/{seeded_track['id']}").json()
+        tp = fresh_student.get(f"{API}/progress/tracks/{seeded_track['id']}").json()
         assert topic["id"] in tp["nodes"]
         assert tp["state"]["last_node_id"] == topic["id"]
 
-        ov = student_session.get(f"{API}/progress/overview").json()
+        ov = fresh_student.get(f"{API}/progress/overview").json()
         assert "states" in ov and "completed" in ov
 
 

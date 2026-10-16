@@ -1,8 +1,9 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+
 from core import PROGRESS_STATUSES, current_user, db, now, oid, require, ser
-from learning import assert_unlocked, assert_visible, track_locks
+from learning import assert_unlocked, track_locks
 from schemas.content import HistoryOut, OkOut
 from schemas.progress import ProgressIn, ProgressOut, ProgressOverviewOut, TrackProgressOut, VisitIn
 

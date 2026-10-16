@@ -9,7 +9,8 @@ from uuid import uuid4
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from starlette.middleware.cors import CORSMiddleware  # noqa: E402
+from starlette.middleware.cors import CORSMiddleware
+
 from settings import settings
 
 if settings.sentry_dsn:
@@ -37,15 +38,16 @@ if settings.sentry_dsn:
     )
 
 from core import client, db  # noqa: E402
+from learning import router as learning_router  # noqa: E402
+from migrations import check_schema_version, current_version  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
 from routes_content import router as content_router  # noqa: E402
-from routes_progress import router as progress_router  # noqa: E402
-from routes_taxonomy import router as taxonomy_router  # noqa: E402
-from migrations import check_schema_version, current_version
 from routes_import import router as import_router  # noqa: E402
-from learning import router as learning_router  # noqa: E402
+from routes_progress import router as progress_router  # noqa: E402
 from routes_submissions import router as submissions_router  # noqa: E402
+from routes_taxonomy import router as taxonomy_router  # noqa: E402
 from routes_versions import router as versions_router  # noqa: E402
+
 
 class JsonFormatter(logging.Formatter):
     def format(self, record):

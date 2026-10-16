@@ -1,13 +1,26 @@
 from datetime import timedelta
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from settings import settings
+
+from core import (
+    PERMISSIONS,
+    ROLES,
+    audit,
+    create_access_token,
+    create_refresh_token,
+    current_user,
+    db,
+    decode_token,
+    hash_password,
+    now,
+    oid,
+    require,
+    ser,
+    verify_password,
+)
 from schemas.content import OkOut
 from schemas.users import LoginIn, ProfileIn, RegisterIn, RoleIn, UserOut
-
-from core import (ROLES, audit, create_access_token, create_refresh_token, current_user, db,
-                  decode_token, hash_password, now, oid, require, ser, verify_password, PERMISSIONS)
+from settings import settings
 
 router = APIRouter(prefix="/api")
 
