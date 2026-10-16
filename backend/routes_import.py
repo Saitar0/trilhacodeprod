@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from core import require
+from permissions import require
 from schemas.versions import ImportReportOut
 from services.imports import run_import
 

@@ -1,8 +1,9 @@
 ﻿# ruff: noqa: EXE002
 import re
 
-from core import db, is_staff
+from database import db
 from integrity import visible_ids
+from permissions import is_staff
 
 
 async def search_nodes(

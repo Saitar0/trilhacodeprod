@@ -1,5 +1,6 @@
 # ruff: noqa: EXE002
-from core import db, now
+from core_utils import now
+from database import db
 from seed import BLOCK_TYPES, SUBMITTABLE
 
 

@@ -3,6 +3,7 @@ import logging
 import re
 import sys
 import time
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -37,7 +38,7 @@ if settings.sentry_dsn:
         before_send=_scrub_sentry_event,
     )
 
-from core import client, db  # noqa: E402
+from database import client, db  # noqa: E402
 from learning import router as learning_router  # noqa: E402
 from migrations import check_schema_version, current_version  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
@@ -70,8 +71,22 @@ _handler.setFormatter(JsonFormatter())
 logging.basicConfig(level=logging.INFO, handlers=[_handler], force=True)
 request_log = logging.getLogger("http.request")
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    if not await check_schema_version():
+        message = "Banco sem todas as migrações; execute python -m backend.manage migrate"
+        if settings.is_production:
+            raise RuntimeError(message)
+        logging.getLogger(__name__).warning(message)
+    try:
+        yield
+    finally:
+        await client.close()
+
+
 app = FastAPI(
     title="Trilha Code API",
+    lifespan=lifespan,
     docs_url=None if settings.is_production else "/docs",
     redoc_url=None if settings.is_production else "/redoc",
     openapi_url=None if settings.is_production else "/openapi.json",
@@ -168,17 +183,3 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
     expose_headers=["X-Request-ID"],
 )
-
-
-@app.on_event("startup")
-async def startup():
-    if not await check_schema_version():
-        message = "Banco sem todas as migrações; execute python -m backend.manage migrate"
-        if settings.is_production:
-            raise RuntimeError(message)
-        logging.getLogger(__name__).warning(message)
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    client.close()

@@ -3,9 +3,13 @@ import re
 
 from fastapi import HTTPException
 
-from core import audit, db, is_staff, now, oid
+from audit import audit
+from core_utils import now
+from database import db
 from integrity import reconcile_orphans, save_version
 from learning import find_cycles
+from permissions import is_staff
+from serialization import oid
 from services.common import check_status, get_document, next_order, slugify
 from services.nodes import clone_nodes, parents_first
 from services.versions import snapshot_track
@@ -27,9 +31,10 @@ async def list_tracks(
     match = {"track_id": {"$in": track_ids}}
     if not is_staff(user):
         match["status"] = "published"
-    counts = await db.nodes.aggregate([
+    cursor = await db.nodes.aggregate([
         {"$match": match}, {"$group": {"_id": {"t": "$track_id", "k": "$kind"}, "n": {"$sum": 1}}}
-    ]).to_list(5000)
+    ])
+    counts = await cursor.to_list(5000)
     by_track = {}
     for count in counts:
         by_track.setdefault(count["_id"]["t"], {})[count["_id"]["k"]] = count["n"]

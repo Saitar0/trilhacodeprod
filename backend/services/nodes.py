@@ -1,9 +1,14 @@
 # ruff: noqa: EXE002
 from fastapi import HTTPException
 
-from core import DEFAULT_HIERARCHY, audit, db, is_staff, now, oid
+from audit import audit
+from constants import DEFAULT_HIERARCHY
+from core_utils import now
+from database import db
 from integrity import can_view_node, reconcile_orphans
 from learning import track_locks, visible_nodes
+from permissions import is_staff
+from serialization import oid
 from services.common import (
     ancestors,
     check_status,
@@ -185,9 +190,10 @@ async def get_track_tree(track_id: str, user: dict, limit: int = 100000, skip: i
     relations = [relation for relation in await db.relations.find({"track_id": track_id}).to_list(10000)
                  if relation["node_id"] in ids and relation["target_id"] in ids]
     block_match = {"track_id": track_id} if staff else {"track_id": track_id, "status": "published"}
-    block_counts = await db.content_blocks.aggregate([
+    cursor = await db.content_blocks.aggregate([
         {"$match": block_match}, {"$group": {"_id": "$node_id", "n": {"$sum": 1}}}
-    ]).to_list(10000)
+    ])
+    block_counts = await cursor.to_list(10000)
     return {
         "track": track,
         "nodes": nodes,

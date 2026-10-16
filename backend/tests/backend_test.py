@@ -1,11 +1,14 @@
 """Trilha Code - Backend regression tests (pytest).
 
-Covers: auth (login/me/logout/refresh/brute force), permissions, tracks CRUD/publish/duplicate/versions,
-nodes hierarchy/reorder/duplicate, blocks, relations, progress (visit/set/overview), meta/taxonomy.
+Covers: auth (login/me/logout/refresh/brute force/profile/roles), permissions, tracks CRUD/publish/duplicate/versions,
+nodes hierarchy/reorder/duplicate, blocks, relations, progress (visit/set/overview/history), meta/taxonomy.
 """
 import uuid
 
 import pytest
+from bson import ObjectId
+
+from database import db
 
 API = "/api"
 
@@ -55,6 +58,23 @@ class TestAuth:
         assert r.status_code == 200
         assert r.json()["role"] == "student"
         assert r.json()["email"] == email
+
+    def test_update_profile_and_admin_role_change(self, session_factory, admin_session):
+        email = f"profile_{uuid.uuid4().hex[:8]}@example.com"
+        student = session_factory()
+        created = student.post(f"{API}/auth/register", json={
+            "name": "Profile User", "email": email, "password": "Test@1234"})
+        assert created.status_code == 200
+        profile = student.put(f"{API}/profile", json={"name": "Updated User", "profile": {"bio": "hello"}})
+        assert profile.status_code == 200
+        assert profile.json()["name"] == "Updated User"
+        assert profile.json()["profile"]["bio"] == "hello"
+
+        users = admin_session.get(f"{API}/users").json()
+        user_id = next(user["id"] for user in users if user["email"] == email)
+        changed = admin_session.put(f"{API}/users/{user_id}/role", json={"role": "editor"})
+        assert changed.status_code == 200
+        assert changed.json()["role"] == "editor"
 
     def test_brute_force_lockout(self, session_factory):
         email = f"bf_{uuid.uuid4().hex[:6]}@example.com"
@@ -141,13 +161,20 @@ class TestTracks:
             assert pub.json()["version"] == 1
             assert pub.json()["status"] == "published"
 
+            # Publish a second version and preserve newest-first ordering.
+            update_node = admin_session.put(f"{API}/nodes/{nid}", json={"title": "TEST phase v2"})
+            assert update_node.status_code == 200
+            pub_v2 = admin_session.post(f"{API}/tracks/{tid}/publish", json={"note": "v2"})
+            assert pub_v2.status_code == 200 and pub_v2.json()["version"] == 2
+
             # versions list
             versions = admin_session.get(f"{API}/tracks/{tid}/versions").json()
-            assert len(versions) == 1
-            vid = versions[0]["id"]
+            assert [version["version"] for version in versions] == [2, 1]
+            assert all("snapshot" not in version for version in versions)
+            vid = versions[-1]["id"]
             v = admin_session.get(f"{API}/versions/{vid}")
             assert v.status_code == 200
-            assert "snapshot" in v.json()
+            assert v.json()["snapshot"]["track"]["id"] == tid
         finally:
             admin_session.delete(f"{API}/tracks/{tid}")
 
@@ -293,6 +320,9 @@ class TestProgress:
 
         ov = fresh_student.get(f"{API}/progress/overview").json()
         assert "states" in ov and "completed" in ov
+        history = fresh_student.get(f"{API}/progress/history", params={"track_id": seeded_track["id"]})
+        assert history.status_code == 200
+        assert any(event["node_title"] == topic["title"] for event in history.json())
 
 
 # ---------- Meta/taxonomies ----------
@@ -314,3 +344,33 @@ class TestMeta:
         u = admin_session.put(f"{API}/taxonomies/{tid}", json={"label": "Updated"})
         assert u.status_code == 200 and u.json()["label"] == "Updated"
         admin_session.delete(f"{API}/taxonomies/{tid}")
+
+    def test_tag_and_block_type_endpoints(self, admin_session, event_loop):
+        suffix = uuid.uuid4().hex[:8]
+        tag = admin_session.post(f"{API}/tags", json={"name": f"phase-{suffix}"})
+        assert tag.status_code == 200
+        assert tag.json()["slug"] == f"phase-{suffix}"
+        tag_id = tag.json()["id"]
+        track = admin_session.post(f"{API}/tracks", json={"title": "TEST_tag_cleanup", "tag_ids": [tag_id]})
+        assert track.status_code == 200
+        track_id = track.json()["id"]
+        try:
+            node = admin_session.post(f"{API}/nodes", json={
+                "track_id": track_id, "kind": "phase", "title": "TEST_tag_cleanup", "tag_ids": [tag_id]})
+            assert node.status_code == 200
+            deleted = admin_session.delete(f"{API}/tags/{tag_id}")
+            assert deleted.status_code == 200 and deleted.json()["ok"] is True
+            assert tag_id not in admin_session.get(f"{API}/tracks/{track_id}").json()["tag_ids"]
+            stored_node = event_loop.run_until_complete(
+                db.nodes.find_one({"_id": ObjectId(node.json()["id"])})
+            )
+            assert tag_id not in stored_node["tag_ids"]
+        finally:
+            admin_session.delete(f"{API}/tracks/{track_id}")
+
+        block_type = admin_session.post(f"{API}/block-types", json={
+            "key": f"phase_{suffix}", "label": "Phase test", "capabilities": ["submission"]})
+        assert block_type.status_code == 200
+        block_type_id = block_type.json()["id"]
+        updated = admin_session.put(f"{API}/block-types/{block_type_id}", json={"label": "Updated phase test"})
+        assert updated.status_code == 200 and updated.json()["label"] == "Updated phase test"

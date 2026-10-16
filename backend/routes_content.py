@@ -2,8 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends
 
-from core import current_user, db, require, ser
-from integrity import load_snapshot
+from permissions import require
 from schemas.content import (
     BlockIn,
     BlockOut,
@@ -27,11 +26,12 @@ from schemas.content import (
     TrackUpdate,
     VersionOut,
 )
+from security import current_user
+from serialization import ser
 from services.blocks import create_block as create_block_service
 from services.blocks import delete_block as delete_block_service
 from services.blocks import reorder_blocks as reorder_blocks_service
 from services.blocks import update_block as update_block_service
-from services.common import get_document as _get
 from services.history import list_history
 from services.nodes import create_node as create_node_service
 from services.nodes import delete_node as delete_node_service
@@ -53,6 +53,8 @@ from services.tracks import list_tracks as list_tracks_service
 from services.tracks import publish_track as publish_track_service
 from services.tracks import reorder_tracks as reorder_tracks_service
 from services.tracks import update_track as update_track_service
+from services.versions import get_version as get_version_service
+from services.versions import list_track_versions
 
 router = APIRouter(prefix="/api")
 
@@ -101,14 +103,12 @@ async def publish_track(track_id: str, body: PublishIn, user: dict = Depends(req
 
 @router.get("/tracks/{track_id}/versions", response_model=list[VersionOut], response_model_exclude_unset=True)
 async def list_versions(track_id: str, _: dict = Depends(require("content.read"))):
-    versions = await db.track_versions.find({"track_id": track_id, "chunks": {"$exists": True}}, {"snapshot": 0}).sort("created_at", -1).to_list(500)
-    return [ser(v) for v in versions]
+    return [ser(version) for version in await list_track_versions(track_id)]
 
 
 @router.get("/versions/{version_id}", response_model=VersionOut, response_model_exclude_unset=True)
 async def get_version(version_id: str, _: dict = Depends(require("content.read"))):
-    v = await _get("track_versions", version_id)
-    return ser({**v, "snapshot": await load_snapshot(v)})
+    return ser(await get_version_service(version_id))
 
 
 @router.get("/tracks/{track_id}/tree", response_model=TrackTreeOut, response_model_exclude_unset=True)

@@ -2,9 +2,14 @@
 import re
 
 from fastapi import HTTPException
+from pymongo.errors import DuplicateKeyError
 
-from core import DEFAULT_HIERARCHY, DEFAULT_LABELS, STATUSES, audit, db, now, oid, ser
+from audit import audit
+from constants import DEFAULT_HIERARCHY, DEFAULT_LABELS, STATUSES
+from core_utils import now
+from database import db
 from learning import find_cycles
+from serialization import oid, ser
 
 NODE_TEXT = ["summary", "description", "guidance", "notes"]
 NODE_TAX = {"pedagogical_type": "pedagogical_type", "requirement": "requirement", "depth": "depth"}
@@ -145,8 +150,15 @@ async def _execute(payload, plan, user):
         track_id = str(res.inserted_id)
     tags = dict(ctx["tags"])
     for name in ctx["missing_tags"]:
-        r = await db.tags.insert_one({"name": name, "slug": name.lower().replace(" ", "-"), "color": "slate", "created_at": now()})
-        tags[name.lower()] = str(r.inserted_id)
+        slug = name.lower().replace(" ", "-")
+        document = {"name": name, "slug": slug, "color": "slate", "created_at": now()}
+        try:
+            await db.tags.update_one({"slug": slug}, {"$setOnInsert": document}, upsert=True)
+        except DuplicateKeyError:
+            # Another import may have inserted the same slug after this upsert's lookup.
+            pass
+        tag = await db.tags.find_one({"slug": slug})
+        tags[name.lower()] = str(tag["_id"])
     ids = {}
     for n in ctx["flat"]:
         doc = {"track_id": track_id, "parent_id": ids.get(n["_parent"]), "kind": n["kind"], "title": n["title"].strip(),

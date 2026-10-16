@@ -3,7 +3,9 @@ import re
 
 from fastapi import HTTPException
 
-from core import STATUSES, db, oid
+from constants import STATUSES
+from database import db
+from serialization import oid
 
 
 def slugify(text: str) -> str:

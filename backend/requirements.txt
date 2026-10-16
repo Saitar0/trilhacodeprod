@@ -50,7 +50,6 @@ markdown-it-py==4.2.0
 MarkupSafe==3.0.4
 mccabe==0.7.0
 mdurl==0.1.2
-motor==3.7.1
 multidict==6.9.1
 numpy==2.4.6
 oauthlib==4.0.0

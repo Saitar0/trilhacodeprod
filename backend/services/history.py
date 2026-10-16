@@ -1,5 +1,5 @@
 ﻿# ruff: noqa: EXE002
-from core import db
+from database import db
 
 
 async def list_history(track_id: str | None = None, limit: int = 50, skip: int = 0) -> list[dict]:

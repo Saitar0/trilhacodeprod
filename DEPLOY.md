@@ -52,7 +52,7 @@ Crie uma aplicação Dockerfile em cada ambiente, apontando ao repositório/bran
 - Domínio: `https://api.example.com` em production; `https://api.staging.example.com` em staging.
 - Healthcheck: `GET /health` (já incluído na imagem); depois do deploy confira também `GET /ready`.
 - Adicione todas as variáveis API do arquivo de exemplo correspondente. A configuração production rejeita segredo JWT inseguro, domínio de cookie ausente/incorreto, URLs sem HTTPS e admin inicial incompleto.
-- Em **Pre-deploy command**, configure `python -m backend.manage migrate`. Não configure `seed` como pre-deploy. A imagem não executa migração nem seed ao iniciar.
+- Não trate `python -m backend.manage migrate` isoladamente como procedimento completo. Siga a sequência de release da seção 7 antes de promover a aplicação. Não configure `seed` como pre-deploy. A imagem não executa migração, criação de índices nem seed ao iniciar.
 - `TRUSTED_PROXY_IPS` controla tanto o `--forwarded-allow-ips` do Uvicorn quanto a identificação do IP cliente usada pelo limitador de login.
 
 ## 6. Aplicação do frontend
@@ -69,9 +69,67 @@ Crie outra aplicação Dockerfile em cada ambiente:
 - A imagem `frontend/Dockerfile.prod` serve `dist/` pelo Nginx. A CSP mantém `script-src 'self'`; o HTML do Vite carrega o módulo externo empacotado e não depende de scripts inline.
 - A CSP inicial libera estilos inline (compatibilidade com componentes React), imagens/conexões HTTPS (imagens externas, API e Sentry) e frames somente do YouTube para blocos de vídeo. Scripts continuam restritos à mesma origem. Se os hosts reais de imagens/Sentry forem conhecidos, restrinja `img-src` e `connect-src` a esses hosts.
 
-## 7. CI e disparo de deploy
+## 7. Sequência de release e banco de dados
 
-A opção implementada é o deploy webhook de recurso do Coolify disparado pelo GitHub Actions **após os jobs de backend e frontend passarem**. O workflow `.github/workflows/ci-deploy.yml` usa `main` para produção e `staging` para staging.
+Execute cada etapa em uma tarefa operacional registrada, com confirmação explícita do ambiente e do `DB_NAME`. Use a imagem do commit candidato e a URI/credencial do ambiente alvo. Não copie URI ou credenciais de production para staging. O `preflight-indexes` não modifica o banco; `migrate` e `ensure-indexes` escrevem.
+
+### Pré-condições
+
+1. Commit candidato identificado e jobs backend/frontend verdes no CI; staging visualmente homologado antes de qualquer promoção.
+2. Janela aprovada, responsável operacional presente, acesso de rollback confirmado e backup recente concluído. Para production, confirme também um restore recente de teste, retenção e espaço livre no Mongo e volume da VPS.
+3. Confirme destino, `DB_NAME`, host/cluster, credencial de menor privilégio e versão do MongoDB com o operador. Verifique que o alvo é o banco exclusivo do ambiente planejado. Pare se qualquer identificador divergir.
+4. Capture estado atual: versão do app, `/ready`, versão de schema, inventário dos índices e métricas do banco. Suspenda mudanças concorrentes de schema e cargas administrativas durante a operação.
+
+### Ordem obrigatória
+
+1. **Backup:** crie snapshot/backup consistente imediatamente antes da mudança; registre confirmação, horário, local e retenção. Em production, não prossiga se o backup falhar ou não puder ser localizado.
+2. **Preflight (somente leitura):** rode `python -m backend.manage preflight-indexes`. Ele compara os índices esperados com os existentes e agrupa chaves para todos os índices únicos, incluindo filtros de índices parciais. `OK` significa compatível; `AUSENTE` significa que será necessária criação; `CONFLITO` significa mesmas chaves com opções/nome incompatíveis; `DUPLICATAS` lista exemplos. Coleções grandes podem tornar o scan demorado e consumir CPU/memória. Interrompa se houver conflito, duplicatas ou erro/limite de recursos; não tente corrigir automaticamente.
+3. **Migrate (escrita de dados):** só após revisar e aprovar a saída do preflight, rode `python -m backend.manage migrate`. Migrações obrigatórias: `0001_legacy_snapshots` compacta snapshots embutidos em chunks e altera documentos de versões; `0002_block_submission_capabilities` atualiza campos/capacidades em tipos de bloco existentes. O CLI usa uma trava de migração com lease de 15 minutos e grava registros em `migrations`. O startup da API exige schema versão 2; portanto, aplique migração antes de iniciar o novo backend. Confirme versão 2 e logs antes de continuar.
+4. **Preflight pós-migração:** rode novamente `python -m backend.manage preflight-indexes`. Migrações podem alterar dados. Pare caso apareçam conflitos ou duplicatas; escale a correção como mudança de dados separada, com plano e aprovação próprios.
+5. **Ensure-indexes (escrita de índices):** com o segundo preflight limpo, rode `python -m backend.manage ensure-indexes`. Este é o único comando de gerenciamento que cria os índices declarados em `backend/indexes.py`. Não é chamado por `migrate`, pelo startup da API ou pelo Docker entrypoint. O comando cria os índices em sequência e não remove índices extras.
+6. **Verificação:** rode novamente `python -m backend.manage preflight-indexes`. Exija `OK` em todos e nenhuma saída `AUSENTE`, `CONFLITO` ou `DUPLICATAS`. Depois valide `/health`, `/ready` (schema 2), logs, métricas e smoke test autenticado em staging. Só então autorize a publicação manual pelo workflow, na branch e ambiente corretos.
+
+### Índices cobertos pelo preflight e ensure-indexes
+
+| Coleção | Índices esperados (ordem e opções) |
+| --- | --- |
+| `users` | `email` unique |
+| `login_attempts` | `identifier`; `last` TTL 3600 s |
+| `nodes` | `(track_id, parent_id, order)`; texto `(title, summary)`, nome `node_search_text` |
+| `content_blocks` | `(node_id, order)` |
+| `relations` | `track_id` |
+| `progress` | `(user_id, track_id)`; `(user_id, node_id, block_id)` unique |
+| `user_track_state` | `(user_id, track_id)` unique, `one_user_track_state` |
+| `learning_events` | `(user_id, at desc)` |
+| `edit_history` | `(track_id, at desc)` |
+| `taxonomies` | `(group, key)` unique |
+| `block_types` | `key` unique |
+| `tags` | `slug` unique, `one_tag_slug` |
+| `submissions` | `(user_id, block_id, attempt desc)` unique; `(status, submitted_at)` |
+| `notes` | `(user_id, node_id, block_id)` unique |
+| `reviews` | `(user_id, status, due_at)`; `(user_id, node_id, block_id)` unique parcial `status=pending`, `one_pending_review` |
+| `version_chunks` | `(version_id, seq)` unique |
+| `restore_jobs` | `track_id` unique parcial `status=running`, `one_running_restore` |
+| `migrations` | `key` unique |
+
+As definições do código são a fonte de verdade para chaves e opções. `preflight-indexes` é somente leitura: lista especificações e faz agregações de duplicatas. Ele não reserva o estado do banco e não elimina a possibilidade de uma escrita concorrente criar conflito depois da checagem. Congelar operações de escrita relevantes durante o intervalo entre preflight e criação é obrigatório.
+
+### Impacto, falhas e critérios de aborto
+
+- Agregações de duplicidade percorrem as coleções para chaves únicas. Embora não escrevam, podem demorar e pressionar CPU/memória; monitore e faça primeiro em staging com volume representativo. Se excederem recursos, não habilite `allowDiskUse` às cegas nem prossiga: dimensione e planeje uma checagem controlada.
+- MongoDB 7 constrói índices com bloqueios exclusivos breves no início/fim; durante a maior parte da construção permite operações intercaladas. Ainda há consumo relevante de CPU, memória, I/O e disco temporário, e as escritas passam a manter cada índice. Duração depende de volume, cardinalidade, hardware e carga; meça em staging com dataset representativo e reserve janela. Índices podem afetar latência de escrita.
+- Referências oficiais: [processo de build de índices no MongoDB 7](https://www.mongodb.com/docs/v7.0/core/index-creation/) e [parâmetros de memória para index build](https://www.mongodb.com/docs/v7.0/reference/parameters/).
+- Se `ensure-indexes` falhar, o comando para no primeiro erro e índices anteriores podem já ter sido criados. Não há rollback automático. Registre o erro; corrija a causa por procedimento aprovado, rode preflight, repita `ensure-indexes` (idempotente para índices compatíveis) e preflight final. Não derrube índices existentes como tentativa de reparo.
+- Aborte antes de prosseguir diante de backup ausente, ambiente/credencial incerta, preflight com duplicatas/conflitos, falha parcial de migração, versão de schema diferente de 2, falta de disco, saturação/latência fora do limite acordado, healthcheck falho, erro de aplicação ou CI não verde. Não inicie o novo backend se a migração não concluiu: o lifespan rejeitará schema anterior.
+- A restauração de backup pode descartar gravações posteriores; use-a apenas como recuperação planejada, com decisão do responsável pelo banco. Preferir rollback da aplicação se o schema continuar compatível.
+
+## 8. CI e disparo de deploy
+
+A opção implementada é o deploy webhook de recurso do Coolify disparado pelo GitHub Actions **após os jobs de backend e frontend passarem**. O workflow `.github/workflows/ci-deploy.yml` valida em push para `main`/`staging`, PRs destinados a essas branches e `workflow_dispatch`. Pushes e PRs executam somente os checks. A publicação exige execução manual com input explícito `staging` ou `production`, branch correspondente e ambos os jobs verdes. O input manual padrão é `none`. Cada job de deploy também está associado ao GitHub Environment correspondente.
+
+Para rodar o CI completo sem deploy, use um PR para `main` ou `staging`, faça push às branches validadas ou execute `workflow_dispatch` na branch/commit candidato com input `none`. Só depois da sequência de banco da seção 7, e com aprovação operacional registrada, execute `workflow_dispatch` na branch adequada com input de publicação correspondente. O workflow não foi disparado nesta preparação.
+
+Os jobs de validação e publicação permanecem no mesmo arquivo, mas têm gatilhos/condições separados. A validação não depende de secrets; a publicação exige os secrets Coolify, branch e input explícitos. Configure ambientes `staging` e `production` com revisores/proteção adequada no GitHub Settings; a associação `environment:` por si só não configura aprovação. Proteja `main` exigindo ambos os checks e bloqueando push direto/bypass. Desative auto-deploy por push no Coolify para que ele não contorne o gate manual do workflow. Preserve os secrets atuais e não replique credenciais de deploy nos jobs de teste.
 
 1. Em **Keys & Tokens > API Tokens**, crie um token Coolify com permissão mínima **deploy** e prazo de validade.
 2. Atribua tags distintas `trilhacode-production` e `trilhacode-staging` às aplicações API e frontend de cada ambiente (não ao Mongo). Em **Webhooks**, copie o **Deploy Webhook (auth required)** de cada tag.
@@ -80,14 +138,14 @@ A opção implementada é o deploy webhook de recurso do Coolify disparado pelo 
 
 Alternativa manual: se sua versão Coolify oferecer **Wait for CI**, habilite-o junto do auto-deploy da branch e confirme que aguarda os checks requeridos do GitHub antes de iniciar. Sem esse recurso, o auto-deploy em push pode correr em paralelo ao CI; prefira o workflow com webhook autenticado. Consulte [Coolify Deploy Webhooks](https://coolify.io/docs/core/automation/deploy-webhooks).
 
-## 8. Primeiro acesso e checagens
+## 9. Primeiro acesso e checagens
 
 1. Faça o primeiro deploy de staging, observe logs e confirme `https://api.staging.example.com/health` e `/ready`.
 2. Em cada ambiente, depois da migração e do banco prontos, execute uma única vez no container/API pelo comando de execução do Coolify: `python -m backend.manage seed`. É idempotente: cria o admin de `ADMIN_EMAIL`/`ADMIN_PASSWORD` se não existir e prepara taxonomias; em production não semeia trilha demo. Não rode isso repetidamente se pretende rotacionar a senha de usuário.
 3. Abra o frontend, entre como admin, e confirme login, navegação e leitura de conteúdo. O login retorna cookies `access_token` e `refresh_token` com `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/` e o domínio configurado. No navegador confirme esses atributos e que não há bloqueio CORS/cookies.
 4. Repita para staging com suas credenciais próprias. Em production confirme `/ready` saudável e que `/docs`, `/redoc` e `/openapi.json` retornam 404.
 
-## 9. Backup, segurança e rollback
+## 10. Backup, segurança e rollback
 
 Configure backup diário do Mongo para S3 e faça um restore de teste seguindo [`scripts/backup_restore.md`](scripts/backup_restore.md). Confirme sucesso do job, objeto no bucket e leitura da restauração pela aplicação.
 

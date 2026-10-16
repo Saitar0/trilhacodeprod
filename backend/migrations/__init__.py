@@ -9,7 +9,8 @@ from datetime import timedelta
 from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
 
-from core import db, now
+from core_utils import now
+from database import db
 
 log = logging.getLogger(__name__)
 EXPECTED_MIGRATION_VERSION = 2

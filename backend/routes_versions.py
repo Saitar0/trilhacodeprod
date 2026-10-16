@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from core import require, ser
+from permissions import require
 from schemas.content import TrackOut
 from schemas.versions import RestoreIn, VersionCompareOut
+from serialization import ser
 from services.versions import compare_versions, restore_version
 
 router = APIRouter(prefix="/api")

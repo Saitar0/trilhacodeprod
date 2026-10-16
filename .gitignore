@@ -1,4 +1,6 @@
 # Python
+.venv/
+.venv311/
 __pycache__/
 *.py[cod]
 *.pyo
@@ -6,9 +8,12 @@ __pycache__/
 *.pyc
 **/.venv/
 venv/
+.pytest_cache/
+.ruff_cache/
 
 # Node
 node_modules/
+dist/
 frontend/node_modules/
 .npm/
 .npmrc

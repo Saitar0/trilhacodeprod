@@ -1,9 +1,10 @@
 ﻿# ruff: noqa: EXE002
-from core import db
+from database import db
 
 
 async def _group(coll: str, field: str) -> dict:
-    rows = await db[coll].aggregate([{"$group": {"_id": f"${field}", "n": {"$sum": 1}}}]).to_list(100)
+    cursor = await db[coll].aggregate([{"$group": {"_id": f"${field}", "n": {"$sum": 1}}}])
+    rows = await cursor.to_list(100)
     return {row["_id"]: row["n"] for row in rows}
 
 

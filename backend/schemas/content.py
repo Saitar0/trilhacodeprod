@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from core import DEFAULT_HIERARCHY, DEFAULT_LABELS
+from constants import DEFAULT_HIERARCHY, DEFAULT_LABELS
 
 
 class TrackIn(BaseModel):

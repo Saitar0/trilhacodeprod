@@ -5,6 +5,14 @@ on:
     branches: [main, staging]
   pull_request:
     branches: [main, staging]
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: "Publicar somente depois da aprovação operacional do release"
+        type: choice
+        options: [none, staging, production]
+        default: none
+        required: true
 
 permissions:
   contents: read
@@ -103,8 +111,9 @@ jobs:
 
   deploy-staging:
     needs: [backend, frontend]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_target == 'staging' && github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
+    environment: staging
     steps:
       - name: Trigger Coolify staging deployment
         env:
@@ -118,8 +127,9 @@ jobs:
 
   deploy-production:
     needs: [backend, frontend]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_target == 'production' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Trigger Coolify production deployment
         env:

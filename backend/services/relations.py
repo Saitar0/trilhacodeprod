@@ -1,8 +1,11 @@
 # ruff: noqa: EXE002
 from fastapi import HTTPException
 
-from core import audit, db, now, oid
+from audit import audit
+from core_utils import now
+from database import db
 from learning import prerequisite_cycle
+from serialization import oid
 from services.common import ancestors, descendants, get_document
 
 

@@ -23,10 +23,11 @@ os.environ["JWT_SECRET"] = "isolated-tests-only-secret-key-32-bytes"
 if not _db_name.startswith("test_"):
     raise RuntimeError(f"Refusing to run tests against unsafe database: {_db_name!r}")
 
-from core import client as mongo_client
-from core import db, hash_password
+from database import client as mongo_client
+from database import db
 from indexes import ensure_indexes
 from migrations import migrate
+from security import hash_password
 from seed import BLOCK_TYPES, SUBMITTABLE, TAXONOMIES
 from server import app
 
@@ -106,7 +107,7 @@ def disposable_database(session_factory, event_loop):
         try:
             session_factory.close_all()
         finally:
-            mongo_client.close()
+            event_loop.run_until_complete(mongo_client.close())
             if not _db_name.startswith("test_"):
                 raise RuntimeError(f"Refusing to drop unsafe database: {_db_name!r}")
             with MongoClient(MONGO_URL) as cleanup_client:

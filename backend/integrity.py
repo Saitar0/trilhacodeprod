@@ -5,8 +5,11 @@ import zlib
 
 from bson import Binary, ObjectId
 
-from core import db, is_staff, now, oid
+from core_utils import now
+from database import db
 from learning import visible_nodes
+from permissions import is_staff
+from serialization import oid
 
 CHUNK = 4 * 1024 * 1024
 log = logging.getLogger("integrity")

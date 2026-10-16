@@ -5,8 +5,12 @@ from fastapi import HTTPException
 from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
 
-from core import PERMISSIONS, db, is_staff, now, oid
+from constants import PERMISSIONS
+from core_utils import now
+from database import db
 from learning import assert_unlocked
+from permissions import is_staff
+from serialization import oid
 
 OPEN_STATUSES = ["draft", "submitted", "returned"]
 STAFF_STATUSES = ["submitted", "in_review", "graded", "returned"]
@@ -126,9 +130,10 @@ async def list_submissions(
         ]
     page_size = min(max(limit, 1), 500)
     items = await db.submissions.find(query, {"history": 0}).sort("submitted_at", 1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
-    counts = await db.submissions.aggregate([
+    cursor = await db.submissions.aggregate([
         {"$match": base}, {"$group": {"_id": "$status", "n": {"$sum": 1}}}
-    ]).to_list(20)
+    ])
+    counts = await cursor.to_list(20)
     return {"items": items, "counts": {count["_id"]: count["n"] for count in counts}}
 
 

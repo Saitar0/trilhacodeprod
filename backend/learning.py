@@ -4,10 +4,15 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pymongo.errors import DuplicateKeyError
 
-from core import DEFAULT_HIERARCHY, current_user, db, is_staff, now, oid, require, ser
+from constants import DEFAULT_HIERARCHY
+from core_utils import now
+from database import db
+from permissions import is_staff, require
 from schemas.content import OkOut
 from schemas.learning import NoteIn, NoteOut, ReviewDone, ReviewIn, ReviewOut
 from schemas.versions import DeletedOut, TrackValidationOut
+from security import current_user
+from serialization import oid, ser
 
 router = APIRouter(prefix="/api")
 
@@ -84,7 +89,10 @@ async def track_locks(track_id: str, user: dict):
     nodes = [n for n in nodes if n["status"] != "archived"] if is_staff(user) else visible_nodes(nodes)
     relations = await db.relations.find({"track_id": track_id}).to_list(10000)
     bq = {"track_id": track_id} if is_staff(user) else {"track_id": track_id, "status": "published"}
-    counts = await db.content_blocks.aggregate([{"$match": bq}, {"$group": {"_id": "$node_id", "n": {"$sum": 1}}}]).to_list(10000)
+    cursor = await db.content_blocks.aggregate([
+        {"$match": bq}, {"$group": {"_id": "$node_id", "n": {"$sum": 1}}}
+    ])
+    counts = await cursor.to_list(10000)
     done = await db.progress.find({"user_id": user["id"], "track_id": track_id, "block_id": None,
                                    "status": "completed"}, {"node_id": 1}).to_list(20000)
     return compute_locks(track, nodes, relations, {c["_id"]: c["n"] for c in counts}, {d["node_id"] for d in done})

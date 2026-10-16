@@ -8,8 +8,11 @@ from fastapi import HTTPException
 from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
 
-from core import audit, db, now, oid, ser
+from audit import audit
+from core_utils import now
+from database import db
 from integrity import load_snapshot, reconcile_orphans, save_version
+from serialization import oid, ser
 from services.common import get_document
 
 TRACK_FIELDS = ["title", "subtitle", "description", "cover_url", "status", "visibility", "audience", "difficulty",
@@ -63,6 +66,17 @@ async def load_reference(track_id: str, reference: str) -> dict:
         raise HTTPException(status_code=404, detail="Versão não encontrada")
     label = f"v{version['version']}" + (" (backup)" if version.get("kind") == "backup" else "")
     return {"label": label, "snapshot": await load_snapshot(version)}
+
+
+async def list_track_versions(track_id: str) -> list[dict]:
+    return await db.track_versions.find(
+        {"track_id": track_id, "chunks": {"$exists": True}}, {"snapshot": 0}
+    ).sort("created_at", -1).to_list(500)
+
+
+async def get_version(version_id: str) -> dict:
+    version = await get_document("track_versions", version_id)
+    return {**version, "snapshot": await load_snapshot(version)}
 
 
 def _diff(a_list: list[dict], b_list: list[dict], fields: list[str], describe) -> dict:

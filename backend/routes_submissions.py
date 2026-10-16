@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends
 
-from core import current_user, require, ser
+from permissions import require
 from schemas.submissions import (
     AnswerIn,
     GradeIn,
@@ -10,21 +10,17 @@ from schemas.submissions import (
     SubmissionListOut,
     SubmissionOut,
 )
+from security import current_user
+from serialization import ser
 from services.submissions import (
     claim_submission,
     grade_submission,
     submit_answer,
 )
 from services.submissions import get_submission as get_submission_service
-from services.submissions import (
-    list_submissions as list_submissions_service,
-)
-from services.submissions import (
-    my_submissions as my_submissions_service,
-)
-from services.submissions import (
-    save_draft as save_draft_service,
-)
+from services.submissions import list_submissions as list_submissions_service
+from services.submissions import my_submissions as my_submissions_service
+from services.submissions import save_draft as save_draft_service
 
 router = APIRouter(prefix="/api/submissions")
 
