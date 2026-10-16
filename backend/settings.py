@@ -3,6 +3,7 @@
 from ipaddress import ip_address, ip_network
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -27,6 +28,9 @@ class Settings(BaseSettings):
     cookie_samesite: Literal["lax", "strict", "none"] | None = None
     cookie_secure: bool | None = None
     trusted_proxy_ips: list[str] = []
+    sentry_dsn: str | None = None
+    sentry_environment: str | None = None
+    sentry_release: str | None = None
 
     admin_email: str | None = None
     admin_password: str | None = None
@@ -106,11 +110,40 @@ class Settings(BaseSettings):
                 "change-this-secret",
                 "secret",
             }
+            or self.jwt_secret.lower().startswith(("replace_", "example_", "your_"))
         ):
             raise RuntimeError(
                 "Configuração inválida: em production, JWT_SECRET deve ter pelo menos 32 caracteres "
                 "e não pode ser um segredo de exemplo/desenvolvimento."
             )
+        if self.is_production:
+            problems = []
+            mongo = urlsplit(self.mongo_url)
+            if (mongo.scheme not in {"mongodb", "mongodb+srv"} or not mongo.hostname
+                    or mongo.hostname in {"localhost", "127.0.0.1", "::1"}
+                    or not mongo.username or not mongo.password):
+                problems.append("MONGO_URL deve apontar para MongoDB remoto com usuário e senha")
+            if not self.db_name or self.db_name == "trilhacode_dev":
+                problems.append("DB_NAME deve ser definido para production")
+            if self.cookie_secure is False:
+                problems.append("COOKIE_SECURE deve ser true")
+            if self.effective_cookie_samesite == "none" and not self.effective_cookie_secure:
+                problems.append("SameSite=None exige cookies Secure")
+            if not self.cookie_domain or not self.cookie_domain.startswith("."):
+                problems.append("COOKIE_DOMAIN deve ser definido como .<dominio>")
+            elif ".invalid" in self.cookie_domain.lower():
+                problems.append("COOKIE_DOMAIN ainda usa o domínio fictício de exemplo")
+            if not self.frontend_url.startswith("https://"):
+                problems.append("FRONTEND_URL deve usar HTTPS")
+            elif ".invalid" in self.frontend_url.lower():
+                problems.append("FRONTEND_URL ainda usa o domínio fictício de exemplo")
+            if any(not origin.startswith("https://") for origin in self.effective_cors_origins):
+                problems.append("CORS_ORIGINS/FRONTEND_URL devem usar HTTPS")
+            if (not self.admin_email or self.admin_email.endswith(".invalid") or not self.admin_password
+                    or len(self.admin_password) < 16 or self.admin_password.lower().startswith(("replace_", "example_", "your_"))):
+                problems.append("ADMIN_EMAIL e ADMIN_PASSWORD (mínimo 16 caracteres) são obrigatórios")
+            if problems:
+                raise RuntimeError("Configuração insegura para production: " + "; ".join(problems) + ".")
 
 
 settings = Settings()

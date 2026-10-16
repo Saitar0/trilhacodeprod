@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import sys
 import time
 from datetime import UTC, datetime
 from uuid import uuid4
@@ -10,6 +11,30 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware  # noqa: E402
 from settings import settings
+
+if settings.sentry_dsn:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+
+    def _scrub_sentry_event(event, _hint):
+        request = event.get("request")
+        if request:
+            request.pop("cookies", None)
+            headers = request.get("headers") or {}
+            request["headers"] = {
+                key: value for key, value in headers.items()
+                if key.lower() not in {"authorization", "cookie", "set-cookie", "proxy-authorization"}
+            }
+        return event
+
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.sentry_environment or settings.env,
+        release=settings.sentry_release,
+        send_default_pii=False,
+        integrations=[FastApiIntegration()],
+        before_send=_scrub_sentry_event,
+    )
 
 from core import client, db  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
@@ -38,7 +63,7 @@ class JsonFormatter(logging.Formatter):
         }, ensure_ascii=False)
 
 
-_handler = logging.StreamHandler()
+_handler = logging.StreamHandler(sys.stdout)
 _handler.setFormatter(JsonFormatter())
 logging.basicConfig(level=logging.INFO, handlers=[_handler], force=True)
 request_log = logging.getLogger("http.request")
@@ -84,6 +109,8 @@ async def unexpected_exception_handler(request: Request, exc: Exception):
         "request_id": request_id,
         "method": request.method, "path": request.url.path,
     })
+    if settings.sentry_dsn:
+        sentry_sdk.capture_exception(exc)
     return JSONResponse(status_code=500, content={"error": {
         "code": "internal_error", "message": "Erro interno do servidor",
         "request_id": request_id,
