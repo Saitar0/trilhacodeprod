@@ -4,7 +4,7 @@ import json
 import requests
 
 import re
-U = re.search(r"REACT_APP_BACKEND_URL=(\S+)", open("/app/frontend/.env").read()).group(1) + "/api"
+U = re.search(r"VITE_BACKEND_URL=(\S+)", open("/app/frontend/.env").read()).group(1) + "/api"
 
 
 def login(email, pw):

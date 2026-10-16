@@ -15,14 +15,14 @@ def _url():
     try:
         with open("/app/frontend/.env") as fh:
             for line in fh:
-                if line.startswith("REACT_APP_BACKEND_URL"):
+                if line.startswith("VITE_BACKEND_URL"):
                     return line.split("=", 1)[1].strip().strip('"').rstrip("/")
     except Exception:
         pass
     return ""
 
 
-BASE_URL = (os.environ.get("REACT_APP_BACKEND_URL") or _url()).rstrip("/")
+BASE_URL = (os.environ.get("VITE_BACKEND_URL") or _url()).rstrip("/")
 API = f"{BASE_URL}/api"
 SEEDED_TRACK_ID = "6acb0b40ef07136c920e83c2"
 

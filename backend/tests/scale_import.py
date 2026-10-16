@@ -1,6 +1,6 @@
 """Scale check: import ~2.5k nodes / 5k blocks, publish, compare, delete."""
 import re, time, requests
-U = re.search(r"REACT_APP_BACKEND_URL=(\S+)", open("/app/frontend/.env").read()).group(1) + "/api"
+U = re.search(r"VITE_BACKEND_URL=(\S+)", open("/app/frontend/.env").read()).group(1) + "/api"
 A = requests.Session(); A.post(f"{U}/auth/login", json={"email": "admin@trilhacode.dev", "password": "Admin@123"})
 body = "Lorem ipsum dolor sit amet, texto de teoria placeholder. " * 60
 nodes = [{"ref": f"f{f}", "kind": "phase", "title": f"Fase {f}", "status": "published", "children": [

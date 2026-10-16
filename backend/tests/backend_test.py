@@ -14,15 +14,15 @@ def _read_frontend_url():
     try:
         with open("/app/frontend/.env") as fh:
             for line in fh:
-                if line.startswith("REACT_APP_BACKEND_URL"):
+                if line.startswith("VITE_BACKEND_URL"):
                     return line.split("=", 1)[1].strip().strip('"').rstrip("/")
     except Exception:
         pass
     return None
 
 
-BASE_URL = (os.environ.get("REACT_APP_BACKEND_URL") or _read_frontend_url() or "").rstrip("/")
-assert BASE_URL, "REACT_APP_BACKEND_URL not set"
+BASE_URL = (os.environ.get("VITE_BACKEND_URL") or _read_frontend_url() or "").rstrip("/")
+assert BASE_URL, "VITE_BACKEND_URL not set"
 API = f"{BASE_URL}/api"
 
 ADMIN = ("admin@trilhacode.dev", "Admin@123")
