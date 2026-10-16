@@ -69,3 +69,8 @@ mongo.log
 frontend/.emergent/
 test_reports/
 memory/
+
+
+docs/**/*.rar
+docs/**/*.backup-*
+PROJECT_AUDIT.md
