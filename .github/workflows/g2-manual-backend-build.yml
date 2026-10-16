@@ -1,0 +1,60 @@
+name: G2 - Manual backend Docker build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trilhacode-g2-manual-build
+  cancel-in-progress: false
+
+jobs:
+  build-backend:
+    name: Build approved backend image (GitHub runner only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      APPROVED_SHA: 65857f5a4d26b026f7b064862bebc29091713d9a
+      IMAGE_TAG: trilhacode-backend:g2-65857f5a
+    steps:
+      - name: Checkout approved commit
+        uses: actions/checkout@v4
+        with:
+          ref: 65857f5a4d26b026f7b064862bebc29091713d9a
+          persist-credentials: false
+
+      - name: Validate exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          printf 'Approved SHA: %s\nChecked-out SHA: %s\n' "$APPROVED_SHA" "$actual"
+          test "$actual" = "$APPROVED_SHA"
+          test -f backend/Dockerfile.prod
+
+      - name: Build backend locally on GitHub runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --file backend/Dockerfile.prod --tag "$IMAGE_TAG" .
+
+      - name: Verify built image and absence of started containers
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker image inspect "$IMAGE_TAG" --format 'Image={{.Id}} SizeBytes={{.Size}}'
+          count="$(docker ps -aq --filter "ancestor=$IMAGE_TAG" | wc -l)"
+          echo "ContainersFromBuiltImage=$count"
+          test "$count" -eq 0
+          {
+            echo '## Trilha Code G2 — backend Docker build'
+            echo ''
+            echo "- Approved source commit: \`$APPROVED_SHA\`"
+            echo "- Dockerfile: \`backend/Dockerfile.prod\`"
+            echo "- Image (runner-local only): \`$IMAGE_TAG\`"
+            echo '- Result: build and image verification passed'
+            echo '- VPS / Coolify / MongoDB: not accessed'
+            echo '- Image not published, deployed, or exported'
+          } >> "$GITHUB_STEP_SUMMARY"
