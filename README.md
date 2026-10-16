@@ -4,12 +4,12 @@ Plataforma full stack para organizar e estudar trilhas de aprendizagem. Administ
 
 ## Arquitetura
 
-- `frontend`: React 19 com TypeScript, CRA e CRACO; servidor de desenvolvimento na porta 3000.
+- `frontend`: React 19 com TypeScript e Vite; servidor de desenvolvimento na porta 3000.
 - `backend/routes_*.py`: validação HTTP, permissões e serialização; `backend/services/` contém serviços por domínio, e `backend/schemas/` os contratos Pydantic.
 - `api`: FastAPI/Uvicorn na porta 8000; no startup verifica a versão do banco. Índices, migrações, seed e retomada de restores são comandos explícitos.
 - `mongo`: MongoDB 7, acessível à API na rede Compose como `mongo:27017`; dados persistidos no volume nomeado `mongo_data`.
 
-O Compose é uma configuração de desenvolvimento: monta o código local e permite recarga durante a edição. O servidor CRA não é apropriado para produção. Para produção, gere o bundle com `npm run build` e sirva os arquivos por um servidor web apropriado; publique a API ASGI e o MongoDB em uma infraestrutura com autenticação, TLS, gestão de segredos, backups e controles de rede. Este repositório não fornece uma configuração de produção.
+O Compose é uma configuração de desenvolvimento: monta o código local e permite recarga durante a edição. O Vite serve a aplicação localmente; para produção, gere o bundle com `npm run build` ou use `frontend/Dockerfile.prod`, que serve o resultado pelo Nginx. Publique a API ASGI e o MongoDB em uma infraestrutura com autenticação, TLS, gestão de segredos, backups e controles de rede.
 
 ## Pré-requisitos
 
@@ -29,7 +29,7 @@ No Windows PowerShell, use `Copy-Item .env.example .env` no primeiro comando. Os
 
 A API e o frontend não copiam arquivos `.env` para suas imagens. O Compose fornece as variáveis de ambiente aos serviços. Como o backend monta `./backend` dentro do container, um `backend/.env` local também fica visível e `load_dotenv` pode carregá-lo. `load_dotenv` não sobrescreve variáveis já definidas por padrão; assim, os valores injetados pelo Compose, incluindo `MONGO_URL`, prevalecem. Para execução diretamente no host, o backend carrega esse arquivo da mesma forma.
 
-O MongoDB não tem autenticação nesta configuração local, mas sua porta não é publicada no host: somente os serviços na rede privada do Compose o acessam. A API conecta a `mongo:27017`. Já o navegador acessa a API pela URL em `REACT_APP_BACKEND_URL`, por padrão `http://localhost:8000`; o navegador não resolve o nome interno `api` do Compose.
+O MongoDB não tem autenticação nesta configuração local, mas sua porta não é publicada no host: somente os serviços na rede privada do Compose o acessam. A API conecta a `mongo:27017`. Já o navegador acessa a API pela URL em `VITE_BACKEND_URL`, por padrão `http://localhost:8000`; o navegador não resolve o nome interno `api` do Compose.
 
 ### Comandos do dia a dia
 
@@ -51,7 +51,7 @@ docker compose down
 docker compose up -d --build --renew-anon-volumes
 ```
 
-Use o último comando depois de alterar `frontend/package.json` ou `frontend/package-lock.json`, para que o volume `node_modules` seja recriado a partir das dependências instaladas pela imagem. O Dockerfile instala com `npm ci --legacy-peer-deps`.
+Use o último comando depois de alterar `frontend/package.json` ou `frontend/package-lock.json`, para que o volume `node_modules` seja recriado a partir das dependências instaladas pela imagem. O Dockerfile instala com `npm ci`.
 
 ### Acesso
 
@@ -80,11 +80,10 @@ O Compose lê o `.env` da raiz. A tabela mostra os valores do `.env.example`; co
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | API | vazios | Desenvolvimento: conta demo opcional. Produção: cria o primeiro admin somente se ainda não houver admin. |
 | `EDITOR_EMAIL`, `EDITOR_PASSWORD` | API | vazios | Desenvolvimento/staging: contas demo opcionais; ignoradas em produção. |
 | `STUDENT_EMAIL`, `STUDENT_PASSWORD` | API | vazios | Desenvolvimento/staging: contas demo opcionais; ignoradas em produção. |
-| `REACT_APP_BACKEND_URL` | Frontend | `http://localhost:8000` | URL da API que o navegador pode alcançar; ajuste se mudar `API_PORT`. |
-| `FRONTEND_PORT` | Compose/frontend | `3000` | Porta publicada do frontend; ajuste também `FRONTEND_URL`. `WDS_SOCKET_PORT` é definido pelo Compose com esse mesmo valor. |
-| `API_PORT` | Compose/API | `8000` | Porta publicada da API; ajuste também `REACT_APP_BACKEND_URL`. |
-| `ENABLE_HEALTH_CHECK` | Frontend | `false` | Ativa endpoints de health check opcionais do servidor de desenvolvimento CRACO. |
-| `WDS_SOCKET_PORT` | Frontend | `3000` | Porta do WebSocket de recarga do CRA; no Compose acompanha `FRONTEND_PORT`. No modo local, o exemplo do frontend usa 3000. |
+| `VITE_BACKEND_URL` | Frontend | `http://localhost:8000` | URL da API que o navegador pode alcançar; ajuste se mudar `API_PORT`. No deploy, é uma variável de build. |
+| `FRONTEND_PORT` | Compose/frontend | `3000` | Porta publicada do frontend; ajuste também `FRONTEND_URL`. |
+| `API_PORT` | Compose/API | `8000` | Porta publicada da API; ajuste também `VITE_BACKEND_URL`. |
+| `VITE_SENTRY_DSN`, `VITE_SENTRY_ENVIRONMENT`, `VITE_SENTRY_RELEASE` | Frontend | vazios / production | Configuração opcional do Sentry no navegador; valores `VITE_*` são incorporados ao bundle no build. |
 
 Os exemplos contêm somente valores fictícios. Em staging e produção, configure os segredos no gerenciador de ambiente do Coolify; não use os valores do exemplo. O `JWT_SECRET` deve ter pelo menos 32 caracteres fora de development. O seed nunca redefine senha de usuário existente.
 
@@ -113,7 +112,7 @@ python -m backend.manage resume-restores
 
 Em development e staging, o seed cria a trilha demonstrativa e as contas configuradas; documentos da trilha, nós, blocos e usuários de demonstração recebem `is_demo: true`. Em production, esse conteúdo e as contas demo não são criados. O primeiro administrador só é criado com `ADMIN_EMAIL` e `ADMIN_PASSWORD`, e apenas quando ainda não há nenhum admin. Se a conta informada já existir, o seed não altera seus dados nem senha.
 
-Para execução local, `backend/.env.example` e `frontend/.env.example` documentam as configurações. O backend carrega `backend/.env` com `pydantic-settings`; o frontend lê `REACT_APP_BACKEND_URL` no build. O Compose injeta as variáveis no serviço da API. Em produção, `/docs`, `/redoc` e `/openapi.json` ficam desabilitados.
+Para execução local, `backend/.env.example` e `frontend/.env.example` documentam as configurações. O backend carrega `backend/.env` com `pydantic-settings`; o Vite lê `VITE_BACKEND_URL` no servidor local e o incorpora ao bundle de produção. O Compose injeta as variáveis no serviço da API. Em produção, `/docs`, `/redoc` e `/openapi.json` ficam desabilitados.
 
 ## Execução local sem Docker
 
@@ -134,7 +133,7 @@ New-Item -ItemType Directory -Force .\mongo-data
 mongod --dbpath .\mongo-data
 ```
 
-No Linux/macOS, instale o MongoDB Community Server 7, crie a pasta `mongo-data/` e use `mongod --dbpath ./mongo-data`. Configure `backend/.env` com `MONGO_URL="mongodb://localhost:27017"` e `frontend/.env` com `REACT_APP_BACKEND_URL=http://localhost:8000`.
+No Linux/macOS, instale o MongoDB Community Server 7, crie a pasta `mongo-data/` e use `mongod --dbpath ./mongo-data`. Configure `backend/.env` com `MONGO_URL="mongodb://localhost:27017"` e `frontend/.env` com `VITE_BACKEND_URL=http://localhost:8000`.
 
 Para iniciar manualmente, primeiro prepare o ambiente Python e depois rode os serviços em terminais separados:
 
@@ -146,27 +145,25 @@ python -m pip install -r backend\requirements.txt
 
 # Em outro terminal, frontend
 cd frontend
-npm install --legacy-peer-deps
+npm ci
 npm start
 ```
 
-No Linux/macOS, a ativação equivale a `source backend/.venv/bin/activate`; depois de ativar, rode `python -m pip install -r backend/requirements.txt`. Em um terminal para a API, a partir da pasta `backend/`, execute `uvicorn server:app --reload --host 0.0.0.0 --port 8000`. Em outro, na pasta `frontend/`, execute `npm install --legacy-peer-deps` e `npm start`. O script PowerShell define `FRONTEND_URL=http://localhost:3000` para o processo da API.
+No Linux/macOS, a ativação equivale a `source backend/.venv/bin/activate`; depois de ativar, rode `python -m pip install -r backend/requirements.txt`. Em um terminal para a API, a partir da pasta `backend/`, execute `uvicorn server:app --reload --host 0.0.0.0 --port 8000`. Em outro, na pasta `frontend/`, execute `npm ci` e `npm start`. O script PowerShell define `FRONTEND_URL=http://localhost:3000` para o processo da API.
 
 ## Solução de problemas
 
 - **Compose não inicia:** confirme que Docker Desktop/Engine está rodando e que `docker compose version` funciona.
 - **Porta 3000 ou 8000 ocupada:** ajuste `FRONTEND_PORT` ou `API_PORT` no `.env` e as URLs relacionadas na tabela de variáveis.
 - **API não fica saudável:** confira `docker compose logs -f mongo api`; a API aguarda o health check do banco.
-- **Frontend não alcança a API:** use em `REACT_APP_BACKEND_URL` uma URL alcançável pelo navegador, como `http://localhost:8000`; `api` é um nome interno dos containers.
-- **Instalação local do frontend falha:** use `npm install --legacy-peer-deps`.
+- **Frontend não alcança a API:** use em `VITE_BACKEND_URL` uma URL alcançável pelo navegador, como `http://localhost:8000`; `api` é um nome interno dos containers.
 - **Script falha com erro de fim de linha no WSL/Linux:** arquivos com finais de linha CRLF podem causar erros. Converta o script afetado para LF antes de executá-lo em Linux/containers; `run_local.ps1` é destinado ao PowerShell do Windows.
 - **Execução manual sem MongoDB:** confirme que MongoDB 7 está instalado e que `mongod --dbpath ./mongo-data` (ou `mongod --dbpath .\\mongo-data` no PowerShell) está em execução.
 
 ## Testes e lint
 
-- Frontend: `cd frontend` e `npm test` iniciam o test runner interativo do CRA. Para compilar o bundle localmente, use `npm run build`.
-- Backend: a suíte `backend/tests/` é de integração e faz requisições HTTP para uma API ativa. Configure `REACT_APP_BACKEND_URL` e execute `python -m pytest` na pasta `backend/` com as dependências instaladas. Use um banco de teste descartável: alguns testes criam e alteram conteúdo.
-- Não há script de lint configurado no `package.json` nem uma configuração de lint dedicada para o projeto. `flake8` está entre as dependências do backend, mas não há comando/regras de lint documentados.
+- Frontend: `npm test` executa Vitest; `npm run typecheck`, `npm run lint` e `npm run build` verificam tipos, lint e bundle.
+- Backend: a suíte `backend/tests/` é de integração e faz requisições HTTP para uma API ativa. Configure o endereço de API em `VITE_BACKEND_URL` e execute `python -m pytest` na pasta `backend/` com as dependências instaladas. Use um banco de teste descartável: alguns testes criam e alteram conteúdo.
 
 ## Conteúdo do curso
 

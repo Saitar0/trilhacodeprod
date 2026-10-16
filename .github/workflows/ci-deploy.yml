@@ -1,0 +1,91 @@
+name: CI and Coolify deploy
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r backend/requirements.prod.txt
+      - run: python -m compileall -q backend
+        env:
+          ENV: development
+          MONGO_URL: mongodb://localhost:27017
+          DB_NAME: trilhacode_ci
+          JWT_SECRET: ci-only-not-a-secret
+      - name: Reject insecure production configuration
+        shell: bash
+        env:
+          ENV: production
+          MONGO_URL: mongodb://ci:ci@mongo.example.invalid:27017/ci?authSource=admin
+          DB_NAME: ci
+          JWT_SECRET: short
+          FRONTEND_URL: https://app.example.com
+          CORS_ORIGINS: https://app.example.com
+          COOKIE_DOMAIN: .example.com
+          COOKIE_SAMESITE: Lax
+          COOKIE_SECURE: "true"
+          ADMIN_EMAIL: admin@example.com
+          ADMIN_PASSWORD: ci-only-long-password
+        run: |
+          if output=$(PYTHONPATH=backend python -c 'import settings' 2>&1); then
+            echo "Unsafe production config was accepted" >&2
+            exit 1
+          fi
+          echo "$output"
+          case "$output" in
+            *"JWT_SECRET"*) ;;
+            *) echo "Production validation failed for an unexpected reason" >&2; exit 1 ;;
+          esac
+      - name: Build production API image
+        run: docker build -f backend/Dockerfile.prod -t trilhacode-api:ci .
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build production frontend image
+        run: >-
+          docker build -f frontend/Dockerfile.prod -t trilhacode-frontend:ci
+          --build-arg VITE_BACKEND_URL=https://api-ci.example.invalid .
+
+  deploy-staging:
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify staging deployment
+        env:
+          WEBHOOK: ${{ secrets.COOLIFY_STAGING_WEBHOOK }}
+          TOKEN: ${{ secrets.COOLIFY_STAGING_TOKEN }}
+        run: |
+          test -n "$WEBHOOK" && test -n "$TOKEN"
+          curl --fail --silent --show-error --retry 3 \
+            --request GET "$WEBHOOK" \
+            --header "Authorization: Bearer $TOKEN"
+
+  deploy-production:
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify production deployment
+        env:
+          WEBHOOK: ${{ secrets.COOLIFY_PRODUCTION_WEBHOOK }}
+          TOKEN: ${{ secrets.COOLIFY_PRODUCTION_TOKEN }}
+        run: |
+          test -n "$WEBHOOK" && test -n "$TOKEN"
+          curl --fail --silent --show-error --retry 3 \
+            --request GET "$WEBHOOK" \
+            --header "Authorization: Bearer $TOKEN"

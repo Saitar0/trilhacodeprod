@@ -36,7 +36,7 @@ if (-not (Test-Path "node_modules")) {
     Write-Host "Instalando dependencias do frontend..."
     npm install
 }
-$env:REACT_APP_BACKEND_URL = "http://localhost:8000"
+$env:VITE_BACKEND_URL = "http://localhost:8000"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$frontendDir'; npm start" -WorkingDirectory $frontendDir
 
 Write-Host "Backend em: http://localhost:8000"

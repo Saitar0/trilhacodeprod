@@ -26,6 +26,7 @@ coverage/
 .env
 .env.*
 !.env.example
+!.env.*.example
 backend/.env
 frontend/.env
 
@@ -52,6 +53,8 @@ Thumbs.db
 # Environment and secrets
 .env*
 !.env.example
+!.env.staging.example
+!.env.production.example
 backend/.env
 backend/env.txt
 frontend/.env
