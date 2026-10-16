@@ -47,7 +47,7 @@ export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nod
           <TaxBadge group="pedagogical_type" value={node.pedagogical_type} />
           <TaxBadge group="requirement" value={node.requirement} />
           <TaxBadge group="depth" value={node.depth} />
-          {node.estimated_minutes > 0 && <span className="flex items-center gap-1 text-xs text-slate-400"><Clock3 className="h-3 w-3" />{node.estimated_minutes} min</span>}
+          {node.estimated_minutes > 0 && <span className="flex items-center gap-1 text-xs text-slate-400"><Clock3 className="h-3 w-3" />~{node.estimated_minutes} min de estudo</span>}
           {staff && node.status !== "published" && <StatusBadge status={node.status} />}
         </div>
         {node.summary && <p className="text-lg leading-relaxed text-slate-300">{node.summary}</p>}
@@ -109,4 +109,5 @@ export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nod
     </article>
   );
 }
+
 
