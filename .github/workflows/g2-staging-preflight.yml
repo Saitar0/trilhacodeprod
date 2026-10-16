@@ -1,0 +1,66 @@
+name: G2 - Staging MongoDB preflight (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trilhacode-g2-staging-preflight
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    name: Request restricted staging preflight over SSH
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging-preflight
+    steps:
+      - name: Check preflight connection configuration
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.G2_STAGING_SSH_HOST }}
+          SSH_USER: ${{ secrets.G2_STAGING_SSH_USER }}
+          SSH_KEY: ${{ secrets.G2_STAGING_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.G2_STAGING_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$SSH_HOST" || { echo 'Missing G2_STAGING_SSH_HOST' >&2; exit 1; }
+          test -n "$SSH_USER" || { echo 'Missing G2_STAGING_SSH_USER' >&2; exit 1; }
+          test -n "$SSH_KEY" || { echo 'Missing G2_STAGING_SSH_KEY' >&2; exit 1; }
+          test -n "$SSH_KNOWN_HOSTS" || { echo 'Missing G2_STAGING_SSH_KNOWN_HOSTS' >&2; exit 1; }
+          echo 'Required preflight connection configuration exists.'
+
+      - name: Run approved, fixed preflight command
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.G2_STAGING_SSH_HOST }}
+          SSH_USER: ${{ secrets.G2_STAGING_SSH_USER }}
+          SSH_KEY: ${{ secrets.G2_STAGING_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.G2_STAGING_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          umask 077
+          ssh_dir="$(mktemp -d)"
+          trap 'rm -rf "$ssh_dir"' EXIT
+          printf '%s\n' "$SSH_KEY" > "$ssh_dir/id_ed25519"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          chmod 600 "$ssh_dir/id_ed25519" "$ssh_dir/known_hosts"
+          # On the VPS, this dedicated key MUST be bound to a forced command.
+          # The runner cannot choose arbitrary shell commands or receive Docker access.
+          ssh -T \
+            -i "$ssh_dir/id_ed25519" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$ssh_dir/known_hosts" \
+            -o ConnectTimeout=10 \
+            -- "$SSH_USER@$SSH_HOST" 'trilhacode-g2-preflight'
+          {
+            echo '## G2 — staging MongoDB preflight'
+            echo '- Fixed SSH preflight command completed with exit code 0'
+            echo '- No MongoDB secrets were passed from GitHub Actions'
+            echo '- Inspect job logs for sanitized OK / AUSENTE findings'
+            echo '- G3 / G4 / deploy remain separately gated'
+          } >> "$GITHUB_STEP_SUMMARY"
