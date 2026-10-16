@@ -3,77 +3,25 @@
 Covers: auth (login/me/logout/refresh/brute force), permissions, tracks CRUD/publish/duplicate/versions,
 nodes hierarchy/reorder/duplicate, blocks, relations, progress (visit/set/overview), meta/taxonomy.
 """
-import os
-import time
 import uuid
 
 import pytest
-import requests
 
-def _read_frontend_url():
-    try:
-        with open("/app/frontend/.env") as fh:
-            for line in fh:
-                if line.startswith("VITE_BACKEND_URL"):
-                    return line.split("=", 1)[1].strip().strip('"').rstrip("/")
-    except Exception:
-        pass
-    return None
-
-
-BASE_URL = (os.environ.get("VITE_BACKEND_URL") or _read_frontend_url() or "").rstrip("/")
-assert BASE_URL, "VITE_BACKEND_URL not set"
-API = f"{BASE_URL}/api"
-
-ADMIN = ("admin@trilhacode.dev", "Admin@123")
-EDITOR = ("editor@trilhacode.dev", "Editor@123")
-STUDENT = ("aluno@trilhacode.dev", "Aluno@123")
-
-
-def _login(email, password):
-    s = requests.Session()
-    r = s.post(f"{API}/auth/login", json={"email": email, "password": password}, timeout=20)
-    assert r.status_code == 200, f"login failed {email}: {r.status_code} {r.text}"
-    return s, r.json()
-
-
-@pytest.fixture(scope="session")
-def admin_session():
-    s, _ = _login(*ADMIN)
-    return s
-
-
-@pytest.fixture(scope="session")
-def editor_session():
-    s, _ = _login(*EDITOR)
-    return s
-
-
-@pytest.fixture(scope="session")
-def student_session():
-    s, _ = _login(*STUDENT)
-    return s
-
-
-@pytest.fixture(scope="session")
-def seeded_track(admin_session):
-    tracks = admin_session.get(f"{API}/tracks").json()
-    t = next((x for x in tracks if x.get("slug") == "trilha-code"), None)
-    assert t, "Seeded trilha-code not found"
-    return t
+API = "/api"
 
 
 # ---------- Health & root ----------
-def test_root():
-    r = requests.get(f"{API}/", timeout=10)
+def test_root(session_factory):
+    r = session_factory().get(f"{API}/")
     assert r.status_code == 200 and r.json().get("ok") is True
 
 
 # ---------- Auth ----------
 class TestAuth:
-    def test_login_sets_cookies(self):
-        s, data = _login(*ADMIN)
-        assert data["email"] == ADMIN[0]
+    def test_login_sets_cookies(self, login):
+        s = login("admin@test.local")
+        data = s.get(f"{API}/auth/me").json()
+        assert data["email"] == "admin@test.local"
         assert data["role"] == "admin"
         assert "access_token" in s.cookies
         assert "refresh_token" in s.cookies
@@ -84,35 +32,35 @@ class TestAuth:
         assert r.json()["role"] == "admin"
         assert "content.write" in r.json()["permissions"]
 
-    def test_me_unauthenticated(self):
-        r = requests.get(f"{API}/auth/me")
+    def test_me_unauthenticated(self, session_factory):
+        r = session_factory().get(f"{API}/auth/me")
         assert r.status_code == 401
 
-    def test_logout_clears_cookies(self):
-        s, _ = _login(*STUDENT)
+    def test_logout_clears_cookies(self, login):
+        s = login("student@test.local")
         r = s.post(f"{API}/auth/logout")
         assert r.status_code == 200
         r2 = s.get(f"{API}/auth/me")
         assert r2.status_code == 401
 
-    def test_refresh(self):
-        s, _ = _login(*STUDENT)
+    def test_refresh(self, login):
+        s = login("student@test.local")
         r = s.post(f"{API}/auth/refresh")
         assert r.status_code == 200
 
-    def test_register_creates_student(self):
+    def test_register_creates_student(self, session_factory):
         email = f"test_{uuid.uuid4().hex[:8]}@trilhacode.dev"
-        s = requests.Session()
+        s = session_factory()
         r = s.post(f"{API}/auth/register", json={"name": "Test User", "email": email, "password": "Test@1234"})
         assert r.status_code == 200
         assert r.json()["role"] == "student"
         assert r.json()["email"] == email
 
-    def test_brute_force_lockout(self):
+    def test_brute_force_lockout(self, session_factory):
         email = f"bf_{uuid.uuid4().hex[:6]}@trilhacode.dev"
         statuses = []
         for _ in range(6):
-            r = requests.post(f"{API}/auth/login", json={"email": email, "password": "wrong"})
+            r = session_factory().post(f"{API}/auth/login", json={"email": email, "password": "wrong"})
             statuses.append(r.status_code)
         assert 429 in statuses, f"expected 429 after 5 tries, got {statuses}"
 
@@ -238,12 +186,14 @@ class TestTracks:
 
 
 # ---------- Nodes ----------
+@pytest.fixture(scope="module")
+def track(admin):
+    tr = admin.post(f"{API}/tracks", json={"title": "TEST_nodes"}).json()
+    yield tr
+    admin.delete(f"{API}/tracks/{tr['id']}")
+
+
 class TestNodes:
-    @pytest.fixture(scope="class")
-    def track(self, admin_session):
-        tr = admin_session.post(f"{API}/tracks", json={"title": "TEST_nodes"}).json()
-        yield tr
-        admin_session.delete(f"{API}/tracks/{tr['id']}")
 
     def test_hierarchy_validation(self, admin_session, track):
         tid = track["id"]
@@ -277,16 +227,16 @@ class TestNodes:
 
 
 # ---------- Blocks & Relations ----------
+@pytest.fixture(scope="module")
+def ctx(admin):
+    tr = admin.post(f"{API}/tracks", json={"title": "TEST_blocks"}).json()
+    n1 = admin.post(f"{API}/nodes", json={"track_id": tr["id"], "kind": "phase", "title": "n1"}).json()
+    n2 = admin.post(f"{API}/nodes", json={"track_id": tr["id"], "kind": "phase", "title": "n2"}).json()
+    yield {"track": tr, "n1": n1, "n2": n2}
+    admin.delete(f"{API}/tracks/{tr['id']}")
+
+
 class TestBlocksRelations:
-    @pytest.fixture(scope="class")
-    def ctx(self, admin_session):
-        tr = admin_session.post(f"{API}/tracks", json={"title": "TEST_blocks"}).json()
-        n1 = admin_session.post(f"{API}/nodes", json={
-            "track_id": tr["id"], "kind": "phase", "title": "n1"}).json()
-        n2 = admin_session.post(f"{API}/nodes", json={
-            "track_id": tr["id"], "kind": "phase", "title": "n2"}).json()
-        yield {"track": tr, "n1": n1, "n2": n2}
-        admin_session.delete(f"{API}/tracks/{tr['id']}")
 
     def test_block_crud_and_unknown_type(self, admin_session, ctx):
         bad = admin_session.post(f"{API}/blocks", json={

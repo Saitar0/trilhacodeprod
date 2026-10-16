@@ -3,39 +3,12 @@
 Covers: locks (enforce_prerequisites), cycles/validate, submissions lifecycle,
 notes, reviews, versions compare + restore. Uses TEST_ tracks for destructive ops.
 """
-import os
 import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
-import requests
 
-
-def _url():
-    try:
-        with open("/app/frontend/.env") as fh:
-            for line in fh:
-                if line.startswith("VITE_BACKEND_URL"):
-                    return line.split("=", 1)[1].strip().strip('"').rstrip("/")
-    except Exception:
-        pass
-    return ""
-
-
-BASE_URL = (os.environ.get("VITE_BACKEND_URL") or _url()).rstrip("/")
-API = f"{BASE_URL}/api"
-SEEDED_TRACK_ID = "6acb0b40ef07136c920e83c2"
-
-ADMIN = ("admin@trilhacode.dev", "Admin@123")
-EDITOR = ("editor@trilhacode.dev", "Editor@123")
-STUDENT = ("aluno@trilhacode.dev", "Aluno@123")
-
-
-def _login(email, password):
-    s = requests.Session()
-    r = s.post(f"{API}/auth/login", json={"email": email, "password": password}, timeout=20)
-    assert r.status_code == 200, f"login failed {email}: {r.status_code} {r.text}"
-    return s
+API = "/api"
 
 
 def test_search_filters_and_pagination(admin):
@@ -69,8 +42,8 @@ def test_search_filters_and_pagination(admin):
         admin.delete(f"{API}/taxonomies/{taxonomy.json()['id']}")
 
 
-def test_health_request_id_and_error_envelope(admin):
-    health = requests.get(f"{BASE_URL}/health", headers={"X-Request-ID": "test-request-42"}, timeout=20)
+def test_health_request_id_and_error_envelope(admin, session_factory):
+    health = session_factory().get("/health", headers={"X-Request-ID": "test-request-42"})
     assert health.status_code == 200
     assert health.headers["X-Request-ID"] == "test-request-42"
     assert health.json() == {"ok": True}
@@ -81,41 +54,30 @@ def test_health_request_id_and_error_envelope(admin):
 
 
 @pytest.fixture(scope="module")
-def admin():
-    return _login(*ADMIN)
-
-
-@pytest.fixture(scope="module")
-def student():
-    return _login(*STUDENT)
-
-
-@pytest.fixture(scope="module")
-def fresh_student():
-    """Register a new student for isolated submission testing."""
-    email = f"test_stu_{uuid.uuid4().hex[:8]}@trilhacode.dev"
-    s = requests.Session()
-    r = s.post(f"{API}/auth/register", json={"name": "T", "email": email, "password": "Test@1234"})
-    assert r.status_code == 200
-    return s
+def fresh_student(session_factory):
+    session = session_factory()
+    email = f"new_{uuid.uuid4().hex[:8]}@test.local"
+    response = session.post(f"{API}/auth/register", json={"name": "Test", "email": email, "password": "Test@1234"})
+    assert response.status_code == 200
+    return session
 
 
 # ============ Locks / prerequisites ============
 class TestLocks:
-    def test_seeded_locks_present_for_student(self, student):
-        r = student.get(f"{API}/progress/tracks/{SEEDED_TRACK_ID}")
+    def test_seeded_locks_present_for_student(self, student, seeded_track):
+        r = student.get(f"{API}/progress/tracks/{seeded_track['id']}")
         assert r.status_code == 200
         data = r.json()
         assert "locks" in data
         # expect at least some locks since enforce_prerequisites=true per spec
         assert isinstance(data["locks"], dict)
 
-    def test_staff_never_locked(self, admin):
-        r = admin.get(f"{API}/progress/tracks/{SEEDED_TRACK_ID}")
+    def test_staff_never_locked(self, admin, seeded_track):
+        r = admin.get(f"{API}/progress/tracks/{seeded_track['id']}")
         assert r.status_code == 200
         # Staff: track_locks is still returned but assert_unlocked is skipped elsewhere.
         # Confirm admin can read any node without lock blocking blocks array.
-        tree = admin.get(f"{API}/tracks/{SEEDED_TRACK_ID}/tree").json()
+        tree = admin.get(f"{API}/tracks/{seeded_track['id']}/tree").json()
         for n in tree["nodes"]:
             r2 = admin.get(f"{API}/nodes/{n['id']}")
             assert r2.status_code == 200
@@ -123,8 +85,8 @@ class TestLocks:
             assert r2.json().get("lock") in (None, False) or True
             break
 
-    def test_locked_node_strips_blocks_for_student(self, student):
-        tp = student.get(f"{API}/progress/tracks/{SEEDED_TRACK_ID}").json()
+    def test_locked_node_strips_blocks_for_student(self, student, seeded_track):
+        tp = student.get(f"{API}/progress/tracks/{seeded_track['id']}").json()
         locks = tp.get("locks") or {}
         if not locks:
             pytest.skip("No locks on seeded track; cannot test lock behavior")
@@ -135,8 +97,8 @@ class TestLocks:
         assert data["lock"] is not None
         assert data["blocks"] == []
 
-    def test_locked_node_cannot_complete(self, student):
-        tp = student.get(f"{API}/progress/tracks/{SEEDED_TRACK_ID}").json()
+    def test_locked_node_cannot_complete(self, student, seeded_track):
+        tp = student.get(f"{API}/progress/tracks/{seeded_track['id']}").json()
         locks = tp.get("locks") or {}
         if not locks:
             pytest.skip("No locks")
@@ -144,7 +106,7 @@ class TestLocks:
         r = student.post(f"{API}/progress", json={"node_id": locked_id, "status": "completed"})
         assert r.status_code == 403
 
-    def test_enforce_off_removes_locks(self, admin):
+    def test_enforce_off_removes_locks(self, admin, login):
         # Create TEST track with enforce + prerequisite relation
         tid = admin.post(f"{API}/tracks", json={"title": "TEST_locks_enforce"}).json()["id"]
         try:
@@ -155,7 +117,7 @@ class TestLocks:
             admin.put(f"{API}/tracks/{tid}", json={"settings": {"enforce_prerequisites": True}})
             admin.post(f"{API}/tracks/{tid}/publish", json={})
             # student view
-            s = _login(*STUDENT)
+            s = login("student@test.local")
             tp = s.get(f"{API}/progress/tracks/{tid}").json()
             assert b["id"] in (tp.get("locks") or {})
             # Turn off enforce
@@ -165,7 +127,7 @@ class TestLocks:
         finally:
             admin.delete(f"{API}/tracks/{tid}")
 
-    def test_auto_unlock_after_complete_target(self, admin):
+    def test_auto_unlock_after_complete_target(self, admin, login):
         tid = admin.post(f"{API}/tracks", json={"title": "TEST_auto_unlock"}).json()["id"]
         try:
             a = admin.post(f"{API}/nodes", json={"track_id": tid, "kind": "topic", "title": "A"}).json()
@@ -174,7 +136,7 @@ class TestLocks:
                 "node_id": b["id"], "target_id": a["id"], "type": "prerequisite", "enforced": True})
             admin.put(f"{API}/tracks/{tid}", json={"settings": {"enforce_prerequisites": True}})
             admin.post(f"{API}/tracks/{tid}/publish", json={})
-            s = _login(*STUDENT)
+            s = login("student@test.local")
             tp = s.get(f"{API}/progress/tracks/{tid}").json()
             assert b["id"] in (tp.get("locks") or {})
             # Complete the prerequisite
@@ -249,8 +211,9 @@ class TestCyclesValidate:
 # ============ Submissions ============
 class TestSubmissions:
     @pytest.fixture(scope="class")
-    def ctx(self):
-        admin = _login(*ADMIN)
+    @classmethod
+    def ctx(cls, login):
+        admin = login("admin@test.local")
         tid = admin.post(f"{API}/tracks", json={"title": "TEST_subs"}).json()["id"]
         node = admin.post(f"{API}/nodes", json={"track_id": tid, "kind": "topic", "title": "T"}).json()
         # find submittable block type
@@ -271,22 +234,22 @@ class TestSubmissions:
                "sub_type": sub_type}
         admin.delete(f"{API}/tracks/{tid}")
 
-    def test_non_submittable_block_rejected(self, ctx):
-        s = _login(*STUDENT)
+    def test_non_submittable_block_rejected(self, ctx, login):
+        s = login("student@test.local")
         r = s.post(f"{API}/submissions/submit",
                    json={"block_id": ctx["theory"]["id"], "answer": {"text": "hi"}})
         assert r.status_code == 400
 
-    def test_empty_answer_rejected(self, ctx):
-        s = _login(*STUDENT)
+    def test_empty_answer_rejected(self, ctx, login):
+        s = login("student@test.local")
         r = s.post(f"{API}/submissions/submit",
                    json={"block_id": ctx["block"]["id"], "answer": {"text": ""}})
         assert r.status_code == 400
 
-    def test_draft_submit_claim_grade_approve(self, ctx):
+    def test_draft_submit_claim_grade_approve(self, ctx, session_factory):
         # Use a fresh student to avoid pre-existing submissions
         email = f"test_stu_{uuid.uuid4().hex[:8]}@trilhacode.dev"
-        s = requests.Session()
+        s = session_factory()
         r = s.post(f"{API}/auth/register",
                    json={"name": "Grad", "email": email, "password": "Test@1234"})
         assert r.status_code == 200
@@ -343,9 +306,9 @@ class TestSubmissions:
         assert bid in (tp.get("blocks") or {})
         assert tp["blocks"][bid]["status"] == "completed"
 
-    def test_returned_resubmit_same_attempt(self, ctx):
+    def test_returned_resubmit_same_attempt(self, ctx, session_factory):
         email = f"test_stu_{uuid.uuid4().hex[:8]}@trilhacode.dev"
-        s = requests.Session()
+        s = session_factory()
         s.post(f"{API}/auth/register", json={"name": "Rt", "email": email, "password": "Test@1234"})
         bid = ctx["block"]["id"]
         r = s.post(f"{API}/submissions/submit", json={"block_id": bid, "answer": {"text": "r"}})
@@ -359,9 +322,9 @@ class TestSubmissions:
         assert r2.status_code == 200
         assert r2.json()["attempt"] == r.json()["attempt"]
 
-    def test_rejected_allow_resubmit_new_attempt(self, ctx):
+    def test_rejected_allow_resubmit_new_attempt(self, ctx, session_factory):
         email = f"test_stu_{uuid.uuid4().hex[:8]}@trilhacode.dev"
-        s = requests.Session()
+        s = session_factory()
         s.post(f"{API}/auth/register", json={"name": "Rj", "email": email, "password": "Test@1234"})
         bid = ctx["block"]["id"]
         r = s.post(f"{API}/submissions/submit", json={"block_id": bid, "answer": {"text": "r"}})
@@ -377,8 +340,8 @@ class TestSubmissions:
 
 # ============ Notes ============
 class TestNotes:
-    def test_upsert_and_delete(self, student, admin):
-        tree = admin.get(f"{API}/tracks/{SEEDED_TRACK_ID}/tree").json()
+    def test_upsert_and_delete(self, student, admin, seeded_track):
+        tree = admin.get(f"{API}/tracks/{seeded_track['id']}/tree").json()
         node_id = next(n["id"] for n in tree["nodes"] if n["kind"] == "topic")
         up = student.put(f"{API}/notes", json={"node_id": node_id, "body": "my note"})
         assert up.status_code == 200
@@ -390,8 +353,8 @@ class TestNotes:
 
 # ============ Reviews ============
 class TestReviews:
-    def test_schedule_list_complete_dismiss(self, student, admin):
-        tree = admin.get(f"{API}/tracks/{SEEDED_TRACK_ID}/tree").json()
+    def test_schedule_list_complete_dismiss(self, student, admin, seeded_track):
+        tree = admin.get(f"{API}/tracks/{seeded_track['id']}/tree").json()
         node_id = next(n["id"] for n in tree["nodes"] if n["kind"] == "topic")
         r = student.post(f"{API}/reviews", json={"node_id": node_id, "when": "today"})
         assert r.status_code == 200
