@@ -6,7 +6,7 @@ import { api, apiError } from "@/lib/api";
 import { useMySubmissions } from "@/hooks/useStudy";
 import { ContentBlock, Submission } from "@/types";
 import { cn, formatDate } from "@/lib/utils";
-import { Markdown } from "@/components/common";
+import { Markdown } from "@/components/common/Markdown";
 import { RESULT_META, SubmissionBadge } from "@/components/common/SubmissionBadge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

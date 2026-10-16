@@ -163,7 +163,7 @@ No Linux/macOS, a ativação equivale a `source backend/.venv/bin/activate`; dep
 ## Testes e lint
 
 - Frontend: `npm test` executa Vitest; `npm run typecheck`, `npm run lint` e `npm run build` verificam tipos, lint e bundle.
-- Backend: a suíte `backend/tests/` é de integração e faz requisições HTTP para uma API ativa. Configure o endereço de API em `VITE_BACKEND_URL` e execute `python -m pytest` na pasta `backend/` com as dependências instaladas. Use um banco de teste descartável: alguns testes criam e alteram conteúdo.
+- Backend: execute `python -m pytest` na pasta `backend/` com MongoDB disponível em `mongodb://localhost:27017`. Os testes usam o app FastAPI em processo e um banco descartável `test_<uuid>`, removido ao final; configure outro endereço com `MONGO_URL_TEST`. O nome do banco é validado como proteção contra exclusão de dados fora de teste. `VITE_BACKEND_URL` não é usado pela suíte.
 
 ## Conteúdo do curso
 

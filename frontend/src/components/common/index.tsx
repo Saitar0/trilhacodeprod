@@ -1,22 +1,15 @@
-import React from "react";
-import * as Icons from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { LucideIcon } from "lucide-react";
+import React, { lazy, Suspense } from "react";
+import { Loader2, Square } from "lucide-react";
 import { cn, DOTS, STATUS_META, tone } from "@/lib/utils";
 import { useTaxonomy } from "@/hooks/useData";
 
-export function DynamicIcon({ name, className }: { name?: string; className?: string }) {
-  const Icon = ((name && (Icons as unknown as Record<string, LucideIcon>)[name]) || Icons.Square) as LucideIcon;
-  return <Icon className={className} />;
-}
+const IconCatalog = lazy(() => import("@/components/common/IconCatalog").then((module) => ({ default: module.IconCatalog })));
 
-export function Markdown({ children, className }: { children?: string; className?: string }) {
-  if (!children) return null;
+export function DynamicIcon({ name, className }: { name?: string; className?: string }) {
   return (
-    <div className={cn("md", className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
-    </div>
+    <Suspense fallback={<Square className={className} />}>
+      <IconCatalog name={name} className={className} />
+    </Suspense>
   );
 }
 
@@ -91,7 +84,7 @@ export function ProgressBar({ value, className, testId }: { value: number; class
 export function Loader({ label = "Carregando..." }: { label?: string }) {
   return (
     <div data-testid="loader" className="flex items-center gap-3 p-8 text-sm text-slate-400">
-      <Icons.Loader2 className="h-4 w-4 animate-spin text-emerald-400" /> {label}
+      <Loader2 className="h-4 w-4 animate-spin text-emerald-400" /> {label}
     </div>
   );
 }

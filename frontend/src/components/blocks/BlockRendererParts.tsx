@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Check, Copy, ExternalLink, Info, RotateCcw, X } from "lucide-react";
-import { Markdown } from "@/components/common";
+import { Markdown } from "@/components/common/Markdown";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { BlockProps } from "./BlockProps";

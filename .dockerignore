@@ -6,7 +6,7 @@
 **/env.txt
 **/node_modules
 **/__pycache__
-**/.venv
+**/.venv*
 mongo-data
 mongo.log
 .antigravity
