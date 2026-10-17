@@ -48,6 +48,6 @@ A missão permanece PARCIAL: as frentes técnicas selecionadas concluíram e pas
 ## Atualização de retomada — 17/10/2026
 
 - Base remota confirmada: `main` em `217f40fd3581f54eaa5f00546f643cc7203e1c72`; PR #17 está integrado. CI #39030667018 passou backend, frontend, Compose e Playwright E2E; deploys foram pulados.
-- Próximo escopo de QA escolhido: teste Playwright do ciclo de publicação e comparação de versões pela interface administrativa, usando somente o Mongo descartável configurado pela CI. A alteração está na branch `codex/e2e-version-history`.
+- QA de histórico implementado no PR #18: teste Playwright publica versão com nota única, edita a descrição e compara com o estado atual usando Mongo descartável da CI. CI #39035017901 passou backend, frontend, Compose e E2E; deploys foram pulados. Revisão independente não encontrou achados acionáveis após corrigir o passo de obtenção da chave pública no runbook G2.
 - Diagnóstico G2 atualizado: painel Hostinger autenticado confirma VPS ativa, mas Web Console está desabilitado. Coolify é acessível; app API de staging está `exited:unhealthy`, Mongo staging `running:healthy`. Workflow usa porta SSH 22; segredo do hostname e segredo `known_hosts` não são legíveis por este canal. Chave ED25519/fingerprint do servidor não foi obtida.
 - Missão segue parcial. Nenhuma secret foi alterada, G2 foi executado, nem houve migração, criação de índices, seed, deploy ou acesso/escrita ao banco real.
