@@ -8,7 +8,7 @@ from audit import audit
 from constants import DEFAULT_HIERARCHY, DEFAULT_LABELS, STATUSES
 from core_utils import now
 from database import db
-from import_payload import NODE_TAX, validate_import_shape
+from import_payload import NODE_TAX, has_valid_parent_kind, validate_import_shape
 from learning import find_cycles
 from serialization import oid, ser
 
@@ -60,6 +60,8 @@ async def _plan(payload: dict):
             refs.add(ref)
             if kind not in hierarchy:
                 errors.append({"path": f"{p}.kind", "message": f"kind deve ser um de {hierarchy}"})
+            elif parent_kind and not has_valid_parent_kind(parent_kind, hierarchy):
+                errors.append({"path": f"{p}.kind", "message": "não é possível validar a hierarquia porque o tipo do item pai é inválido"})
             elif parent_kind and hierarchy.index(kind) <= hierarchy.index(parent_kind):
                 errors.append({"path": f"{p}.kind", "message": f"'{kind}' não pode ficar dentro de '{parent_kind}'"})
             if not str(n.get("title", "")).strip():
