@@ -18,6 +18,24 @@ permissions:
   contents: read
 
 jobs:
+  compose-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate development Compose configuration
+        run: docker compose --env-file .env.example -f compose.yaml config --quiet
+      - name: Validate isolated QA Compose configuration
+        shell: bash
+        run: |
+          qa_env=$(mktemp)
+          trap 'rm -f "$qa_env"' EXIT
+          chmod 600 "$qa_env"
+          printf '%s\n' \
+            'QA_MONGO_ROOT_USERNAME=ci_qa_user' \
+            'QA_MONGO_ROOT_PASSWORD=ci-only-password' \
+            'QA_JWT_SECRET=ci-only-jwt-secret-for-compose-validation' > "$qa_env"
+          docker compose --env-file "$qa_env" -f compose.qa.yaml config --quiet
+
   backend:
     runs-on: ubuntu-latest
     services:
@@ -37,6 +55,9 @@ jobs:
           python-version: "3.11"
       - name: Install backend test and quality dependencies
         run: pip install -r backend/requirements-dev.txt
+      - name: Run backend tests that do not require MongoDB
+        run: python -m pytest unit_tests
+        working-directory: backend
       - name: Run Ruff
         run: ruff check backend
       - name: Run isolated backend tests
