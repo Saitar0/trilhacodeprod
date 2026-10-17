@@ -1,13 +1,50 @@
+import math
+
 NODE_TAX = {"pedagogical_type": "pedagogical_type", "requirement": "requirement", "depth": "depth"}
 TRACK_TEXT = ("title", "subtitle", "description", "cover_url", "visibility", "difficulty")
 NODE_TEXT = ("title", "summary", "description", "guidance", "notes")
 MAX_NODE_DEPTH = 100
 MAX_ESTIMATED_MINUTES = (1 << 63) - 1
+MIN_BSON_INT64 = -(1 << 63)
+
+
+def _validate_json_value(value, path, errors, depth=0):
+    if depth > MAX_NODE_DEPTH:
+        errors.append({"path": path, "message": f"profundidade máxima de {MAX_NODE_DEPTH} níveis excedida"})
+        return
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if not isinstance(key, str) or "\x00" in key:
+                errors.append({"path": path, "message": "chaves devem ser textos sem caractere nulo"})
+                continue
+            try:
+                key.encode("utf-8")
+            except UnicodeEncodeError:
+                errors.append({"path": path, "message": "chave deve conter texto UTF-8 válido"})
+                continue
+            _validate_json_value(child, f"{path}.{key}", errors, depth + 1)
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            _validate_json_value(child, f"{path}[{index}]", errors, depth + 1)
+    elif isinstance(value, int) and not isinstance(value, bool):
+        if not MIN_BSON_INT64 <= value <= MAX_ESTIMATED_MINUTES:
+            errors.append({"path": path, "message": "inteiro fora do intervalo BSON int64"})
+    elif isinstance(value, float):
+        if not math.isfinite(value):
+            errors.append({"path": path, "message": "número deve ser finito"})
+    elif isinstance(value, str):
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError:
+            errors.append({"path": path, "message": "texto deve conter UTF-8 válido"})
+    elif value is not None and not isinstance(value, bool):
+        errors.append({"path": path, "message": "valor não é JSON compatível"})
 
 
 def validate_import_shape(payload: dict) -> list[dict]:
     """Reject malformed containers before import planning dereferences or hashes them."""
     errors = []
+    _validate_json_value(payload, "payload", errors)
 
     def add(path, message):
         errors.append({"path": path, "message": message})
