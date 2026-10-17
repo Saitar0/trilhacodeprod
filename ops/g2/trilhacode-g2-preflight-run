@@ -1,0 +1,75 @@
+#!/bin/bash
+# Root-only, fixed-purpose MongoDB index preflight. No caller-supplied arguments.
+set -Eeuo pipefail
+umask 077
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+unset BASH_ENV ENV CDPATH
+if (( $# != 0 )) || [[ "$(id -u)" != 0 ]]; then
+  echo 'G2: invalid invocation' >&2; exit 64
+fi
+
+readonly IMAGE='ghcr.io/saitar0/trilhacodeprod-backend@sha256:a6bf47a3fb1c8019678c85ce5d6d6b055a61e547c62681865f8fd1be20fad71e'
+readonly NETWORK='trilhacode-staging-network'
+readonly MONGO_CONTAINER='3jo4k9aes1iqn4qlqqeyyh4y'
+readonly ENV_FILE='/etc/trilhacode-g2/preflight.env'
+readonly RUN_NAME='trilhacode-g2-preflight'
+readonly DOCKER='/usr/bin/docker'
+readonly TIMEOUT='/usr/bin/timeout'
+
+# Readiness checks do not expose secret values.
+[[ -f "$ENV_FILE" && ! -L "$ENV_FILE" ]] || { echo 'G2: configuration missing' >&2; exit 78; }
+[[ "$(stat -c '%u:%a' "$ENV_FILE")" == '0:600' ]] || { echo 'G2: configuration permissions rejected' >&2; exit 78; }
+grep -qx 'DB_NAME=trilhacode_staging' "$ENV_FILE" || { echo 'G2: staging database not confirmed' >&2; exit 78; }
+grep -qx 'ENV=staging' "$ENV_FILE" || { echo 'G2: staging environment not confirmed' >&2; exit 78; }
+grep -q '^MONGO_URL=mongodb' "$ENV_FILE" || { echo 'G2: MongoDB connection configuration missing' >&2; exit 78; }
+
+"$DOCKER" network inspect "$NETWORK" >/dev/null 2>&1 || { echo 'G2: staging network missing' >&2; exit 69; }
+[[ "$("$DOCKER" inspect -f '{{.State.Running}}' "$MONGO_CONTAINER" 2>/dev/null)" == 'true' ]] || { echo 'G2: staging database container unavailable' >&2; exit 69; }
+"$DOCKER" inspect --format '{{json .NetworkSettings.Networks}}' "$MONGO_CONTAINER" |
+  /usr/bin/jq -e --arg n "$NETWORK" 'has($n)' >/dev/null ||
+  { echo 'G2: staging database network mismatch' >&2; exit 69; }
+"$DOCKER" image inspect "$IMAGE" >/dev/null 2>&1 || { echo 'G2: approved image missing; provision pinned digest separately' >&2; exit 69; }
+[[ -z "$("$DOCKER" ps -aq --filter "name=^/${RUN_NAME}$")" ]] || { echo 'G2: prior preflight container exists; inspect manually' >&2; exit 75; }
+
+out="$(/usr/bin/mktemp)"
+cleanup() {
+  local status=$?
+  trap - EXIT HUP INT TERM
+  "$DOCKER" rm -f "$RUN_NAME" >/dev/null 2>&1 || true
+  /usr/bin/rm -f -- "$out"
+  exit "$status"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+set +e
+"$TIMEOUT" --signal=TERM --kill-after=10s 180s "$DOCKER" run --rm \
+  --name "$RUN_NAME" \
+  --network "$NETWORK" \
+  --pull never \
+  --env-file "$ENV_FILE" \
+  --entrypoint python \
+  --read-only \
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16m \
+  --cap-drop ALL \
+  --security-opt no-new-privileges \
+  --pids-limit 128 \
+  --memory 512m \
+  --cpus 1 \
+  --log-driver none \
+  "$IMAGE" -m backend.manage preflight-indexes >"$out" 2>&1
+rc=$?
+set -e
+# Raw backend findings and errors may contain MongoDB document values.
+# Only publish fixed-status counts and a coarse success/failure indication.
+count() { /usr/bin/grep -c "^$1 " "$out" || true; }
+ok="$(count OK)"
+missing="$(count AUSENTE)"
+conflicts="$(count CONFLITO)"
+duplicates="$(count DUPLICATAS)"
+printf 'G2 staging preflight: OK=%s AUSENTE=%s CONFLITO=%s DUPLICATAS=%s\n' "$ok" "$missing" "$conflicts" "$duplicates"
+if (( rc != 0 || conflicts > 0 || duplicates > 0 )); then
+  echo 'G2: preflight FAILED (details withheld; inspect securely on host)' >&2
+  exit 1
+fi
+echo 'G2: preflight PASSED (read-only; no schema changes)'
