@@ -95,7 +95,7 @@ Homologação visual/teclado e histórico permanecem para outra rodada com naveg
 - CI #39030667018 concluiu com sucesso: `compose-config`, backend, frontend e E2E. Os jobs `deploy-staging` e `deploy-production` foram pulados.
 - PRs #8–#15 e #17 foram encontrados integrados; PR #16 foi encerrado como supersedido pelo #12. PR #17 foi fechado por merge nesse SHA.
 - Checkout local em `27a98964` está oito commits atrás e tem modificações e arquivos não rastreados. Foi preservado sem limpeza; clone remoto limpo não foi possível por bloqueio de DNS/rede do host.
-- Um E2E novo está na branch `codex/e2e-version-history`: publica uma nota única, edita a descrição depois e verifica nota e diff positivo pela UI de versões, no pipeline com Mongo efêmero. A CI dessa branch ainda precisa validar a alteração.
+- PR #18 adiciona um E2E que publica uma nota única, edita a descrição depois e verifica a nota e um diff positivo pela UI de versões no pipeline com Mongo efêmero. CI #39035017901 passou backend, frontend, Compose e E2E; deploys foram pulados. A revisão técnica independente aprovou o isolamento do teste e o runbook G2 depois do ajuste para obter a linha da chave pública e a fingerprint no canal administrativo.
 
 ### Diagnóstico G2 e infraestrutura
 
