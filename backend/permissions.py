@@ -20,3 +20,10 @@ def require(perm: str):
 
 def is_staff(user: dict) -> bool:
     return "content.read" in PERMISSIONS.get(user["role"], set())
+
+
+def can_view_track(track: dict, user: dict) -> bool:
+    """Return whether a user may read a track's metadata and content tree."""
+    return is_staff(user) or (
+        track.get("status") == "published" and track.get("visibility") == "public"
+    )
