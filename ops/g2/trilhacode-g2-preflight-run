@@ -29,7 +29,7 @@ grep -q '^MONGO_URL=mongodb' "$ENV_FILE" || { echo 'G2: MongoDB connection confi
   /usr/bin/jq -e --arg n "$NETWORK" 'has($n)' >/dev/null ||
   { echo 'G2: staging database network mismatch' >&2; exit 69; }
 "$DOCKER" image inspect "$IMAGE" >/dev/null 2>&1 || { echo 'G2: approved image missing; provision pinned digest separately' >&2; exit 69; }
-[[ -z "$("$DOCKER" ps -aq --filter "name=^/$\{RUN_NAME}$")" ]] || { echo 'G2: prior preflight container exists; inspect manually' >&2; exit 75; }
+[[ -z "$("$DOCKER" ps -aq --filter "name=^/$RUN_NAME$")" ]] || { echo 'G2: prior preflight container exists; inspect manually' >&2; exit 75; }
 
 out="$(/usr/bin/mktemp)"
 cidfile="$(/usr/bin/mktemp)"
