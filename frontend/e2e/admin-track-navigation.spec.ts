@@ -8,6 +8,8 @@ test("administrator can open the seeded track editor", async ({ page }) => {
   await page.getByTestId("login-password-input").fill(process.env.E2E_ADMIN_PASSWORD || "e2e-only-admin-password");
   await page.getByTestId("login-submit-button").click();
 
+  await expect(page.getByTestId("login-form")).toHaveCount(0);
+  await page.goto("/admin");
   await expect(page.getByTestId("admin-nav-dashboard")).toBeVisible();
   await page.getByTestId("admin-nav-tracks").click();
   await expect(page.getByTestId("admin-track-row-trilha-code")).toBeVisible();
