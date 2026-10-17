@@ -1,11 +1,25 @@
 import math
 
+from bson import BSON
+from bson.errors import InvalidDocument
+
 NODE_TAX = {"pedagogical_type": "pedagogical_type", "requirement": "requirement", "depth": "depth"}
 TRACK_TEXT = ("title", "subtitle", "description", "cover_url", "visibility", "difficulty")
 NODE_TEXT = ("title", "summary", "description", "guidance", "notes")
 MAX_NODE_DEPTH = 100
 MAX_ESTIMATED_MINUTES = (1 << 63) - 1
 MIN_BSON_INT64 = -(1 << 63)
+MAX_IMPORT_DOCUMENT_BYTES = 15 * 1024 * 1024
+
+
+def _bson_size_within_limit(value, max_bytes=None):
+    """Keep each future Mongo document below 16 MiB, leaving room for DB metadata."""
+    if max_bytes is None:
+        max_bytes = MAX_IMPORT_DOCUMENT_BYTES
+    try:
+        return len(BSON.encode({"value": value})) <= max_bytes
+    except (InvalidDocument, OverflowError, TypeError, ValueError):
+        return False
 
 
 def _validate_json_value(value, path, errors, depth=0):
@@ -133,6 +147,40 @@ def validate_import_shape(payload: dict) -> list[dict]:
 
     validate_nodes(payload.get("nodes", []), "nodes")
 
+    # MongoDB limits each stored document to 16 MiB. Imports write the track and
+    # nodes before their blocks, so reject oversized source records up front to
+    # avoid a late block failure leaving a partially applied import. The 15 MiB
+    # cap reserves space for the IDs and metadata added by _execute.
+    track = payload.get("track")
+    if isinstance(track, dict):
+        stored_track_fields = {key: track[key] for key in (*TRACK_TEXT, "slug", "audience", "level_labels", "settings", "hierarchy") if key in track}
+        if not _bson_size_within_limit(stored_track_fields):
+            add("track", "documento excede o limite seguro de tamanho para importação")
+
+    def validate_document_sizes(items, path, depth=0):
+        if depth > MAX_NODE_DEPTH or not isinstance(items, list):
+            return
+        for index, node in enumerate(items):
+            node_path = f"{path}[{index}]"
+            if not isinstance(node, dict):
+                continue
+            stored_node_fields = {
+                key: node[key]
+                for key in ("kind", "title", "summary", "description", "guidance", "notes", "pedagogical_type",
+                            "requirement", "depth", "estimated_minutes", "status", "tags")
+                if key in node
+            }
+            if not _bson_size_within_limit(stored_node_fields):
+                add(node_path, "documento excede o limite seguro de tamanho para importação")
+            blocks = node.get("blocks")
+            if isinstance(blocks, list):
+                for block_index, block in enumerate(blocks):
+                    if isinstance(block, dict) and not _bson_size_within_limit(block):
+                        add(f"{node_path}.blocks[{block_index}]", "documento excede o limite seguro de tamanho para importação")
+            validate_document_sizes(node.get("children"), f"{node_path}.children", depth + 1)
+
+    validate_document_sizes(payload.get("nodes"), "nodes")
+
     relations = payload.get("relations")
     if relations is not None and not isinstance(relations, list):
         add("relations", "deve ser uma lista")
@@ -147,6 +195,8 @@ def validate_import_shape(payload: dict) -> list[dict]:
                     add(f"{path}.{field}", "deve ser texto")
             if "note" in relation and not isinstance(relation["note"], str):
                 add(f"{path}.note", "deve ser texto")
+            if not _bson_size_within_limit(relation):
+                add(path, "documento excede o limite seguro de tamanho para importação")
 
     return errors
 
