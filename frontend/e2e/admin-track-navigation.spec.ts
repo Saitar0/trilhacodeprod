@@ -15,5 +15,13 @@ test("administrator can open the seeded track editor", async ({ page }) => {
   await expect(page.getByTestId("admin-track-row-trilha-code")).toBeVisible();
   await page.getByTestId("admin-track-open-trilha-code").click();
   await expect(page.getByTestId("editor-track-title")).toContainText("Trilha Code");
+
+  await page.getByTestId("editor-settings-button").click();
+  await page.getByTestId("track-form-description").fill("E2E persisted track description");
+  await page.getByTestId("track-form-save").click();
+
+  await page.reload();
+  await page.getByTestId("editor-settings-button").click();
+  await expect(page.getByTestId("track-form-description")).toHaveValue("E2E persisted track description");
 });
 
