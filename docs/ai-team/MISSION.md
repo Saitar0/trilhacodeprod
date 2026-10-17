@@ -60,8 +60,8 @@ A missão permanece PARCIAL: as frentes técnicas selecionadas concluíram e pas
 ### Qualidade de código
 
 - Histórico administrativo via UI coberto pelo PR #18 e CI #39035017901.
-- Acessibilidade do formulário de importação está em PR #19: label, axe WCAG 2.1 A/AA e foco/Enter. Revisão independente aprovada; CI #39037180408 estava em execução.
-- Reenvio da resposta do aluno está em PR #20, com revisão independente aprovada; CI #39037237806 passou todos os checks e pulou deploys.
+- Acessibilidade do formulário de importação está em PR #19: label, axe WCAG 2.1 A/AA e foco/Enter. Revisão independente aprovada; CI #39037180408 passou frontend, backend, Compose e E2E.
+- Reenvio da resposta do aluno está em PR #20, com revisão independente aprovada; CI #39037237806 passou frontend, backend, Compose e E2E; deploys foram pulados.
 
 ### Homologação descartável
 
@@ -83,7 +83,7 @@ A missão permanece PARCIAL: as frentes técnicas selecionadas concluíram e pas
 
 ### Instruções de retomada
 
-1. Consultar CI #39037180408 e #39037237806 e revisar logs/jobs; se algum falhar, corrigir em PR separado.
+1. PRs #19 e #20 passaram CI e revisão; manter prontas para integração manual sem merge automático.
 2. Atualizar este checkpoint com os resultados finais e o status de PRs #19/#20; não fazer merge.
 3. Manter o baseline de performance até haver medição de requests em runtime.
 4. O responsável compara em canal privado o hostname confirmado no Web Console, porta SSH 22 e fingerprint da chave ED25519 com os valores do GitHub; só após comparação e aprovação específica corrigir o secret comprovadamente divergente. A aprovação para G2 permanece separada.
