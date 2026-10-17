@@ -6,7 +6,7 @@
 
 ## Resumo
 
-Foram abertas alterações para isolamento/CI, otimização de ícones, visibilidade, E2E, validação de import, autorização baseada em role e importação persistente. PRs #9–#11 passaram CI; #13 passou CI #48 e revisão independente; #14 passou CI #46; #15 passou CI #59. PR #12 CI #51 passou backend/frontend/E2E e manteve os deploys manuais pulados. PR #12 também passou CI #60 (submissão de exercício) e CI #70 (prévia sem mutação, importação persistida e edição de nó após reload). A revisão independente do último fluxo não encontrou achados acionáveis. Nenhum PR foi mesclado.
+Foram abertas alterações para isolamento/CI, otimização de ícones, visibilidade, E2E, validação de import, autorização baseada em role e importação persistente. PRs #9–#11 passaram CI; #13 passou CI #48 e revisão independente; #14 passou CI #46; #15 passou CI #59. PR #12 CI #51 passou backend/frontend/E2E e manteve os deploys manuais pulados. PR #12 também passou CI #60 (submissão de exercício) e CI #70 (prévia sem mutação, importação persistida e edição de nó após reload). A revisão independente do último fluxo não encontrou achados acionáveis. No momento da conclusão original da missão, nenhum PR havia sido mesclado. **Atualização posterior:** os PRs #9–#15 foram integrados à `main` por squash; a execução integrada da CI sobre a `main` ainda precisa de validação explícita.
 
 ## Alterações e evidências
 
@@ -40,14 +40,18 @@ Nenhuma credencial/secret consultada ou registrada; nenhum Mongo real, migraçã
 ## PRs
 
 - [#8 — registros da equipe](https://github.com/Saitar0/trilhacodeprod/pull/8) — aberto; documentação atualizada.
-- [#9 — isolamento Mongo/Compose](https://github.com/Saitar0/trilhacodeprod/pull/9) — aberto; CI passou.
-- [#10 — lazy icons](https://github.com/Saitar0/trilhacodeprod/pull/10) — aberto; CI passou.
-- [#11 — visibilidade](https://github.com/Saitar0/trilhacodeprod/pull/11) — aberto; CI/review passaram.
-- [#12 — E2E e gate de deploy](https://github.com/Saitar0/trilhacodeprod/pull/12) — aberto; CI #70 passou (inclui os fluxos acrescentados após #60); deploys foram pulados.
-- [#13 — import validation](https://github.com/Saitar0/trilhacodeprod/pull/13) — aberto; CI #48 passou.
-- [#14 — role revocation](https://github.com/Saitar0/trilhacodeprod/pull/14) — aberto; CI #46 passou.
-- [#15 — import persistence](https://github.com/Saitar0/trilhacodeprod/pull/15) — aberto; CI #59 passou.
+- [#9 — isolamento Mongo/Compose](https://github.com/Saitar0/trilhacodeprod/pull/9) — mesclado à `main`; CI passou.
+- [#10 — lazy icons](https://github.com/Saitar0/trilhacodeprod/pull/10) — mesclado à `main`; CI passou.
+- [#11 — visibilidade](https://github.com/Saitar0/trilhacodeprod/pull/11) — mesclado à `main`; CI/review passaram.
+- [#12 — E2E e gate de deploy](https://github.com/Saitar0/trilhacodeprod/pull/12) — mesclado à `main`; CI #70 passou (inclui os fluxos acrescentados após #60); deploys foram pulados.
+- [#13 — import validation](https://github.com/Saitar0/trilhacodeprod/pull/13) — mesclado à `main`; CI #48 passou.
+- [#14 — role revocation](https://github.com/Saitar0/trilhacodeprod/pull/14) — mesclado à `main`; CI #46 passou.
+- [#15 — import persistence](https://github.com/Saitar0/trilhacodeprod/pull/15) — mesclado à `main`; CI #59 passou.
 - [#16 — E2E submission](https://github.com/Saitar0/trilhacodeprod/pull/16) — fechado sem merge, substituído pelo commit no PR #12 para que o teste execute no workflow configurado para PRs contra main.
+
+## Atualização de integração
+
+Os PRs #9, #11, #13, #14, #15, #12 e #10 foram mesclados nessa ordem, após revisão de seus patches e confirmação de CI verde nas branches. A CI sobre a combinação final em `main` ainda não foi confirmada nesta atualização. O PR #8 documenta a missão e este registro de integração.
 
 ## Próxima retomada
 
