@@ -18,6 +18,10 @@ Avançar confiabilidade, E2E, responsividade, desempenho, segurança/integridade
 - F — homologação: PARCIAL. Edição admin persistiu em CI #50. Import de preview/persistência/idempotência passou em PR #15/CI #59; dry-run tem asserção de não mutação. PR #12/CI #60 passou envio de exercício e persistência; CI #70 passou importação UI e edição de nó após reload. Histórico e inspeção funcional mais ampla permanecem pendentes.
 - G — staging/release: BLOQUEADA por gates operacionais. Nenhum acesso a Mongo real, segredo, SSH/Coolify/VPS ou operação G3–G6.
 
+## Percentual do escopo verificável
+
+16 de 18 tarefas selecionadas concluídas (89%); restam inspeção visual/teclado/acessibilidade local e homologação operacional de staging. A contagem usa tarefas verificáveis descritas em REPORT.md e não considera gates G3–G6 como execução autorizada.
+
 ## Segurança e continuidade
 
 CI de E2E usa Mongo sem volume persistente e DB trilhacode_e2e na própria job; backend de integração usa fixture de banco descartável. O novo caso cria estudante e bloco temporários, e remove o bloco no teardown do teste; a job destrói o banco ao final. Credenciais são de teste. As alterações locais anteriores do usuário foram preservadas e não incluídas nos PRs. PRs são para revisão manual; não houve merge/deploy.
