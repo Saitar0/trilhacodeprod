@@ -71,7 +71,7 @@
 
 - Decisão: cobrir a publicação com nota pela tela administrativa, edição posterior da descrição e comparação do snapshot com o estado atual. Usar o track seed apenas no job E2E descartável; não restaurar nem acionar operações operacionais.
 - Motivo: os testes existentes cobrem edição e persistência de settings, enquanto o fluxo de versão publicado e compare ainda não tem cobertura UI.
-- Evidência inicial: implementado em `frontend/e2e/admin-track-navigation.spec.ts` na branch `codex/e2e-version-history`; aguarda validação da CI antes de ser considerado concluído.
+- Evidência: PR #18; CI #39035017901 passou backend, frontend, Compose e E2E; deploys de staging/produção foram pulados. Revisão independente aprovou o isolamento e os asserts do fluxo.
 
 ## 17/10/2026 — Não alterar configuração G2 sem chave verificada
 
