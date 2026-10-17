@@ -3,6 +3,8 @@ import { expect, request as apiRequest, test } from "@playwright/test";
 const API_BASE_URL = "http://127.0.0.1:18000";
 
 test("student can submit an exercise and retain the answer after reload", async ({ page }) => {
+  test.skip(!process.env.CI, "Mutates only the ephemeral Mongo database prepared by the CI workflow.");
+
   const api = await apiRequest.newContext({ baseURL: API_BASE_URL });
   let blockId: string | undefined;
 
