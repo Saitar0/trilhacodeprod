@@ -1,9 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, request as apiRequest, test } from "@playwright/test";
 
 const API_BASE_URL = "http://127.0.0.1:18000";
 
-test("student can submit an exercise and retain the answer after reload", async ({ page, request }) => {
-  const api = await request.newContext({ baseURL: API_BASE_URL });
+test("student can submit an exercise and retain the answer after reload", async ({ page }) => {
+  const api = await apiRequest.newContext({ baseURL: API_BASE_URL });
   let blockId: string | undefined;
 
   try {
@@ -36,7 +36,7 @@ test("student can submit an exercise and retain the answer after reload", async 
         data: { prompt: "Describe a variable.", allow_resubmit: true },
       },
     });
-    expect(blockResponse.status(), await blockResponse.text()).toBe(200);
+    expect(blockResponse.status(), "create a temporary exercise in disposable CI Mongo").toBe(200);
     blockId = (await blockResponse.json()).id;
 
     await page.route("https://**/*", (route) => route.abort());
