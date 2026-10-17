@@ -22,8 +22,8 @@ Criada a documentação permanente para organização e continuidade da equipe. 
 - **Verificação documental:** os seis arquivos esperados e seções obrigatórias foram conferidos por script local; `git diff --check` passou.
 - **Testes de aplicação:** não executados; esta missão altera somente documentação e instruções. A CI da PR será a validação automatizada disponível para o commit proposto.
 - **Revisão técnica independente:** aprovada sem correções de conteúdo; confirmou os fatos sobre branch padrão, PRs, CI, testes de interface e oportunidade de tamanho de bundle.
-- **Escopo do commit:** somente `AGENTS.md` e os cinco arquivos de `docs/ai-team/` serão staged. Alterações locais preexistentes permanecem fora do escopo.
-- **CI remota:** pendente da criação da Pull Request.
+- **Escopo do commit:** somente `AGENTS.md` e os cinco arquivos de `docs/ai-team/` foram incluídos. Alterações locais preexistentes permanecem fora do commit.
+- **CI remota:** [execução 39013812908](https://github.com/Saitar0/trilhacodeprod/actions/runs/39013812908) aprovada no commit `06f2217`; backend e frontend passaram, deploy-staging e deploy-production foram ignorados.
 
 ## Segurança e riscos
 
@@ -33,7 +33,7 @@ Criada a documentação permanente para organização e continuidade da equipe. 
 
 ## Pull Request
 
-Pendente de publicação da branch e criação da PR contra `main`.
+[PR #8 — docs: add development team operating records](https://github.com/Saitar0/trilhacodeprod/pull/8), aberta contra `main`; sem merge.
 
 ## Backlog e pendências
 
