@@ -51,7 +51,7 @@ O workflow atual não define `-p` nem uma opção `Port`; a conexão usa a porta
 
 Antes de propor qualquer correção:
 
-1. Em um console administrativo autenticado da VPS, consulte somente a chave pública ED25519 do host: `sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256`. Registre a fingerprint SHA256 por canal privado e confirme que o console pertence à VPS esperada.
+1. Em um console administrativo autenticado da VPS, consulte a linha da chave pública ED25519 com `sudo cat /etc/ssh/ssh_host_ed25519_key.pub` e calcule sua fingerprint com `sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256`. Registre a linha pública e a fingerprint somente por canal privado; confirme que o console pertence à VPS esperada. A chave `.pub` é pública, mas não a copie para este repositório, tarefa, terminal compartilhado ou logs.
 2. O responsável confere privadamente que o hostname/IP de `G2_STAGING_SSH_HOST` identifica essa VPS. A entrada de `G2_STAGING_SSH_KNOWN_HOSTS` precisa usar exatamente essa identidade; na porta padrão 22, a forma habitual é `host ssh-ed25519 BASE64_PUBLIC_KEY`.
 3. Calcule a fingerprint da chave ED25519 na entrada conhecida, usando um arquivo temporário seguro sob controle do responsável, e compare os valores SHA256. Não copie secrets para este repositório, tarefa, terminal compartilhado ou logs.
 4. Se identidade e fingerprint coincidirem, preserve os valores. Se a identidade host estiver errada, corrija somente `G2_STAGING_SSH_HOST`; se a chave estiver ausente ou for a chave pública errada para a identidade confirmada, atualize somente `G2_STAGING_SSH_KNOWN_HOSTS` com a entrada verificada. Se a fingerprint não coincidir, pare e investigue a identidade/rotação com o administrador.
