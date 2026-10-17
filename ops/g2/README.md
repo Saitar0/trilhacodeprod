@@ -15,7 +15,7 @@ This change adds **only source files**. It does not install anything on the VPS,
 - The key entry enforces `restrict,command="/usr/local/sbin/trilhacode-g2-preflight-guard"`.
 - The guard checks `SSH_ORIGINAL_COMMAND` exactly equals `trilhacode-g2-preflight` and can call **only** the root-owned preflight runner via passwordless sudo. The runner is root-owned mode 0700; `sudoers` allows exactly that path with no user-provided flags.
 - Runner accepts no arguments, hardcodes the approved image digest and staging Docker network/container ID, and checks database container state, network, image presence and that `preflight.env` is root-owned mode 0600.
-- It runs the backend as the image's unprivileged `app` user in an ephemeral restricted Docker container with no ports, host mounts, privileges or Docker socket; read-only filesystem, resource limits and 180-second timeout.
+- The pinned image's Dockerfile has no non-root `USER`, so the runner explicitly sets UID/GID `65532:65532`. It runs the backend in an ephemeral restricted Docker container with no ports, host mounts, privileges or Docker socket; read-only filesystem, resource limits and 180-second timeout.
 - Backend output is captured to a root-only temporary file; GitHub gets **only counts** of `OK`, `AUSENTE`, `CONFLITO`, `DUPLICATAS`. No raw error strings or sample MongoDB keys are sent to GitHub.
 - A nonzero command exit, conflict, duplicate, timeout or failed prerequisite returns a failure. Missing indexes are expected before G4.
 
@@ -34,7 +34,7 @@ This change adds **only source files**. It does not install anything on the VPS,
 ## Operational caveats
 
 - The installer is **single-use** by design; running it twice stops rather than silently rewriting access controls.
-- After a time limit, the runner attempts cleanup of its **fixed-name** ephemeral container only; it never removes unrelated containers. A concurrent or unexpected existing G2 container causes a failure.
+- The runner records Docker's per-invocation container ID and cleanup targets only that ID; it never removes another container by name. A concurrent or unexpected existing G2 container causes a failure.
 - GHCR image digest pins content, but independent provenance validation of the GitHub workflow and approved commit is still required before production-sensitive use.
 - `preflight.env` is presented to Docker as container environment and is readable by host root/Docker admins; it is not exposed to the GitHub SSH account. Docker administrators are already privileged.
 - Mongo errors and raw findings are intentionally not exposed to GitHub. Operational diagnosis must occur securely on the VPS.
