@@ -78,3 +78,21 @@
 - Decisão: manter `StrictHostKeyChecking=yes` e não alterar host/secret nem despachar o workflow.
 - Evidência: YAML usa SSH na porta padrão 22. A sessão autenticada Hostinger confirma a VPS e status em atividade, mas Web Console está desabilitado; Coolify MCP confirma apenas a disponibilidade do painel e estado dos recursos. O hostname alvo é secret, e não foi possível ler a chave ED25519 do servidor para fingerprint.
 - Próximo passo: administrador obter a chave pública pela fonte confiável do servidor, calcular SHA256 e comparar com a entrada e identidade host de `G2_STAGING_SSH_KNOWN_HOSTS` em canal privado. A correção de secret e a execução de G2 permanecem gates separados.
+
+
+## 17/10/2026 — Homologação de importação acessível e reenvio do aluno
+
+- Decisão: ampliar E2E com axe-core WCAG 2.1 A/AA e navegação por teclado no formulário de importação admin; verificar reenvio de uma resposta já enviada. Os testes só mutam o Mongo efêmero do CI.
+- Motivo: cobertura comprovada ainda não verificava nome acessível do JSON, ativação por teclado, nem a transição de atualização de resposta já enviada.
+- Evidência: PR #19 e PR #20 abertos; revisões técnicas independentes aprovadas. CI #39037180408 e #39037237806 pendentes no checkpoint.
+
+## 17/10/2026 — Hostinger Web Console novamente disponível; manter G2 bloqueado
+
+- Decisão: usar somente `hostname -f` e `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256` no console administrativo autenticado; não expor a fingerprint em arquivos/PR/logs; não alterar secrets nem despachar G2.
+- Evidência: o console identificou o hostname canônico esperado para a VPS; a fingerprint foi calculada localmente no terminal. O valor do hostname/known_hosts no GitHub é secret e não foi lido, impedindo comparar a identidade e escolher a correção.
+- Próximo passo: responsável compara host, porta 22 e fingerprint em canal privado; aprova especificamente qualquer alteração de secret. A execução G2 é uma autorização separada.
+
+## 17/10/2026 — Registrar baseline de bundle antes de otimizar
+
+- Decisão: não otimizar os ícones sem uma medição de requests por rota e confirmação de compatibilidade do catálogo.
+- Evidência: CI #39036366799 reportou 1.611 chunks JavaScript, soma gzip de 874,12 kB para todos os arquivos, `index` 493,75/159,36 kB e `IconCatalog` 213,07/50,83 kB (bruto/gzip). A soma de todos os chunks não representa tráfego de uma visita, pois há lazy loading.
