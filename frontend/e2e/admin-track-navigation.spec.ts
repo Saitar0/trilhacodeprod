@@ -18,7 +18,12 @@ test("administrator can open the seeded track editor", async ({ page }) => {
 
   await page.getByTestId("editor-settings-button").click();
   await page.getByTestId("track-form-description").fill("E2E persisted track description");
+  const updateResponse = page.waitForResponse((response) =>
+    response.url().includes("/api/tracks/") && response.request().method() === "PUT" && response.status() === 200,
+  );
   await page.getByTestId("track-form-save").click();
+  await updateResponse;
+  await expect(page.getByTestId("track-form-dialog")).toBeHidden();
 
   await page.reload();
   await page.getByTestId("editor-settings-button").click();
