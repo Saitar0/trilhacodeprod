@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 const API_BASE_URL = "http://127.0.0.1:18000";
 
-test("administrator can preview and persist an imported track", async ({ page }) => {
+test("administrator can preview and persist an imported track and node edit", async ({ page }) => {
   test.skip(!process.env.CI, "Mutates only the ephemeral Mongo database prepared by the CI workflow.");
 
   let trackId: string | undefined;
@@ -80,6 +80,25 @@ test("administrator can preview and persist an imported track", async ({ page })
     const tree = await treeResponse.json();
     expect(tree.nodes).toHaveLength(3);
     expect(tree.track.slug).toBe(slug);
+
+    const topic = tree.nodes.find((node: { kind: string }) => node.kind === "topic");
+    expect(topic).toBeTruthy();
+    await page.getByTestId("import-open-track").click();
+    await page.getByTestId(`admin-tree-select-${topic.id}`).click();
+    await expect(page.getByTestId("node-title-input")).toHaveValue("Topic 1");
+
+    const updatedTitle = "Topic 1 edited in E2E";
+    await page.getByTestId("node-title-input").fill(updatedTitle);
+    const updateResponse = page.waitForResponse((item) =>
+      item.url().includes(`/api/nodes/${topic.id}`)
+      && item.request().method() === "PUT",
+    );
+    await page.getByTestId("node-save-button").click();
+    const savedNode = await updateResponse;
+    expect(savedNode.status()).toBe(200);
+
+    await page.reload();
+    await expect(page.getByTestId("node-title-input")).toHaveValue(updatedTitle);
   } finally {
     if (trackId) {
       const cleanup = await page.request.delete(`${API_BASE_URL}/api/tracks/${trackId}`);
