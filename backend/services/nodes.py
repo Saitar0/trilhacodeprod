@@ -7,7 +7,7 @@ from core_utils import now
 from database import db
 from integrity import can_view_node, reconcile_orphans
 from learning import track_locks, visible_nodes
-from permissions import is_staff
+from permissions import can_view_track, is_staff
 from serialization import oid
 from services.common import (
     ancestors,
@@ -180,7 +180,7 @@ async def duplicate_node(node_id: str, user: dict) -> dict:
 async def get_track_tree(track_id: str, user: dict, limit: int = 100000, skip: int = 0) -> dict:
     track = await get_document("tracks", track_id)
     staff = is_staff(user)
-    if not staff and (track["status"] != "published" or track.get("visibility") == "private"):
+    if not can_view_track(track, user):
         raise HTTPException(status_code=404, detail="Trilha não encontrada")
     nodes = await db.nodes.find({"track_id": track_id}).sort("order", 1).to_list(100000)
     if not staff:

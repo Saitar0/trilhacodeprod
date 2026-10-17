@@ -53,6 +53,25 @@ def test_health_request_id_and_error_envelope(admin, session_factory):
     assert response.json()["error"]["request_id"]
 
 
+def test_students_cannot_fetch_private_track_metadata_directly(admin, student):
+    suffix = uuid.uuid4().hex[:8]
+    created = admin.post(f"{API}/tracks", json={"title": f"TEST_private_{suffix}"})
+    assert created.status_code == 200, created.text
+    track_id = created.json()["id"]
+    try:
+        published = admin.post(f"{API}/tracks/{track_id}/publish", json={})
+        assert published.status_code == 200, published.text
+        private = admin.put(f"{API}/tracks/{track_id}", json={"visibility": "private"})
+        assert private.status_code == 200, private.text
+
+        assert student.get(f"{API}/tracks/{track_id}").status_code == 404
+        assert student.get(f"{API}/tracks/{track_id}/tree").status_code == 404
+        assert admin.get(f"{API}/tracks/{track_id}").status_code == 200
+        assert admin.get(f"{API}/tracks/{track_id}/tree").status_code == 200
+    finally:
+        admin.delete(f"{API}/tracks/{track_id}")
+
+
 @pytest.fixture(scope="module")
 def fresh_student(session_factory):
     session = session_factory()
