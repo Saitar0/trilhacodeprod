@@ -51,3 +51,39 @@ A missão permanece PARCIAL: as frentes técnicas selecionadas concluíram e pas
 - QA de histórico implementado no PR #18: teste Playwright publica versão com nota única, edita a descrição e compara com o estado atual usando Mongo descartável da CI. CI #39035017901 passou backend, frontend, Compose e E2E; deploys foram pulados. Revisão independente não encontrou achados acionáveis após corrigir o passo de obtenção da chave pública no runbook G2.
 - Diagnóstico G2 atualizado: painel Hostinger autenticado confirma VPS ativa, mas Web Console está desabilitado. Coolify é acessível; app API de staging está `exited:unhealthy`, Mongo staging `running:healthy`. Workflow usa porta SSH 22; segredo do hostname e segredo `known_hosts` não são legíveis por este canal. Chave ED25519/fingerprint do servidor não foi obtida.
 - Missão segue parcial. Nenhuma secret foi alterada, G2 foi executado, nem houve migração, criação de índices, seed, deploy ou acesso/escrita ao banco real.
+
+
+## Missão de homologação e preparação de lançamento — 17/10/2026
+
+**Base confirmada:** `main` em `5e503aecccfb85bd764d7af8e120d70819c6af4f`, PR #18 integrado. CI pós-merge #39036366799 verde em backend, frontend, Compose e E2E; deploys pulados.
+
+### Qualidade de código
+
+- Histórico administrativo via UI coberto pelo PR #18 e CI #39035017901.
+- Acessibilidade do formulário de importação está em PR #19: label, axe WCAG 2.1 A/AA e foco/Enter. Revisão independente aprovada; CI #39037180408 estava em execução.
+- Reenvio da resposta do aluno está em PR #20, com revisão independente aprovada; CI #39037237806 estava em execução.
+
+### Homologação descartável
+
+- CI #39036366799 confirmou as suites E2E anteriores em Mongo descartável.
+- Importação com preview, persistência, edição e histórico publicado já têm cobertura de UI na CI; PR #20 acrescenta atualização após envio e persistência.
+- Execução local mutável foi evitada porque a configuração de Mongo local não foi demonstrada como descartável. O CI isolado é a validação pendente para PR #19/#20.
+
+### Pendências de staging
+
+- API `trilhacode-staging-api` continua `exited:unhealthy`, sem container presente; Mongo de staging responde como healthy.
+- A sessão autenticada da Hostinger agora mostra o Web Console. Hostname e fingerprint foram consultados com comandos de leitura, mas a fingerprint não foi copiada para este registro.
+- O hostname e a chave conhecida do GitHub são secrets não inspecionáveis pela sessão; responsável precisa compará-los privadamente antes de se determinar a correção.
+
+### Bloqueios que exigem autorização
+
+- Alterar `G2_STAGING_SSH_HOST` ou `G2_STAGING_SSH_KNOWN_HOSTS), ou despachar G2, depende de autorização específica. G2 consulta Mongo staging.
+- Migração, criação de índices, seed, backup/restore, deploy, mudança em serviços/credenciais/redes VPS ou Dev Forge não foram autorizados nem executados.
+- Os testes automatizados não representam homologação visual ou operacional de staging; não declarar produto pronto para produção.
+
+### Instruções de retomada
+
+1. Consultar CI #39037180408 e #39037237806 e revisar logs/jobs; se algum falhar, corrigir em PR separado.
+2. Atualizar este checkpoint com os resultados finais e o status de PRs #19/#20; não fazer merge.
+3. Manter o baseline de performance até haver medição de requests em runtime.
+4. O responsável compara em canal privado o hostname confirmado no Web Console, porta SSH 22 e fingerprint da chave ED25519 com os valores do GitHub; só após comparação e aprovação específica corrigir o secret comprovadamente divergente. A aprovação para G2 permanece separada.
