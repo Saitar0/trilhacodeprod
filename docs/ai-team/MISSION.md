@@ -11,11 +11,11 @@ Avançar confiabilidade, E2E, responsividade, desempenho, segurança/integridade
 ## Estado
 
 - A — isolamento Mongo dos testes e validação Compose: CONCLUÍDA em PR #9; CI #18 verde.
-- B — login/progresso do aluno, navegação/admin e persistência de edição: implementados no PR #12; CI #45, #50 e #51 passaram. O último CI também confirmou que E2E é requisito dos deploy jobs, que foram pulados. Um fluxo de submissão de exercício com aluno temporário foi adicionado ao PR #12 e aguarda CI #60/revisão.
+- B — login/progresso do aluno, navegação/admin e persistência de edição: implementados no PR #12; CI #45, #50 e #51 passaram. O último CI também confirmou que E2E é requisito dos deploy jobs, que foram pulados. CI #60 passou o fluxo de submissão com aluno temporário; CI #70 passou a prévia/importação persistida e edição de nó após reload, com aprovação independente.
 - C — overflow horizontal nos breakpoints 360/390 px: CONCLUÍDA no escopo testado por CI #45; falta inspeção visual/teclado local.
 - D — chunk de ícones sob demanda: CONCLUÍDA em PR #10; redução gzip medida de 65,7%, CI #19 verde.
 - E — visibilidade privada (PR #11/CI #21), payload/tamanho BSON de import (PR #13, 33 testes locais, CI #48 e revisor aprovando) e role refresh/revogação (PR #14/CI #46): CONCLUÍDA para os achados atuais.
-- F — homologação: PARCIAL. Edição admin persistiu em CI #50. Import de preview/persistência/idempotência passou em PR #15/CI #59; dry-run tem asserção de não mutação. Novo E2E de submissão aguarda CI #60. Edição de nó/bloco e outros fluxos ainda pendentes.
+- F — homologação: PARCIAL. Edição admin persistiu em CI #50. Import de preview/persistência/idempotência passou em PR #15/CI #59; dry-run tem asserção de não mutação. PR #12/CI #60 passou envio de exercício e persistência; CI #70 passou importação UI e edição de nó após reload. Histórico e inspeção funcional mais ampla permanecem pendentes.
 - G — staging/release: BLOQUEADA por gates operacionais. Nenhum acesso a Mongo real, segredo, SSH/Coolify/VPS ou operação G3–G6.
 
 ## Segurança e continuidade
@@ -24,4 +24,4 @@ CI de E2E usa Mongo sem volume persistente e DB trilhacode_e2e na própria job; 
 
 ## Critério de fechamento
 
-A missão técnica fica PARCIAL até a CI/revisão do fluxo de submissão e os itens de homologação viáveis serem concluídos. Os gates de staging dependem do operador e de aprovação específica.
+A missão permanece PARCIAL: as frentes técnicas selecionadas concluíram e passaram suas CI/revisões; a inspeção visual/teclado local e a homologação real de staging não puderam ser executadas com segurança/recursos disponíveis. Gates operacionais dependem do operador e de aprovação específica.
