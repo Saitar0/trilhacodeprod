@@ -44,3 +44,18 @@ Host-side execution guard requirements:
 No SSH account, keys, MongoDB user, environment files, image or scripts are created by this PR. It does not perform any build, preflight or deploy. No changes to Dev Forge or to Docker networks/firewalls/Coolify are authorized.
 
 Before activation, perform a host-only review of the wrapper, least-privilege permissions, image provenance, output filtering, and failure cases. Confirm with the user before any infrastructure writes.
+
+## Verificação de identidade SSH antes da ativação
+
+O workflow atual não define `-p` nem uma opção `Port`; a conexão usa a porta SSH padrão 22. O valor de `G2_STAGING_SSH_HOST` é um secret e deve ser confirmado pelo responsável no GitHub Environment `staging-preflight`. Não infira o alvo a partir do IP público da VPS.
+
+Antes de propor qualquer correção:
+
+1. Em um console administrativo autenticado da VPS, consulte a linha da chave pública ED25519 com `sudo cat /etc/ssh/ssh_host_ed25519_key.pub` e calcule sua fingerprint com `sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256`. Registre a linha pública e a fingerprint somente por canal privado; confirme que o console pertence à VPS esperada. A chave `.pub` é pública, mas não a copie para este repositório, tarefa, terminal compartilhado ou logs.
+2. O responsável confere privadamente que o hostname/IP de `G2_STAGING_SSH_HOST` identifica essa VPS. A entrada de `G2_STAGING_SSH_KNOWN_HOSTS` precisa usar exatamente essa identidade; na porta padrão 22, a forma habitual é `host ssh-ed25519 BASE64_PUBLIC_KEY`.
+3. Calcule a fingerprint da chave ED25519 na entrada conhecida, usando um arquivo temporário seguro sob controle do responsável, e compare os valores SHA256. Não copie secrets para este repositório, tarefa, terminal compartilhado ou logs.
+4. Se identidade e fingerprint coincidirem, preserve os valores. Se a identidade host estiver errada, corrija somente `G2_STAGING_SSH_HOST`; se a chave estiver ausente ou for a chave pública errada para a identidade confirmada, atualize somente `G2_STAGING_SSH_KNOWN_HOSTS` com a entrada verificada. Se a fingerprint não coincidir, pare e investigue a identidade/rotação com o administrador.
+5. Se o console autenticado estiver indisponível, pare aqui e registre o bloqueio. Não confie em `ssh-keyscan` sem comparação independente. Não desative `StrictHostKeyChecking`.
+
+A correção do secret exige aprovação do responsável da infraestrutura. Disparar o workflow G2 exige aprovação separada, pois ele consulta o Mongo de staging e pode consumir recursos.
+

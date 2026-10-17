@@ -85,3 +85,23 @@ Os PRs #9, #11, #13, #14, #15, #12 e #10 foram mesclados nessa ordem, após revi
 ## Próxima retomada
 
 Homologação visual/teclado e histórico permanecem para outra rodada com navegador/QA disponível. O host key do preflight G2 precisa ser comparado pelo operador com a fingerprint pública e a configuração conhecida, sem expor/alterar credenciais nesta missão. Gates operacionais G3–G6 continuam sem execução e dependem de aprovação.
+
+
+## Retomada — estado observado em 17/10/2026
+
+### Repositório e CI
+
+- GitHub confirma `main` em `217f40fd3581f54eaa5f00546f643cc7203e1c72`, correspondente ao merge do PR #17. Não foi encontrado commit posterior nos 10 commits mais recentes.
+- CI #39030667018 concluiu com sucesso: `compose-config`, backend, frontend e E2E. Os jobs `deploy-staging` e `deploy-production` foram pulados.
+- PRs #8–#15 e #17 foram encontrados integrados; PR #16 foi encerrado como supersedido pelo #12. PR #17 foi fechado por merge nesse SHA.
+- Checkout local em `27a98964` está oito commits atrás e tem modificações e arquivos não rastreados. Foi preservado sem limpeza; clone remoto limpo não foi possível por bloqueio de DNS/rede do host.
+- PR #18 adiciona um E2E que publica uma nota única, edita a descrição depois e verifica a nota e um diff positivo pela UI de versões no pipeline com Mongo efêmero. CI #39035017901 passou backend, frontend, Compose e E2E; deploys foram pulados. A revisão técnica independente aprovou o isolamento do teste e o runbook G2 depois do ajuste para obter a linha da chave pública e a fingerprint no canal administrativo.
+
+### Diagnóstico G2 e infraestrutura
+
+- Sessão autenticada Hostinger respondeu. VPS `srv2032201.hstgr.cloud` / `179.236.240.176`, Ubuntu 24.04 com Coolify, consta “Em atividade”; painel informa KVM 2, 2 vCPU/8 GB RAM/100 GB, validade até 03/11/2026.
+- O Web Console está desabilitado no painel no momento da consulta; não foi possível consultar `/etc/ssh/ssh_host_ed25519_key.pub` por canal administrativo.
+- Coolify 4.4.6 respondeu por conexão de leitura. `trilhacode-staging-api` (projeto Trilha Code) consta `exited:unhealthy` e sem container presente; `trilhacode-staging-mongodb` está `running:healthy`. Os apps do projeto `general` incluem Dev Forge; nenhum lifecycle ou dado deles foi acessado.
+- `.github/workflows/g2-staging-preflight.yml` usa as secrets `G2_STAGING_SSH_*` e não define `-p`/`Port`; OpenSSH usa 22. O alvo de `G2_STAGING_SSH_HOST` e a entrada em `G2_STAGING_SSH_KNOWN_HOSTS` não podem ser lidos pelos canais disponíveis. A falha anterior é compatível com entrada ED25519 ausente/incompatível, mas não confirma host correto nem fingerprint.
+- Nenhuma chave/fingerprint obtida. Não foram alteradas secrets/configurações, executado G2, acesso SSH, deploy, migração, índice, seed, backup/restore ou operação em Mongo.
+- Bloqueio e retomada: quando o Web Console ficar disponível, administrador deve obter fingerprint SHA256 no próprio host e comparar em canal privado com hostname, porta 22 e entrada `known_hosts` configurados no GitHub. Corrigir secrets apenas depois dessa comparação e aprovação específica; executar G2 exige aprovação distinta.

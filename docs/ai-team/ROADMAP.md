@@ -24,3 +24,11 @@ Atualizado em 17/10/2026 a partir de main (8dea1233) e evidências de CI e QA lo
 ## Salvaguardas
 
 Nenhum acesso ou escrita em Mongo real, migração, seed real, backup/restore, deploy, Coolify, VPS, SSH/firewall, secret ou Dev Forge. PRs permanecem abertos; nenhum merge automático.
+
+
+## Atualização de retomada — 17/10/2026
+
+- `main` avançou até `217f40fd3581f54eaa5f00546f643cc7203e1c72` (PRs #8–#15 e #17 integrados; PR #16 foi encerrado como supersedido pelo #12). A CI #39030667018 passou backend, frontend, Compose e Playwright E2E; deploys staging e produção foram pulados.
+- PR #18 amplia o E2E do histórico administrativo: publica uma versão pela UI, edita a trilha depois e compara snapshot e estado atual no Mongo efêmero. CI #39035017901 passou backend, frontend, Compose e E2E; deploys foram pulados. Revisão independente sem achados acionáveis após ajuste do runbook G2.
+- G2: Hostinger autenticada confirma VPS `srv2032201.hstgr.cloud` (`179.236.240.176`) em atividade. O botão Web Console aparece desabilitado. Coolify responde; `trilhacode-staging-api` está `exited:unhealthy`, Mongo staging está saudável. O comando SSH do workflow usa a porta 22 por padrão; o hostname configurado continua oculto no secret. Não há fingerprint autenticada disponível para comparar.
+- A correção de `G2_STAGING_SSH_HOST`/`G2_STAGING_SSH_KNOWN_HOSTS` permanece pendente. Não alterar secrets, disparar G2, operar Mongo, migrar, criar índices, seed ou deploy sem aprovações correspondentes.

@@ -65,3 +65,16 @@
 - Decisão: incluir no E2E de submissão um bloco `practical_challenge` temporário no Mongo efêmero e verificar seu nome acessível; selecionar o textarea pelo ID do bloco criado ao medir sobreposição.
 - Motivo: a revisão independente apontou que o teste anterior podia medir outro exercício e não cobria o label do campo de código.
 - Evidência: payload conferido com `BlockIn`/serviço de blocos, cleanup dos IDs temporários no teardown e revisão independente sem achados acionáveis. CI #39030010321 passou backend, frontend, Compose e Playwright E2E.
+
+
+## 17/10/2026 — E2E do histórico pela interface
+
+- Decisão: cobrir a publicação com nota pela tela administrativa, edição posterior da descrição e comparação do snapshot com o estado atual. Usar o track seed apenas no job E2E descartável; não restaurar nem acionar operações operacionais.
+- Motivo: os testes existentes cobrem edição e persistência de settings, enquanto o fluxo de versão publicado e compare ainda não tem cobertura UI.
+- Evidência: PR #18; CI #39035017901 passou backend, frontend, Compose e E2E; deploys de staging/produção foram pulados. Revisão independente aprovou o isolamento e os asserts do fluxo.
+
+## 17/10/2026 — Não alterar configuração G2 sem chave verificada
+
+- Decisão: manter `StrictHostKeyChecking=yes` e não alterar host/secret nem despachar o workflow.
+- Evidência: YAML usa SSH na porta padrão 22. A sessão autenticada Hostinger confirma a VPS e status em atividade, mas Web Console está desabilitado; Coolify MCP confirma apenas a disponibilidade do painel e estado dos recursos. O hostname alvo é secret, e não foi possível ler a chave ED25519 do servidor para fingerprint.
+- Próximo passo: administrador obter a chave pública pela fonte confiável do servidor, calcular SHA256 e comparar com a entrada e identidade host de `G2_STAGING_SSH_KNOWN_HOSTS` em canal privado. A correção de secret e a execução de G2 permanecem gates separados.
