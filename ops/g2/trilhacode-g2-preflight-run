@@ -29,14 +29,25 @@ grep -q '^MONGO_URL=mongodb' "$ENV_FILE" || { echo 'G2: MongoDB connection confi
   /usr/bin/jq -e --arg n "$NETWORK" 'has($n)' >/dev/null ||
   { echo 'G2: staging database network mismatch' >&2; exit 69; }
 "$DOCKER" image inspect "$IMAGE" >/dev/null 2>&1 || { echo 'G2: approved image missing; provision pinned digest separately' >&2; exit 69; }
-[[ -z "$("$DOCKER" ps -aq --filter "name=^/${RUN_NAME}$")" ]] || { echo 'G2: prior preflight container exists; inspect manually' >&2; exit 75; }
+[[ -z "$("$DOCKER" ps -aq --filter "name=^/$RUN_NAME$")" ]] || { echo 'G2: prior preflight container exists; inspect manually' >&2; exit 75; }
 
 out="$(/usr/bin/mktemp)"
+cid_dir="$(/usr/bin/mktemp -d)"
+cidfile="$cid_dir/container.id"
 cleanup() {
   local status=$?
   trap - EXIT HUP INT TERM
-  "$DOCKER" rm -f "$RUN_NAME" >/dev/null 2>&1 || true
-  /usr/bin/rm -f -- "$out"
+  # Remove only the container ID created by this invocation. Never remove
+  # another caller's container by the shared fixed name.
+  if [[ -s "$cidfile" ]]; then
+    container_id=''
+    IFS= read -r container_id < "$cidfile" || true
+    if [[ "$container_id" =~ ^[0-9a-f]{64}$ ]]; then
+      "$DOCKER" rm -f "$container_id" >/dev/null 2>&1 || true
+    fi
+  fi
+/usr/bin/rm -f -- "$out" "$cidfile"
+  /usr/bin/rmdir -- "$cid_dir" 2>/dev/null || true
   exit "$status"
 }
 trap cleanup EXIT
@@ -44,11 +55,13 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 set +e
 "$TIMEOUT" --signal=TERM --kill-after=10s 180s "$DOCKER" run --rm \
+  --cidfile "$cidfile" \
   --name "$RUN_NAME" \
   --network "$NETWORK" \
   --pull never \
   --env-file "$ENV_FILE" \
   --entrypoint python \
+  --user 65532:65532 \
   --read-only \
   --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16m \
   --cap-drop ALL \

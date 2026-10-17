@@ -39,10 +39,12 @@ printf 'trilhacode-g2 ALL=(root) NOPASSWD: %s\n' "$RUNNER" > "$tmp"
 
 install -o root -g root -m 0755 "$SCRIPT_DIR/trilhacode-g2-preflight-guard" "$GUARD"
 install -o root -g root -m 0700 "$SCRIPT_DIR/trilhacode-g2-preflight-run" "$RUNNER"
-install -o root -g root -m 0440 "$tmp" "$SUDOERS"
+# Install the forced-command key before granting its narrowly scoped sudo right.
+# If the final policy install fails, the key has no privileged operation.
 # Only allow the exact remote request, no scp/sftp/TTY/forwarding.
 printf 'restrict,command="%s" %s %s\n' "$GUARD" "$key_type" "$key_blob" > "$KEYFILE"
 chown trilhacode-g2:trilhacode-g2 "$KEYFILE"
 chmod 0600 "$KEYFILE"
+install -o root -g root -m 0440 "$tmp" "$SUDOERS"
 /usr/sbin/visudo -c >/dev/null
 echo 'G2 host guard installed. Preflight not executed. Image/readonly Mongo/env/GitHub secrets still require separate provisioning.'
