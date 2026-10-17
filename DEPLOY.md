@@ -1,6 +1,6 @@
 # Deploy Trilha Code com Coolify
 
-Este projeto usa duas aplicações independentes no Coolify: **API** e **frontend**, em cada ambiente. Isso permite domínios, variáveis de build e implantações independentes; a API executa a migração como comando pre-deploy. O MongoDB é um recurso gerenciado pelo Coolify. Não use `compose.yaml` para produção: ele é voltado ao desenvolvimento local.
+Este projeto usa duas aplicações independentes no Coolify: **API** e **frontend**, em cada ambiente. Isso permite domínios, variáveis de build e implantações independentes. A API não executa migrações ao iniciar; preflight, migração e criação de índices seguem os gates operacionais da seção 7. O MongoDB é um recurso gerenciado pelo Coolify. Não use `compose.yaml` para produção: ele é voltado ao desenvolvimento local.
 
 Substitua `example.com`, endereços e valores `REPLACE_...` antes de criar os recursos. Nunca versione credenciais.
 
