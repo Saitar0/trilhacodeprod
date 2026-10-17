@@ -2,7 +2,7 @@
 
 **Data:** 17/10/2026 (America/Sao_Paulo)  
 **Início observado:** 07:55:22 UTC  
-**Última atualização:** 09:16 UTC; PR #12 CI #70 concluída
+**Última atualização:** 09:17 UTC; PR #12 CI #70 concluída
 
 ## Resumo
 
@@ -19,12 +19,16 @@ Foram abertas alterações para isolamento/CI, otimização de ícones, visibili
 - [#15 — import persistente/idempotente](https://github.com/Saitar0/trilhacodeprod/pull/15): testa dry-run sem escrita, import real, árvore resultante e reimport idempotente. Revisor solicitou comprovação explícita de não mutação no dry-run; foi adicionada a expectativa de duas criações no primeiro import. CI #59 backend/frontend passou; execução está isolada pela fixture descartável.
 - [#8 — registros de equipe](https://github.com/Saitar0/trilhacodeprod/pull/8): contém TEAM, roadmap, missão, decisões e este relatório.
 
+## Percentual do escopo verificável
+
+16 de 18 tarefas selecionadas foram concluídas (89%): 2 de qualidade/CI, 5 de jornadas E2E, overflow mobile, desempenho, 4 de backend/segurança e 3 de homologação funcional. Permanecem 1 tarefa de inspeção visual/teclado/acessibilidade local e 1 homologação operacional de staging bloqueada por gates e validação de host key.
+
 ## Testes
 
 - Backend unitários locais: `python -m pytest unit_tests -q` — 33 passaram; Ruff nos arquivos do PR #13 passou.
 - Backend de integração: PR #14 CI #46 e PR #15 CI #59 passaram em DB descartável. Não executados contra banco local/persistente.
 - Frontend: Vitest 9/9; typecheck, lint, Playwright discovery e ESLint das specs/config passaram localmente para o conjunto anterior de E2E.
-- CI: #18 PR #9 verde; #19 PR #10 verde; #21 PR #11 verde; #45/#50/#51 PR #12 verde; #48 PR #13 verde; #46 PR #14 verde; #59 PR #15 verde. #60 PR #12, com submissão E2E, em execução.
+- CI: #18 PR #9 verde; #19 PR #10 verde; #21 PR #11 verde; #45/#50/#51/#60/#70 PR #12 verde; #48 PR #13 verde; #46 PR #14 verde; #59 PR #15 verde. No #70, backend, frontend e E2E passaram; deploy staging e produção foram pulados.
 - Docker/browser E2E não foi executado localmente; a CI usa serviço Mongo isolado. Nenhum Mongo local foi iniciado.
 
 ## Revisão, segurança e limites
