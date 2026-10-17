@@ -30,6 +30,9 @@ def test_import_dry_run_persistence_and_reimport_are_idempotent(admin_session):
         imported = admin_session.post(f"{API}/import/track?dry_run=false", json=payload)
         assert imported.status_code == 200, imported.text
         assert imported.json()["dry_run"] is False
+        assert imported.json()["summary"]["nodes_create"] == 2, (
+            "dry-run must not persist nodes before the real import"
+        )
         track_id = imported.json()["track"]["id"]
 
         repeated = admin_session.post(f"{API}/import/track?dry_run=false", json=payload)
@@ -43,4 +46,3 @@ def test_import_dry_run_persistence_and_reimport_are_idempotent(admin_session):
     finally:
         if track_id:
             admin_session.delete(f"{API}/tracks/{track_id}")
-
