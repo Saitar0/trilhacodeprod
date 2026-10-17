@@ -61,3 +61,12 @@ def test_bson_document_size_limit_is_rejected_by_shape_validation(monkeypatch):
     assert any(issue["path"] == "track" for issue in errors)
     assert not _bson_size_within_limit({"data": "x" * 64}, max_bytes=32)
 
+
+def test_node_size_check_includes_generated_slug_and_import_reference(monkeypatch):
+    monkeypatch.setattr("import_payload.MAX_IMPORT_DOCUMENT_BYTES", 256)
+    payload = {"track": {}, "nodes": [{"ref": "r" * 100, "title": "t" * 100}]}
+
+    errors = validate_import_shape(payload)
+
+    assert any(issue["path"] == "nodes[0]" for issue in errors)
+
