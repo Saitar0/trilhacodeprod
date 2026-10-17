@@ -6,9 +6,9 @@
 
 **Base:** `main` em `8dea1233d6977cbaf387dd5e0bb964f9464b3d9c`
 
-**Branch de código:** `codex/qa-mobile-a11y`
+**Branch de código:** `codex/qa-mobile-a11y`; [PR #17](https://github.com/Saitar0/trilhacodeprod/pull/17) aberto, CI #39029549535 em fila.
 
-- **QA de navegador:** CONCLUÍDA PARA OS FLUXOS COBERTOS. Chromium local, API simulada, login/catálogo/leitor/exercício e listagem admin; viewports 1280, 390 e 360 px. Tab levou o foco de Email para Senha. Sem overflow horizontal.
+- **QA de navegador:** CONCLUÍDA PARA OS FLUXOS COBERTOS. Chromium local com API simulada; login/catálogo/leitor/exercício e busca/lista admin em viewports 1280, 390 e 360 px. Tab levou o foco de Email para Senha e o indicador verde de foco foi confirmado. Sem overflow horizontal.
 - **Correções:** CONCLUÍDAS LOCALMENTE. Rodapé sticky cobria o textarea de exercício em 360 e 390 px; labels de resposta/código e nomes de botões admin estavam ausentes. Ajustes e regressões E2E adicionados.
 - **Validação:** typecheck, lint, build, Vitest (9/9) e fluxo simulado passaram. A spec E2E que usa Mongo real descartável não foi executada localmente; CI do PR é a verificação final integrada.
 - **G2:** DIAGNÓSTICO PARCIAL. O run anterior não conhece host ED25519; workflow preserva `StrictHostKeyChecking=yes`. A identidade precisa ser comparada com fingerprint administrada na VPS, indisponível neste ambiente. Nenhuma secret alterada e nenhum preflight/migração/seed/deploy executado.

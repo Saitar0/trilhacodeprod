@@ -8,7 +8,7 @@
 
 ### QA de navegador
 
-- Chromium local em `http://127.0.0.1:5173` com respostas de API e submissões simuladas; nenhuma chamada de backend real ou banco. Verificados login/formulário, catálogo, navegação para conteúdo e exercício, envio, busca e lista admin em 1280, 390 e 360 px.
+- Chromium local em `http://127.0.0.1:5173` com respostas de API e submissões simuladas; nenhuma chamada de backend real ou banco. Login/formulário, catálogo, navegação para conteúdo e exercício e envio foram verificados em 1280, 390 e 360 px; busca e lista admin, nas mesmas três larguras.
 - Medida `documentElement.scrollWidth`/`body.scrollWidth`: igual à viewport em todos os fluxos registrados (sem overflow horizontal).
 - Antes da correção, o retângulo do rodapé sobrepunha o campo de resposta em 390 px (interseção vertical 819–870 px) e 360 px (818–920 px versus campo até 933 px). Depois, o rodapé passou a seguir o fluxo em telas estreitas; interseção é falsa nas duas larguras. Em desktop (1280 px), o comportamento sticky continua.
 - Antes, o textarea de resposta não tinha label associado; depois, Chromium reporta “Sua resposta para Exercício de resposta aberta”. Três botões admin (mover acima/abaixo e menu de ações) não tinham nome acessível; depois passaram a expor nomes por trilha.
@@ -22,6 +22,7 @@
 - Nomear os três botões somente com ícone em administração e especificar `type="button"` nos controles de ordem.
 - E2E de submissão verifica label acessível, ausência de overflow e não sobreposição em 360/390 px; E2E admin verifica nomes acessíveis dos controles.
 - Local: `npm run typecheck`, `npm run lint`, build e QA Chromium com mocks passaram. O E2E integrado requer o serviço Mongo efêmero e ficará validado pela CI do PR; não foi iniciado Compose local por existirem containers/volumes QA antigos e outros serviços compartilhados no Docker.
+- [PR #17 — correções mobile e acessibilidade](https://github.com/Saitar0/trilhacodeprod/pull/17), branch `codex/qa-mobile-a11y`, commit `5908e410`. CI #39029549535 está em fila; deploys permanecem fora de escopo.
 
 ### Diagnóstico G2
 
