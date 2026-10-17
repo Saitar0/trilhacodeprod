@@ -59,3 +59,9 @@
 - Decisão: preservar `StrictHostKeyChecking=yes` e não alterar o workflow ou secrets enquanto hostname e fingerprint não forem confirmados pelo administrador da VPS.
 - Motivo: o log de G2 diz que nenhuma chave ED25519 é conhecida para o host mascarado; não afirma que houve troca. `G2_STAGING_SSH_HOST` e `G2_STAGING_SSH_KNOWN_HOSTS` são secrets inacessíveis no log, e não existe fonte confiável do host no ambiente de trabalho.
 - Evidência/ação: comparar `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` no próprio servidor com a chave do `known_hosts` para o hostname efetivo; só então corrigir secret com aprovação do dono da infraestrutura.
+
+## 17/10/2026 — Cobrir acessibilidade do campo de código no E2E
+
+- Decisão: incluir no E2E de submissão um bloco `practical_challenge` temporário no Mongo efêmero e verificar seu nome acessível; selecionar o textarea pelo ID do bloco criado ao medir sobreposição.
+- Motivo: a revisão independente apontou que o teste anterior podia medir outro exercício e não cobria o label do campo de código.
+- Evidência: payload conferido com `BlockIn`/serviço de blocos, cleanup dos IDs temporários no teardown e revisão independente sem achados acionáveis. Commit `0354f4eb`; CI #39029960120 em execução.
