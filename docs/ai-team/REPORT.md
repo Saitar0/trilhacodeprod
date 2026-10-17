@@ -93,7 +93,7 @@ Homologação visual/teclado e histórico permanecem para outra rodada com naveg
 
 - GitHub confirma `main` em `217f40fd3581f54eaa5f00546f643cc7203e1c72`, correspondente ao merge do PR #17. Não foi encontrado commit posterior nos 10 commits mais recentes.
 - CI #39030667018 concluiu com sucesso: `compose-config`, backend, frontend e E2E. Os jobs `deploy-staging` e `deploy-production` foram pulados.
-- PRs #8–#17 foram encontrados integrados; #17 foi fechado por merge nesse SHA.
+- PRs #8–#15 e #17 foram encontrados integrados; PR #16 foi encerrado como supersedido pelo #12. PR #17 foi fechado por merge nesse SHA.
 - Checkout local em `27a98964` está oito commits atrás e tem modificações e arquivos não rastreados. Foi preservado sem limpeza; clone remoto limpo não foi possível por bloqueio de DNS/rede do host.
 - Um E2E novo está na branch `codex/e2e-version-history`: publica uma nota única, edita a descrição depois e verifica nota e diff positivo pela UI de versões, no pipeline com Mongo efêmero. A CI dessa branch ainda precisa validar a alteração.
 
