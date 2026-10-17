@@ -2,26 +2,22 @@
 import asyncio
 import os
 import uuid
-from urllib.parse import urlsplit, urlunsplit
 
 import httpx
 import pytest
 from pymongo import MongoClient
 
+from test_support.mongo_target import make_disposable_mongo_url
+
 MONGO_URL = os.environ.get("MONGO_URL_TEST", "mongodb://localhost:27017")
 _db_name = f"test_{uuid.uuid4().hex}"
-_parts = urlsplit(MONGO_URL)
-_query = _parts.query
-_mongo_url = urlunsplit((_parts.scheme, _parts.netloc, f"/{_db_name}", _query, _parts.fragment))
+_mongo_url = make_disposable_mongo_url(MONGO_URL, _db_name)
 
 # server/core read settings at import time. Point them at this run's disposable DB.
 os.environ["MONGO_URL"] = _mongo_url
 os.environ["DB_NAME"] = _db_name
 os.environ["ENV"] = "development"
 os.environ["JWT_SECRET"] = "isolated-tests-only-secret-key-32-bytes"
-
-if not _db_name.startswith("test_"):
-    raise RuntimeError(f"Refusing to run tests against unsafe database: {_db_name!r}")
 
 from database import client as mongo_client
 from database import db
@@ -110,7 +106,7 @@ def disposable_database(session_factory, event_loop):
             event_loop.run_until_complete(mongo_client.close())
             if not _db_name.startswith("test_"):
                 raise RuntimeError(f"Refusing to drop unsafe database: {_db_name!r}")
-            with MongoClient(MONGO_URL) as cleanup_client:
+            with MongoClient(_mongo_url) as cleanup_client:
                 cleanup_client.drop_database(_db_name)
 
 
