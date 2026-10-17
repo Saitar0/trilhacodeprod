@@ -8,7 +8,7 @@ from core_utils import now
 from database import db
 from integrity import reconcile_orphans, save_version
 from learning import find_cycles
-from permissions import is_staff
+from permissions import can_view_track, is_staff
 from serialization import oid
 from services.common import check_status, get_document, next_order, slugify
 from services.nodes import clone_nodes, parents_first
@@ -72,7 +72,7 @@ async def reorder_tracks(ordered_ids: list[str]) -> dict:
 
 async def get_track(track_id: str, user: dict) -> dict:
     track = await get_document("tracks", track_id)
-    if not is_staff(user) and track["status"] != "published":
+    if not can_view_track(track, user):
         raise HTTPException(status_code=404, detail="Trilha não encontrada")
     return track
 
