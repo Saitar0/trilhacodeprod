@@ -1,6 +1,6 @@
 import pytest
 
-from import_payload import has_valid_parent_kind, validate_import_shape
+from import_payload import _bson_size_within_limit, has_valid_parent_kind, validate_import_shape
 
 
 @pytest.mark.parametrize(
@@ -50,4 +50,14 @@ def test_import_shape_accepts_bson_signed_int64_boundaries():
     payload = {"track": {}, "nodes": [{"estimated_minutes": 9223372036854775807}]}
 
     assert validate_import_shape(payload) == []
+
+
+def test_bson_document_size_limit_is_rejected_by_shape_validation(monkeypatch):
+    monkeypatch.setattr("import_payload.MAX_IMPORT_DOCUMENT_BYTES", 128)
+    payload = {"track": {"title": "x" * 256}, "nodes": []}
+
+    errors = validate_import_shape(payload)
+
+    assert any(issue["path"] == "track" for issue in errors)
+    assert not _bson_size_within_limit({"data": "x" * 64}, max_bytes=32)
 
