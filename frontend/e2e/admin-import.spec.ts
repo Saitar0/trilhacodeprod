@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import axe from "axe-core";
 import { expect, test } from "@playwright/test";
 
 const API_BASE_URL = "http://127.0.0.1:18000";
@@ -41,21 +42,53 @@ test("administrator can preview and persist an imported track and node edit", as
 
     await page.goto("/admin");
     await page.getByTestId("admin-nav-import").click();
-    await expect(page.getByTestId("import-confirm-button")).toBeDisabled();
-    await page.getByTestId("import-json-input").fill(JSON.stringify(payload));
+    const importForm = page.getByTestId("import-form");
+    const jsonInput = page.getByRole("textbox", { name: "JSON da trilha" });
+    const simulateButton = page.getByTestId("import-dry-run-button");
+    const confirmButton = page.getByTestId("import-confirm-button");
+
+    await expect(jsonInput).toBeVisible();
+    await expect(confirmButton).toBeDisabled();
+    await page.addScriptTag({ content: axe.source });
+    const violations = await importForm.evaluate(async (container) => {
+      const axe = (window as Window & {
+        axe: {
+          run: (context: Element, options: unknown) => Promise<{
+            violations: Array<{ id: string; impact: string | null }>;
+          }>;
+        };
+      }).axe;
+      const results = await axe.run(container, {
+        runOnly: {
+          type: "tag",
+          values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"],
+        },
+      });
+      return results.violations.map(({ id, impact }) => ({ id, impact }));
+    });
+    expect(violations).toEqual([]);
+
+    await jsonInput.fill(JSON.stringify(payload));
+    await page.getByTestId("import-load-example").focus();
+    await page.keyboard.press("Tab");
+    await expect(jsonInput).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(simulateButton).toBeFocused();
 
     const previewResponse = page.waitForResponse((response) =>
       response.url().includes("/api/import/track?dry_run=true")
       && response.request().method() === "POST",
     );
-    await page.getByTestId("import-dry-run-button").click();
+    await page.keyboard.press("Enter");
     const preview = await previewResponse;
     expect(preview.status()).toBe(200);
     const previewReport = await preview.json();
     expect(previewReport.summary.track).toBe("criar");
     expect(previewReport.summary.nodes_create).toBe(3);
     await expect(page.getByTestId("import-status")).toHaveText("Simulação válida");
-    await expect(page.getByTestId("import-confirm-button")).toBeEnabled();
+    await expect(confirmButton).toBeEnabled();
+    await page.keyboard.press("Tab");
+    await expect(confirmButton).toBeFocused();
 
     const tracksBeforeApply = await page.request.get(`${API_BASE_URL}/api/tracks?limit=500`);
     expect(tracksBeforeApply.status()).toBe(200);
@@ -66,7 +99,7 @@ test("administrator can preview and persist an imported track and node edit", as
       response.url().includes("/api/import/track?dry_run=false")
       && response.request().method() === "POST",
     );
-    await page.getByTestId("import-confirm-button").click();
+    await page.keyboard.press("Enter");
     const response = await importResponse;
     expect(response.status()).toBe(200);
     const report = await response.json();
