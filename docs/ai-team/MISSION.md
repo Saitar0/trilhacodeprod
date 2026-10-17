@@ -61,13 +61,13 @@ A missão permanece PARCIAL: as frentes técnicas selecionadas concluíram e pas
 
 - Histórico administrativo via UI coberto pelo PR #18 e CI #39035017901.
 - Acessibilidade do formulário de importação está em PR #19: label, axe WCAG 2.1 A/AA e foco/Enter. Revisão independente aprovada; CI #39037180408 estava em execução.
-- Reenvio da resposta do aluno está em PR #20, com revisão independente aprovada; CI #39037237806 estava em execução.
+- Reenvio da resposta do aluno está em PR #20, com revisão independente aprovada; CI #39037237806 passou todos os checks e pulou deploys.
 
 ### Homologação descartável
 
 - CI #39036366799 confirmou as suites E2E anteriores em Mongo descartável.
 - Importação com preview, persistência, edição e histórico publicado já têm cobertura de UI na CI; PR #20 acrescenta atualização após envio e persistência.
-- Execução local mutável foi evitada porque a configuração de Mongo local não foi demonstrada como descartável. O CI isolado é a validação pendente para PR #19/#20.
+- Execução local mutável foi evitada porque a configuração de Mongo local não foi demonstrada como descartável. CI #39037180408 e #39037237806 passaram em Mongo descartável; deploys foram pulados.
 
 ### Pendências de staging
 
