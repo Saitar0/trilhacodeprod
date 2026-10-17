@@ -84,7 +84,7 @@
 
 - Decisão: ampliar E2E com axe-core WCAG 2.1 A/AA e navegação por teclado no formulário de importação admin; verificar reenvio de uma resposta já enviada. Os testes só mutam o Mongo efêmero do CI.
 - Motivo: cobertura comprovada ainda não verificava nome acessível do JSON, ativação por teclado, nem a transição de atualização de resposta já enviada.
-- Evidência: PR #19 e PR #20 abertos; revisões técnicas independentes aprovadas. CI #39037180408 e #39037237806 pendentes no checkpoint.
+- Evidência: PR #19 e PR #20 abertos; revisões técnicas independentes aprovadas. CI #39037180408 e #39037237806 passaram frontend, backend, Compose e E2E; deploys foram pulados.
 
 ## 17/10/2026 — Hostinger Web Console novamente disponível; manter G2 bloqueado
 
