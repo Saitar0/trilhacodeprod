@@ -165,10 +165,27 @@ def validate_import_shape(payload: dict) -> list[dict]:
             if not isinstance(node, dict):
                 continue
             stored_node_fields = {
-                key: node[key]
-                for key in ("kind", "title", "summary", "description", "guidance", "notes", "pedagogical_type",
-                            "requirement", "depth", "estimated_minutes", "status", "tags")
-                if key in node
+                "track_id": "0" * 24,
+                "parent_id": "0" * 24,
+                "kind": node.get("kind", ""),
+                "title": node.get("title", "").strip() if isinstance(node.get("title", ""), str) else "",
+                "slug": node.get("title", "").strip().lower() if isinstance(node.get("title", ""), str) else "",
+                "order": 0,
+                "status": node.get("status", "draft"),
+                "estimated_minutes": 0,
+                "tag_ids": ["0" * 24 for _ in node.get("tags", [])] if isinstance(node.get("tags"), list) else [],
+                "updated_at": None,
+                "summary": node.get("summary", ""),
+                "description": node.get("description", ""),
+                "guidance": node.get("guidance", ""),
+                "notes": node.get("notes", ""),
+                "pedagogical_type": node.get("pedagogical_type", ""),
+                "requirement": node.get("requirement", ""),
+                "depth": node.get("depth", ""),
+                "release": {},
+                "meta": {"import_ref": node.get("ref", "")},
+                "created_by": "0" * 24,
+                "created_at": None,
             }
             if not _bson_size_within_limit(stored_node_fields):
                 add(node_path, "documento excede o limite seguro de tamanho para importação")
