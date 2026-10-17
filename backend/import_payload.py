@@ -128,6 +128,15 @@ def validate_import_shape(payload: dict) -> list[dict]:
                 if values is not None and not isinstance(values, list):
                     add(f"{node_path}.{field}", "deve ser uma lista")
                     continue
+                if field == "tags" and isinstance(values, list):
+                    for tag_index, tag in enumerate(values):
+                        tag_path = f"{node_path}.tags[{tag_index}]"
+                        if not isinstance(tag, str):
+                            add(tag_path, "deve ser texto")
+                            continue
+                        tag_doc = {"name": tag, "slug": tag.lower().replace(" ", "-"), "color": "slate", "created_at": None}
+                        if not _bson_size_within_limit(tag_doc):
+                            add(tag_path, "documento excede o limite seguro de tamanho para importação")
                 if field == "blocks" and isinstance(values, list):
                     for j, block in enumerate(values):
                         block_path = f"{node_path}.blocks[{j}]"
@@ -136,6 +145,8 @@ def validate_import_shape(payload: dict) -> list[dict]:
                             continue
                         if "type" in block and not isinstance(block["type"], str):
                             add(f"{block_path}.type", "deve ser texto")
+                        if "ref" in block and block["ref"] is not None and not isinstance(block["ref"], str):
+                            add(f"{block_path}.ref", "deve ser texto")
                         for field in ("title", "status"):
                             if field in block and not isinstance(block[field], str):
                                 add(f"{block_path}.{field}", "deve ser texto")
@@ -192,7 +203,23 @@ def validate_import_shape(payload: dict) -> list[dict]:
             blocks = node.get("blocks")
             if isinstance(blocks, list):
                 for block_index, block in enumerate(blocks):
-                    if isinstance(block, dict) and not _bson_size_within_limit(block):
+                    if not isinstance(block, dict):
+                        continue
+                    block_ref = block.get("ref")
+                    block_doc = {
+                        "node_id": "0" * 24,
+                        "track_id": "0" * 24,
+                        "type": block.get("type", ""),
+                        "title": block.get("title", ""),
+                        "data": block.get("data") or {},
+                        "status": block.get("status", "published"),
+                        "order": block_index,
+                        "updated_at": None,
+                        "meta": {"import_ref": f"{node.get('ref', '')}/{block_ref}"} if block_ref else {},
+                        "schema_version": 1,
+                        "created_at": None,
+                    }
+                    if not _bson_size_within_limit(block_doc):
                         add(f"{node_path}.blocks[{block_index}]", "documento excede o limite seguro de tamanho para importação")
             validate_document_sizes(node.get("children"), f"{node_path}.children", depth + 1)
 
