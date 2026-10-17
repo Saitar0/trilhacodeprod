@@ -45,25 +45,28 @@ test("administrator can preview and persist an imported track", async ({ page })
 
     const previewResponse = page.waitForResponse((response) =>
       response.url().includes("/api/import/track?dry_run=true")
-      && response.request().method() === "POST"
-      && response.status() === 200,
+      && response.request().method() === "POST",
     );
     await page.getByTestId("import-dry-run-button").click();
-    await previewResponse;
+    const preview = await previewResponse;
+    expect(preview.status()).toBe(200);
+    const previewReport = await preview.json();
+    expect(previewReport.summary.track).toBe("criar");
+    expect(previewReport.summary.nodes_create).toBe(3);
     await expect(page.getByTestId("import-status")).toHaveText("Simulação válida");
-    await expect(page.getByTestId("import-summary")).toContainText(slug);
     await expect(page.getByTestId("import-confirm-button")).toBeEnabled();
 
     const importResponse = page.waitForResponse((response) =>
       response.url().includes("/api/import/track?dry_run=false")
-      && response.request().method() === "POST"
-      && response.status() === 200,
+      && response.request().method() === "POST",
     );
     await page.getByTestId("import-confirm-button").click();
     const response = await importResponse;
-    await expect(page.getByTestId("import-status")).toHaveText("Importado");
+    expect(response.status()).toBe(200);
     const report = await response.json();
     trackId = report.track.id;
+    expect(report.dry_run).toBe(false);
+    await expect(page.getByTestId("import-status")).toHaveText("Importado");
 
     const treeResponse = await page.request.get(`${API_BASE_URL}/api/tracks/${trackId}/tree`);
     expect(treeResponse.status()).toBe(200);
