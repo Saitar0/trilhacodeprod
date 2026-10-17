@@ -16,7 +16,7 @@ Atualizado em 17/10/2026 a partir de main (8dea1233) e evidências de CI e QA lo
 
 - Concluído nesta missão: E2E de submissão e edição de nó/bloco via importação, em PR #12/CI #70.
 - Histórico administrativo pela UI coberto no PR #18, CI #39035017901.
-- Acessibilidade de importação admin com axe e teclado está no PR #19, aguardando CI.
+- Acessibilidade de importação admin com axe e teclado está no PR #19; CI #39037180408 passou em frontend, backend, Compose e E2E.
 - Baseline de bundle medido na CI #39036366799; acompanhar o número de chunks e medir requests em runtime antes de definir budgets.
 - Administrador da VPS valida fingerprint ED25519 pela fonte local confiável, confere host secret e corrige `G2_STAGING_SSH_HOST`/`G2_STAGING_SSH_KNOWN_HOSTS`; a alteração de secret exige aprovação do responsável.
 - Retomar homologação G0–G7 somente sob aprovações e dados isolados exigidos nos runbooks.
@@ -39,9 +39,9 @@ Nenhuma escrita ou operação em Mongo real, migration, seed real, backup/restor
 - Base atual confirmada por busca de commits: `main` em `5e503aecccfb85bd764d7af8e120d70819c6af4f`; nenhum commit posterior foi encontrado. PR #18 está integrado.
 - CI pós-merge #39036366799 passou em frontend, backend, Compose e E2E. Deploy de staging e produção foram pulados.
 - PR #19: label acessível no JSON de importação, scan axe WCAG 2.1 A/AA na região do formulário e fluxo de teclado; revisão independente aprovada; CI #39037180408 passou frontend, backend, Compose e E2E; deploys staging/produção foram pulados.
-- PR #20: cobre reenvio de resposta já enviada e persistência após reload em Mongo descartável; revisão independente aprovada; CI #39037180408 passou frontend, backend, Compose e E2E; deploys staging/produção foram pulados.
+- PR #20: cobre reenvio de resposta já enviada e persistência após reload em Mongo descartável; revisão independente aprovada; CI #39037237806 passou frontend, backend, Compose e E2E; deploys staging/produção foram pulados.
 - Homologação descartável: importação, edição, publicação/histórico e envio de resposta cobertos pela CI anterior; PRs #19/#20 aumentam os fluxos. Staging real não foi homologado.
 - A Hostinger Web Console está disponível. O hostname consultado no console corresponde à VPS identificada. A fingerprint foi calculada no terminal autenticado; não foi copiada para repositório, issue ou registro compartilhado. Os secrets G2 de hostname e known_hosts não podem ser inspecionados, portanto ainda falta a comparação independente e não é possível decidir se host ou chave precisa de correção.
 - Coolify 4.4.6: `trilhacode-staging-api` consta `exited:unhealthy`, sem container presente; Mongo de staging `running:healthy`. Nenhuma ação de ciclo de vida foi executada.
 - Bundle build da CI #39036366799: 1.611 arquivos JavaScript em `dist/assets`; 1.867,01 kB bruto somado (874,12 kB gzip se todos fossem baixados). O entry `index` tem 493,75 kB (159,36 kB gzip); `IconCatalog` tem 213,07 kB (50,83 kB gzip). O build levou 11,75 s. Esses valores descrevem o build, não requests carregadas em uma rota real; não foi aplicada otimização. Contagem de requests em runtime segue pendente.
-- Próxima retomada: consultar conclusão das CI #39037180408 e #39037237806; corrigir falhas em PR separado; depois consolidar estes resultados no relatório. Manter mudanças em branches e não fazer merge. Para G2, responsável compara em canal privado host, porta 22 e fingerprint com `G2_STAGING_SSH_KNOWN_HOSTS`; nenhuma secret ou workflow deve ser alterado/acionado sem aprovação específica.
+- Próxima retomada: PRs #19 e #20 estão revisadas e com CI verde, prontas para integração manual. A PR #21 documenta este checkpoint. Manter as branches abertas e não fazer merge automático. Para G2, responsável compara em canal privado host, porta 22 e fingerprint com `G2_STAGING_SSH_KNOWN_HOSTS`; nenhuma secret ou workflow deve ser alterado/acionado sem aprovação específica.
