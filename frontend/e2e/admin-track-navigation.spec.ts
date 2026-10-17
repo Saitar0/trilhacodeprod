@@ -13,6 +13,9 @@ test("administrator can open the seeded track editor", async ({ page }) => {
   await expect(page.getByTestId("admin-nav-dashboard")).toBeVisible();
   await page.getByTestId("admin-nav-tracks").click();
   await expect(page.getByTestId("admin-track-row-trilha-code")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Mover Trilha Code para cima" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Mover Trilha Code para baixo" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Ações para Trilha Code" })).toBeVisible();
   await page.getByTestId("admin-track-open-trilha-code").click();
   await expect(page.getByTestId("editor-track-title")).toContainText("Trilha Code");
 

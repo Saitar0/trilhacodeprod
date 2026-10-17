@@ -1,5 +1,19 @@
 # Missão — avanço do roadmap técnico
 
+## Retomada QA visual/acessibilidade + diagnóstico G2
+
+**Data:** 17/10/2026
+
+**Base:** `main` em `8dea1233d6977cbaf387dd5e0bb964f9464b3d9c`
+
+**Branch de código:** `codex/qa-mobile-a11y`
+
+- **QA de navegador:** CONCLUÍDA PARA OS FLUXOS COBERTOS. Chromium local, API simulada, login/catálogo/leitor/exercício e listagem admin; viewports 1280, 390 e 360 px. Tab levou o foco de Email para Senha. Sem overflow horizontal.
+- **Correções:** CONCLUÍDAS LOCALMENTE. Rodapé sticky cobria o textarea de exercício em 360 e 390 px; labels de resposta/código e nomes de botões admin estavam ausentes. Ajustes e regressões E2E adicionados.
+- **Validação:** typecheck, lint, build, Vitest (9/9) e fluxo simulado passaram. A spec E2E que usa Mongo real descartável não foi executada localmente; CI do PR é a verificação final integrada.
+- **G2:** DIAGNÓSTICO PARCIAL. O run anterior não conhece host ED25519; workflow preserva `StrictHostKeyChecking=yes`. A identidade precisa ser comparada com fingerprint administrada na VPS, indisponível neste ambiente. Nenhuma secret alterada e nenhum preflight/migração/seed/deploy executado.
+- **Estado desta retomada:** PARCIALMENTE CONCLUÍDA, aguardando CI do PR e validação autenticada da fingerprint pelo administrador da VPS. Próxima ação permitida sem novo risco: acompanhar CI/revisão do PR. Próxima ação operacional requer aprovação do dono da infraestrutura para corrigir `G2_STAGING_SSH_HOST` e/ou `G2_STAGING_SSH_KNOWN_HOSTS` após comparação independente.
+
 **Data:** 17/10/2026 (America/Sao_Paulo)  
 **Base:** main, 27a98964d55b96003fac70154178c5892da8d453  
 **Branch de registros:** codex/ai-team-mission-2026-10-17

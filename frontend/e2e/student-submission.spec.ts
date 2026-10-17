@@ -63,6 +63,19 @@ test("student can submit an exercise and retain the answer after reload", async 
     await page.getByTestId("track-start-button").click();
     await expect(page.getByTestId(`exercise-submission-${blockId}`)).toBeVisible();
 
+    for (const width of [360, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      const documentWidth = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth));
+      expect(documentWidth, `exercise screen overflows at ${width}px`).toBeLessThanOrEqual(width);
+      await expect(page.getByLabel(`Sua resposta para E2E submission exercise`)).toBeVisible();
+      const overlapsStickyFooter = await page.evaluate(() => {
+        const answer = document.querySelector('textarea[data-testid^="exercise-answer-"]')?.getBoundingClientRect();
+        const footer = document.querySelector('[data-testid="topic-mark-completed-button"]')?.closest('footer')?.getBoundingClientRect();
+        return !!answer && !!footer && Math.max(answer.top, footer.top) < Math.min(answer.bottom, footer.bottom);
+      });
+      expect(overlapsStickyFooter, `exercise answer is covered by the sticky footer at ${width}px`).toBe(false);
+    }
+
     const answer = "A variable stores a value.";
     await page.getByTestId(`exercise-answer-${blockId}`).fill(answer);
     await page.getByTestId(`exercise-submit-${blockId}`).click();

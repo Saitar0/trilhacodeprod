@@ -62,8 +62,8 @@ export default function AdminTracks() {
           {tracks.map((t) => (
             <div key={t.id} data-testid={`admin-track-row-${t.slug}`} className="flex items-center gap-4 border-b border-slate-800 bg-slate-900/40 px-5 py-4 last:border-0 hover:bg-slate-900/80">
               <div className="flex flex-col">
-                <button data-testid={`track-up-${t.id}`} onClick={() => move(t, -1)} className="text-slate-600 hover:text-slate-200"><ArrowUp className="h-3.5 w-3.5" /></button>
-                <button data-testid={`track-down-${t.id}`} onClick={() => move(t, 1)} className="text-slate-600 hover:text-slate-200"><ArrowDown className="h-3.5 w-3.5" /></button>
+                <button type="button" aria-label={`Mover ${t.title} para cima`} data-testid={`track-up-${t.id}`} onClick={() => move(t, -1)} className="text-slate-600 hover:text-slate-200"><ArrowUp className="h-3.5 w-3.5" /></button>
+                <button type="button" aria-label={`Mover ${t.title} para baixo`} data-testid={`track-down-${t.id}`} onClick={() => move(t, 1)} className="text-slate-600 hover:text-slate-200"><ArrowDown className="h-3.5 w-3.5" /></button>
               </div>
               <Link to={`/admin/trilhas/${t.id}`} className="min-w-0 flex-1" data-testid={`admin-track-open-${t.slug}`}>
                 <div className="flex items-center gap-2">
@@ -77,7 +77,7 @@ export default function AdminTracks() {
                 </p>
               </Link>
               <DropdownMenu>
-                <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" data-testid={`track-actions-${t.id}`}><MoreHorizontal /></Button></DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={`Ações para ${t.title}`} data-testid={`track-actions-${t.id}`}><MoreHorizontal /></Button></DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="border-slate-800 bg-slate-900">
                   <DropdownMenuItem data-testid={`track-edit-${t.id}`} onClick={() => navigate(`/admin/trilhas/${t.id}`)}><Pencil className="mr-2 h-4 w-4" />Editar estrutura</DropdownMenuItem>
                   <DropdownMenuItem data-testid={`track-preview-${t.id}`} onClick={() => navigate(`/trilhas/${t.id}`)}><Eye className="mr-2 h-4 w-4" />Pré-visualizar</DropdownMenuItem>

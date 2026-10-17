@@ -47,3 +47,15 @@
 - Decisão: no E2E administrativo, validar preview sem criar a trilha, aplicar a importação hierárquica, conferir os três nós, editar o tópico, recarregar e validar persistência; remover a trilha temporária.
 - Motivo: cobrir homologação funcional de import e editor por UI em base isolada.
 - Evidência: PR #12, CI #70 passou; revisor independente não encontrou achados acionáveis. A base Mongo é descartável e a mutação roda somente quando CI está habilitado.
+
+## 17/10/2026 — QA de resposta acessível em mobile
+
+- Decisão: deixar o rodapé de progresso não fixo abaixo do breakpoint `sm`, associar labels visíveis para leitores de tela aos campos de resposta/código, e nomear controles icon-only de reordenação/ações admin.
+- Motivo: Chromium local com API simulada reproduziu sobreposição do rodapé ao textarea em 360 e 390 px, textarea sem label e três botões admin sem nome acessível.
+- Evidência: após mudança, não há interseção do footer/textarea nem overflow a 360/390; labels e nomes dos três botões são detectados. E2E de regressão foi adicionado ao workflow Mongo descartável.
+
+## 17/10/2026 — Não modificar known_hosts sem confirmação criptográfica
+
+- Decisão: preservar `StrictHostKeyChecking=yes` e não alterar o workflow ou secrets enquanto hostname e fingerprint não forem confirmados pelo administrador da VPS.
+- Motivo: o log de G2 diz que nenhuma chave ED25519 é conhecida para o host mascarado; não afirma que houve troca. `G2_STAGING_SSH_HOST` e `G2_STAGING_SSH_KNOWN_HOSTS` são secrets inacessíveis no log, e não existe fonte confiável do host no ambiente de trabalho.
+- Evidência/ação: comparar `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` no próprio servidor com a chave do `known_hosts` para o hostname efetivo; só então corrigir secret com aprovação do dono da infraestrutura.

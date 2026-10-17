@@ -87,7 +87,7 @@ export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nod
         <EmptyState icon="FileText" title="Conteúdo em preparação" description="Este tópico já faz parte da estrutura, mas os blocos de conteúdo ainda serão adicionados." />
       )}
       {learnable && (
-        <footer className="sticky bottom-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/90 p-3 backdrop-blur-xl">
+        <footer className="static flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/90 p-3 backdrop-blur-xl sm:sticky sm:bottom-4">
           <Button variant="ghost" size="sm" disabled={!prev} asChild={!!prev} data-testid="reader-prev-button">
             {prev ? <Link to={`/trilhas/${vm.track.id}/n/${prev.id}`}><ArrowLeft />Anterior</Link> : <span className="inline-flex items-center gap-2"><ArrowLeft />Anterior</span>}
           </Button>
