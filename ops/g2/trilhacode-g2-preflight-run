@@ -32,7 +32,8 @@ grep -q '^MONGO_URL=mongodb' "$ENV_FILE" || { echo 'G2: MongoDB connection confi
 [[ -z "$("$DOCKER" ps -aq --filter "name=^/$RUN_NAME$")" ]] || { echo 'G2: prior preflight container exists; inspect manually' >&2; exit 75; }
 
 out="$(/usr/bin/mktemp)"
-cidfile="$(/usr/bin/mktemp)"
+cid_dir="$(/usr/bin/mktemp -d)"
+cidfile="$cid_dir/container.id"
 cleanup() {
   local status=$?
   trap - EXIT HUP INT TERM
@@ -45,7 +46,8 @@ cleanup() {
       "$DOCKER" rm -f "$container_id" >/dev/null 2>&1 || true
     fi
   fi
-  /usr/bin/rm -f -- "$out" "$cidfile"
+/usr/bin/rm -f -- "$out" "$cidfile"
+  /usr/bin/rmdir -- "$cid_dir" 2>/dev/null || true
   exit "$status"
 }
 trap cleanup EXIT
