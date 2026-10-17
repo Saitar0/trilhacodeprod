@@ -7,6 +7,7 @@ test("student can submit an exercise and retain the answer after reload", async 
 
   const api = await apiRequest.newContext({ baseURL: API_BASE_URL });
   let blockId: string | undefined;
+  let practicalBlockId: string | undefined;
 
   try {
     const adminLogin = await api.post("/api/auth/login", {
@@ -41,6 +42,18 @@ test("student can submit an exercise and retain the answer after reload", async 
     expect(blockResponse.status(), "create a temporary exercise in disposable CI Mongo").toBe(200);
     blockId = (await blockResponse.json()).id;
 
+    const practicalBlockResponse = await api.post("/api/blocks", {
+      data: {
+        node_id: topic.id,
+        type: "practical_challenge",
+        title: "E2E practical challenge",
+        status: "published",
+        data: { prompt: "Write a short function.", starter_code: "def solution():\n    pass" },
+      },
+    });
+    expect(practicalBlockResponse.status(), "create a temporary practical challenge in disposable CI Mongo").toBe(200);
+    practicalBlockId = (await practicalBlockResponse.json()).id;
+
     const studentApi = await apiRequest.newContext({ baseURL: API_BASE_URL });
     const studentEmail = `e2e_student_${Date.now()}@example.com`;
     const studentPassword = "e2e-only-student-password";
@@ -62,16 +75,18 @@ test("student can submit an exercise and retain the answer after reload", async 
     await page.getByTestId("catalog-track-card-trilha-code").click();
     await page.getByTestId("track-start-button").click();
     await expect(page.getByTestId(`exercise-submission-${blockId}`)).toBeVisible();
+    await expect(page.getByLabel("Código da resposta para E2E practical challenge")).toBeVisible();
 
     for (const width of [360, 390]) {
       await page.setViewportSize({ width, height: 900 });
       const documentWidth = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth));
       expect(documentWidth, `exercise screen overflows at ${width}px`).toBeLessThanOrEqual(width);
       await expect(page.getByLabel(`Sua resposta para E2E submission exercise`)).toBeVisible();
-      const overlapsStickyFooter = await page.evaluate(() => {
-        const answer = document.querySelector('textarea[data-testid^="exercise-answer-"]')?.getBoundingClientRect();
-        const footer = document.querySelector('[data-testid="topic-mark-completed-button"]')?.closest('footer')?.getBoundingClientRect();
-        return !!answer && !!footer && Math.max(answer.top, footer.top) < Math.min(answer.bottom, footer.bottom);
+      const overlapsStickyFooter = await page.getByTestId(`exercise-answer-${blockId}`).evaluate((element) => {
+        const answer = element.getBoundingClientRect();
+        const reader = element.closest('[data-testid="node-reader"]');
+        const footer = reader?.querySelector('[data-testid="topic-mark-completed-button"]')?.closest('footer')?.getBoundingClientRect();
+        return !!footer && Math.max(answer.top, footer.top) < Math.min(answer.bottom, footer.bottom);
       });
       expect(overlapsStickyFooter, `exercise answer is covered by the sticky footer at ${width}px`).toBe(false);
     }
@@ -85,9 +100,14 @@ test("student can submit an exercise and retain the answer after reload", async 
     await expect(page.getByTestId(`exercise-status-${blockId}`)).toHaveText("Enviado");
     await expect(page.getByTestId(`exercise-answer-${blockId}`)).toHaveValue(answer);
   } finally {
-    if (blockId) {
-      const cleanup = await api.delete(`/api/blocks/${blockId}`);
-      expect(cleanup.status(), "remove the temporary exercise from disposable CI Mongo").toBe(200);
+    for (const [createdBlockId, description] of [
+      [blockId, "temporary exercise"],
+      [practicalBlockId, "temporary practical challenge"],
+    ] as const) {
+      if (createdBlockId) {
+        const cleanup = await api.delete(`/api/blocks/${createdBlockId}`);
+        expect(cleanup.status(), `remove the ${description} from disposable CI Mongo`).toBe(200);
+      }
     }
     await api.dispose();
   }
