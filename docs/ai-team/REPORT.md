@@ -4,6 +4,35 @@
 **Início observado:** 07:55:22 UTC  
 **Última atualização:** 09:17 UTC; PR #12 CI #70 concluída
 
+## Retomada — QA visual/acessibilidade e diagnóstico G2 (base 8dea1233)
+
+### QA de navegador
+
+- Chromium local em `http://127.0.0.1:5173` com respostas de API e submissões simuladas; nenhuma chamada de backend real ou banco. Login/formulário, catálogo, navegação para conteúdo e exercício e envio foram verificados em 1280, 390 e 360 px; busca e lista admin, nas mesmas três larguras.
+- Medida `documentElement.scrollWidth`/`body.scrollWidth`: igual à viewport em todos os fluxos registrados (sem overflow horizontal).
+- Antes da correção, o retângulo do rodapé sobrepunha o campo de resposta em 390 px (interseção vertical 819–870 px) e 360 px (818–920 px versus campo até 933 px). Depois, o rodapé passou a seguir o fluxo em telas estreitas; interseção é falsa nas duas larguras. Em desktop (1280 px), o comportamento sticky continua.
+- Antes, o textarea de resposta não tinha label associado; depois, Chromium reporta “Sua resposta para Exercício de resposta aberta”. Três botões admin (mover acima/abaixo e menu de ações) não tinham nome acessível; depois passaram a expor nomes por trilha.
+- Teclado: tabulação de Email para Senha moveu foco corretamente e o alvo permaneceu visível; Chromium computou halo verde de foco `0 0 0 1px rgb(16, 183, 127)`. Inspeção manual com leitor de tela/axe não foi executada.
+- Evidências temporárias de screenshot/resultados foram mantidas somente durante a análise no worktree; não são arquivos de produto. Regressões permanentes foram adicionadas às specs E2E existentes (serão executadas no CI, que usa Mongo descartável).
+
+### Alterações deste PR
+
+- Em exercícios abertos e desafios práticos, associar labels ocultos aos campos de resposta e código.
+- Em leitores estreitos, remover o posicionamento sticky que cobria a resposta; manter sticky a partir de `sm`.
+- Nomear os três botões somente com ícone em administração e especificar `type="button"` nos controles de ordem.
+- E2E de submissão verifica labels acessíveis de resposta aberta e código prático, ausência de overflow e não sobreposição em 360/390 px; E2E admin verifica nomes acessíveis dos controles. Revisão independente confirmou o payload de criação, cleanup e seletores do cenário.
+- Local: `npm run typecheck`, `npm run lint`, build, Vitest (9/9), ESLint das specs E2E, descoberta Playwright e QA Chromium com mocks passaram. O E2E integrado usa Mongo efêmero na CI; não foi iniciado Compose local por existirem containers/volumes QA antigos e outros serviços compartilhados no Docker.
+- [PR #17 — correções mobile e acessibilidade](https://github.com/Saitar0/trilhacodeprod/pull/17), branch `codex/qa-mobile-a11y`. CI #39030010321 passou backend, frontend, Compose e Playwright E2E; deploys permaneceram pulados.
+
+### Diagnóstico G2
+
+- Run `39011425126`, SHA anterior: a etapa de configuração verificou presença das quatro secrets sem imprimir valores. A etapa SSH falhou com `No ED25519 host key is known for [host mascarado]` e `Host key verification failed`.
+- O workflow lê `G2_STAGING_SSH_HOST`, `G2_STAGING_SSH_USER`, `G2_STAGING_SSH_KEY`, `G2_STAGING_SSH_KNOWN_HOSTS`, usa porta 22, `UserKnownHostsFile` temporário e `StrictHostKeyChecking=yes`, e chama somente `trilhacode-g2-preflight`.
+- Evidência aponta host/alias sem entrada ED25519 correspondente no arquivo temporário ou uma entrada com formato/host incompatível. Não é o diagnóstico de chave alterada (`REMOTE HOST IDENTIFICATION HAS CHANGED`) e não prova rotação ou divergência criptográfica.
+- Comparação solicitada não pôde ser concluída: os logs mascaram o hostname; o valor `known_hosts` é secret e inacessível; nenhum canal SSH autenticado ou fonte do administrador no servidor está disponível. A configuração versionada contém apenas nomes de secrets, não a chave/fingerprint.
+- A correção permanece bloqueada até o administrador comparar a chave apresentada com `/etc/ssh/ssh_host_ed25519_key.pub` (ou outra fonte local confiável) e confirmar o hostname efetivo. Só então ele pode atualizar `G2_STAGING_SSH_HOST` e/ou `G2_STAGING_SSH_KNOWN_HOSTS`; aprovação do responsável da infraestrutura é necessária para alterar secrets. Não desativar verificação estrita nem confiar em `ssh-keyscan` sem verificação independente.
+- Nenhum G2 preflight, migração, índice, seed, deploy, acesso a VPS/SSH/Coolify/Mongo real, alteração de secret ou operação Dev Forge ocorreu.
+
 ## Resumo
 
 Foram abertas alterações para isolamento/CI, otimização de ícones, visibilidade, E2E, validação de import, autorização baseada em role e importação persistente. PRs #9–#11 passaram CI; #13 passou CI #48 e revisão independente; #14 passou CI #46; #15 passou CI #59. PR #12 CI #51 passou backend/frontend/E2E e manteve os deploys manuais pulados. PR #12 também passou CI #60 (submissão de exercício) e CI #70 (prévia sem mutação, importação persistida e edição de nó após reload). A revisão independente do último fluxo não encontrou achados acionáveis. No momento da conclusão original da missão, nenhum PR havia sido mesclado. **Atualização posterior:** os PRs #9–#15 foram integrados à `main` por squash; a execução integrada da CI sobre a `main` ainda precisa de validação explícita.
