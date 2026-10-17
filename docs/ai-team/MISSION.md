@@ -11,11 +11,11 @@ Avançar confiabilidade, E2E, responsividade, desempenho, segurança/integridade
 ## Estado
 
 - A — isolamento Mongo dos testes e validação Compose: CONCLUÍDA em PR #9; CI #18 verde.
-- B — jornada de aluno, navegação admin e persistência admin: EM EXECUÇÃO em PR #12; CI #45 passou a versão sem escrita de conteúdo. CI #50 valida persistência de descrição na trilha seedada.
+- B — jornada de aluno, navegação admin e persistência admin: EM EXECUÇÃO em PR #12; CI #45 passou a versão sem escrita de conteúdo. CI #50 passou persistência da edição; CI #51 valida a dependência do E2E nos deploy jobs.
 - C — overflow horizontal nos breakpoints 360/390 px: CONCLUÍDA no escopo testado por CI #45; falta inspeção visual/teclado local.
 - D — chunk de ícones sob demanda: CONCLUÍDA em PR #10; redução gzip medida de 65,7%, CI #19 verde.
 - E — visibilidade privada (PR #11/CI #21), payload/tamanho BSON de import (PR #13, 33 testes locais, CI #48 e revisor aprovando) e role refresh/revogação (PR #14/CI #46): CONCLUÍDA para os achados atuais.
-- F — homologação: PARCIAL; estudante e admin testados em dados descartáveis; edição de descrição em CI #50; importação persistida, edição de nó/bloco e submissões ainda sem E2E.
+- F — homologação: PARCIAL; estudante e admin testados em dados descartáveis; edição de descrição passou em CI #50; PR #15 adiciona import persistente/idempotente e aguarda CI #56. Edição de nó/bloco e submissões ainda sem E2E.
 - G — staging/release: BLOQUEADA por gates operacionais. Nenhum acesso a Mongo real, segredo, SSH/Coolify/VPS ou operação G3–G6.
 
 ## Segurança e continuidade
