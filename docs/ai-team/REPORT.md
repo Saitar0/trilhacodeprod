@@ -2,18 +2,18 @@
 
 **Data:** 17/10/2026 (America/Sao_Paulo)  
 **Início observado:** 07:55:22 UTC  
-**Última atualização:** 09:06 UTC; PR #12 CI #60 em execução
+**Última atualização:** 09:16 UTC; PR #12 CI #70 concluída
 
 ## Resumo
 
-Foram abertas alterações para isolamento/CI, otimização de ícones, visibilidade, E2E, validação de import, autorização baseada em role e importação persistente. PRs #9–#11 passaram CI; #13 passou CI #48 e revisão independente; #14 passou CI #46; #15 passou CI #59. PR #12 CI #51 passou backend/frontend/E2E e manteve os deploys manuais pulados. Uma submissão de exercício com persistência foi adicionada à ponta atual de PR #12 e aguarda CI #60. Nenhum PR foi mesclado.
+Foram abertas alterações para isolamento/CI, otimização de ícones, visibilidade, E2E, validação de import, autorização baseada em role e importação persistente. PRs #9–#11 passaram CI; #13 passou CI #48 e revisão independente; #14 passou CI #46; #15 passou CI #59. PR #12 CI #51 passou backend/frontend/E2E e manteve os deploys manuais pulados. PR #12 também passou CI #60 (submissão de exercício) e CI #70 (prévia sem mutação, importação persistida e edição de nó após reload). A revisão independente do último fluxo não encontrou achados acionáveis. Nenhum PR foi mesclado.
 
 ## Alterações e evidências
 
 - [#9 — fixtures Mongo e Compose](https://github.com/Saitar0/trilhacodeprod/pull/9): URI de testes validada para alvo descartável/loopback; validação de compose sem subir serviços. CI #18 passou backend/frontend/Compose.
 - [#10 — ícones sob demanda](https://github.com/Saitar0/trilhacodeprod/pull/10): chunk Lucide de 799.578 B / 147,81 KiB gzip para 213.071 B / 50,78 KiB gzip (~65,7% de redução gzip). CI #19 passou. ~1.593 chunks pequenos sob demanda (~1,35 MB bruto total).
 - [#11 — visibilidade direta de trilha](https://github.com/Saitar0/trilhacodeprod/pull/11): estudante recebe negação para metadados/árvore de trilhas privadas; CI #21 e revisão independente passaram.
-- [#12 — E2E e gate de deploy](https://github.com/Saitar0/trilhacodeprod/pull/12): CI usa Mongo efêmero/seed fictício. CI #45 cobriu progresso do aluno, navegação admin e overflow em 360/390 px; CI #50 confirmou persistência da descrição após reload; CI #51 passou com ambos os deploys pulados. Head atual adiciona envio e persistência de exercício usando estudante e bloco temporários; CI #60 em execução.
+- [#12 — E2E e gate de deploy](https://github.com/Saitar0/trilhacodeprod/pull/12): CI usa Mongo efêmero/seed fictício. CI #45 cobriu progresso do aluno, navegação admin e overflow em 360/390 px; CI #50 confirmou persistência da descrição após reload; CI #51 passou com ambos os deploys pulados. CI #60 passou envio e persistência de exercício com estudante/bloco temporários. CI #70 passou o fluxo admin de prévia, ausência de gravação antes do apply, importação persistida e edição do tópico com persistência após reload; revisão independente aprovada.
 - [#13 — validação de import](https://github.com/Saitar0/trilhacodeprod/pull/13): rejeita estruturas/valores inválidos com 422 antes do planejamento; testa profundidade, int64, BSON NUL/UTF-8/tipos e limite conservador nos documentos gerados, incluindo slug/ref, tag e ref combinado de bloco. Local: 33 testes unitários e Ruff passaram; CI #48 backend/frontend/build/auditoria passou; revisor independente aprovou.
 - [#14 — role refresh](https://github.com/Saitar0/trilhacodeprod/pull/14): teste de integração comprova que sessão existente ganha/perde permissão após mudança de role. CI #46 backend/frontend passou usando fixture Mongo descartável.
 - [#15 — import persistente/idempotente](https://github.com/Saitar0/trilhacodeprod/pull/15): testa dry-run sem escrita, import real, árvore resultante e reimport idempotente. Revisor solicitou comprovação explícita de não mutação no dry-run; foi adicionada a expectativa de duas criações no primeiro import. CI #59 backend/frontend passou; execução está isolada pela fixture descartável.
@@ -29,7 +29,7 @@ Foram abertas alterações para isolamento/CI, otimização de ícones, visibili
 
 ## Revisão, segurança e limites
 
-Revisão independente: #11 aprovado; #13 teve correções para hierarquia e limites BSON em node/tag/ref/block metadata e foi aprovado após revisão. #12 teve a corrida entre salvar e recarregar corrigida; CI confirmou persistência de edição. A nova submissão E2E aguarda revisão atualizada. #15 recebeu observação P2 sobre dry-run; a asserção de primeira criação foi adicionada antes da CI #59.
+Revisão independente: #11 aprovado; #13 teve correções para hierarquia e limites BSON em node/tag/ref/block metadata e foi aprovado após revisão. #12 teve a corrida entre salvar e recarregar corrigida; CI confirmou persistência de edição. A revisão independente do E2E de edição de nó/import não encontrou achados acionáveis. #15 recebeu observação P2 sobre dry-run; a asserção de primeira criação foi adicionada antes da CI #59.
 
 Nenhuma credencial/secret consultada ou registrada; nenhum Mongo real, migração, seed real, deploy, webhook, Coolify, VPS, SSH/firewall ou Dev Forge tocado. O erro anterior Host key verification failed não pôde ser validado com evidência pública segura. Arquivos locais preexistentes do usuário não foram incluídos nos PRs.
 
@@ -39,7 +39,7 @@ Nenhuma credencial/secret consultada ou registrada; nenhum Mongo real, migraçã
 - [#9 — isolamento Mongo/Compose](https://github.com/Saitar0/trilhacodeprod/pull/9) — aberto; CI passou.
 - [#10 — lazy icons](https://github.com/Saitar0/trilhacodeprod/pull/10) — aberto; CI passou.
 - [#11 — visibilidade](https://github.com/Saitar0/trilhacodeprod/pull/11) — aberto; CI/review passaram.
-- [#12 — E2E e gate de deploy](https://github.com/Saitar0/trilhacodeprod/pull/12) — aberto; CI #51 passou, novo CI #60 em andamento.
+- [#12 — E2E e gate de deploy](https://github.com/Saitar0/trilhacodeprod/pull/12) — aberto; CI #70 passou (inclui os fluxos acrescentados após #60); deploys foram pulados.
 - [#13 — import validation](https://github.com/Saitar0/trilhacodeprod/pull/13) — aberto; CI #48 passou.
 - [#14 — role revocation](https://github.com/Saitar0/trilhacodeprod/pull/14) — aberto; CI #46 passou.
 - [#15 — import persistence](https://github.com/Saitar0/trilhacodeprod/pull/15) — aberto; CI #59 passou.
@@ -47,4 +47,4 @@ Nenhuma credencial/secret consultada ou registrada; nenhum Mongo real, migraçã
 
 ## Próxima retomada
 
-Aguardar CI #60 e a revisão independente do novo E2E. Se falhar, inspecionar os logs e corrigir. Atualizar roadmap/relatório com estado final e registrar pendências de homologação G0–G7; os gates operacionais continuam sem execução e dependem do aprovador.
+Homologação visual/teclado e histórico permanecem para outra rodada com navegador/QA disponível. O host key do preflight G2 precisa ser comparado pelo operador com a fingerprint pública e a configuração conhecida, sem expor/alterar credenciais nesta missão. Gates operacionais G3–G6 continuam sem execução e dependem de aprovação.
