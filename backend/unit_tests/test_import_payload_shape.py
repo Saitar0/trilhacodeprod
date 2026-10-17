@@ -14,6 +14,8 @@ from import_payload import has_valid_parent_kind, validate_import_shape
         ({"track": {}, "nodes": [{"estimated_minutes": {}}]}, "nodes[0].estimated_minutes"),
         ({"track": {}, "nodes": [{"estimated_minutes": 9223372036854775808}]}, "nodes[0].estimated_minutes"),
         ({"track": {}, "nodes": [{"estimated_minutes": -1}]}, "nodes[0].estimated_minutes"),
+        ({"track": {}, "nodes": [{"blocks": [{"data": {"correct_index": 1 << 80}}]}]}, "payload.nodes[0].blocks[0].data.correct_index"),
+        ({"track": {"settings": {"bad\x00key": True}}}, "payload.track.settings"),
         ({"track": {}, "nodes": [{"blocks": "not-a-list"}]}, "nodes[0].blocks"),
         ({"track": {}, "nodes": [{"blocks": [{"type": [], "data": []}]}]}, "nodes[0].blocks[0].type"),
         ({"track": {}, "relations": ["not-an-object"]}, "relations[0]"),
@@ -42,4 +44,10 @@ def test_invalid_parent_kind_is_reported_without_hierarchy_index_lookup():
 
     assert not has_valid_parent_kind("unknown", hierarchy)
     assert has_valid_parent_kind("module", hierarchy)
+
+
+def test_import_shape_accepts_bson_signed_int64_boundaries():
+    payload = {"track": {}, "nodes": [{"estimated_minutes": 9223372036854775807}]}
+
+    assert validate_import_shape(payload) == []
 
