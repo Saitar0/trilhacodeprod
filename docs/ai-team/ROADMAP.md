@@ -1,6 +1,5 @@
 # Roadmap técnico
 Atualizado em 17/10/2026 a partir de main (`5e503aecccfb85bd764d7af8e120d70819c6af4f`) e evidências de CI, revisão estática e terminal administrativo somente leitura.
-Atualizado em 17/10/2026 a partir de main (8dea1233) e evidências de CI e QA local isolado. Status distinguem validação local, CI e homologação real.
 
 | Frente | Status | Evidência verificada | Próximo critério |
 | --- | --- | --- | --- |
