@@ -39,14 +39,22 @@ test("student can submit an exercise and retain the answer after reload", async 
     expect(blockResponse.status(), "create a temporary exercise in disposable CI Mongo").toBe(200);
     blockId = (await blockResponse.json()).id;
 
+    const studentApi = await apiRequest.newContext({ baseURL: API_BASE_URL });
+    const studentEmail = `e2e_student_${Date.now()}@example.com`;
+    const studentPassword = "e2e-only-student-password";
+    try {
+      const registration = await studentApi.post("/api/auth/register", {
+        data: { name: "E2E Student", email: studentEmail, password: studentPassword },
+      });
+      expect(registration.status(), "create an isolated disposable E2E student").toBe(200);
+    } finally {
+      await studentApi.dispose();
+    }
+
     await page.route("https://**/*", (route) => route.abort());
     await page.goto("/login");
-    await page.getByTestId("login-email-input").fill(
-      process.env.E2E_STUDENT_EMAIL || "student@example.com",
-    );
-    await page.getByTestId("login-password-input").fill(
-      process.env.E2E_STUDENT_PASSWORD || "e2e-only-student-password",
-    );
+    await page.getByTestId("login-email-input").fill(studentEmail);
+    await page.getByTestId("login-password-input").fill(studentPassword);
     await page.getByTestId("login-submit-button").click();
 
     await page.getByTestId("catalog-track-card-trilha-code").click();
