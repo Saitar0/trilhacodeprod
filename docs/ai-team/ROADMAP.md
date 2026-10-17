@@ -38,8 +38,8 @@ Nenhuma escrita ou operação em Mongo real, migration, seed real, backup/restor
 
 - Base atual confirmada por busca de commits: `main` em `5e503aecccfb85bd764d7af8e120d70819c6af4f`; nenhum commit posterior foi encontrado. PR #18 está integrado.
 - CI pós-merge #39036366799 passou em frontend, backend, Compose e E2E. Deploy de staging e produção foram pulados.
-- PR #19: label acessível no JSON de importação, scan axe WCAG 2.1 A/AA na região do formulário e fluxo de teclado; revisão independente aprovada; CI em andamento na criação deste checkpoint.
-- PR #20: cobre reenvio de resposta já enviada e persistência após reload em Mongo descartável; revisão independente aprovada; CI em andamento na criação deste checkpoint.
+- PR #19: label acessível no JSON de importação, scan axe WCAG 2.1 A/AA na região do formulário e fluxo de teclado; revisão independente aprovada; CI #39037180408 passou frontend, backend, Compose e E2E; deploys staging/produção foram pulados.
+- PR #20: cobre reenvio de resposta já enviada e persistência após reload em Mongo descartável; revisão independente aprovada; CI #39037180408 passou frontend, backend, Compose e E2E; deploys staging/produção foram pulados.
 - Homologação descartável: importação, edição, publicação/histórico e envio de resposta cobertos pela CI anterior; PRs #19/#20 aumentam os fluxos. Staging real não foi homologado.
 - A Hostinger Web Console está disponível. O hostname consultado no console corresponde à VPS identificada. A fingerprint foi calculada no terminal autenticado; não foi copiada para repositório, issue ou registro compartilhado. Os secrets G2 de hostname e known_hosts não podem ser inspecionados, portanto ainda falta a comparação independente e não é possível decidir se host ou chave precisa de correção.
 - Coolify 4.4.6: `trilhacode-staging-api` consta `exited:unhealthy`, sem container presente; Mongo de staging `running:healthy`. Nenhuma ação de ciclo de vida foi executada.
