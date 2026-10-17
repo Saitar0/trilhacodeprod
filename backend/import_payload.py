@@ -2,6 +2,7 @@ NODE_TAX = {"pedagogical_type": "pedagogical_type", "requirement": "requirement"
 TRACK_TEXT = ("title", "subtitle", "description", "cover_url", "visibility", "difficulty")
 NODE_TEXT = ("title", "summary", "description", "guidance", "notes")
 MAX_NODE_DEPTH = 100
+MAX_ESTIMATED_MINUTES = (1 << 63) - 1
 
 
 def validate_import_shape(payload: dict) -> list[dict]:
@@ -61,12 +62,13 @@ def validate_import_shape(payload: dict) -> list[dict]:
                 valid_minutes = isinstance(value, int) and not isinstance(value, bool)
                 if isinstance(value, str):
                     try:
-                        int(value)
-                        valid_minutes = bool(value.strip())
+                        value = int(value)
+                        valid_minutes = bool(node["estimated_minutes"].strip())
                     except ValueError:
                         valid_minutes = False
+                valid_minutes = valid_minutes and 0 <= value <= MAX_ESTIMATED_MINUTES
                 if not valid_minutes:
-                    add(f"{node_path}.estimated_minutes", "deve ser um número inteiro")
+                    add(f"{node_path}.estimated_minutes", "deve ser um número inteiro entre 0 e 9223372036854775807")
             for field in NODE_TAX:
                 if node.get(field) is not None and not isinstance(node[field], str):
                     add(f"{node_path}.{field}", "deve ser texto")
