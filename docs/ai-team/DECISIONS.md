@@ -15,7 +15,13 @@
 
 - Decisão: usar Mongo service por job, DB trilhacode_e2e, seed e credenciais fictícias.
 - Motivo: confirmar login, progresso persistido e fluxo administrativo sem tocar em dados persistentes.
-- Evidência: CI #45 passou fluxo estudante, navegação admin e overflow 360/390 px; PR #12 adicionou edição de descrição, espera a resposta antes do reload e passou CI #50; CI #51 testa a nova dependência dos deploy jobs.
+- Evidência: CI #45 passou fluxo estudante, navegação admin e overflow 360/390 px; CI #50 passou edição de descrição e reload; CI #51 passou dependência E2E dos deploy jobs, mantendo-os pulados.
+
+## 17/10/2026 — E2E de submissão em entidade temporária
+
+- Decisão: criar bloco exercise_open publicado por API no seed descartável, registrar um estudante exclusivo para o caso, enviar pela UI, recarregar e verificar status/resposta; apagar o bloco no teardown.
+- Motivo: manter o teste representativo da interface e evitar interferência do progresso do estudante usado em outro E2E.
+- Limite: Mongo é efêmero por job. A execução atual PR #12/CI #60 aguarda validação; não usar base de staging ou produção.
 
 ## 17/10/2026 — Import deve validar BSON antes de qualquer escrita
 
