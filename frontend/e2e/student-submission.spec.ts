@@ -96,9 +96,15 @@ test("student can submit an exercise and retain the answer after reload", async 
     await page.getByTestId(`exercise-submit-${blockId}`).click();
     await expect(page.getByTestId(`exercise-status-${blockId}`)).toHaveText("Enviado");
 
+    const updatedAnswer = "A variable stores a value that can be updated.";
+    await page.getByTestId(`exercise-answer-${blockId}`).fill(updatedAnswer);
+    await expect(page.getByTestId(`exercise-submit-${blockId}`)).toHaveText("Atualizar envio");
+    await page.getByTestId(`exercise-submit-${blockId}`).click();
+    await expect(page.getByTestId(`exercise-status-${blockId}`)).toHaveText("Enviado");
+
     await page.reload();
     await expect(page.getByTestId(`exercise-status-${blockId}`)).toHaveText("Enviado");
-    await expect(page.getByTestId(`exercise-answer-${blockId}`)).toHaveValue(answer);
+    await expect(page.getByTestId(`exercise-answer-${blockId}`)).toHaveValue(updatedAnswer);
   } finally {
     for (const [createdBlockId, description] of [
       [blockId, "temporary exercise"],
