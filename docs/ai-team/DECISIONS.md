@@ -15,7 +15,7 @@
 
 - Decisão: usar Mongo service por job, DB trilhacode_e2e, seed e credenciais fictícias.
 - Motivo: confirmar login, progresso persistido e fluxo administrativo sem tocar em dados persistentes.
-- Evidência: CI #45 passou fluxo estudante, navegação admin e overflow 360/390 px; PR #12 adicionou edição de descrição com confirmação da resposta antes do reload, CI #50 pendente.
+- Evidência: CI #45 passou fluxo estudante, navegação admin e overflow 360/390 px; PR #12 adicionou edição de descrição, espera a resposta antes do reload e passou CI #50; CI #51 testa a nova dependência dos deploy jobs.
 
 ## 17/10/2026 — Import deve validar BSON antes de qualquer escrita
 
