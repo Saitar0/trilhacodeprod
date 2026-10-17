@@ -8,11 +8,11 @@ from audit import audit
 from constants import DEFAULT_HIERARCHY, DEFAULT_LABELS, STATUSES
 from core_utils import now
 from database import db
+from import_payload import NODE_TAX, validate_import_shape
 from learning import find_cycles
 from serialization import oid, ser
 
 NODE_TEXT = ["summary", "description", "guidance", "notes"]
-NODE_TAX = {"pedagogical_type": "pedagogical_type", "requirement": "requirement", "depth": "depth"}
 TRACK_FIELDS = ["title", "subtitle", "description", "cover_url", "visibility", "audience", "difficulty", "level_labels", "settings"]
 MAX_NODES = 20000
 
@@ -193,6 +193,9 @@ async def _execute(payload, plan, user):
     return track_id
 
 async def run_import(payload: dict, dry_run: bool, user: dict) -> dict:
+    shape_errors = validate_import_shape(payload)
+    if shape_errors:
+        raise HTTPException(status_code=422, detail={"message": "Formato de importação inválido", "errors": shape_errors})
     plan = await _plan(payload)
     report = {key: value for key, value in plan.items() if key != "_ctx"}
     if dry_run or not plan["ok"]:
@@ -202,3 +205,4 @@ async def run_import(payload: dict, dry_run: bool, user: dict) -> dict:
         raise HTTPException(status_code=409, detail="Restauração em andamento nesta trilha")
     track_id = await _execute(payload, plan, user)
     return {**report, "dry_run": False, "track": ser(await db.tracks.find_one({"_id": oid(track_id)}))}
+
