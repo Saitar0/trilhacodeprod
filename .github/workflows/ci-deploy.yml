@@ -199,7 +199,7 @@ jobs:
           E2E_ADMIN_PASSWORD: e2e-only-admin-password
 
   deploy-staging:
-    needs: [backend, frontend]
+    needs: [backend, frontend, e2e]
     if: github.event_name == 'workflow_dispatch' && inputs.deploy_target == 'staging' && github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
     environment: staging
@@ -215,7 +215,7 @@ jobs:
             --header "Authorization: Bearer $TOKEN"
 
   deploy-production:
-    needs: [backend, frontend]
+    needs: [backend, frontend, e2e]
     if: github.event_name == 'workflow_dispatch' && inputs.deploy_target == 'production' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
