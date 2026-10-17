@@ -6,11 +6,11 @@
 
 **Base:** `main` em `8dea1233d6977cbaf387dd5e0bb964f9464b3d9c`
 
-**Branch de código:** `codex/qa-mobile-a11y`; [PR #17](https://github.com/Saitar0/trilhacodeprod/pull/17) aberto no commit `0354f4eb`; CI #39029960120 passou Compose e backend/frontend/E2E ainda executam.
+**Branch de código:** `codex/qa-mobile-a11y`; [PR #17](https://github.com/Saitar0/trilhacodeprod/pull/17) aberto; CI #39030010321 passou backend, frontend, Compose e Playwright E2E. Deploys de staging e produção foram pulados.
 
 - **QA de navegador:** CONCLUÍDA PARA OS FLUXOS COBERTOS. Chromium local com API simulada; login/catálogo/leitor/exercício e busca/lista admin em viewports 1280, 390 e 360 px. Tab levou o foco de Email para Senha e o indicador verde de foco foi confirmado. Sem overflow horizontal.
 - **Correções:** CONCLUÍDAS LOCALMENTE. Rodapé sticky cobria o textarea de exercício em 360 e 390 px; labels de resposta/código e nomes de botões admin estavam ausentes. Ajustes e regressões E2E adicionados.
-- **Validação:** typecheck, lint, build, Vitest (9/9), ESLint das specs E2E e descoberta Playwright passaram. Revisão independente aprovou a correção do seletor e o payload de desafio prático; CI #39029960120 passou Compose, backend/frontend/E2E ainda executam. O E2E usa somente Mongo descartável no workflow.
+- **Validação:** typecheck, lint, build, Vitest (9/9), ESLint das specs E2E e descoberta Playwright passaram. Revisão independente aprovou a correção do seletor e o payload de desafio prático; CI #39030010321 passou backend, frontend, Compose e E2E em Mongo descartável. Deploys foram pulados.
 - **G2:** DIAGNÓSTICO PARCIAL. O run anterior não conhece host ED25519; workflow preserva `StrictHostKeyChecking=yes`. A identidade precisa ser comparada com fingerprint administrada na VPS, indisponível neste ambiente. Nenhuma secret alterada e nenhum preflight/migração/seed/deploy executado.
 - **Estado desta retomada:** PARCIALMENTE CONCLUÍDA, aguardando CI do PR e validação autenticada da fingerprint pelo administrador da VPS. Próxima ação permitida sem novo risco: acompanhar CI/revisão do PR. Próxima ação operacional requer aprovação do dono da infraestrutura para corrigir `G2_STAGING_SSH_HOST` e/ou `G2_STAGING_SSH_KNOWN_HOSTS` após comparação independente.
 

@@ -22,7 +22,7 @@
 - Nomear os três botões somente com ícone em administração e especificar `type="button"` nos controles de ordem.
 - E2E de submissão verifica labels acessíveis de resposta aberta e código prático, ausência de overflow e não sobreposição em 360/390 px; E2E admin verifica nomes acessíveis dos controles. Revisão independente confirmou o payload de criação, cleanup e seletores do cenário.
 - Local: `npm run typecheck`, `npm run lint`, build, Vitest (9/9), ESLint das specs E2E, descoberta Playwright e QA Chromium com mocks passaram. O E2E integrado usa Mongo efêmero na CI; não foi iniciado Compose local por existirem containers/volumes QA antigos e outros serviços compartilhados no Docker.
-- [PR #17 — correções mobile e acessibilidade](https://github.com/Saitar0/trilhacodeprod/pull/17), branch `codex/qa-mobile-a11y`, commit `0354f4eb`. CI #39029960120 passou Compose; backend, frontend e E2E ainda executam; deploys permanecem fora de escopo.
+- [PR #17 — correções mobile e acessibilidade](https://github.com/Saitar0/trilhacodeprod/pull/17), branch `codex/qa-mobile-a11y`. CI #39030010321 passou backend, frontend, Compose e Playwright E2E; deploys permaneceram pulados.
 
 ### Diagnóstico G2
 

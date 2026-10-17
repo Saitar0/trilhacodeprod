@@ -64,4 +64,4 @@
 
 - Decisão: incluir no E2E de submissão um bloco `practical_challenge` temporário no Mongo efêmero e verificar seu nome acessível; selecionar o textarea pelo ID do bloco criado ao medir sobreposição.
 - Motivo: a revisão independente apontou que o teste anterior podia medir outro exercício e não cobria o label do campo de código.
-- Evidência: payload conferido com `BlockIn`/serviço de blocos, cleanup dos IDs temporários no teardown e revisão independente sem achados acionáveis. Commit `0354f4eb`; CI #39029960120 em execução.
+- Evidência: payload conferido com `BlockIn`/serviço de blocos, cleanup dos IDs temporários no teardown e revisão independente sem achados acionáveis. CI #39030010321 passou backend, frontend, Compose e Playwright E2E.
