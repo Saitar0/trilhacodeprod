@@ -105,3 +105,29 @@ Homologação visual/teclado e histórico permanecem para outra rodada com naveg
 - `.github/workflows/g2-staging-preflight.yml` usa as secrets `G2_STAGING_SSH_*` e não define `-p`/`Port`; OpenSSH usa 22. O alvo de `G2_STAGING_SSH_HOST` e a entrada em `G2_STAGING_SSH_KNOWN_HOSTS` não podem ser lidos pelos canais disponíveis. A falha anterior é compatível com entrada ED25519 ausente/incompatível, mas não confirma host correto nem fingerprint.
 - Nenhuma chave/fingerprint obtida. Não foram alteradas secrets/configurações, executado G2, acesso SSH, deploy, migração, índice, seed, backup/restore ou operação em Mongo.
 - Bloqueio e retomada: quando o Web Console ficar disponível, administrador deve obter fingerprint SHA256 no próprio host e comparar em canal privado com hostname, porta 22 e entrada `known_hosts` configurados no GitHub. Corrigir secrets apenas depois dessa comparação e aprovação específica; executar G2 exige aprovação distinta.
+
+
+## Relatório de homologação — 17/10/2026
+
+### Código e qualidade
+
+- PR #18 integrado em `5e503aecccfb85bd764d7af8e120d70819c6af4f`; a CI pós-merge #39036366799 passou backend, frontend, Compose e E2E. Deploys foram pulados.
+- PR #19 adiciona label ao campo JSON de importação, axe-core WCAG 2.1 A/AA e verificação de Tab/Enter. Revisão independente aprovada; CI #39037180408 passou frontend, backend, Compose e E2E; deploys foram pulados.
+- PR #20 testa a edição e o reenvio de uma resposta no estado enviado, e a persistência após reload. Revisão independente aprovada; CI #39037237806 passou frontend, backend, Compose e E2E; deploys foram pulados.
+- Os dois E2Es mutáveis permanecem dentro dos jobs que criam `trilhacode_e2e` Mongo efêmero. Não foram executados localmente contra uma base não identificada.
+
+### Performance de build
+
+- Job frontend da CI #39036366799: 2.429 módulos transformados; build em 11,75 s.
+- `dist/assets` contém 1.611 arquivos JavaScript, total bruto 1.867,01 kB; a soma gzip reportada é 874,12 kB se todos os chunks fossem solicitados.
+- Chunk `index`: 493,75 kB bruto / 159,36 kB gzip. Chunk `IconCatalog`: 213,07 kB bruto / 50,83 kB gzip. Separação em chunks indica carregamento dinâmico, mas a CI não mediu quantos chunks uma rota baixa em runtime.
+- Não há mudança de otimização proposta sem medição real de requests por rota; evitar reduzir o catálogo de ícones sem comprovar impacto funcional e ganho.
+
+### Staging, G2 e bloqueios
+
+- A sessão autenticada da Hostinger exibe o Web Console da VPS. Em modo somente leitura, `hostname -f` identificou `srv2032201.hstgr.cloud`; `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256` calculou a fingerprint no console. O valor não foi copiado para os arquivos do projeto.
+- O workflow G2 usa SSH na porta 22 e exige `StrictHostKeyChecking=yes`. Os valores dos secrets configurados no GitHub não são acessíveis pela sessão; hostname/known_hosts esperados ainda precisam ser comparados privadamente pelo responsável. Não há base para decidir secret a corrigir.
+- Coolify continua mostrando a API de staging como `exited:unhealthy`, sem container; Mongo está saudável. Isso não valida staging nem autoriza ciclo de vida.
+- Nenhuma secret, G2, conexão SSH, banco real, migration, índice, seed, backup, deploy ou recurso Dev Forge foi alterado/acionado.
+- `DEPLOY.md` possuía frase introdutória que contradizia sua sequência operacional de migração. A correção documental está incluída neste checkpoint para revisão.
+
