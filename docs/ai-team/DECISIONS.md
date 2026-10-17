@@ -40,3 +40,10 @@
 - Decisão: não alterar Mongo real, secrets, SSH/firewall, Coolify/VPS, Dev Forge; não rodar G3–G6 ou deploy.
 - Motivo: esses gates têm impacto em dados/infra compartilhados e aprovadores definidos no plano.
 - Consequência: permanece pendente a investigação segura da configuração de host key e aprovação operacional individual.
+
+
+## 17/10/2026 — Cobrir importação e edição de nó no navegador
+
+- Decisão: no E2E administrativo, validar preview sem criar a trilha, aplicar a importação hierárquica, conferir os três nós, editar o tópico, recarregar e validar persistência; remover a trilha temporária.
+- Motivo: cobrir homologação funcional de import e editor por UI em base isolada.
+- Evidência: PR #12, CI #70 passou; revisor independente não encontrou achados acionáveis. A base Mongo é descartável e a mutação roda somente quando CI está habilitado.
