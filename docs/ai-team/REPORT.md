@@ -112,8 +112,8 @@ Homologação visual/teclado e histórico permanecem para outra rodada com naveg
 ### Código e qualidade
 
 - PR #18 integrado em `5e503aecccfb85bd764d7af8e120d70819c6af4f`; a CI pós-merge #39036366799 passou backend, frontend, Compose e E2E. Deploys foram pulados.
-- PR #19 adiciona label ao campo JSON de importação, axe-core WCAG 2.1 A/AA e verificação de Tab/Enter. Revisão independente aprovada; CI #39037180408 estava em andamento no checkpoint.
-- PR #20 testa a edição e o reenvio de uma resposta no estado enviado, e a persistência após reload. Revisão independente aprovada; CI #39037237806 estava em andamento no checkpoint.
+- PR #19 adiciona label ao campo JSON de importação, axe-core WCAG 2.1 A/AA e verificação de Tab/Enter. Revisão independente aprovada; CI #39037180408 passou frontend, backend, Compose e E2E; deploys foram pulados.
+- PR #20 testa a edição e o reenvio de uma resposta no estado enviado, e a persistência após reload. Revisão independente aprovada; CI #39037237806 passou frontend, backend, Compose e E2E; deploys foram pulados.
 - Os dois E2Es mutáveis permanecem dentro dos jobs que criam `trilhacode_e2e` Mongo efêmero. Não foram executados localmente contra uma base não identificada.
 
 ### Performance de build
