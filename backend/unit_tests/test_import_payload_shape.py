@@ -70,3 +70,24 @@ def test_node_size_check_includes_generated_slug_and_import_reference(monkeypatc
 
     assert any(issue["path"] == "nodes[0]" for issue in errors)
 
+
+def test_tag_size_check_includes_generated_name_and_slug(monkeypatch):
+    monkeypatch.setattr("import_payload.MAX_IMPORT_DOCUMENT_BYTES", 512)
+    payload = {"track": {}, "nodes": [{"title": "Node", "tags": ["t" * 250]}]}
+
+    errors = validate_import_shape(payload)
+
+    assert any(issue["path"] == "nodes[0].tags[0]" for issue in errors)
+
+
+def test_block_size_check_includes_combined_import_reference(monkeypatch):
+    monkeypatch.setattr("import_payload.MAX_IMPORT_DOCUMENT_BYTES", 550)
+    payload = {
+        "track": {},
+        "nodes": [{"ref": "n" * 20, "title": "Node", "blocks": [{"ref": "b" * 350, "type": "text"}]}],
+    }
+
+    errors = validate_import_shape(payload)
+
+    assert any(issue["path"] == "nodes[0].blocks[0]" for issue in errors)
+
