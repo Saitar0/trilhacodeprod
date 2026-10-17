@@ -77,7 +77,7 @@ A missão permanece PARCIAL: as frentes técnicas selecionadas concluíram e pas
 
 ### Bloqueios que exigem autorização
 
-- Alterar `G2_STAGING_SSH_HOST` ou `G2_STAGING_SSH_KNOWN_HOSTS), ou despachar G2, depende de autorização específica. G2 consulta Mongo staging.
+- Alterar `G2_STAGING_SSH_HOST` ou `G2_STAGING_SSH_KNOWN_HOSTS`, ou despachar G2, depende de autorização específica. G2 consulta Mongo staging.
 - Migração, criação de índices, seed, backup/restore, deploy, mudança em serviços/credenciais/redes VPS ou Dev Forge não foram autorizados nem executados.
 - Os testes automatizados não representam homologação visual ou operacional de staging; não declarar produto pronto para produção.
 
