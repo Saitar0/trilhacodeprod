@@ -12,6 +12,8 @@ from import_payload import has_valid_parent_kind, validate_import_shape
         ({"track": {}, "nodes": [{"title": 4}]}, "nodes[0].title"),
         ({"track": {}, "nodes": [{"estimated_minutes": "many"}]}, "nodes[0].estimated_minutes"),
         ({"track": {}, "nodes": [{"estimated_minutes": {}}]}, "nodes[0].estimated_minutes"),
+        ({"track": {}, "nodes": [{"estimated_minutes": 9223372036854775808}]}, "nodes[0].estimated_minutes"),
+        ({"track": {}, "nodes": [{"estimated_minutes": -1}]}, "nodes[0].estimated_minutes"),
         ({"track": {}, "nodes": [{"blocks": "not-a-list"}]}, "nodes[0].blocks"),
         ({"track": {}, "nodes": [{"blocks": [{"type": [], "data": []}]}]}, "nodes[0].blocks[0].type"),
         ({"track": {}, "relations": ["not-an-object"]}, "relations[0]"),
