@@ -56,6 +56,11 @@ test("administrator can preview and persist an imported track", async ({ page })
     await expect(page.getByTestId("import-status")).toHaveText("Simulação válida");
     await expect(page.getByTestId("import-confirm-button")).toBeEnabled();
 
+    const tracksBeforeApply = await page.request.get(`${API_BASE_URL}/api/tracks?limit=500`);
+    expect(tracksBeforeApply.status()).toBe(200);
+    const existingTracks = await tracksBeforeApply.json();
+    expect(existingTracks.some((track: { slug: string }) => track.slug === slug)).toBe(false);
+
     const importResponse = page.waitForResponse((response) =>
       response.url().includes("/api/import/track?dry_run=false")
       && response.request().method() === "POST",
@@ -66,6 +71,7 @@ test("administrator can preview and persist an imported track", async ({ page })
     const report = await response.json();
     trackId = report.track.id;
     expect(report.dry_run).toBe(false);
+    expect(report.summary.nodes_create).toBe(3);
     await expect(page.getByTestId("import-status")).toHaveText("Importado");
 
     const treeResponse = await page.request.get(`${API_BASE_URL}/api/tracks/${trackId}/tree`);
