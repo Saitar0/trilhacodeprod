@@ -37,6 +37,7 @@ test("administrator can preview and persist an imported track", async ({ page })
       process.env.E2E_ADMIN_PASSWORD || "e2e-only-admin-password",
     );
     await page.getByTestId("login-submit-button").click();
+    await expect(page.getByTestId("login-form")).toHaveCount(0);
 
     await page.goto("/admin");
     await page.getByTestId("admin-nav-import").click();
