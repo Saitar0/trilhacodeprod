@@ -1,4 +1,7 @@
 NODE_TAX = {"pedagogical_type": "pedagogical_type", "requirement": "requirement", "depth": "depth"}
+TRACK_TEXT = ("title", "subtitle", "description", "cover_url", "visibility", "difficulty")
+NODE_TEXT = ("title", "summary", "description", "guidance", "notes")
+MAX_NODE_DEPTH = 100
 
 
 def validate_import_shape(payload: dict) -> list[dict]:
@@ -12,8 +15,17 @@ def validate_import_shape(payload: dict) -> list[dict]:
     if not isinstance(track, dict):
         add("track", "deve ser um objeto")
     else:
-        if "slug" in track and not isinstance(track["slug"], str):
-            add("track.slug", "deve ser texto")
+        for field in (*TRACK_TEXT, "slug"):
+            if field in track and not isinstance(track[field], str):
+                add(f"track.{field}", "deve ser texto")
+        if "audience" in track and (
+            not isinstance(track["audience"], list)
+            or any(not isinstance(item, str) for item in track["audience"])
+        ):
+            add("track.audience", "deve ser uma lista de textos")
+        for field in ("settings", "level_labels"):
+            if field in track and not isinstance(track[field], dict):
+                add(f"track.{field}", "deve ser um objeto")
         if "hierarchy" in track and track["hierarchy"] is not None and (
             not isinstance(track["hierarchy"], list)
             or any(not isinstance(kind, str) for kind in track["hierarchy"])
@@ -24,7 +36,10 @@ def validate_import_shape(payload: dict) -> list[dict]:
     if options is not None and not isinstance(options, dict):
         add("options", "deve ser um objeto")
 
-    def validate_nodes(items, path):
+    def validate_nodes(items, path, depth=0):
+        if depth > MAX_NODE_DEPTH:
+            add(path, f"profundidade máxima de {MAX_NODE_DEPTH} níveis excedida")
+            return
         if items is None:
             return
         if not isinstance(items, list):
@@ -35,9 +50,23 @@ def validate_import_shape(payload: dict) -> list[dict]:
             if not isinstance(node, dict):
                 add(node_path, "deve ser um objeto")
                 continue
-            for field in ("ref", "kind"):
+            for field in ("ref", "kind", "status"):
                 if field in node and not isinstance(node[field], str):
                     add(f"{node_path}.{field}", "deve ser texto")
+            for field in NODE_TEXT:
+                if field in node and not isinstance(node[field], str):
+                    add(f"{node_path}.{field}", "deve ser texto")
+            if "estimated_minutes" in node:
+                value = node["estimated_minutes"]
+                valid_minutes = isinstance(value, int) and not isinstance(value, bool)
+                if isinstance(value, str):
+                    try:
+                        int(value)
+                        valid_minutes = bool(value.strip())
+                    except ValueError:
+                        valid_minutes = False
+                if not valid_minutes:
+                    add(f"{node_path}.estimated_minutes", "deve ser um número inteiro")
             for field in NODE_TAX:
                 if node.get(field) is not None and not isinstance(node[field], str):
                     add(f"{node_path}.{field}", "deve ser texto")
@@ -54,11 +83,14 @@ def validate_import_shape(payload: dict) -> list[dict]:
                             continue
                         if "type" in block and not isinstance(block["type"], str):
                             add(f"{block_path}.type", "deve ser texto")
+                        for field in ("title", "status"):
+                            if field in block and not isinstance(block[field], str):
+                                add(f"{block_path}.{field}", "deve ser texto")
                         if block.get("data") is not None and not isinstance(block["data"], dict):
                             add(f"{block_path}.data", "deve ser um objeto")
             children = node.get("children")
             if children is not None:
-                validate_nodes(children, f"{node_path}.children")
+                validate_nodes(children, f"{node_path}.children", depth + 1)
 
     validate_nodes(payload.get("nodes", []), "nodes")
 
@@ -74,6 +106,12 @@ def validate_import_shape(payload: dict) -> list[dict]:
             for field in ("from", "to", "type"):
                 if field in relation and not isinstance(relation[field], str):
                     add(f"{path}.{field}", "deve ser texto")
+            if "note" in relation and not isinstance(relation["note"], str):
+                add(f"{path}.note", "deve ser texto")
 
     return errors
+
+
+def has_valid_parent_kind(parent_kind: str | None, hierarchy: list[str]) -> bool:
+    return parent_kind is None or parent_kind in hierarchy
 
