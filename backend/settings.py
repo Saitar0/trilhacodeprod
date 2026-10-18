@@ -130,7 +130,7 @@ class Settings(BaseSettings):
     def effective_cookie_secure(self) -> bool:
         if self.cookie_secure is not None:
             return self.cookie_secure
-        return self.is_production
+        return self.env in {"staging", "production"}
 
     def trusts_proxy(self, peer_ip: str | None) -> bool:
         if not peer_ip:
@@ -142,6 +142,8 @@ class Settings(BaseSettings):
             return False
 
     def validate_runtime(self) -> None:
+        if self.env == "staging" and self.cookie_secure is False:
+            raise RuntimeError("Configuração inválida: COOKIE_SECURE deve ser true em staging.")
         if self.is_production and (
             len(self.jwt_secret) < 32
             or self.jwt_secret.lower() in {

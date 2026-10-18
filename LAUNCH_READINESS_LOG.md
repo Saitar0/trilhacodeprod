@@ -5,7 +5,7 @@ Audit base: `55d08dd734e862d46be91575226181b6bc9596b2` (`origin/main` at session
 
 ## Current mission
 
-Mission 5 — complete review, ensure the final regression suite passes, and prepare a reviewable change for the deploy webhook and production-origin validation findings.
+Mission 6 — verify PR #24 CI, continue public-access/security review, and keep staging/G2 readiness evidence current.
 
 ## Mission history
 
@@ -37,6 +37,14 @@ Mission 5 — complete review, ensure the final regression suite passes, and pre
 - Updated production validation to reject reserved/example hosts, non-origin HTTPS URLs and a cookie domain unrelated to `FRONTEND_URL`. Updated deployment guidance and added 12 deterministic settings tests; all passed.
 - Re-ran backend integration after the validation change: 73 passed on a disposable Mongo. The final `.local` denylist extension only needs the settings/unit suite rerun.
 
+### Mission 5 — read-only Coolify inventory and staging cookie defaults
+
+- Read-only team-scoped Coolify inventory confirmed the Trilha Code project currently has one API application and one MongoDB resource. The staging API is `exited:unhealthy`, has no container present, no registry image configured, health checking disabled, and no deployment history. The staging Mongo is `running:healthy` and private.
+- Staging Mongo has no Coolify backup schedule. No backup/restore job was run.
+- Listed environment key names only (never values): API keys include `ENV`, `DB_NAME`, `FRONTEND_URL`, `CORS_ORIGINS`, `MONGO_URL`, and `JWT_SECRET`; there is no `COOKIE_SECURE` key. No database env keys were returned. Settings previously defaulted secure cookies only in production, so staging would emit cookies without `Secure` unless manually configured.
+- Changed runtime default to secure cookies for both staging and production, and make explicit `COOKIE_SECURE=false` a staging configuration error. Added two tests; final unit suite is 84 passed / 35 skipped. Python compileall, YAML parse, and whitespace checks passed.
+- This is code-only; it does not change the live Coolify resource. A new backend image and reviewed deployment would be required before the staging behavior changes.
+
 ## Evidence and test ledger
 
 | Date | Scope | Result | Limits |
@@ -44,7 +52,7 @@ Mission 5 — complete review, ensure the final regression suite passes, and pre
 | 2026-10-18 | `origin/main` SHA | `55d08dd734e862d46be91575226181b6bc9596b2` | Fetch/refs verified locally |
 | 2026-10-18 | PR #23 post-merge CI, run 39099796575 | Success; compose/backend/frontend/e2e pass; deploys skipped | Directly retrieved via connected GitHub Actions connector |
 | 2026-10-18 | Original dirty checkout unit/frontend checks | Passed as recorded above | Different base; not release evidence |
-| 2026-10-18 | Main backend unit suite | 82 passed, 35 skipped | Includes new webhook contract and production settings tests |
+| 2026-10-18 | Main backend unit suite / PR branch revision | 84 passed, 35 skipped | Includes workflow, origin, and staging-cookie contracts |
 | 2026-10-18 | Main backend integration | 73 passed | Disposable isolated Mongo 7, no persistent mounts; cleaned and verified |
 | 2026-10-18 | Main frontend checks | 9 Vitest; typecheck/lint/build/audit passed | `npm audit` found 0 vulnerabilities |
 | 2026-10-18 | Playwright browser E2E | 5 tests discovered; not executed | Executor blocked Vite server start; no workaround |
@@ -57,11 +65,14 @@ Mission 5 — complete review, ensure the final regression suite passes, and pre
 
 ## Blockers
 
-- No authorized VPS/Coolify SSH or panel access is established in this session; do not infer G2 completion.
+- No SSH/Hostinger console access is established. Coolify access in this session is limited to team-scoped read-only metadata; do not infer G2 completion.
+- Current read-only Coolify evidence: the Trilha Code staging API has no container, no registry image, disabled health checks, and zero deployments; the staging Mongo has no backup schedule.
+- The local browser E2E could not start because the executor blocked the Vite server command; the original post-merge CI E2E succeeded. PR #24 CI is pending.
+- Actual environment values, SSH secrets/fingerprint, GHCR pull identity, and network memberships remain unverified; do not read or alter secrets to resolve this.
 
 ## Next actions
 
-1. Rerun the final unit suite after the `.local` host denylist extension and review the complete diff.
+1. Check PR #24 CI for commit `31cfc5fb` and rerun after any new push.
 2. Review data-access/permissions and G2 install/runner boundaries for further proven issues.
-3. Keep G2 blocked until authorized host identity, private image pull and topology requirements are met.
-4. Continue updating this log before every handoff; public launch requires real staging evidence, backup/restore proof, and a readiness-gated deployment process.
+3. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
+4. Continue updating this log before every handoff; public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.

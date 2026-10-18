@@ -26,6 +26,18 @@ def test_accepts_valid_production_origin_and_matching_cookie_domain():
     configured().validate_runtime()
 
 
+def test_staging_cookies_default_to_secure():
+    settings = Settings(_env_file=None, env="staging")
+    assert settings.effective_cookie_secure is True
+    settings.validate_runtime()
+
+
+def test_staging_rejects_explicit_insecure_cookies():
+    settings = Settings(_env_file=None, env="staging", cookie_secure=False)
+    with pytest.raises(RuntimeError, match="COOKIE_SECURE deve ser true em staging"):
+        settings.validate_runtime()
+
+
 @pytest.mark.parametrize("frontend_url,cookie_domain", [
     ("https://app.example.com", ".example.com"),
     ("https://app.example.invalid", ".example.invalid"),

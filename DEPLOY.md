@@ -34,7 +34,7 @@ Use [`.env.staging.example`](.env.staging.example) e [`.env.production.example`]
 
 - `JWT_SECRET`: gere um valor aleatório forte, com pelo menos 32 caracteres; mantenha secreto.
 - `MONGO_URL` e `ADMIN_PASSWORD`: marque como secrets no Coolify.
-- `FRONTEND_URL`, `CORS_ORIGINS`, `COOKIE_DOMAIN`, `COOKIE_SAMESITE=Lax` e `COOKIE_SECURE=true`: substitua os exemplos por origens HTTPS reais sem caminho/query/fragmento. `COOKIE_DOMAIN` deve corresponder ao host do frontend (por exemplo, `.dominio-real.tld`) e ser isolado entre ambientes quando ambos compartilham o mesmo navegador. A API rejeita hosts reservados/de exemplo.
+- `FRONTEND_URL`, `CORS_ORIGINS`, `COOKIE_DOMAIN`, `COOKIE_SAMESITE=Lax` e `COOKIE_SECURE=true`: substitua os exemplos por origens HTTPS reais sem caminho/query/fragmento. Staging e production usam cookies seguros por padrão e rejeitam configuração explícita `COOKIE_SECURE=false`. `COOKIE_DOMAIN` deve corresponder ao host do frontend (por exemplo, `.dominio-real.tld`) e ser isolado entre ambientes quando ambos compartilham o mesmo navegador. A API rejeita hosts reservados/de exemplo.
 - `TRUSTED_PROXY_IPS`: configure o IP/CIDR interno real do proxy Coolify para a aplicação e para os cabeçalhos encaminhados pelo Uvicorn. Não copie `127.0.0.1` do exemplo sem confirmar a topologia da sua VPS. Use apenas endereços do proxy confiável.
 - `ADMIN_EMAIL` e `ADMIN_PASSWORD`: credenciais iniciais; use senha única forte. O seed de produção cria o admin se ainda não existir.
 - `WEB_CONCURRENCY=1` inicialmente. A API mantém estado externo; aumente só após medir memória/CPU.
