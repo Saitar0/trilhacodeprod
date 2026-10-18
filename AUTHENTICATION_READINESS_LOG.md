@@ -49,8 +49,9 @@ Implementar cadastro público com confirmação obrigatória, controles antiabus
 - O runbook G2 ainda exige imagem privada GHCR identificada por digest, identidade SSH validada, runner/manifest instalados, topologia interna dedicada, usuário Mongo somente leitura e evidência de backup/restauração. Nenhum gate foi acionado ou alterado.
 - O inventário de saúde mostrou aplicações fora do projeto Trilha Code em estado unhealthy; não investiguei nem alterei recursos de outros projetos.
 - Simulei a integração textual da head PR #24 com a head de autenticação em worktree descartável; não houve conflito de arquivos. A primeira execução backend combinada achou duas pendências em fixtures de produção: a fixture SMTP nova desta PR usava domínio reservado (corrigida aqui) e a fixture `test_settings_production.py` da PR #24 não define SMTP. Com ambas as fixtures coerentes no scratch, a suíte combinada passou com 170 testes e 35 skips G2; Ruff passou. A PR #24 e seu worktree ficaram intocados; após o merge futuro da PR #24, a fixture de configuração de produção precisará incluir SMTP de teste para a CI combinada passar.
-- Run CI #39105232718 no head `914bcaa08b35a0e9c987a179c17ccf19b2a8613f`: backend, frontend e Compose passaram; E2E ainda executava no último snapshot. O commit seguinte da atualização deste log exige sua própria CI.
+- CI run #39105232718 passou no head `914bcaa08b35a0e9c987a179c17ccf19b2a8613f`, incluindo E2E; deploys foram pulados por ser PR.
+- CI run #39105423611 passou no head `8d98c932395fa2d4c256f9163ea630d2d6037709`: Compose, backend, frontend e E2E passaram; deploys de staging/produção foram pulados. Esse head inclui a fixture SMTP compatível com a validação de produção.
 
 ## Próxima ação
 
-Atualizar a CI da PR #25 quando ela concluir e continuar a auditoria independente de deploy/recuperação sem tocar nos gates operacionais bloqueados.
+Registrar a CI acionada pelo commit final do log; manter PR #25 sem merge e retomar validação operacional após merge autorizado, configuração SMTP e recuperação de staging.
