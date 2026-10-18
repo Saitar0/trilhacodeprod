@@ -62,16 +62,20 @@ mongo_id="$("$DOCKER" inspect -f '{{.Id}}' "$MONGO_CONTAINER" 2>/dev/null)" || e
 [[ "$mongo_id" =~ ^[0-9a-f]{64}$ && "$mongo_id" == "$expected_mongo_id" ]] || emit_failure DB_UNAVAILABLE 69
 
 "$JQ" -e 'type == "object" and keys == ["checks", "schema_version"] and .schema_version == 1 and (.checks | type == "array" and length > 0 and all(.[]; type == "string")) and (.checks | length == (unique | length))' "$MANIFEST" >/dev/null 2>&1 || emit_failure MANIFEST 78
-"$JQ" -e --arg n "$NETWORK" --arg id "$mongo_id" --arg h "$expected_host" --arg container "$MONGO_CONTAINER" '
+network_json="$("$DOCKER" network inspect "$NETWORK" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
+"$JQ" -e --arg n "$NETWORK" --arg id "$mongo_id" --arg container "$MONGO_CONTAINER" '
   length == 1 and .[0].Name == $n and .[0].Internal == true
   and (.[0].Containers | type == "object" and keys == [$id])
   and .[0].Containers[$id].Name == $container
   and (.[0].Containers[$id].IPv4Address | type == "string" and length > 0)
-' < <("$DOCKER" network inspect "$NETWORK" 2>/dev/null) >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
+' <<<"$network_json" >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
+network_id="$("$JQ" -r '.[0].Id' <<<"$network_json" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
+[[ "$network_id" =~ ^[0-9a-f]{64}$ ]] || emit_failure NETWORK_ISOLATION 69
 container_networks="$("$DOCKER" inspect -f '{{json .NetworkSettings.Networks}}' "$MONGO_CONTAINER" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
-"$JQ" -e --arg n "$NETWORK" --arg h "$expected_host" '
-  type == "object" and keys == [$n]
+"$JQ" -e --arg n "$NETWORK" --arg h "$expected_host" --arg id "$network_id" '
+  type == "object" and has($n)
   and (.[$n] | type == "object")
+  and .[$n].NetworkID == $id
   and (.[$n].Aliases | type == "array" and index($h) != null)
 ' <<<"$container_networks" >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
 [[ "$("$DOCKER" inspect -f '{{.State.Running}}' "$MONGO_CONTAINER" 2>/dev/null)" == true ]] || emit_failure DB_UNAVAILABLE 69
@@ -111,6 +115,17 @@ cleanup_container() {
   "$DOCKER" rm -f "$container_id" >/dev/null 2>&1 || return 1
   remaining="$("$DOCKER" ps -aq --filter "name=^/${run_name}$" 2>/dev/null)" || return 1
   [[ -z "$remaining" ]]
+}
+validate_ephemeral_network() {
+  local ephemeral_id='' ephemeral_networks=''
+  [[ -f "$cidfile" && ! -L "$cidfile" ]] || return 1
+  IFS= read -r ephemeral_id < "$cidfile" || return 1
+  [[ "$ephemeral_id" =~ ^[0-9a-f]{64}$ ]] || return 1
+  ephemeral_networks="$("$DOCKER" inspect -f '{{json .NetworkSettings.Networks}}' "$ephemeral_id" 2>/dev/null)" || return 1
+  "$JQ" -e --arg n "$NETWORK" --arg id "$network_id" '
+    type == "object" and keys == [$n]
+    and (.[$n] | type == "object" and .NetworkID == $id)
+  ' <<<"$ephemeral_networks" >/dev/null 2>&1
 }
 on_signal() {
   local signal_code="$1"
@@ -170,8 +185,16 @@ set +e
 run_rc=$?
 set -e
 
+# Verify Docker's actual endpoint set, not only the requested --network option.
+# This is checked before cleanup while the invocation's container still exists.
+ephemeral_network_failed=0
+if [[ -s "$cidfile" ]] && ! validate_ephemeral_network; then
+  ephemeral_network_failed=1
+fi
+
 # Resolve and remove only this invocation's uniquely named, labelled container.
 if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+if (( ephemeral_network_failed )); then emit_failure NETWORK_ISOLATION 69; fi
 if [[ ! -s "$cidfile" ]] && (( run_rc != 124 && run_rc != 137 )); then
   emit_failure DOCKER_FAILURE 125
 fi
