@@ -159,3 +159,15 @@ def test_auth_rate_limiter_rejects_over_budget_requests(event_loop):
         return error.value.status_code
 
     assert event_loop.run_until_complete(run()) == 429
+
+
+def test_rate_limit_identifiers_use_a_keyed_hash():
+    import hmac
+
+    from routes_auth import _rate_key
+    from settings import settings
+
+    email = "example@example.com"
+    assert _rate_key(email) == _rate_key(email.upper())
+    assert _rate_key(email) == hmac.digest(settings.jwt_secret.encode(), email.encode(), "sha256").hex()
+    assert _rate_key(email) != hmac.digest(b"different-secret-key", email.encode(), "sha256").hex()

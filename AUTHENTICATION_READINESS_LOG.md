@@ -17,13 +17,14 @@ Implementar cadastro público com confirmação obrigatória, controles antiabus
 - Adicionados tokens aleatórios guardados somente por SHA-256, expiração (24h confirmação, 1h recuperação), consumo atômico e remoção após uso; versão JWT invalida sessões após reset/troca.
 - Corrigido vazamento de hash/expiração de tokens de verificação e recuperação em respostas serializadas de usuário; regressão cobre `/auth/me` e a listagem administrativa.
 - Criados limites Mongo TTL por IP/ação e e-mail hasheados sobre o índice TTL existente, mensagens genéricas e transporte local descartável/SMTP TLS; produção sem SMTP passa a falhar na validação de configuração.
+- Chaves de limite agora usam HMAC com o segredo de aplicação para impedir adivinhação de e-mails/IPs a partir de dump dos contadores.
 - Adicionadas telas de confirmação, recuperação e redefinição de senha, testes de integração/regressão e documentação operacional.
 - A confirmação só consome o token após clique explícito, evitando consumo por scanners/preview e efeitos duplicados no modo de desenvolvimento. Troca de senha detecta atualização concorrente.
 
 ## Validação concluída
 
 - `python -m compileall -q backend`, `ruff check .` (backend) e `git diff --check`: passaram.
-- Backend após revisão final, contra Mongo 7 novo em tmpfs, sem volume, ligado só a loopback e removido depois: 154 testes passaram; 35 testes G2 foram pulados pelos requisitos do runner operacional.
+- Backend após revisão final, contra Mongo 7 novo em tmpfs, sem volume, ligado só a loopback e removido depois: 155 testes passaram; 35 testes G2 foram pulados pelos requisitos do runner operacional.
 - Frontend após revisão final: Vitest 11 passaram; typecheck, lint e build passaram; `npm ci` relatou zero vulnerabilidades auditadas.
 - Playwright em banco limpo e descartável: 5 cenários passaram, cobrindo import/admin, navegação/admin, versões/admin, progresso/aluno, confirmação de e-mail e submissão/aluno.
 - Revisão acrescentou confirmação no E2E pelo botão da interface; a lista Playwright ainda descobre os 5 cenários e os 11 testes Vitest seguem passando. A tentativa local de execução Playwright após essa alteração foi rejeitada pelo executor ao iniciar Vite; nenhuma alternativa para contornar a política foi tentada. A CI remota no head mais recente ainda precisa executar este cenário atualizado.

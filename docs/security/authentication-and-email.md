@@ -10,7 +10,7 @@ O link de confirmação expira em 24 horas. O servidor guarda somente o SHA-256 
 
 ## Limites de abuso
 
-Os limites são contadores de janela fixa guardados na coleção `login_attempts`, reutilizando seu índice TTL existente; os documentos dos novos contadores usam `_id` hash e não guardam IP ou e-mail em claro. O monitor TTL do MongoDB faz a limpeza após a janela.
+Os limites são contadores de janela fixa guardados na coleção `login_attempts`, reutilizando seu índice TTL existente; identificadores de IP/e-mail usam HMAC com o segredo da aplicação e os documentos de contador usam `_id` hash, sem guardar IP ou e-mail em claro. O monitor TTL do MongoDB faz a limpeza após a janela.
 
 | Ação | Limite |
 | --- | --- |

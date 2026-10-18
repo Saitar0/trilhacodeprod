@@ -1,4 +1,4 @@
-import hashlib
+import hmac
 import logging
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
@@ -47,7 +47,7 @@ def _client_ip(request: Request) -> str:
 
 
 def _rate_key(value: str) -> str:
-    return hashlib.sha256(value.strip().lower().encode("utf-8")).hexdigest()
+    return hmac.digest(settings.jwt_secret.encode("utf-8"), value.strip().lower().encode("utf-8"), "sha256").hex()
 
 
 async def _deliver_account_email(kind: str, recipient: str, token: str) -> None:
