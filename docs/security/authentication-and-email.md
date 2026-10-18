@@ -10,15 +10,16 @@ O link de confirmação expira em 24 horas. O servidor guarda somente o SHA-256 
 
 ## Limites de abuso
 
-Os limites são contadores de janela fixa guardados na coleção `login_attempts`, reutilizando seu índice TTL existente; identificadores de IP/e-mail usam HMAC com o segredo da aplicação e os documentos de contador usam `_id` hash, sem guardar IP ou e-mail em claro. O monitor TTL do MongoDB faz a limpeza após a janela.
+Os limites usam buckets de tokens guardados na coleção `login_attempts`, reutilizando seu índice TTL existente; a reposição é gradual e não libera uma nova rajada quando o relógio cruza o início de um minuto ou hora. Cada alteração do contador é atômica no MongoDB, compartilhada entre instâncias, e usa o relógio do servidor Mongo. Identificadores de IP/e-mail usam HMAC com o segredo da aplicação e os documentos de contador usam `_id` hash, sem guardar IP ou e-mail em claro. O monitor TTL do MongoDB faz a limpeza depois de uma hora sem atividade.
 
 | Ação | Limite |
 | --- | --- |
 | Cadastro | 20 por IP/hora e 3 por e-mail/hora |
-| Login | 120 por IP/minuto; também há bloqueio por 5 falhas para o par IP/e-mail em 15 minutos |
+| Login | capacidade inicial de 120 por IP; reposição de 120 por minuto; também há bloqueio por 5 falhas para o par IP/e-mail em 15 minutos |
 | Reenvio de confirmação | 10 por IP/hora e 3 por e-mail/hora |
 | Pedido de recuperação | 10 por IP/hora e 3 por e-mail/hora |
-| Consumo do link de confirmação | 60 por IP/minuto |
+| Consumo de confirmação ou recuperação | capacidade de 60 por IP; reposição de 60 por minuto |
+| Alteração de senha autenticada | capacidade de 30 por IP; reposição de 30 por hora |
 
 Cadastro, reenvio e recuperação retornam mensagens genéricas para não revelar se um endereço está cadastrado. O envio ocorre após iniciar a resposta HTTP. O login também usa mensagem igual para senha incorreta e conta ainda não confirmada.
 

@@ -27,21 +27,54 @@ def _token_hash(token: str) -> str:
 
 
 async def rate_limit(action: str, key: str, maximum: int, window_seconds: int) -> None:
-    """Count fixed-window requests using an atomic, privacy-preserving Mongo key."""
-    bucket = int(now().timestamp()) // window_seconds
-    raw_key = f"{action}:{key}:{bucket}"
-    record_id = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
-    record = await db.login_attempts.find_one_and_update(
-        {"_id": record_id},
-        {"$inc": {"count": 1}, "$setOnInsert": {
+    """Consume one Mongo-backed token, shared by every API instance."""
+    if maximum < 1 or window_seconds < 1:
+        raise ValueError("Rate limit maximum and window must be positive")
+    record_id = hashlib.sha256(f"rate:{action}:{key}".encode("utf-8")).hexdigest()
+    refill_per_second = maximum / window_seconds
+    update = [
+        {"$set": {
+            "tokens": {"$min": [maximum, {"$add": [
+                {"$ifNull": ["$tokens", maximum]},
+                {"$multiply": [
+                    {"$divide": [{"$max": [0, {"$subtract": ["$$NOW", {"$ifNull": ["$updated_at", "$$NOW"]}]}]}, 1000]},
+                    refill_per_second,
+                ]},
+            ]}]},
+            "updated_at": "$$NOW",
             # Existing login_attempts.last TTL index performs bounded cleanup.
-            "last": now(),
+            "last": "$$NOW",
         }},
-        upsert=True,
-        return_document=ReturnDocument.AFTER,
-    )
-    if record["count"] > maximum:
+        {"$set": {
+            "allowed": {"$gte": ["$tokens", 1]},
+            "tokens": {"$max": [0, {"$subtract": ["$tokens", 1]}]},
+        }},
+    ]
+    try:
+        record = await db.login_attempts.find_one_and_update(
+            {"_id": record_id}, update, upsert=True, return_document=ReturnDocument.AFTER,
+        )
+    except DuplicateKeyError:
+        # Concurrent first requests can race to insert the deterministic _id.
+        record = await db.login_attempts.find_one_and_update(
+            {"_id": record_id}, update, upsert=False, return_document=ReturnDocument.AFTER,
+        )
+    if not record or not record["allowed"]:
         raise HTTPException(status_code=429, detail="Muitas tentativas. Tente novamente mais tarde.")
+
+
+def _failed_login_id(identifier: str) -> str:
+    return hashlib.sha256(f"failed-login:{identifier}".encode("utf-8")).hexdigest()
+
+
+async def _record_failed_login(identifier: str) -> None:
+    record_id = _failed_login_id(identifier)
+    update = {"$inc": {"count": 1}, "$set": {"last": now()}}
+    try:
+        await db.login_attempts.update_one({"_id": record_id}, update, upsert=True)
+    except DuplicateKeyError:
+        # The _id uniqueness constraint makes concurrent failures converge on one counter.
+        await db.login_attempts.update_one({"_id": record_id}, update, upsert=False)
 
 
 async def register_user(email: str, name: str, password: str) -> tuple[dict | None, str | None]:
@@ -72,22 +105,19 @@ async def register_user(email: str, name: str, password: str) -> tuple[dict | No
 
 async def authenticate_user(email: str, password: str, identifier: str) -> dict:
     email = email.lower()
-    attempt = await db.login_attempts.find_one({"identifier": identifier})
+    failed_login_id = _failed_login_id(identifier)
+    attempt = await db.login_attempts.find_one({"_id": failed_login_id})
     if attempt and attempt.get("count", 0) >= 5 and attempt["last"] > now() - timedelta(minutes=15):
         raise HTTPException(status_code=429, detail="Muitas tentativas. Tente novamente em 15 minutos.")
     user = await db.users.find_one({"email": email})
     password_matches = verify_password(password, user["password_hash"] if user else _DUMMY_PASSWORD_HASH)
     if not user or not password_matches:
-        await db.login_attempts.update_one(
-            {"identifier": identifier}, {"$inc": {"count": 1}, "$set": {"last": now()}}, upsert=True
-        )
+        await _record_failed_login(identifier)
         raise HTTPException(status_code=401, detail="Email ou senha inválidos")
     if user.get("email_verified") is False:
-        await db.login_attempts.update_one(
-            {"identifier": identifier}, {"$inc": {"count": 1}, "$set": {"last": now()}}, upsert=True
-        )
+        await _record_failed_login(identifier)
         raise HTTPException(status_code=401, detail="Email ou senha inválidos")
-    await db.login_attempts.delete_many({"identifier": identifier})
+    await db.login_attempts.delete_one({"_id": failed_login_id})
     return _public(user)
 
 

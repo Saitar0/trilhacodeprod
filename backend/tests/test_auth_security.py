@@ -1,4 +1,6 @@
 """Integration/regression coverage for account verification and recovery flows."""
+import asyncio
+import hashlib
 import uuid
 from datetime import timedelta
 
@@ -169,6 +171,67 @@ def test_auth_rate_limiter_rejects_over_budget_requests(event_loop):
         return error.value.status_code
 
     assert event_loop.run_until_complete(run()) == 429
+
+
+def test_auth_rate_limiter_is_atomic_across_concurrent_instances(event_loop):
+    from fastapi import HTTPException
+
+    from services.auth import rate_limit
+
+    key = uuid.uuid4().hex
+
+    async def consume():
+        try:
+            await rate_limit("parallel-test", key, 5, 3600)
+            return "allowed"
+        except HTTPException as error:
+            return error.status_code
+
+    results = event_loop.run_until_complete(asyncio.gather(*(consume() for _ in range(40))))
+    assert results.count("allowed") == 5
+    assert results.count(429) == 35
+
+
+def test_auth_rate_limiter_refills_gradually_instead_of_resetting_at_bucket_boundary(event_loop):
+    from fastapi import HTTPException
+
+    from services.auth import rate_limit
+
+    key = uuid.uuid4().hex
+    record_id = hashlib.sha256(f"rate:refill-test:{key}".encode()).hexdigest()
+
+    async def run():
+        # Empty the bucket and simulate 30 seconds of inactivity in a 40 second window.
+        await db.login_attempts.update_one(
+            {"_id": record_id},
+            {"$set": {"tokens": 0, "updated_at": now() - timedelta(seconds=30), "last": now()}},
+            upsert=True,
+        )
+        outcomes = []
+        for _ in range(4):
+            try:
+                await rate_limit("refill-test", key, 4, 40)
+                outcomes.append("allowed")
+            except HTTPException as error:
+                outcomes.append(error.status_code)
+        return outcomes
+
+    assert event_loop.run_until_complete(run()) == ["allowed", "allowed", "allowed", 429]
+
+
+def test_concurrent_failed_login_updates_share_one_atomic_counter(event_loop):
+    from services.auth import _failed_login_id, _record_failed_login
+
+    identifier = uuid.uuid4().hex
+    record_id = _failed_login_id(identifier)
+
+    async def run():
+        await asyncio.gather(*(_record_failed_login(identifier) for _ in range(40)))
+        return await db.login_attempts.find_one({"_id": record_id})
+
+    record = event_loop.run_until_complete(run())
+    assert record["count"] == 40
+    assert "identifier" not in record
 
 
 def test_rate_limit_identifiers_use_a_keyed_hash():
