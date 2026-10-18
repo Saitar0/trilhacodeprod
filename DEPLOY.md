@@ -34,7 +34,7 @@ Use [`.env.staging.example`](.env.staging.example) e [`.env.production.example`]
 
 - `JWT_SECRET`: gere um valor aleatório forte, com pelo menos 32 caracteres; mantenha secreto.
 - `MONGO_URL` e `ADMIN_PASSWORD`: marque como secrets no Coolify.
-- `FRONTEND_URL`, `CORS_ORIGINS`, `COOKIE_DOMAIN`, `COOKIE_SAMESITE=Lax` e `COOKIE_SECURE=true`: configure conforme a tabela. `COOKIE_DOMAIN=.example.com` em production e `.staging.example.com` em staging evita colisão de cookies entre ambientes no mesmo navegador.
+- `FRONTEND_URL`, `CORS_ORIGINS`, `COOKIE_DOMAIN`, `COOKIE_SAMESITE=Lax` e `COOKIE_SECURE=true`: substitua os exemplos por origens HTTPS reais sem caminho/query/fragmento. `COOKIE_DOMAIN` deve corresponder ao host do frontend (por exemplo, `.dominio-real.tld`) e ser isolado entre ambientes quando ambos compartilham o mesmo navegador. A API rejeita hosts reservados/de exemplo.
 - `TRUSTED_PROXY_IPS`: configure o IP/CIDR interno real do proxy Coolify para a aplicação e para os cabeçalhos encaminhados pelo Uvicorn. Não copie `127.0.0.1` do exemplo sem confirmar a topologia da sua VPS. Use apenas endereços do proxy confiável.
 - `ADMIN_EMAIL` e `ADMIN_PASSWORD`: credenciais iniciais; use senha única forte. O seed de produção cria o admin se ainda não existir.
 - `WEB_CONCURRENCY=1` inicialmente. A API mantém estado externo; aumente só após medir memória/CPU.
@@ -51,7 +51,7 @@ Crie uma aplicação Dockerfile em cada ambiente, apontando ao repositório/bran
 - Porta interna: `8000` (ou valor de `PORT`). Não publique porta no host; o proxy do Coolify faz o encaminhamento e TLS.
 - Domínio: `https://api.example.com` em production; `https://api.staging.example.com` em staging.
 - Healthcheck: `GET /health` (já incluído na imagem); depois do deploy confira também `GET /ready`.
-- Adicione todas as variáveis API do arquivo de exemplo correspondente. A configuração production rejeita segredo JWT inseguro, domínio de cookie ausente/incorreto, URLs sem HTTPS e admin inicial incompleto.
+- Adicione todas as variáveis API do arquivo de exemplo correspondente. A configuração production rejeita segredo JWT inseguro, hosts reservados/de exemplo, domínio de cookie ausente ou incompatível com o frontend, URLs sem HTTPS ou com caminhos, e admin inicial incompleto.
 - Não trate `python -m backend.manage migrate` isoladamente como procedimento completo. Siga a sequência de release da seção 7 antes de promover a aplicação. Não configure `seed` como pre-deploy. A imagem não executa migração, criação de índices nem seed ao iniciar.
 - `TRUSTED_PROXY_IPS` controla tanto o `--forwarded-allow-ips` do Uvicorn quanto a identificação do IP cliente usada pelo limitador de login.
 
@@ -125,11 +125,13 @@ As definições do código são a fonte de verdade para chaves e opções. `pref
 
 ## 8. CI e disparo de deploy
 
-A opção implementada é o deploy webhook de recurso do Coolify disparado pelo GitHub Actions **após os jobs de backend e frontend passarem**. O workflow `.github/workflows/ci-deploy.yml` valida em push para `main`/`staging`, PRs destinados a essas branches e `workflow_dispatch`. Pushes e PRs executam somente os checks. A publicação exige execução manual com input explícito `staging` ou `production`, branch correspondente e ambos os jobs verdes. O input manual padrão é `none`. Cada job de deploy também está associado ao GitHub Environment correspondente.
+A opção implementada é o deploy webhook de recurso do Coolify disparado pelo GitHub Actions **após os jobs `backend`, `frontend` e `e2e` passarem**. O workflow `.github/workflows/ci-deploy.yml` valida em push para `main`/`staging`, PRs destinados a essas branches e `workflow_dispatch`. Pushes e PRs executam somente os checks. A publicação exige execução manual com input explícito `staging` ou `production`, branch correspondente e todos os três jobs verdes. O input manual padrão é `none`. Cada job de deploy também está associado ao GitHub Environment correspondente.
 
-Para rodar o CI completo sem deploy, use um PR para `main` ou `staging`, faça push às branches validadas ou execute `workflow_dispatch` na branch/commit candidato com input `none`. Só depois da sequência de banco da seção 7, e com aprovação operacional registrada, execute `workflow_dispatch` na branch adequada com input de publicação correspondente. O workflow não foi disparado nesta preparação.
+Para rodar o CI completo sem deploy, use um PR para `main` ou `staging`, faça push às branches validadas ou execute `workflow_dispatch` na branch/commit candidato com input `none`. Só depois da sequência de banco da seção 7, e com aprovação operacional registrada, execute `workflow_dispatch` na branch adequada com input de publicação correspondente. Em qualquer dispatch de verificação, mantenha o input `none`; os jobs de deploy serão pulados.
 
 Os jobs de validação e publicação permanecem no mesmo arquivo, mas têm gatilhos/condições separados. A validação não depende de secrets; a publicação exige os secrets Coolify, branch e input explícitos. Configure ambientes `staging` e `production` com revisores/proteção adequada no GitHub Settings; a associação `environment:` por si só não configura aprovação. Proteja `main` exigindo ambos os checks e bloqueando push direto/bypass. Desative auto-deploy por push no Coolify para que ele não contorne o gate manual do workflow. Preserve os secrets atuais e não replique credenciais de deploy nos jobs de teste.
+
+O job envia uma chamada autenticada ao webhook sem retry automático. Se a chamada falhar ou expirar, o resultado pode ser ambíguo: primeiro confira o estado da implantação no Coolify antes de repetir o dispatch, pois o webhook pode ter enfileirado o deploy mesmo sem uma resposta utilizável. Um job concluído confirma apenas a resposta HTTP do webhook; não confirma conclusão, saúde ou readiness da aplicação. Verifique esses estados no Coolify e pelos endpoints de health/readiness antes de declarar o ambiente homologado.
 
 1. Em **Keys & Tokens > API Tokens**, crie um token Coolify com permissão mínima **deploy** e prazo de validade.
 2. Atribua tags distintas `trilhacode-production` e `trilhacode-staging` às aplicações API e frontend de cada ambiente (não ao Mongo). Em **Webhooks**, copie o **Deploy Webhook (auth required)** de cada tag.

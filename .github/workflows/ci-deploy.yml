@@ -231,7 +231,7 @@ jobs:
           TOKEN: ${{ secrets.COOLIFY_STAGING_TOKEN }}
         run: |
           test -n "$WEBHOOK" && test -n "$TOKEN"
-          curl --fail --silent --show-error --retry 3 \
+          curl --fail --silent --show-error \
             --request GET "$WEBHOOK" \
             --header "Authorization: Bearer $TOKEN"
 
@@ -247,6 +247,6 @@ jobs:
           TOKEN: ${{ secrets.COOLIFY_PRODUCTION_TOKEN }}
         run: |
           test -n "$WEBHOOK" && test -n "$TOKEN"
-          curl --fail --silent --show-error --retry 3 \
+          curl --fail --silent --show-error \
             --request GET "$WEBHOOK" \
             --header "Authorization: Bearer $TOKEN"
