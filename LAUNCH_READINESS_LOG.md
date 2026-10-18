@@ -5,7 +5,7 @@ Audit base: `55d08dd734e862d46be91575226181b6bc9596b2` (`origin/main` at session
 
 ## Current mission
 
-Mission 9 — verify CI after the latest PR #24 commit, continue release-readiness review, and keep staging/G2 evidence current.
+Mission 10 — verify the latest PR #24 CI and consolidate remaining public signup, staging, and G2 launch gates.
 
 ## Mission history
 
@@ -64,6 +64,12 @@ Mission 9 — verify CI after the latest PR #24 commit, continue release-readine
 - Added `https://player.vimeo.com` to each CSP declaration and corrected the deploy guide to list both supported providers.
 - Frontend unit suite passed 9/9 after the edit; `git diff --check` passed. Production image/reverse-proxy integration remains pending CI; no deploy was performed.
 
+### Mission 9 — public registration abuse controls
+
+- Confirmed `/cadastro` is an unauthenticated public route; backend registration accepts a six-character password and has no registration rate limit or email verification. Login has a separate failure limit, which does not constrain account creation.
+- Recorded this as a launch policy gate instead of inventing a signup quota or depending on an unconfigured email service. Before publicly opening registration, select and implement anti-abuse controls, password policy, and the corresponding user experience.
+- Ran a targeted secret-pattern scan over tracked files for common cloud access keys, GitHub tokens, private-key headers, credentialed MongoDB URIs, and long literal password/secret/token assignments: no tracked matches. This is a targeted check, not a comprehensive secret audit.
+
 ## Evidence and test ledger
 
 | Date | Scope | Result | Limits |
@@ -80,12 +86,14 @@ Mission 9 — verify CI after the latest PR #24 commit, continue release-readine
 | 2026-10-18 | Container networking lesson source/import copy | Malformed inline-code closing delimiters corrected in both files; JSON parse passed | No live import or database write |
 | 2026-10-18 | Video CSP and embed-provider contract | Vimeo player origin added to all 3 production CSP declarations; frontend tests 9/9 passed | CI/image validation pending; no deployment |
 | 2026-10-18 | PR #24 CI run 39101630737 | Compose and frontend passed; backend and E2E still running at checkpoint | Head `05150db965c67b98359191da55c0e71a4465d11d`; superseded by later content commits |
+| 2026-10-18 | Public signup/auth policy review | Open signup confirmed; 6-character minimum, no signup throttle/email verification; targeted tracked-secret scan had no matches | Anti-abuse policy and email service are not configured in this environment |
 
 ## Findings
 
 - `main`'s deploy steps treated webhook HTTP acceptance as job success and did not wait for deployment completion/readiness; docs now state the operator checks required.
 - Coolify deployment remains non-sequential and not readiness-gated. Automatic retries are removed, but production deploy safety is not fully implemented.
 - Production hostname/cookie validation is stricter, but DNS, exact production origins and Coolify environment values remain unverified operationally.
+- Public registration currently has no email verification or creation-rate limit and accepts six-character passwords; decide and implement signup abuse controls before public exposure.
 
 ## Blockers
 
@@ -93,9 +101,11 @@ Mission 9 — verify CI after the latest PR #24 commit, continue release-readine
 - Current read-only Coolify evidence: the Trilha Code staging API has no container, no registry image, disabled health checks, and zero deployments; the staging Mongo has no backup schedule.
 - The local browser E2E could not start because the executor blocked the Vite server command; CI run 39101340050 passed the E2E job on PR #24, while backend CI failed only at Ruff and has been corrected locally.
 - Actual environment values, SSH secrets/fingerprint, GHCR pull identity, and network memberships remain unverified; do not read or alter secrets to resolve this.
+- Public signup abuse controls and password requirements need a product decision and code/UI implementation before enabling broad registration.
 
 ## Next actions
 
 1. Verify the latest PR #24 CI on its exact head after the Ruff, course-content, and CSP corrections.
-2. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
-3. Continue the release gate review; public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.
+2. Define and implement public-signup abuse controls and confirm password policy before exposing `/cadastro` broadly.
+3. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
+4. Public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.
