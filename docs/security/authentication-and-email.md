@@ -25,7 +25,7 @@ Cadastro, reenvio e recuperação retornam mensagens genéricas para não revela
 
 ## Transporte de e-mail
 
-O backend usa a biblioteca padrão do Python (`smtplib`), sem credenciais ou dependência de provedor embutidas. Em produção, a inicialização exige `EMAIL_TRANSPORT=smtp`, host, remetente e TLS. Defina `SMTP_STARTTLS=true` para um relay com STARTTLS (normalmente porta 587), ou `SMTP_SSL=true` para conexão TLS desde o início; não habilite os dois. `SMTP_USERNAME` e `SMTP_PASSWORD` são opcionais para relays sem autenticação, mas devem ser configurados juntos quando o relay exigir login. O remetente precisa estar autorizado pelo provedor.
+O backend usa a biblioteca padrão do Python (`smtplib`), sem credenciais ou dependência de provedor embutidas. Em staging e produção, a inicialização exige `EMAIL_TRANSPORT=smtp`, host, remetente e TLS; transporte local é permitido somente em desenvolvimento e testes descartáveis. Defina `SMTP_STARTTLS=true` para um relay com STARTTLS (normalmente porta 587), ou `SMTP_SSL=true` para conexão TLS desde o início; não habilite os dois. `SMTP_USERNAME` e `SMTP_PASSWORD` são opcionais para relays sem autenticação, mas devem ser configurados juntos quando o relay exigir login. O remetente precisa estar autorizado pelo provedor.
 
 Variáveis de runtime:
 

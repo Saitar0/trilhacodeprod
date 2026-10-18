@@ -110,7 +110,27 @@ class Settings(BaseSettings):
         except ValueError:
             return False
 
+    def _email_configuration_problems(self) -> list[str]:
+        problems = []
+        if (self.email_transport != "smtp" or not self.smtp_host or not self.smtp_from_email
+                or (not self.smtp_starttls and not self.smtp_ssl)):
+            problems.append("EMAIL_TRANSPORT=smtp e SMTP_HOST/SMTP_FROM_EMAIL com TLS são obrigatórios")
+        if self.smtp_host and self.smtp_host.lower().endswith(".invalid"):
+            problems.append("SMTP_HOST ainda usa o domínio fictício de exemplo")
+        if self.smtp_from_email and (".invalid" in self.smtp_from_email.lower()
+                                     or "@example.com" in self.smtp_from_email.lower()):
+            problems.append("SMTP_FROM_EMAIL ainda usa um endereço fictício de exemplo")
+        if self.smtp_starttls and self.smtp_ssl:
+            problems.append("SMTP_STARTTLS e SMTP_SSL não podem ser usados juntos")
+        if bool(self.smtp_username) != bool(self.smtp_password):
+            problems.append("SMTP_USERNAME e SMTP_PASSWORD devem ser definidos juntos")
+        return problems
+
     def validate_runtime(self) -> None:
+        if self.env == "staging":
+            email_problems = self._email_configuration_problems()
+            if email_problems:
+                raise RuntimeError("Configuração inválida para staging: " + "; ".join(email_problems) + ".")
         if self.is_production and (
             len(self.jwt_secret) < 32
             or self.jwt_secret.lower() in {
@@ -126,19 +146,7 @@ class Settings(BaseSettings):
                 "e não pode ser um segredo de exemplo/desenvolvimento."
             )
         if self.is_production:
-            problems = []
-            if (self.email_transport != "smtp" or not self.smtp_host or not self.smtp_from_email
-                    or (not self.smtp_starttls and not self.smtp_ssl)):
-                problems.append("EMAIL_TRANSPORT=smtp e SMTP_HOST/SMTP_FROM_EMAIL com TLS são obrigatórios")
-            if self.smtp_host and self.smtp_host.lower().endswith(".invalid"):
-                problems.append("SMTP_HOST ainda usa o domínio fictício de exemplo")
-            if self.smtp_from_email and (".invalid" in self.smtp_from_email.lower()
-                                         or "@example.com" in self.smtp_from_email.lower()):
-                problems.append("SMTP_FROM_EMAIL ainda usa um endereço fictício de exemplo")
-            if self.smtp_starttls and self.smtp_ssl:
-                problems.append("SMTP_STARTTLS e SMTP_SSL não podem ser usados juntos")
-            if bool(self.smtp_username) != bool(self.smtp_password):
-                problems.append("SMTP_USERNAME e SMTP_PASSWORD devem ser definidos juntos")
+            problems = self._email_configuration_problems()
             mongo = urlsplit(self.mongo_url)
             if (mongo.scheme not in {"mongodb", "mongodb+srv"} or not mongo.hostname
                     or mongo.hostname in {"localhost", "127.0.0.1", "::1"}

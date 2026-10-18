@@ -24,9 +24,29 @@ def _production_settings(**overrides):
     return Settings(**values)
 
 
+def _staging_settings(**overrides):
+    values = {
+        "env": "staging",
+        "email_transport": "smtp",
+        "smtp_host": "smtp.unit.test",
+        "smtp_from_email": "no-reply@unit.test",
+        "smtp_starttls": True,
+    }
+    values.update(overrides)
+    return Settings(_env_file=None, **values)
+
+
 def test_production_requires_smtp_delivery():
     with pytest.raises(RuntimeError, match="EMAIL_TRANSPORT=smtp"):
         _production_settings(email_transport="local").validate_runtime()
+
+
+def test_staging_requires_real_smtp_transport_and_tls():
+    with pytest.raises(RuntimeError, match="EMAIL_TRANSPORT=smtp"):
+        _staging_settings(email_transport="local").validate_runtime()
+    with pytest.raises(RuntimeError, match="com TLS"):
+        _staging_settings(smtp_starttls=False, smtp_ssl=False).validate_runtime()
+    _staging_settings().validate_runtime()
 
 
 def test_production_rejects_plaintext_and_conflicting_smtp_security():
