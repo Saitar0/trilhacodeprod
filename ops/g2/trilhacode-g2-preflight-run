@@ -7,7 +7,6 @@ unset BASH_ENV ENV CDPATH
 
 readonly IMAGE='ghcr.io/saitar0/trilhacodeprod-backend@sha256:a6bf47a3fb1c8019678c85ce5d6d6b055a61e547c62681865f8fd1be20fad71e'
 readonly NETWORK='trilhacode-g2-preflight-internal'
-readonly MONGO_CONTAINER='3jo4k9aes1iqn4qlqqeyyh4y'
 readonly ENV_FILE='/etc/trilhacode-g2/preflight.env'
 readonly MANIFEST='/etc/trilhacode-g2/preflight-manifest-v1.json'
 readonly RUN_PREFIX='trilhacode-g2-preflight-'
@@ -57,6 +56,7 @@ expected_mongo_id="$(/usr/bin/awk -F= '$1 == "G2_MONGO_EXPECTED_CONTAINER_ID" { 
 [[ "$expected_host" =~ ^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?$ ]] || emit_failure TARGET_IDENTITY 78
 grep -qx 'G2_MONGO_EXPECTED_PORT=27017' "$ENV_FILE" || emit_failure TARGET_IDENTITY 78
 [[ "$expected_mongo_id" =~ ^[0-9a-f]{64}$ ]] || emit_failure TARGET_IDENTITY 78
+readonly MONGO_CONTAINER="$expected_mongo_id"
 
 mongo_id="$("$DOCKER" inspect -f '{{.Id}}' "$MONGO_CONTAINER" 2>/dev/null)" || emit_failure DB_UNAVAILABLE 69
 [[ "$mongo_id" =~ ^[0-9a-f]{64}$ && "$mongo_id" == "$expected_mongo_id" ]] || emit_failure DB_UNAVAILABLE 69
