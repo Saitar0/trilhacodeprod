@@ -51,16 +51,16 @@ case "$1" in
       format="$2"; target="$3"
       case "$format" in
         '{{.Id}}')
-          if [[ "$target" == test-mongo ]]; then
+          if [[ "$target" == "$id" ]]; then
             [[ "$mode" == mongo_identity_mismatch ]] && printf '%s\n' 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' || printf '%s\n' "$id"
             exit 0
           fi
           [[ -f "$state" && "$target" == "$run_id" ]] || exit 1
           printf '%s\n' "$run_id"
           ;;
-        '{{.Name}}') [[ "$target" == test-mongo ]] && printf '%s\n' '/test-mongo' || exit 1 ;;
+        '{{.Name}}') [[ "$target" == "$id" ]] && printf '%s\n' '/test-mongo' || exit 1 ;;
         '{{json .NetworkSettings.Networks}}')
-          if [[ "$target" == test-mongo ]]; then
+          if [[ "$target" == "$id" ]]; then
           jq -cn --arg mode "$mode" '
             (if $mode == "mongo_not_on_g2" then {"trilhacode-staging-network":{NetworkID:"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",Aliases:["mongo"]}}
              else {"trilhacode-g2-preflight-internal":
@@ -171,7 +171,6 @@ def runner_harness(tmp_path):
     timeout.chmod(0o755)
     runner = tmp_path / "runner.sh"
     source = RUNNER.read_text()
-    source = source.replace("readonly MONGO_CONTAINER='3jo4k9aes1iqn4qlqqeyyh4y'", "readonly MONGO_CONTAINER='test-mongo'")
     source = source.replace("readonly ENV_FILE='/etc/trilhacode-g2/preflight.env'", f"readonly ENV_FILE='{env_file}'")
     source = source.replace("readonly MANIFEST='/etc/trilhacode-g2/preflight-manifest-v1.json'", f"readonly MANIFEST='{manifest}'")
     source = source.replace("readonly DOCKER='/usr/bin/docker'", f"readonly DOCKER='{docker}'")
@@ -227,6 +226,7 @@ def runner_harness(tmp_path):
                                 text=True, env=env, start_new_session=True)
 
     invoke.state_path = state_path
+    invoke.env_file = env_file
     invoke.start = start
     return invoke
 
@@ -271,6 +271,20 @@ def test_runner_rejects_mismatched_mongodb_identity_before_creating_preflight(ru
     result = runner_harness(mode="mongo_identity_mismatch")
     assert result.returncode == 69
     assert "DB_UNAVAILABLE" in result.stdout
+    assert not (runner_harness.state_path.parent / "started").exists()
+
+
+def test_runner_rejects_coolify_resource_uuid_as_container_identity_before_docker_inspect(runner_harness):
+    contents = runner_harness.env_file.read_text()
+    runner_harness.env_file.write_text(contents.replace(
+        "G2_MONGO_EXPECTED_CONTAINER_ID=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "G2_MONGO_EXPECTED_CONTAINER_ID=3jo4k9aes1iqn4qlqqeyyh4y",
+    ))
+
+    result = runner_harness()
+
+    assert result.returncode == 78
+    assert "TARGET_IDENTITY" in result.stdout
     assert not (runner_harness.state_path.parent / "started").exists()
 
 
