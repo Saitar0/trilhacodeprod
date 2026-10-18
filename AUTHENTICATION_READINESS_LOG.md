@@ -51,7 +51,8 @@ Implementar cadastro público com confirmação obrigatória, controles antiabus
 - Simulei a integração textual da head PR #24 com a head de autenticação em worktree descartável; não houve conflito de arquivos. A primeira execução backend combinada achou duas pendências em fixtures de produção: a fixture SMTP nova desta PR usava domínio reservado (corrigida aqui) e a fixture `test_settings_production.py` da PR #24 não define SMTP. Com ambas as fixtures coerentes no scratch, a suíte combinada passou com 170 testes e 35 skips G2; Ruff passou. A PR #24 e seu worktree ficaram intocados; após o merge futuro da PR #24, a fixture de configuração de produção precisará incluir SMTP de teste para a CI combinada passar.
 - CI run #39105232718 passou no head `914bcaa08b35a0e9c987a179c17ccf19b2a8613f`, incluindo E2E; deploys foram pulados por ser PR.
 - CI run #39105423611 passou no head `8d98c932395fa2d4c256f9163ea630d2d6037709`: Compose, backend, frontend e E2E passaram; deploys de staging/produção foram pulados. Esse head inclui a fixture SMTP compatível com a validação de produção.
+- CI run #39105643216 passou no head `03c7e4e7c987161694e02a0f14615bac3b55cec8`: Compose, backend, frontend e E2E passaram; deploys de staging/produção foram pulados. PR #25 permanece aberta, sem merge.
 
 ## Próxima ação
 
-Registrar a CI acionada pelo commit final do log; manter PR #25 sem merge e retomar validação operacional após merge autorizado, configuração SMTP e recuperação de staging.
+Manter PR #25 sem merge; depois da integração autorizada, ajustar a fixture de produção compartilhada com PR #24, configurar SMTP por secret store, recuperar/homologar staging, estabelecer backup/restauração e retomar G2 sob seu gate separado.
