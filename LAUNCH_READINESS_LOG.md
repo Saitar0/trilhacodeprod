@@ -5,7 +5,7 @@ Audit base: `55d08dd734e862d46be91575226181b6bc9596b2` (`origin/main` at session
 
 ## Current mission
 
-Mission 11 — validate production frontend image/Nginx in CI and verify the latest PR #24 checks.
+Mission 12 — continue release-readiness work from passing PR CI; the remaining signup and G2 gates need policy or operator action.
 
 ## Mission history
 
@@ -76,6 +76,13 @@ Mission 11 — validate production frontend image/Nginx in CI and verify the lat
 - Added CI steps to build the frontend production image with a non-routable placeholder backend origin and run `nginx -t` in that ephemeral image. The job does not push the image.
 - Local workflow YAML parsing and `git diff --check` passed. The runner-level Docker build and Nginx parse await CI; no image was built on the shared local Docker host.
 
+### Mission 11 — production image checks and latest PR CI
+
+- PR #24 CI run `39101916285` passed all validation jobs on head `b93a10b1283ee14f1c5f9e6ab19fa9d20c851c8d`: Compose, backend unit/Ruff/integration/config/image/dependency audit, frontend typecheck/lint/unit/build, production frontend image build, `nginx -t`, frontend dependency audit, and isolated student/admin E2E.
+- Staging and production deploy jobs were skipped as expected for a pull request. No image was pushed to a registry.
+- Prior run `39101875571` also passed Compose/backend/frontend/E2E on SHA `3a0091f81362a1bac7a9b49d59b0c24a2018a926`; run `39101760653` passed on the Vimeo-CSP SHA `fd99bff6e157363df55ef1597de242c3bfbd13cb`.
+- PR #24 remains open and unmerged. Its branch has no deployment evidence; production/staging operational gates remain pending.
+
 ## Evidence and test ledger
 
 | Date | Scope | Result | Limits |
@@ -94,6 +101,7 @@ Mission 11 — validate production frontend image/Nginx in CI and verify the lat
 | 2026-10-18 | PR #24 CI run 39101630737 | Compose and frontend passed; backend and E2E still running at checkpoint | Head `05150db965c67b98359191da55c0e71a4465d11d`; superseded by later content commits |
 | 2026-10-18 | Public signup/auth policy review | Open signup confirmed; 6-character minimum, no signup throttle/email verification; targeted tracked-secret scan had no matches | Anti-abuse policy and email service are not configured in this environment |
 | 2026-10-18 | Production frontend CI gate | Added ephemeral production image build and `nginx -t`; workflow YAML parsed locally | Await CI on the new commit; no registry push |
+| 2026-10-18 | PR #24 CI run 39101916285 | All validation jobs passed, including production frontend image build, `nginx -t`, disposable Mongo integration and Playwright E2E; deploys skipped | Exact PR head `b93a10b1283ee14f1c5f9e6ab19fa9d20c851c8d`; not a staging/production deployment |
 
 ## Findings
 
@@ -112,7 +120,6 @@ Mission 11 — validate production frontend image/Nginx in CI and verify the lat
 
 ## Next actions
 
-1. Verify the latest PR #24 CI on its exact head, including the production frontend image and Nginx checks.
-2. Define and implement public-signup abuse controls and confirm password policy before exposing `/cadastro` broadly.
-3. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
-4. Public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.
+1. Continue public-signup mitigation work once the product policy is established; no email delivery service is configured here.
+2. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
+3. Public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.
