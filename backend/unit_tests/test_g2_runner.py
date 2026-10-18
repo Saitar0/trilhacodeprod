@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RUNNER = REPO_ROOT / "ops/g2/trilhacode-g2-preflight-run"
 MANIFEST_PATH = REPO_ROOT / "ops/g2/preflight-manifest-v1.json"
