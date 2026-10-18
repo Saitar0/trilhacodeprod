@@ -5,6 +5,7 @@ Atualizado em 17/10/2026 a partir de main (`5e503aecccfb85bd764d7af8e120d70819c6
 
 - Branch `codex/g2-fix` parte da main confirmada `2e83571af259ae2452994d81acb169f19a0e3a20`.
 - Implementação proposta: validação de destino Mongo antes do cliente, incluindo `directConnection=true`; protocolo JSON versionado com manifesto independente; checks somente leitura com limite de agregação; runner fail-closed, sanitizado, com limpeza e lock seguros; guarda de `refs/heads/main`; documentação de implantação separada.
+- PR #22 aberto para revisão; CI #39093646423 passou backend, frontend, Compose e Playwright E2E. Deploys foram pulados. A revisão independente final não encontrou achados P1 de falso sucesso/vazamento.
 - Esta branch ainda não foi integrada. O G2 e os workflows de publicação de imagem não foram executados. Ativação requer nova imagem imutável compatível, revisão e implantação autorizada do runner/manifesto/rede na VPS.
 
 | Frente | Status | Evidência verificada | Próximo critério |
