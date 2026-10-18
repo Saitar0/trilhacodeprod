@@ -8,7 +8,6 @@ from urllib.parse import urlsplit
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 _RESERVED_PUBLIC_HOSTS = {
     "example.com", "example.net", "example.org", "example.edu", "example", "localhost",
     "invalid", "test", "local",

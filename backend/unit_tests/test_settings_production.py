@@ -2,7 +2,6 @@ import pytest
 
 from settings import Settings
 
-
 BASE = {
     "env": "production",
     "mongo_url": "mongodb://appuser:opaque-test-password@mongo.internal:27017/app?authSource=admin",
