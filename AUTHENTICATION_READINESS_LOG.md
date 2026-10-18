@@ -25,6 +25,7 @@ Implementar cadastro público com confirmação obrigatória, controles antiabus
 - Backend após revisão final, contra Mongo 7 novo em tmpfs, sem volume, ligado só a loopback e removido depois: 153 testes passaram; 35 testes G2 foram pulados pelos requisitos do runner operacional.
 - Frontend após revisão final: Vitest 11 passaram; typecheck, lint e build passaram; `npm ci` relatou zero vulnerabilidades auditadas.
 - Playwright em banco limpo e descartável: 5 cenários passaram, cobrindo import/admin, navegação/admin, versões/admin, progresso/aluno, confirmação de e-mail e submissão/aluno.
+- Revisão acrescentou confirmação no E2E pelo botão da interface; a lista Playwright ainda descobre os 5 cenários e os 11 testes Vitest seguem passando. A tentativa local de execução Playwright após essa alteração foi rejeitada pelo executor ao iniciar Vite; nenhuma alternativa para contornar a política foi tentada. A CI remota no head mais recente ainda precisa executar este cenário atualizado.
 - `docker compose --env-file .env.example -f compose.yaml config --quiet`: passou.
 - Testes de SMTP validam TLS obrigatório e credenciais emparelhadas; fluxo de integração usa transporte local `.eml` temporário, removido após a execução.
 

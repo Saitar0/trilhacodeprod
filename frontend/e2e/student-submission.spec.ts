@@ -59,13 +59,13 @@ test("student can submit an exercise and retain the answer after reload", async 
     const studentApi = await apiRequest.newContext({ baseURL: API_BASE_URL });
     const studentEmail = `e2e_student_${Date.now()}@example.com`;
     const studentPassword = "e2e-only-student-password";
+    let verificationToken: string | undefined;
     try {
       const registration = await studentApi.post("/api/auth/register", {
         data: { name: "E2E Student", email: studentEmail, password: studentPassword },
       });
       expect(registration.status(), "create an isolated disposable E2E student").toBe(202);
       const mailbox = process.env.AUTH_TEST_MAIL_DIR || join(process.cwd(), "..", "backend", ".local-emails");
-      let verificationToken: string | undefined;
       await expect.poll(async () => {
         const mailFiles = (await readdir(mailbox)).filter((file) => file.endsWith(".eml"));
         for (const file of mailFiles) {
@@ -79,13 +79,16 @@ test("student can submit an exercise and retain the answer after reload", async 
         }
         return Boolean(verificationToken);
       }, { timeout: 5000 }).toBe(true);
-      const verification = await studentApi.post("/api/auth/verify-email", { data: { token: verificationToken } });
-      expect(verification.status(), "confirm the isolated E2E student email").toBe(200);
     } finally {
       await studentApi.dispose();
     }
 
     await page.route("https://**/*", (route) => route.abort());
+    expect(verificationToken, "local test mailbox contains the verification link").toBeTruthy();
+    await page.goto(`/auth/confirm-email?token=${verificationToken}`);
+    await expect(page.getByRole("button", { name: "Confirmar e-mail" })).toBeVisible();
+    await page.getByRole("button", { name: "Confirmar e-mail" }).click();
+    await expect(page.getByRole("status")).toHaveText("E-mail confirmado. Você já pode entrar.");
     await page.goto("/login");
     await page.getByTestId("login-email-input").fill(studentEmail);
     await page.getByTestId("login-password-input").fill(studentPassword);
