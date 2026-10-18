@@ -112,17 +112,18 @@ Mission 12 — continue release-readiness work from passing PR CI; the remaining
 
 ## Blockers
 
-- No SSH/Hostinger console access is established. Coolify access in this session is limited to team-scoped read-only metadata; do not infer G2 completion.
-- Current read-only Coolify evidence: the Trilha Code staging API has no container, no registry image, disabled health checks, and zero deployments; the staging Mongo has no backup schedule.
+- Hostinger access was subsequently established through the authenticated VPS web console for read-only inspection only (Mission 14). Local SSH authentication is still unavailable; the approved host key matches the local known-hosts pin, but the local identity was not authorized.
+- Current read-only Coolify evidence: the Trilha Code staging API has no container, no registry image, disabled health checks, and zero deployments; the staging Mongo has no Coolify backup schedule.
 - The local browser E2E could not start because the executor blocked the Vite server command; CI run 39101340050 passed the E2E job on PR #24, while backend CI failed only at Ruff and has been corrected locally.
-- Actual environment values, SSH secrets/fingerprint, GHCR pull identity, and network memberships remain unverified; do not read or alter secrets to resolve this.
-- Public signup abuse controls and password requirements need a product decision and code/UI implementation before enabling broad registration.
+- Actual environment values, GHCR pull identity, Mongo read-only user/role, and the identity/writer role of the second container on the Mongo network remain unverified; do not read or alter secrets to resolve this.
+- The public-signup policy and application controls are merged through PR #25; staging email delivery, rate-limit behavior behind the production proxy, and end-to-end verification still require real environment validation.
 
 ## Next actions
 
-1. Continue public-signup mitigation work once the product policy is established; no email delivery service is configured here.
-2. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
-3. Public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.
+1. Identify the active non-Trilha container connected to the staging Mongo network and establish whether it can write, using an authorized non-secret read path; do not detach or modify it.
+2. Establish a database-scoped, consistent backup and disposable Mongo 7 restore proof with protected off-host retention. Hostinger snapshots are whole-VPS recovery points and must not be restored because they include shared services.
+3. Keep G2 blocked until private image digest/provenance, runner version, SSH identity, read-only Mongo role, network isolation, and backup/restore requirements are verified.
+4. Public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.
 
 ### Missão 12 — integração e gates operacionais após PR #25 (18/10/2026)
 
@@ -150,3 +151,13 @@ Mission 12 — continue release-readiness work from passing PR CI; the remaining
 - Nenhum backup, restore, deploy, G2, alteração de banco/rede/segredo, operação de terminal ou mudança em Dev Forge foi realizado. A CI não publicou imagem; deployment continua bloqueado por backup restaurável, escritores/janela consistentes, imagem privada compatível e digest/proveniência, SSH/host key autorizados, rede/IDs, usuário Mongo read-only, origem/configuração/rollback, e SMTP real.
 - GitHub informou branch `main` sem proteção/configuração de status obrigatório na consulta; não foi alterada configuração de repositório. Para prontidão pública, habilitar proteção e gates de revisão/CI exige permissão administrativa autorizada e decisão operacional.
 - Próxima ação: obter acesso humano autorizado à VPS (usuário/chave SSH permitidos e fingerprint de host confirmado) ou um terminal Coolify com escopo de leitura; então inventariar escritores, identidade de containers/redes e armazenamento antes de planejar backup. É necessária também autorização/configuração de um destino de backup externo com retenção e disponibilidade verificáveis. Até isso ocorrer, preservar os serviços e não executar G2, backup/restore ou recuperação da API.
+
+### Missão 14 — inventário Hostinger, backup VPS e topologia Mongo (18/10/2026)
+
+- O usuário disponibilizou sessões autenticadas da Hostinger e do Coolify. Acesso utilizado somente para leitura: console web da VPS confirma host `srv2032201`, usuário `root`, Docker `29.8.2`, e SSH ativo. Nenhuma configuração, chave, serviço ou dado foi alterado.
+- A chave pública Ed25519 do servidor, consultada pelo fingerprint (sem imprimir conteúdo de chave), corresponde ao pin da mesma VPS no `known_hosts` local. A identidade SSH local continua sem autorização: a chave configurada localmente não corresponde à chave pública `coolify` exibida na Hostinger e a tentativa anterior foi negada; nenhuma chave foi adicionada nem nova tentativa de autenticação foi feita.
+- Docker mostra somente o Mongo Trilha Code como container do projeto; MongoDB `mongo:7` está saudável, ID Docker completo conferido internamente, sem porta publicada, em `trilhacode-staging-network`. A rede contém dois membros. O segundo está ativo, não corresponde aos IDs conhecidos da API Trilha Code e seus metadados sanitizados não identificam Dev Forge nem Trilha Code. A identidade, função e capacidade de escrita desse peer permanecem desconhecidas; ele não foi alterado. Não há janela de consistência comprovada.
+- O painel Hostinger mostra backup automático semanal e dois pontos de recuperação de VPS inteira (17 e 10/10/2026), armazenados fora do servidor segundo o painel, com substituição automática dos backups antigos e tempo estimado de restauração de 30 minutos. O restore substituiria a VPS completa, incluindo serviços compartilhados como Dev Forge; portanto não é um backup isolado do Mongo nem uma recuperação segura para teste. Nenhum backup, snapshot ou restauração foi iniciado.
+- Não foi executado `mongodump`, pois a identidade de todos os escritores e uma janela consistente não estão comprovadas; também não há destino Mongo externo de retenção nem restauração descartável demonstrada. Mongo segue saudável e intocado.
+- G2 permanece bloqueado: imagem GHCR privada sem identidade de leitura verificada; runner não implantado; usuário Mongo somente leitura não verificado; peer de rede não identificado; backup/restore de banco não provados. O pin SSH do host está confirmado, mas uma identidade cliente autorizada não está disponível localmente.
+- Recuperação da API, deploy, rede, credenciais, Mongo, G2 e serviços Dev Forge permaneceram intocados. Próxima ação segura: obter do operador a identificação do segundo membro/writer (ou acesso de leitura não sensível ao inventário Coolify correspondente) e um destino de backup de banco protegido; em paralelo, prover uma identidade SSH cliente autorizada ou manter inspeções pelo console web, sem expor chaves.
