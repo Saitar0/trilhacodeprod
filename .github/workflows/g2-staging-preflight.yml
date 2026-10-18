@@ -3,8 +3,7 @@ name: G2 - Staging MongoDB preflight (manual)
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: trilhacode-g2-staging-preflight
@@ -13,6 +12,7 @@ concurrency:
 jobs:
   preflight:
     name: Request restricted staging preflight over SSH
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: staging-preflight

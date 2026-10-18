@@ -1,5 +1,16 @@
 # Relatório de execução
 
+## Checkpoint G2-FIX — 18/10/2026
+
+- Branch isolada `codex/g2-fix`, baseada na `main` `2e83571af259ae2452994d81acb169f19a0e3a20`.
+- Implementação inclui validador de URI antes da criação do cliente Mongo (host único, destino staging, porta, banco e `directConnection=true` obrigatório), protocolo de resultado versionado/manifesto, checks de metadados e agregações somente leitura com `maxTimeMS`, runner root fail-closed com lock e sem publicação de stdout/stderr bruto, workflow G2 protegido por ref e runbook atualizado.
+- Testes adicionados para allow/deny URI, sem conexão antes da validação, relatório ausente/incompleto/duplicado/extra/malformado, semântica dos estados, categorias de falha, saída-canário e limpeza/interrupção.
+- Revisão independente identificou digest de imagem incompatível, risco de discovery Mongo, corrida de limpeza em sinais, concorrência fora do Actions, lock path inseguro e ambiguidade do exit 137. Correções incluem `directConnection=true` obrigatório; diretório `/run/trilhacode-g2-preflight` validado sem links simbólicos (root:0700); arquivo de lock root:0600 e `flock`; teste real de duas invocações concorrentes; limpeza por nome aleatório/label; sinais HUP/INT/TERM; e categoria própria para 137. Re-revisão final solicitada.
+- O digest antigo continua deliberadamente pinado na fonte; os workflows de build/publicação foram ajustados para usar exatamente o SHA selecionado, mas não foram executados. Nova publicação e alteração do pin exigem autorização operacional separada.
+- Não houve acesso à Hostinger, execução G2, publicação de imagem, alteração de staging/produção/Dev Forge, segredo, banco, rede, Docker, deploy, migração, índice ou seed.
+- Validação local: Python 3.13 `pytest unit_tests -q` — 68 passaram, 21 ignorados por dependências POSIX não disponíveis no Windows; `compileall` e `git diff --check` passaram. Ruff não está instalado localmente. A CI Ubuntu do PR é necessária para executar o harness bash/jq/flock.
+- Retomada: rodar testes locais disponíveis, revisar relatório do revisor independente, completar validação da CI do PR e reportar limitações de ambiente Windows; abrir PR e aguardar aprovação/merge manual.
+
 **Data:** 17/10/2026 (America/Sao_Paulo)  
 **Início observado:** 07:55:22 UTC  
 **Última atualização:** 09:17 UTC; PR #12 CI #70 concluída

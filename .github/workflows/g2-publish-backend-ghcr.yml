@@ -18,13 +18,13 @@ jobs:
     timeout-minutes: 45
     environment: g2-image-publish
     env:
-      APPROVED_SHA: 65857f5a4d26b026f7b064862bebc29091713d9a
-      IMAGE: ghcr.io/saitar0/trilhacodeprod-backend:g2-65857f5a
+      APPROVED_SHA: ${{ github.sha }}
+      IMAGE: ghcr.io/saitar0/trilhacodeprod-backend:g2-${{ github.sha }}
     steps:
       - name: Checkout approved source only
         uses: actions/checkout@v4
         with:
-          ref: 65857f5a4d26b026f7b064862bebc29091713d9a
+          ref: ${{ github.sha }}
           persist-credentials: false
 
       - name: Verify source and Dockerfile

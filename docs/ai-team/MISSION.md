@@ -1,5 +1,13 @@
 # Missão — avanço do roadmap técnico
 
+## G2-FIX — endurecimento de software (18/10/2026)
+
+- **Base:** `main` em `2e83571af259ae2452994d81acb169f19a0e3a20`; branch `codex/g2-fix`.
+- **Escopo autorizado:** software G2, testes locais/CI e PR. Sem merge, deploy, G2, publicação de imagem, acesso ou alteração da VPS, banco staging, secrets, Coolify ou Dev Forge.
+- **Implementação em revisão:** URI restrita por parser PyMongo + parsing estrutural; verificação de host/porta/db; protocolo versionado com IDs estáveis e manifesto; estados `OK`, `AUSENTE`, `CONFLITO`, `DUPLICATAS`; agregação limitada; classificação de falhas; saída sanitizada; workflow manual somente em `main`; documentação de implantação separada.
+- **Bloqueio operacional conhecido:** runner referencia digest antigo que não contém o novo módulo. Nova imagem deve ser construída, revisada, publicada e pinada por procedimento posterior autorizado; a branch não dispara esses workflows.
+- **Próximo passo:** concluir testes/revisão independente, abrir PR, aguardar CI e aprovação humana. Não despachar G2.
+
 ## Retomada QA visual/acessibilidade + diagnóstico G2
 
 **Data:** 17/10/2026
