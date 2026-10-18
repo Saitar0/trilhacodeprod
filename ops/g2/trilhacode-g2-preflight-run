@@ -128,6 +128,11 @@ on_signal() {
       fi
       (( CLEANUP_FOUND == 1 )) && break
     done
+    (( CLEANUP_FOUND == 1 )) || {
+      printf 'G2 result: FAILED category=CLEANUP_UNVERIFIED code=74\n'
+      cleanup_temp
+      exit 74
+    }
   fi
   printf 'G2 result: FAILED category=INTERRUPTED code=%s\n' "$signal_code"
   cleanup_temp
