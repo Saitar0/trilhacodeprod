@@ -38,6 +38,15 @@ Implementar cadastro público com confirmação obrigatória, controles antiabus
 - SMTP de produção ainda precisa ser fornecido e validado pelo operador em Coolify/ambiente equivalente. Não há credencial ou provedor configurado nesta sessão.
 - Nenhuma operação de banco, staging, G2, VPS, Coolify ou produção foi executada; sucesso local não homologa esses ambientes.
 
+## Auditoria independente de operação
+
+- Consulta somente leitura no Coolify em 2026-10-18: o app de API do Trilha Code em staging está `exited:unhealthy`, sem container presente; o último registro online é de 2026-10-03 e não há histórico de deploy retornado. Isso impede validação de staging nesta sessão.
+- O MongoDB de staging aparece `running:healthy`, privado e sem porta pública. A listagem de backups retornou zero agendamentos. Não foi iniciada restauração nem alteração no banco.
+- Inspecionei somente nomes de chaves do app, sem ler valores: `EMAIL_TRANSPORT`, `SMTP_HOST`, `SMTP_FROM_EMAIL` e demais chaves SMTP não estão configurados no recurso. Assim, não há evidência de entrega real de e-mail em staging.
+- O run CI #39104820974 da PR #25 está em andamento no último snapshot; o job `compose-config` concluiu com sucesso. Backend, frontend e E2E ainda estavam executando naquele momento.
+- O runbook G2 ainda exige imagem privada GHCR identificada por digest, identidade SSH validada, runner/manifest instalados, topologia interna dedicada, usuário Mongo somente leitura e evidência de backup/restauração. Nenhum gate foi acionado ou alterado.
+- O inventário de saúde mostrou aplicações fora do projeto Trilha Code em estado unhealthy; não investiguei nem alterei recursos de outros projetos.
+
 ## Próxima ação
 
-Criar commit e PR separada para este branch (sem merge), registrar as evidências CI da PR e continuar a auditoria independente de deploy/recuperação sem tocar nos gates operacionais bloqueados.
+Atualizar a CI da PR #25 quando ela concluir e continuar a auditoria independente de deploy/recuperação sem tocar nos gates operacionais bloqueados.
