@@ -126,6 +126,10 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: frontend
+      - name: Build production frontend image
+        run: docker build -f frontend/Dockerfile.prod --build-arg VITE_BACKEND_URL=https://api.example.invalid -t trilhacode-frontend:ci .
+      - name: Validate production Nginx configuration
+        run: docker run --rm trilhacode-frontend:ci nginx -t
       - name: Audit frontend dependencies
         run: npm audit --audit-level=high
         working-directory: frontend
@@ -231,7 +235,7 @@ jobs:
           TOKEN: ${{ secrets.COOLIFY_STAGING_TOKEN }}
         run: |
           test -n "$WEBHOOK" && test -n "$TOKEN"
-          curl --fail --silent --show-error --retry 3 \
+          curl --fail --silent --show-error \
             --request GET "$WEBHOOK" \
             --header "Authorization: Bearer $TOKEN"
 
@@ -247,6 +251,6 @@ jobs:
           TOKEN: ${{ secrets.COOLIFY_PRODUCTION_TOKEN }}
         run: |
           test -n "$WEBHOOK" && test -n "$TOKEN"
-          curl --fail --silent --show-error --retry 3 \
+          curl --fail --silent --show-error \
             --request GET "$WEBHOOK" \
             --header "Authorization: Bearer $TOKEN"

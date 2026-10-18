@@ -8,6 +8,45 @@ from urllib.parse import urlsplit
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+_RESERVED_PUBLIC_HOSTS = {
+    "example.com", "example.net", "example.org", "example.edu", "example", "localhost",
+    "invalid", "test", "local",
+}
+
+
+def _hostname(value: str) -> str | None:
+    try:
+        return (urlsplit(value).hostname or "").rstrip(".").lower() or None
+    except ValueError:
+        return None
+
+
+def _is_reserved_public_host(host: str | None) -> bool:
+    if not host:
+        return True
+    if host in _RESERVED_PUBLIC_HOSTS:
+        return True
+    return any(host.endswith(suffix) for suffix in (
+        ".example", ".example.com", ".example.net", ".example.org", ".example.edu",
+        ".invalid", ".test", ".localhost", ".local",
+    ))
+
+
+def _is_https_origin(value: str) -> bool:
+    try:
+        parsed = urlsplit(value)
+        return (
+            parsed.scheme == "https"
+            and bool(parsed.hostname)
+            and parsed.username is None
+            and parsed.password is None
+            and not parsed.path
+            and not parsed.query
+            and not parsed.fragment
+        )
+    except ValueError:
+        return False
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -99,7 +138,7 @@ class Settings(BaseSettings):
     def effective_cookie_secure(self) -> bool:
         if self.cookie_secure is not None:
             return self.cookie_secure
-        return self.is_production
+        return self.env in {"staging", "production"}
 
     def trusts_proxy(self, peer_ip: str | None) -> bool:
         if not peer_ip:
@@ -127,6 +166,8 @@ class Settings(BaseSettings):
         return problems
 
     def validate_runtime(self) -> None:
+        if self.env == "staging" and self.cookie_secure is False:
+            raise RuntimeError("Configuração inválida: COOKIE_SECURE deve ser true em staging.")
         if self.env == "staging":
             email_problems = self._email_configuration_problems()
             if email_problems:
@@ -148,10 +189,13 @@ class Settings(BaseSettings):
         if self.is_production:
             problems = self._email_configuration_problems()
             mongo = urlsplit(self.mongo_url)
+            mongo_host = mongo.hostname.rstrip(".").lower() if mongo.hostname else None
             if (mongo.scheme not in {"mongodb", "mongodb+srv"} or not mongo.hostname
                     or mongo.hostname in {"localhost", "127.0.0.1", "::1"}
                     or not mongo.username or not mongo.password):
                 problems.append("MONGO_URL deve apontar para MongoDB remoto com usuário e senha")
+            if _is_reserved_public_host(mongo_host):
+                problems.append("MONGO_URL não pode usar host reservado/de exemplo")
             if not self.db_name or self.db_name == "trilhacode_dev":
                 problems.append("DB_NAME deve ser definido para production")
             if self.cookie_secure is False:
@@ -160,14 +204,23 @@ class Settings(BaseSettings):
                 problems.append("SameSite=None exige cookies Secure")
             if not self.cookie_domain or not self.cookie_domain.startswith("."):
                 problems.append("COOKIE_DOMAIN deve ser definido como .<dominio>")
-            elif ".invalid" in self.cookie_domain.lower():
-                problems.append("COOKIE_DOMAIN ainda usa o domínio fictício de exemplo")
-            if not self.frontend_url.startswith("https://"):
-                problems.append("FRONTEND_URL deve usar HTTPS")
-            elif ".invalid" in self.frontend_url.lower():
-                problems.append("FRONTEND_URL ainda usa o domínio fictício de exemplo")
-            if any(not origin.startswith("https://") for origin in self.effective_cors_origins):
-                problems.append("CORS_ORIGINS/FRONTEND_URL devem usar HTTPS")
+            else:
+                cookie_host = self.cookie_domain[1:].rstrip(".").lower()
+                frontend_host = _hostname(self.frontend_url)
+                if _is_reserved_public_host(cookie_host):
+                    problems.append("COOKIE_DOMAIN não pode usar domínio reservado/de exemplo")
+                if frontend_host and not (
+                    frontend_host == cookie_host or frontend_host.endswith("." + cookie_host)
+                ):
+                    problems.append("COOKIE_DOMAIN deve corresponder ao host de FRONTEND_URL")
+            if not _is_https_origin(self.frontend_url):
+                problems.append("FRONTEND_URL deve ser uma origem HTTPS sem caminho, query ou fragmento")
+            elif _is_reserved_public_host(_hostname(self.frontend_url)):
+                problems.append("FRONTEND_URL não pode usar host reservado/de exemplo")
+            if any(not _is_https_origin(origin) for origin in self.effective_cors_origins):
+                problems.append("CORS_ORIGINS/FRONTEND_URL devem ser origens HTTPS sem caminho")
+            elif any(_is_reserved_public_host(_hostname(origin)) for origin in self.effective_cors_origins):
+                problems.append("CORS_ORIGINS/FRONTEND_URL não podem usar hosts reservados/de exemplo")
             if (not self.admin_email or self.admin_email.endswith(".invalid") or not self.admin_password
                     or len(self.admin_password) < 16 or self.admin_password.lower().startswith(("replace_", "example_", "your_"))):
                 problems.append("ADMIN_EMAIL e ADMIN_PASSWORD (mínimo 16 caracteres) são obrigatórios")
