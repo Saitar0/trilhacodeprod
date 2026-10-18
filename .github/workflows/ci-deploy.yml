@@ -126,6 +126,10 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: frontend
+      - name: Build production frontend image
+        run: docker build -f frontend/Dockerfile.prod --build-arg VITE_BACKEND_URL=https://api.example.invalid -t trilhacode-frontend:ci .
+      - name: Validate production Nginx configuration
+        run: docker run --rm trilhacode-frontend:ci nginx -t
       - name: Audit frontend dependencies
         run: npm audit --audit-level=high
         working-directory: frontend

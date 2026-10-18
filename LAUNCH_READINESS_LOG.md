@@ -5,7 +5,7 @@ Audit base: `55d08dd734e862d46be91575226181b6bc9596b2` (`origin/main` at session
 
 ## Current mission
 
-Mission 10 — verify the latest PR #24 CI and consolidate remaining public signup, staging, and G2 launch gates.
+Mission 11 — validate production frontend image/Nginx in CI and verify the latest PR #24 checks.
 
 ## Mission history
 
@@ -70,6 +70,12 @@ Mission 10 — verify the latest PR #24 CI and consolidate remaining public sign
 - Recorded this as a launch policy gate instead of inventing a signup quota or depending on an unconfigured email service. Before publicly opening registration, select and implement anti-abuse controls, password policy, and the corresponding user experience.
 - Ran a targeted secret-pattern scan over tracked files for common cloud access keys, GitHub tokens, private-key headers, credentialed MongoDB URIs, and long literal password/secret/token assignments: no tracked matches. This is a targeted check, not a comprehensive secret audit.
 
+### Mission 10 — production frontend image validation in CI
+
+- Found that frontend CI built the Vite app but did not build `frontend/Dockerfile.prod` or parse its Nginx configuration, leaving the production CSP and static-server config outside the CI gate.
+- Added CI steps to build the frontend production image with a non-routable placeholder backend origin and run `nginx -t` in that ephemeral image. The job does not push the image.
+- Local workflow YAML parsing and `git diff --check` passed. The runner-level Docker build and Nginx parse await CI; no image was built on the shared local Docker host.
+
 ## Evidence and test ledger
 
 | Date | Scope | Result | Limits |
@@ -87,6 +93,7 @@ Mission 10 — verify the latest PR #24 CI and consolidate remaining public sign
 | 2026-10-18 | Video CSP and embed-provider contract | Vimeo player origin added to all 3 production CSP declarations; frontend tests 9/9 passed | CI/image validation pending; no deployment |
 | 2026-10-18 | PR #24 CI run 39101630737 | Compose and frontend passed; backend and E2E still running at checkpoint | Head `05150db965c67b98359191da55c0e71a4465d11d`; superseded by later content commits |
 | 2026-10-18 | Public signup/auth policy review | Open signup confirmed; 6-character minimum, no signup throttle/email verification; targeted tracked-secret scan had no matches | Anti-abuse policy and email service are not configured in this environment |
+| 2026-10-18 | Production frontend CI gate | Added ephemeral production image build and `nginx -t`; workflow YAML parsed locally | Await CI on the new commit; no registry push |
 
 ## Findings
 
@@ -105,7 +112,7 @@ Mission 10 — verify the latest PR #24 CI and consolidate remaining public sign
 
 ## Next actions
 
-1. Verify the latest PR #24 CI on its exact head after the Ruff, course-content, and CSP corrections.
+1. Verify the latest PR #24 CI on its exact head, including the production frontend image and Nginx checks.
 2. Define and implement public-signup abuse controls and confirm password policy before exposing `/cadastro` broadly.
 3. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
 4. Public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.
