@@ -123,6 +123,28 @@ def test_password_change_requires_minimum_and_revokes_current_session(session_fa
     assert session.get(f"{API}/auth/me").status_code == 401
 
 
+def test_account_token_hashes_are_not_exposed_by_user_endpoints(
+    session_factory, create_verified_user, admin_session,
+):
+    session = session_factory()
+    email = f"token_fields_{uuid.uuid4().hex}@example.com"
+    create_verified_user(session, email)
+    assert session.post(f"{API}/auth/password-reset-request", json={"email": email}).status_code == 202
+
+    own_profile = session.get(f"{API}/auth/me").json()
+    admin_users = admin_session.get(f"{API}/users?limit=1000").json()
+    admin_copy = next(user for user in admin_users if user["email"] == email)
+    private_fields = {
+        "password_hash",
+        "email_verification_token_hash",
+        "email_verification_expires_at",
+        "password_reset_token_hash",
+        "password_reset_expires_at",
+    }
+    assert private_fields.isdisjoint(own_profile)
+    assert private_fields.isdisjoint(admin_copy)
+
+
 def test_auth_rate_limiter_rejects_over_budget_requests(event_loop):
     from fastapi import HTTPException
 
