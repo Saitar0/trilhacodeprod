@@ -1,5 +1,5 @@
 import { expect, request as apiRequest, test } from "@playwright/test";
-import { readFile, readdir } from "node:fs/promises";
+import { mkdir, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const API_BASE_URL = "http://127.0.0.1:18000";
@@ -66,6 +66,7 @@ test("student can submit an exercise and retain the answer after reload", async 
       });
       expect(registration.status(), "create an isolated disposable E2E student").toBe(202);
       const mailbox = process.env.AUTH_TEST_MAIL_DIR || join(process.cwd(), "..", "backend", ".local-emails");
+      await mkdir(mailbox, { recursive: true });
       await expect.poll(async () => {
         const mailFiles = (await readdir(mailbox)).filter((file) => file.endsWith(".eml"));
         for (const file of mailFiles) {
