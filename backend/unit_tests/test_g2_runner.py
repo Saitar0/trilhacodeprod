@@ -31,7 +31,7 @@ case "$1" in
   network)
     if [[ "$mode" == network_failure ]]; then exit 1; fi
     cat <<JSON
-[{"Name":"trilhacode-g2-preflight-internal","Internal":true,"Containers":{"$id":{"Name":"staging-mongo","IPv4Address":"172.22.0.2/24","Aliases":["mongo"]}}}]
+[{"Name":"trilhacode-g2-preflight-internal","Internal":true,"Containers":{"$id":{"Name":"/test-mongo","IPv4Address":"172.22.0.2/24","Aliases":["mongo"]}}}]
 JSON
     ;;
   image) [[ "$mode" == image_failure ]] && exit 1 || exit 0 ;;
