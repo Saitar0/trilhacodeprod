@@ -58,7 +58,7 @@ case "$1" in
           [[ -f "$state" && "$target" == "$run_id" ]] || exit 1
           printf '%s\n' "$run_id"
           ;;
-        '{{.Name}}') [[ "$target" == "$id" ]] && printf '%s\n' '/test-mongo' || exit 1 ;;
+        '{{.Name}}') [[ "$target" == test-mongo ]] && printf '%s\n' '/test-mongo' || exit 1 ;;
         '{{json .NetworkSettings.Networks}}')
           if [[ "$target" == test-mongo ]]; then
             jq -cn --arg mode "$mode" '
