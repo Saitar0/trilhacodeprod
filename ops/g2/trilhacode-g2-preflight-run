@@ -79,16 +79,27 @@ cidfile="${out}.cid"
 cleanup_temp() { /usr/bin/rm -f -- "$out" "$cidfile"; }
 cleanup_container() {
   local saved_id='' container_ids='' container_id='' label='' remaining=''
+  CLEANUP_FOUND=0
   if [[ -e "$cidfile" ]]; then
     [[ -f "$cidfile" && ! -L "$cidfile" ]] || return 1
     IFS= read -r saved_id < "$cidfile" || return 1
   fi
   container_ids="$("$DOCKER" ps -aq --filter "name=^/${run_name}$" 2>/dev/null)" || return 1
-  if [[ -z "$container_ids" ]]; then [[ -z "$saved_id" ]]; return; fi
+  if [[ -z "$container_ids" ]]; then
+    if [[ -n "$saved_id" ]]; then
+      container_id="$("$DOCKER" inspect -f '{{.Id}}' "$saved_id" 2>/dev/null)" || return 1
+      [[ "$container_id" == "$saved_id" ]] || return 1
+    else
+      return 0
+    fi
+  fi
   # The 128-bit random name and matching root-generated label prove ownership
   # if Docker has created the container but has not written its cidfile yet.
-  [[ "$container_ids" != *$'\n'* && "$container_ids" =~ ^[0-9a-f]{64}$ ]] || return 1
-  container_id="$container_ids"
+  if [[ -n "$container_ids" ]]; then
+    [[ "$container_ids" != *$'\n'* && "$container_ids" =~ ^[0-9a-f]{64}$ ]] || return 1
+    container_id="$container_ids"
+  fi
+  CLEANUP_FOUND=1
   label="$("$DOCKER" inspect -f '{{index .Config.Labels "com.trilhacode.g2-run"}}' "$container_id" 2>/dev/null)" || return 1
   [[ "$label" == "$token" ]] || return 1
   [[ -z "$saved_id" || "$saved_id" == "$container_id" ]] || return 1
@@ -107,23 +118,17 @@ on_signal() {
   fi
   # Docker may have accepted create just before the client received a signal.
   # Recheck briefly for that invocation's uniquely named container.
-  for _ in 1 2 3 4 5; do
-    if [[ -e "$cidfile" ]]; then
+  if (( CLEANUP_FOUND == 0 )); then
+    for _ in 1 2 3 4 5; do
+      /usr/bin/sleep 1
       if ! cleanup_container; then
         printf 'G2 result: FAILED category=CLEANUP_FAILED code=74\n'
         cleanup_temp
         exit 74
       fi
-      break
-    fi
-    /usr/bin/sleep 1
-    if ! cleanup_container; then
-      printf 'G2 result: FAILED category=CLEANUP_FAILED code=74\n'
-      cleanup_temp
-      exit 74
-    fi
-    [[ -e "$cidfile" ]] && break
-  done
+      (( CLEANUP_FOUND == 1 )) && break
+    done
+  fi
   printf 'G2 result: FAILED category=INTERRUPTED code=%s\n' "$signal_code"
   cleanup_temp
   exit "$signal_code"
