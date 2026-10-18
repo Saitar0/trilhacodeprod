@@ -4,11 +4,10 @@
 
 Implementar cadastro público com confirmação obrigatória, controles antiabuso e recuperação de senha em branch separada baseada em `origin/main` (`55d08dd734e862d46be91575226181b6bc9596b2`). Worktree: `C:\Users\Joao\Documents\CURSO\trilhacodeprod-auth-20261018`, branch `codex/public-email-verification-auth`. Checkout original e worktree da PR #24 preservados. PR #24 não foi integrada aqui.
 
-## Evidências recebidas do supervisor
+## Evidências de CI
 
-- PR #24 aberta em `b7c7ee0f91a3b6558092515777d736d7857d6ca9`.
-- CI pós-merge da PR #23: run `39099796575`, conclusão `success` no commit `55d08dd734e862d46be91575226181b6bc9596b2` (informação externa do supervisor, não consultada diretamente nesta sessão).
-- CI da PR #24: run `39102138622`, sucesso informado pelo supervisor; não revalidado diretamente nesta branch.
+- PR #24 aberta em `b7c7ee0f91a3b6558092515777d736d7857d6ca9`; CI run `39102138622` concluída com `success` nesse head (consultado diretamente via GitHub).
+- CI pós-merge da PR #23: run `39099796575`, conclusão `success` no commit `55d08dd734e862d46be91575226181b6bc9596b2` (consultado diretamente via GitHub; também informado anteriormente pelo supervisor).
 
 ## Missões realizadas nesta branch
 
@@ -36,14 +35,14 @@ Implementar cadastro público com confirmação obrigatória, controles antiabus
 - `current_user` bloqueia qualquer conta marcada explicitamente como não verificada; falta do campo mantém compatibilidade com usuários legados.
 - Limitação reutiliza o índice TTL `login_attempts.last`, sem alterar o manifesto do protocolo G2.
 - SMTP de produção ainda precisa ser fornecido e validado pelo operador em Coolify/ambiente equivalente. Não há credencial ou provedor configurado nesta sessão.
-- Nenhuma operação de banco, staging, G2, VPS, Coolify ou produção foi executada; sucesso local não homologa esses ambientes.
+- Nenhuma mutação de banco, deploy, restart, G2, VPS ou produção foi executada. Consultas Coolify foram somente leitura; sucesso local não homologa esses ambientes.
 
 ## Auditoria independente de operação
 
 - Consulta somente leitura no Coolify em 2026-10-18: o app de API do Trilha Code em staging está `exited:unhealthy`, sem container presente; o último registro online é de 2026-10-03 e não há histórico de deploy retornado. Isso impede validação de staging nesta sessão.
 - O MongoDB de staging aparece `running:healthy`, privado e sem porta pública. A listagem de backups retornou zero agendamentos. Não foi iniciada restauração nem alteração no banco.
 - Inspecionei somente nomes de chaves do app, sem ler valores: `EMAIL_TRANSPORT`, `SMTP_HOST`, `SMTP_FROM_EMAIL` e demais chaves SMTP não estão configurados no recurso. Assim, não há evidência de entrega real de e-mail em staging.
-- O run CI #39104820974 da PR #25 está em andamento no último snapshot; o job `compose-config` concluiu com sucesso. Backend, frontend e E2E ainda estavam executando naquele momento.
+- O run CI #39104884203 da PR #25, no head atual `6bcfcb7f5c9a2b7d74c3d0645ba900a5329450cf`, está em andamento no último snapshot: `compose-config` e `frontend` passaram; `backend` e `e2e` seguem executando. Um run anterior (`39104820974`) estava no commit predecessor e não é evidência para o head atual.
 - O runbook G2 ainda exige imagem privada GHCR identificada por digest, identidade SSH validada, runner/manifest instalados, topologia interna dedicada, usuário Mongo somente leitura e evidência de backup/restauração. Nenhum gate foi acionado ou alterado.
 - O inventário de saúde mostrou aplicações fora do projeto Trilha Code em estado unhealthy; não investiguei nem alterei recursos de outros projetos.
 
