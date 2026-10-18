@@ -25,20 +25,23 @@ def _fake_docker(path: Path) -> None:
 set -eu
 state="$G2_TEST_STATE"
 id='0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+run_id='abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789'
 mode="$G2_TEST_MODE"
 case "$1" in
   network)
-    if [[ "$mode" == network_failure ]]; then exit 1; fi
-    jq -cn --arg id "$id" --arg mode "$mode" '
+    if [[ "$mode" == network_failure || "$mode" == docker_api_unavailable ]]; then exit 1; fi
+    late_extra=0
+    if [[ "$mode" == late_network_extra_member && -f "$state" ]]; then late_extra=1; fi
+    jq -cn --arg id "$id" --arg mode "$mode" --argjson late_extra "$late_extra" '
       [{Name:"trilhacode-g2-preflight-internal",
         Id:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         Driver:"bridge", Scope:"local", Internal:($mode != "network_not_internal"),
-        Containers:({($id):{Name:(if $mode == "network_leading_slash" then "/test-mongo" else "test-mongo" end),
+        Containers:(if $mode == "mongo_not_on_g2" then {} else ({($id):{Name:(if $mode == "network_leading_slash" then "/test-mongo" elif $mode == "network_name_mismatch" then "unexpected" else "test-mongo" end),
           EndpointID:"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           MacAddress:"02:42:ac:16:00:02", IPv4Address:"172.22.0.2/24", IPv6Address:""}}
-          + (if $mode == "network_extra_member" then {"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff":
+          + (if $mode == "network_extra_member" or ($mode == "late_network_extra_member" and $late_extra == 1) then {"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff":
             {Name:"unexpected-container",EndpointID:"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-             MacAddress:"02:42:ac:16:00:03",IPv4Address:"172.22.0.3/24",IPv6Address:""}} else {} end))}]
+             MacAddress:"02:42:ac:16:00:03",IPv4Address:"172.22.0.3/24",IPv6Address:""}} else {} end)) end)}]
     '
     ;;
   image) [[ "$mode" == image_failure ]] && exit 1 || exit 0 ;;
@@ -48,13 +51,19 @@ case "$1" in
       format="$2"; target="$3"
       case "$format" in
         '{{.Id}}')
-          if [[ "$target" == test-mongo ]]; then printf '%s\n' "$id"; exit 0; fi
-          [[ -f "$state" && "$target" == "$id" ]] || exit 1
-          printf '%s\n' "$id"
+          if [[ "$target" == test-mongo ]]; then
+            [[ "$mode" == mongo_identity_mismatch ]] && printf '%s\n' 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' || printf '%s\n' "$id"
+            exit 0
+          fi
+          [[ -f "$state" && "$target" == "$run_id" ]] || exit 1
+          printf '%s\n' "$run_id"
           ;;
+        '{{.Name}}') [[ "$target" == test-mongo ]] && printf '%s\n' '/test-mongo' || exit 1 ;;
         '{{json .NetworkSettings.Networks}}')
+          if [[ "$target" == test-mongo ]]; then
           jq -cn --arg mode "$mode" '
-            {"trilhacode-g2-preflight-internal":
+            (if $mode == "mongo_not_on_g2" then {"trilhacode-staging-network":{NetworkID:"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",Aliases:["mongo"]}}
+             else {"trilhacode-g2-preflight-internal":
               {IPAMConfig:null,Links:null,
                Aliases:(if $mode == "network_alias_missing" then []
                         elif $mode == "network_alias_wrong" then ["unexpected"]
@@ -63,7 +72,26 @@ case "$1" in
                EndpointID:"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
                Gateway:"",IPAddress:"172.22.0.2",IPPrefixLen:24,IPv6Gateway:"",
                GlobalIPv6Address:"",GlobalIPv6PrefixLen:0,MacAddress:"02:42:ac:16:00:02"}}
+               + (if $mode == "mongo_operational_network" then {"trilhacode-staging-network":{NetworkID:"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",Aliases:["mongo"]}} else {} end)
+             end)
           '
+          else
+            if [[ ! -f "$G2_TEST_STARTED" ]]; then
+              if [[ "$mode" == ephemeral_prestart_extra_network ]]; then
+                jq -cn '{"trilhacode-g2-preflight-internal":{NetworkID:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"bridge":{NetworkID:"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"}}'
+              else
+                printf '{}\n'
+              fi
+              exit 0
+            fi
+            jq -cn --arg mode "$mode" '
+              {"trilhacode-g2-preflight-internal":{NetworkID:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}
+              + (if $mode == "ephemeral_post_start_extra_network" then {"bridge":{NetworkID:"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"}} else {} end)
+            '
+          fi
+          ;;
+        '{{.HostConfig.NetworkMode}}')
+          [[ "$mode" == ephemeral_config_extra_network ]] && printf 'bridge\n' || printf 'trilhacode-g2-preflight-internal\n'
           ;;
         '{{.State.Running}}') printf 'true\n' ;;
         '{{index .Config.Labels "com.trilhacode.g2-run"}}') [[ -f "$state" ]] || exit 1; sed -n '2p' "$state" ;;
@@ -74,14 +102,14 @@ case "$1" in
     fi
     ;;
   ps)
-    if [[ -f "$state" ]]; then printf '%s\n' "$id"; fi
+    if [[ -f "$state" ]]; then printf '%s\n' "$run_id"; fi
     exit 0
     ;;
   rm)
     [[ "$mode" == cleanup_failure ]] && exit 1
     rm -f "$state"
     ;;
-  run)
+  create)
     while (($#)); do
       case "$1" in
         --name) name="$2"; shift 2 ;;
@@ -90,11 +118,16 @@ case "$1" in
         *) shift ;;
       esac
     done
-    printf '%s\n%s\n%s\n' "$name" "${label#*=}" "$id" > "$state"
-    if [[ "$mode" != signal_before_cidfile ]]; then printf '%s\n' "$id" > "$cidfile"; fi
+    printf '%s\n%s\n%s\n' "$name" "${label#*=}" "$run_id" > "$state"
+    if [[ "$mode" == signal_before_cidfile ]]; then sleep 60; fi
+    printf '%s\n' "$run_id" > "$cidfile"
+    ;;
+  start)
+    [[ "$2" == --attach ]] || exit 125
+    [[ -f "${G2_TEST_STARTED:?}" ]] && exit 125
+    : > "$G2_TEST_STARTED"
     if [[ "$mode" == canary ]]; then printf '%s\n' 'private-canary-value' >&2; exit 1; fi
     if [[ "$mode" == signal_wait ]]; then sleep 60; exit 0; fi
-    if [[ "$mode" == signal_before_cidfile ]]; then sleep 60; exit 0; fi
     printf '%s' "$G2_TEST_OUTPUT"
     exit "$G2_TEST_RUN_RC"
     ;;
@@ -164,6 +197,7 @@ def runner_harness(tmp_path):
         env.update({
             "G2_TEST_MODE": mode,
             "G2_TEST_STATE": str(state_path),
+            "G2_TEST_STARTED": str(tmp_path / "started"),
             "G2_TEST_OUTPUT": output if output is not None else json.dumps({
                 "schema_version": 1,
                 "result": "COMPLETE",
@@ -180,6 +214,7 @@ def runner_harness(tmp_path):
         env.update({
             "G2_TEST_MODE": mode,
             "G2_TEST_STATE": str(state_path),
+            "G2_TEST_STARTED": str(tmp_path / "started"),
             "G2_TEST_OUTPUT": json.dumps({
                 "schema_version": 1,
                 "result": "COMPLETE",
@@ -205,18 +240,64 @@ def test_complete_manifest_report_passes_and_cleans_container(runner_harness):
     assert not runner_harness.state_path.exists()
 
 
+def test_mongodb_keeps_its_operational_network_while_using_the_dedicated_g2_network(runner_harness):
+    result = runner_harness(mode="mongo_operational_network")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "COMPLETE" in result.stdout
+    assert (runner_harness.state_path.parent / "started").exists()
+    assert not runner_harness.state_path.exists()
+
+
 @pytest.mark.parametrize("mode", [
     "network_leading_slash",
+    "network_name_mismatch",
     "network_not_internal",
     "network_extra_member",
     "network_alias_missing",
     "network_alias_wrong",
+    "mongo_not_on_g2",
+    "docker_api_unavailable",
+    "late_network_extra_member",
 ])
 def test_runner_rejects_realistic_docker_network_identity_mismatches(runner_harness, mode):
     result = runner_harness(mode=mode)
     assert result.returncode == 69
     assert "NETWORK_ISOLATION" in result.stdout
     assert "COMPLETE" not in result.stdout
+    assert not runner_harness.state_path.exists()
+
+
+def test_runner_rejects_mismatched_mongodb_identity_before_creating_preflight(runner_harness):
+    result = runner_harness(mode="mongo_identity_mismatch")
+    assert result.returncode == 69
+    assert "DB_UNAVAILABLE" in result.stdout
+    assert not (runner_harness.state_path.parent / "started").exists()
+
+
+def test_ephemeral_container_with_prestart_additional_network_is_rejected_before_start(runner_harness):
+    result = runner_harness(mode="ephemeral_prestart_extra_network")
+    assert result.returncode == 69
+    assert "NETWORK_ISOLATION" in result.stdout
+    assert "COMPLETE" not in result.stdout
+    assert not (runner_harness.state_path.parent / "started").exists()
+    assert not runner_harness.state_path.exists()
+
+
+def test_ephemeral_container_with_additional_network_after_start_is_failed_and_cleaned(runner_harness):
+    result = runner_harness(mode="ephemeral_post_start_extra_network")
+    assert result.returncode == 69
+    assert "NETWORK_ISOLATION" in result.stdout
+    assert "COMPLETE" not in result.stdout
+    assert (runner_harness.state_path.parent / "started").exists()
+    assert not runner_harness.state_path.exists()
+
+
+def test_ephemeral_container_with_unapproved_network_mode_is_not_started(runner_harness):
+    result = runner_harness(mode="ephemeral_config_extra_network")
+    assert result.returncode == 69
+    assert "NETWORK_ISOLATION" in result.stdout
+    assert not (runner_harness.state_path.parent / "started").exists()
+    assert not runner_harness.state_path.exists()
 
 
 @pytest.mark.parametrize("output,run_rc", [

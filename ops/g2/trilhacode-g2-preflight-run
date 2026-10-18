@@ -60,18 +60,25 @@ grep -qx 'G2_MONGO_EXPECTED_PORT=27017' "$ENV_FILE" || emit_failure TARGET_IDENT
 
 mongo_id="$("$DOCKER" inspect -f '{{.Id}}' "$MONGO_CONTAINER" 2>/dev/null)" || emit_failure DB_UNAVAILABLE 69
 [[ "$mongo_id" =~ ^[0-9a-f]{64}$ && "$mongo_id" == "$expected_mongo_id" ]] || emit_failure DB_UNAVAILABLE 69
+mongo_docker_name="$("$DOCKER" inspect -f '{{.Name}}' "$MONGO_CONTAINER" 2>/dev/null)" || emit_failure DB_UNAVAILABLE 69
+[[ "$mongo_docker_name" =~ ^/[a-zA-Z0-9][a-zA-Z0-9_.-]*$ ]] || emit_failure DB_UNAVAILABLE 69
+mongo_network_name="${mongo_docker_name#/}"
 
 "$JQ" -e 'type == "object" and keys == ["checks", "schema_version"] and .schema_version == 1 and (.checks | type == "array" and length > 0 and all(.[]; type == "string")) and (.checks | length == (unique | length))' "$MANIFEST" >/dev/null 2>&1 || emit_failure MANIFEST 78
-"$JQ" -e --arg n "$NETWORK" --arg id "$mongo_id" --arg h "$expected_host" --arg container "$MONGO_CONTAINER" '
+network_json="$("$DOCKER" network inspect "$NETWORK" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
+"$JQ" -e --arg n "$NETWORK" --arg id "$mongo_id" --arg container "$mongo_network_name" '
   length == 1 and .[0].Name == $n and .[0].Internal == true
   and (.[0].Containers | type == "object" and keys == [$id])
   and .[0].Containers[$id].Name == $container
   and (.[0].Containers[$id].IPv4Address | type == "string" and length > 0)
-' < <("$DOCKER" network inspect "$NETWORK" 2>/dev/null) >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
+' <<<"$network_json" >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
+network_id="$("$JQ" -r '.[0].Id' <<<"$network_json" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
+[[ "$network_id" =~ ^[0-9a-f]{64}$ ]] || emit_failure NETWORK_ISOLATION 69
 container_networks="$("$DOCKER" inspect -f '{{json .NetworkSettings.Networks}}' "$MONGO_CONTAINER" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
-"$JQ" -e --arg n "$NETWORK" --arg h "$expected_host" '
-  type == "object" and keys == [$n]
+"$JQ" -e --arg n "$NETWORK" --arg h "$expected_host" --arg id "$network_id" '
+  type == "object" and has($n)
   and (.[$n] | type == "object")
+  and .[$n].NetworkID == $id
   and (.[$n].Aliases | type == "array" and index($h) != null)
 ' <<<"$container_networks" >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
 [[ "$("$DOCKER" inspect -f '{{.State.Running}}' "$MONGO_CONTAINER" 2>/dev/null)" == true ]] || emit_failure DB_UNAVAILABLE 69
@@ -112,6 +119,38 @@ cleanup_container() {
   remaining="$("$DOCKER" ps -aq --filter "name=^/${run_name}$" 2>/dev/null)" || return 1
   [[ -z "$remaining" ]]
 }
+validate_ephemeral_network() {
+  local ephemeral_id='' ephemeral_networks=''
+  [[ -f "$cidfile" && ! -L "$cidfile" ]] || return 1
+  IFS= read -r ephemeral_id < "$cidfile" || return 1
+  [[ "$ephemeral_id" =~ ^[0-9a-f]{64}$ ]] || return 1
+  ephemeral_networks="$("$DOCKER" inspect -f '{{json .NetworkSettings.Networks}}' "$ephemeral_id" 2>/dev/null)" || return 1
+  "$JQ" -e --arg n "$NETWORK" --arg id "$network_id" '
+    type == "object" and keys == [$n]
+    and (.[$n] | type == "object" and .NetworkID == $id)
+  ' <<<"$ephemeral_networks" >/dev/null 2>&1
+}
+validate_ephemeral_network_config() {
+  local ephemeral_id='' network_mode='' ephemeral_networks=''
+  [[ -f "$cidfile" && ! -L "$cidfile" ]] || return 1
+  IFS= read -r ephemeral_id < "$cidfile" || return 1
+  [[ "$ephemeral_id" =~ ^[0-9a-f]{64}$ ]] || return 1
+  network_mode="$("$DOCKER" inspect -f '{{.HostConfig.NetworkMode}}' "$ephemeral_id" 2>/dev/null)" || return 1
+  [[ "$network_mode" == "$NETWORK" ]] || return 1
+  ephemeral_networks="$("$DOCKER" inspect -f '{{json .NetworkSettings.Networks}}' "$ephemeral_id" 2>/dev/null)" || return 1
+  "$JQ" -e --arg n "$NETWORK" --arg id "$network_id" '
+    type == "object" and ((keys == []) or (keys == [$n] and .[$n].NetworkID == $id))
+  ' <<<"$ephemeral_networks" >/dev/null 2>&1
+}
+validate_g2_network_membership() {
+  local current_network=''
+  current_network="$("$DOCKER" network inspect "$NETWORK" 2>/dev/null)" || return 1
+  "$JQ" -e --arg n "$NETWORK" --arg id "$mongo_id" --arg c "$mongo_network_name" --arg nid "$network_id" '
+    length == 1 and .[0].Name == $n and .[0].Internal == true and .[0].Id == $nid
+    and (.[0].Containers | type == "object" and keys == [$id])
+    and .[0].Containers[$id].Name == $c
+  ' <<<"$current_network" >/dev/null 2>&1
+}
 on_signal() {
   local signal_code="$1"
   trap - HUP INT TERM
@@ -149,7 +188,7 @@ trap 'on_signal 130' INT
 trap 'on_signal 143' TERM
 
 set +e
-"$TIMEOUT" --signal=TERM --kill-after=10s 180s "$DOCKER" run \
+"$TIMEOUT" --signal=TERM --kill-after=10s 30s "$DOCKER" create \
   --cidfile "$cidfile" \
   --name "$run_name" \
   --label "com.trilhacode.g2-run=$token" \
@@ -167,14 +206,42 @@ set +e
   --cpus 1 \
   --log-driver none \
   "$IMAGE" -m backend.g2_preflight >"$out" 2>&1
+create_rc=$?
+set -e
+
+if (( create_rc != 0 )); then
+  if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+  if (( create_rc == 124 )); then emit_failure TIMEOUT 124; fi
+  if (( create_rc == 137 )); then emit_failure PROCESS_KILLED 137; fi
+  emit_failure DOCKER_FAILURE 125
+fi
+if [[ ! -s "$cidfile" ]]; then
+  if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+  emit_failure DOCKER_FAILURE 125
+fi
+
+# Inspect the actual Docker endpoint before starting the workload, not only
+# the requested --network option. An invalid endpoint is removed unstarted.
+if ! validate_ephemeral_network_config; then
+  if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+  emit_failure NETWORK_ISOLATION 69
+fi
+if ! validate_g2_network_membership; then
+  if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+  emit_failure NETWORK_ISOLATION 69
+fi
+
+set +e
+"$TIMEOUT" --signal=TERM --kill-after=10s 180s "$DOCKER" start --attach "$run_name" >"$out" 2>&1
 run_rc=$?
 set -e
 
-# Resolve and remove only this invocation's uniquely named, labelled container.
+# Recheck the endpoint after execution, then resolve and remove only this
+# invocation's uniquely named, labelled container before reporting a result.
+ephemeral_network_failed=0
+if ! validate_ephemeral_network; then ephemeral_network_failed=1; fi
 if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
-if [[ ! -s "$cidfile" ]] && (( run_rc != 124 && run_rc != 137 )); then
-  emit_failure DOCKER_FAILURE 125
-fi
+if (( ephemeral_network_failed )); then emit_failure NETWORK_ISOLATION 69; fi
 if (( run_rc == 124 )); then emit_failure TIMEOUT 124; fi
 if (( run_rc == 137 )); then emit_failure PROCESS_KILLED 137; fi
 if (( run_rc == 125 || run_rc == 126 || run_rc == 127 )); then emit_failure DOCKER_FAILURE "$run_rc"; fi
