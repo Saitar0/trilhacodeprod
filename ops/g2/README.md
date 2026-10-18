@@ -42,3 +42,15 @@ This branch changes software and test sources only. It does not configure GHCR a
 - `preflight.env` is presented to Docker as container environment and is readable by host root/Docker admins; it is not exposed to the GitHub SSH account. Docker administrators are already privileged.
 - Mongo errors and raw findings are intentionally not exposed to GitHub. Operational diagnosis must occur securely on the VPS.
 - This source has not yet been executed against the VPS; review shell, sudo policy and Docker security options on the target OS before installation.
+
+
+## Current gate status — 2026-10-18
+
+This checkpoint supersedes earlier status statements in this document when they conflict; prior mission notes remain historical records.
+
+- The staging MongoDB is a healthy MongoDB 7 standalone. A trilhacode_g2_ro account with the read role was previously observed, but its effective actions and precise scope have not yet been revalidated for this execution. Do not infer successful G2 access from the role label alone.
+- A dedicated internal G2 Docker network exists and was reported empty. The MongoDB was not attached to it. Preserve all existing operational network endpoints, including shared proxy connectivity; never connect Dev Forge or proxy containers to the G2 network.
+- The host inspection recorded in earlier mission notes found runner scripts that did not match the reviewed source, a missing manifest, an existing root-only preflight.env with an incomplete set of names, and an unverified GitHub SSH key correspondence. Treat the installed runner/configuration as untrusted until independently inspected and reconciled; do not rerun the installer or overwrite files.
+- Backup B2 encryption, off-VPS GPG custody and isolated MongoDB 7 restore were technically demonstrated against an empty dump only. This is not evidence of recovery for real application data. Keep the backup gate open until a consistent nonempty application backup (when data exists) or an explicitly documented writer-consistency procedure is verified.
+- No current backend image digest/provenance or host read:packages authentication has been proved, and the GHCR publish workflow has not been dispatched in this execution. The legacy pin above remains prohibited. G2 must stay blocked until the approved image and digest, runner/manifest compatibility, restricted SSH identity and pinned host key, effective Mongo read-only scope, exact Docker ID/network isolation, and backup gates are all verified.
+- The workflow run and environment approval are manual. Do not claim a G2 result or staging deployment until the workflow itself passes and its target evidence is reviewed.
