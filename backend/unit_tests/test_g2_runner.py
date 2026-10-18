@@ -36,7 +36,7 @@ case "$1" in
       [{Name:"trilhacode-g2-preflight-internal",
         Id:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         Driver:"bridge", Scope:"local", Internal:($mode != "network_not_internal"),
-        Containers:(if $mode == "mongo_not_on_g2" then {} else ({($id):{Name:(if $mode == "network_leading_slash" then "/test-mongo" else "test-mongo" end),
+        Containers:(if $mode == "mongo_not_on_g2" then {} else ({($id):{Name:(if $mode == "network_leading_slash" then "/test-mongo" elif $mode == "network_name_mismatch" then "unexpected" else "test-mongo" end),
           EndpointID:"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           MacAddress:"02:42:ac:16:00:02", IPv4Address:"172.22.0.2/24", IPv6Address:""}}
           + (if $mode == "network_extra_member" or ($mode == "late_network_extra_member" and $late_extra == 1) then {"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff":
@@ -58,6 +58,7 @@ case "$1" in
           [[ -f "$state" && "$target" == "$run_id" ]] || exit 1
           printf '%s\n' "$run_id"
           ;;
+        '{{.Name}}') [[ "$target" == "$id" ]] && printf '%s\n' '/test-mongo' || exit 1 ;;
         '{{json .NetworkSettings.Networks}}')
           if [[ "$target" == test-mongo ]]; then
             jq -cn --arg mode "$mode" '
@@ -249,6 +250,7 @@ def test_mongodb_keeps_its_operational_network_while_using_the_dedicated_g2_netw
 
 @pytest.mark.parametrize("mode", [
     "network_leading_slash",
+    "network_name_mismatch",
     "network_not_internal",
     "network_extra_member",
     "network_alias_missing",
