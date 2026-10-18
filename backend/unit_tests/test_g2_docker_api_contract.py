@@ -72,8 +72,7 @@ def test_docker_network_and_container_inspect_keep_names_and_aliases_in_expected
         # A disposable stand-in for the short-lived preflight container is
         # attached only to G2. It has no published ports or host mounts.
         _docker(
-            "run",
-            "--detach",
+            "create",
             "--pull",
             "never",
             "--name",
@@ -84,19 +83,23 @@ def test_docker_network_and_container_inspect_keep_names_and_aliases_in_expected
             "sh",
             "mongo:7",
             "-c",
-            "sleep 60",
+            "true",
         )
+        preflight_config = json.loads(_docker("inspect", preflight_container).stdout)[0]
+        assert preflight_config["HostConfig"]["NetworkMode"] == network
+        assert set(preflight_config["NetworkSettings"]["Networks"]) <= {network}
+
+        # The configured network is verified before start. Once started, the
+        # actual endpoint must still be exclusive to G2.
+        _docker("start", "--attach", preflight_container)
         preflight_inspect = json.loads(_docker("inspect", preflight_container).stdout)[0]
         preflight_networks = preflight_inspect["NetworkSettings"]["Networks"]
-        assert set(preflight_networks) == {network}, (
-            "the ephemeral preflight container must use only the dedicated G2 network"
-        )
+        assert set(preflight_networks) == {network}
         network_after_preflight = json.loads(_docker("network", "inspect", network).stdout)[0]
         assert network_after_preflight["Internal"] is True
-        assert set(network_after_preflight["Containers"]) == {
-            container_id,
-            preflight_inspect["Id"],
-        }
+        # A stopped container keeps the configured endpoint in `inspect`,
+        # while the network's live member list returns to MongoDB alone.
+        assert set(network_after_preflight["Containers"]) == {container_id}
     finally:
         _docker("rm", "--force", preflight_container, check=False)
         _docker("rm", "--force", container, check=False)
