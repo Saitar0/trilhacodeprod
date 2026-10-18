@@ -78,7 +78,16 @@ def test_expired_email_confirmation_token_is_rejected(session_factory, mailbox_t
     assert event_loop.run_until_complete(db.users.find_one({"email": email}))["email_verified"] is False
 
 
-def test_registration_and_mail_requests_are_rate_limited_per_recipient(session_factory, mailbox_token):
+def test_registration_and_mail_requests_are_rate_limited_per_recipient(
+    session_factory, mailbox_token, monkeypatch
+):
+    # Keep the requests in one fixed-window bucket even when CI crosses the
+    # hourly boundary while this integration test is running.
+    from datetime import datetime, timezone
+
+    import services.auth
+
+    monkeypatch.setattr(services.auth, "now", lambda: datetime(2026, 1, 1, 12, tzinfo=timezone.utc))
     session = session_factory()
     email = f"limited_{uuid.uuid4().hex}@example.com"
     payload = {"name": "Limited", "email": email, "password": "Long-passphrase-12"}
