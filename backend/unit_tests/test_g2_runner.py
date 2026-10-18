@@ -40,7 +40,11 @@ JSON
     if [[ "$1" == -f ]]; then
       format="$2"; target="$3"
       case "$format" in
-        '{{.Id}}') printf '%s\n' "$id" ;;
+        '{{.Id}}')
+          if [[ "$target" == test-mongo ]]; then printf '%s\n' "$id"; exit 0; fi
+          [[ -f "$state" && "$target" == "$id" ]] || exit 1
+          printf '%s\n' "$id"
+          ;;
         '{{.State.Running}}') printf 'true\n' ;;
         '{{index .Config.Labels "com.trilhacode.g2-run"}}') [[ -f "$state" ]] || exit 1; sed -n '2p' "$state" ;;
         *) exit 1 ;;
