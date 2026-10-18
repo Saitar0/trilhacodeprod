@@ -3,12 +3,11 @@ import uuid
 API = "/api"
 
 
-def test_role_change_takes_effect_for_an_existing_session(session_factory, admin_session):
+def test_role_change_takes_effect_for_an_existing_session(session_factory, admin_session, create_verified_user):
     email = f"role_refresh_{uuid.uuid4().hex[:8]}@example.com"
     user_session = session_factory()
-    registered = user_session.post(f"{API}/auth/register", json={
-        "name": "Role refresh regression", "email": email, "password": "Test@1234"})
-    assert registered.status_code == 200
+    registered = create_verified_user(user_session, email, name="Role refresh regression")
+    assert registered.status_code == 202
 
     user_id = next(user["id"] for user in admin_session.get(f"{API}/users").json() if user["email"] == email)
     promote = admin_session.put(f"{API}/users/{user_id}/role", json={"role": "editor"})

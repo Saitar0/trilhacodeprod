@@ -5,6 +5,7 @@
 !**/.env.example
 **/env.txt
 **/node_modules
+**/.local-emails
 **/_qa_reset_admin_password.py
 **/__pycache__
 **/.venv*

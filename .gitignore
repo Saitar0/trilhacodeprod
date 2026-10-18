@@ -26,6 +26,7 @@ pnpm-debug.log*
 frontend/build/
 frontend/dist/
 coverage/
+frontend/test-results/
 
 # Environment files
 .env
@@ -38,6 +39,8 @@ frontend/.env
 # MongoDB local data
 mongo-data/
 *.log
+.local-emails/
+backend/.local-emails/
 
 # OS / editor
 .DS_Store

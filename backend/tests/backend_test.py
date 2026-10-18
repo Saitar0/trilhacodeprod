@@ -51,20 +51,19 @@ class TestAuth:
         r = s.post(f"{API}/auth/refresh")
         assert r.status_code == 200
 
-    def test_register_creates_student(self, session_factory):
+    def test_register_creates_student(self, session_factory, create_verified_user):
         email = f"test_{uuid.uuid4().hex[:8]}@example.com"
         s = session_factory()
-        r = s.post(f"{API}/auth/register", json={"name": "Test User", "email": email, "password": "Test@1234"})
-        assert r.status_code == 200
-        assert r.json()["role"] == "student"
-        assert r.json()["email"] == email
+        r = create_verified_user(s, email, name="Test User")
+        assert r.status_code == 202
+        assert s.get(f"{API}/auth/me").json()["role"] == "student"
+        assert s.get(f"{API}/auth/me").json()["email"] == email
 
-    def test_update_profile_and_admin_role_change(self, session_factory, admin_session):
+    def test_update_profile_and_admin_role_change(self, session_factory, admin_session, create_verified_user):
         email = f"profile_{uuid.uuid4().hex[:8]}@example.com"
         student = session_factory()
-        created = student.post(f"{API}/auth/register", json={
-            "name": "Profile User", "email": email, "password": "Test@1234"})
-        assert created.status_code == 200
+        created = create_verified_user(student, email, name="Profile User")
+        assert created.status_code == 202
         profile = student.put(f"{API}/profile", json={"name": "Updated User", "profile": {"bio": "hello"}})
         assert profile.status_code == 200
         assert profile.json()["name"] == "Updated User"

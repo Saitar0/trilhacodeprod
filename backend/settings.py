@@ -31,6 +31,15 @@ class Settings(BaseSettings):
     sentry_dsn: str | None = None
     sentry_environment: str | None = None
     sentry_release: str | None = None
+    email_transport: Literal["smtp", "local"] = "local"
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_from_email: str | None = None
+    smtp_starttls: bool = True
+    smtp_ssl: bool = False
+    local_email_dir: str = ".local-emails"
 
     admin_email: str | None = None
     admin_password: str | None = None
@@ -118,6 +127,18 @@ class Settings(BaseSettings):
             )
         if self.is_production:
             problems = []
+            if (self.email_transport != "smtp" or not self.smtp_host or not self.smtp_from_email
+                    or (not self.smtp_starttls and not self.smtp_ssl)):
+                problems.append("EMAIL_TRANSPORT=smtp e SMTP_HOST/SMTP_FROM_EMAIL com TLS são obrigatórios")
+            if self.smtp_host and self.smtp_host.lower().endswith(".invalid"):
+                problems.append("SMTP_HOST ainda usa o domínio fictício de exemplo")
+            if self.smtp_from_email and (".invalid" in self.smtp_from_email.lower()
+                                         or "@example.com" in self.smtp_from_email.lower()):
+                problems.append("SMTP_FROM_EMAIL ainda usa um endereço fictício de exemplo")
+            if self.smtp_starttls and self.smtp_ssl:
+                problems.append("SMTP_STARTTLS e SMTP_SSL não podem ser usados juntos")
+            if bool(self.smtp_username) != bool(self.smtp_password):
+                problems.append("SMTP_USERNAME e SMTP_PASSWORD devem ser definidos juntos")
             mongo = urlsplit(self.mongo_url)
             if (mongo.scheme not in {"mongodb", "mongodb+srv"} or not mongo.hostname
                     or mongo.hostname in {"localhost", "127.0.0.1", "::1"}

@@ -1,6 +1,9 @@
 """Isolated API fixtures backed by a disposable MongoDB database."""
 import asyncio
 import os
+import re
+import shutil
+import tempfile
 import uuid
 
 import httpx
@@ -12,12 +15,15 @@ from test_support.mongo_target import make_disposable_mongo_url
 MONGO_URL = os.environ.get("MONGO_URL_TEST", "mongodb://localhost:27017")
 _db_name = f"test_{uuid.uuid4().hex}"
 _mongo_url = make_disposable_mongo_url(MONGO_URL, _db_name)
+_mailbox = tempfile.mkdtemp(prefix="trilhacode-test-mail-")
 
 # server/core read settings at import time. Point them at this run's disposable DB.
 os.environ["MONGO_URL"] = _mongo_url
 os.environ["DB_NAME"] = _db_name
 os.environ["ENV"] = "development"
 os.environ["JWT_SECRET"] = "isolated-tests-only-secret-key-32-bytes"
+os.environ["EMAIL_TRANSPORT"] = "local"
+os.environ["LOCAL_EMAIL_DIR"] = _mailbox
 
 from database import client as mongo_client
 from database import db
@@ -108,6 +114,42 @@ def disposable_database(session_factory, event_loop):
                 raise RuntimeError(f"Refusing to drop unsafe database: {_db_name!r}")
             with MongoClient(_mongo_url) as cleanup_client:
                 cleanup_client.drop_database(_db_name)
+            if os.path.commonpath([tempfile.gettempdir(), _mailbox]) == tempfile.gettempdir():
+                shutil.rmtree(_mailbox, ignore_errors=True)
+
+
+@pytest.fixture(scope="session")
+def mailbox_token():
+    from email import policy
+    from email.parser import BytesParser
+    from pathlib import Path
+
+    def find(recipient: str, subject: str | None = None) -> str:
+        candidates = sorted(Path(_mailbox).glob("*.eml"), key=lambda path: path.stat().st_mtime, reverse=True)
+        for path in candidates:
+            message = BytesParser(policy=policy.default).parsebytes(path.read_bytes())
+            if message["To"] != recipient or (subject and message["Subject"] != subject):
+                continue
+            body = message.get_body(preferencelist=("plain",)).get_content()
+            match = re.search(r"[?&]token=([A-Za-z0-9_-]{32,})", body)
+            if match:
+                return match.group(1)
+        raise AssertionError(f"No local test email found for {recipient}")
+    return find
+
+
+@pytest.fixture(scope="session")
+def create_verified_user(mailbox_token):
+    def create(session, email: str, password: str = "Test@12345678", name: str = "Test user"):
+        registered = session.post("/api/auth/register", json={"name": name, "email": email, "password": password})
+        assert registered.status_code == 202, registered.text
+        token = mailbox_token(email, "Confirme seu e-mail")
+        verified = session.post("/api/auth/verify-email", json={"token": token})
+        assert verified.status_code == 200, verified.text
+        logged_in = session.post("/api/auth/login", json={"email": email, "password": password})
+        assert logged_in.status_code == 200, logged_in.text
+        return registered
+    return create
 
 
 def _login(session_factory, email, password="Test@1234"):

@@ -25,13 +25,15 @@ def _secret():
     return settings.jwt_secret
 
 
-def create_access_token(user_id: str, email: str) -> str:
-    payload = {"sub": user_id, "email": email, "type": "access", "exp": now() + timedelta(minutes=15)}
+def create_access_token(user_id: str, email: str, token_version: int = 0) -> str:
+    payload = {"sub": user_id, "email": email, "ver": token_version,
+               "type": "access", "exp": now() + timedelta(minutes=15)}
     return jwt.encode(payload, _secret(), algorithm=JWT_ALGORITHM)
 
 
-def create_refresh_token(user_id: str) -> str:
-    payload = {"sub": user_id, "type": "refresh", "exp": now() + timedelta(days=7)}
+def create_refresh_token(user_id: str, token_version: int = 0) -> str:
+    payload = {"sub": user_id, "ver": token_version,
+               "type": "refresh", "exp": now() + timedelta(days=7)}
     return jwt.encode(payload, _secret(), algorithm=JWT_ALGORITHM)
 
 
@@ -59,6 +61,10 @@ async def current_user(request: Request) -> dict:
     user = await db.users.find_one({"_id": oid(payload["sub"])})
     if not user:
         raise HTTPException(status_code=401, detail="Usuário não encontrado")
+    if payload.get("ver", 0) != user.get("token_version", 0):
+        raise HTTPException(status_code=401, detail="Sessão revogada")
+    if user.get("email_verified") is False:
+        raise HTTPException(status_code=403, detail="Confirme seu e-mail para acessar a plataforma")
     user = ser(user)
     request.state.user_id = user["id"]
     user["permissions"] = sorted(PERMISSIONS.get(user["role"], set()))
