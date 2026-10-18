@@ -65,10 +65,15 @@ mongo_id="$("$DOCKER" inspect -f '{{.Id}}' "$MONGO_CONTAINER" 2>/dev/null)" || e
 "$JQ" -e --arg n "$NETWORK" --arg id "$mongo_id" --arg h "$expected_host" --arg container "$MONGO_CONTAINER" '
   length == 1 and .[0].Name == $n and .[0].Internal == true
   and (.[0].Containers | type == "object" and keys == [$id])
-  and .[0].Containers[$id].Name == ("/" + $container)
+  and .[0].Containers[$id].Name == $container
   and (.[0].Containers[$id].IPv4Address | type == "string" and length > 0)
-  and (.[0].Containers[$id].Aliases | type == "array" and index($h) != null)
 ' < <("$DOCKER" network inspect "$NETWORK" 2>/dev/null) >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
+container_networks="$("$DOCKER" inspect -f '{{json .NetworkSettings.Networks}}' "$MONGO_CONTAINER" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
+"$JQ" -e --arg n "$NETWORK" --arg h "$expected_host" '
+  type == "object" and keys == [$n]
+  and (.[$n] | type == "object")
+  and (.[$n].Aliases | type == "array" and index($h) != null)
+' <<<"$container_networks" >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
 [[ "$("$DOCKER" inspect -f '{{.State.Running}}' "$MONGO_CONTAINER" 2>/dev/null)" == true ]] || emit_failure DB_UNAVAILABLE 69
 "$DOCKER" image inspect "$IMAGE" >/dev/null 2>&1 || emit_failure IMAGE_UNAVAILABLE 69
 

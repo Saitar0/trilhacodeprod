@@ -29,9 +29,17 @@ mode="$G2_TEST_MODE"
 case "$1" in
   network)
     if [[ "$mode" == network_failure ]]; then exit 1; fi
-    cat <<JSON
-[{"Name":"trilhacode-g2-preflight-internal","Internal":true,"Containers":{"$id":{"Name":"/test-mongo","IPv4Address":"172.22.0.2/24","Aliases":["mongo"]}}}]
-JSON
+    jq -cn --arg id "$id" --arg mode "$mode" '
+      [{Name:"trilhacode-g2-preflight-internal",
+        Id:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        Driver:"bridge", Scope:"local", Internal:($mode != "network_not_internal"),
+        Containers:({($id):{Name:(if $mode == "network_leading_slash" then "/test-mongo" else "test-mongo" end),
+          EndpointID:"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          MacAddress:"02:42:ac:16:00:02", IPv4Address:"172.22.0.2/24", IPv6Address:""}}
+          + (if $mode == "network_extra_member" then {"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff":
+            {Name:"unexpected-container",EndpointID:"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+             MacAddress:"02:42:ac:16:00:03",IPv4Address:"172.22.0.3/24",IPv6Address:""}} else {} end))}]
+    '
     ;;
   image) [[ "$mode" == image_failure ]] && exit 1 || exit 0 ;;
   inspect)
@@ -43,6 +51,19 @@ JSON
           if [[ "$target" == test-mongo ]]; then printf '%s\n' "$id"; exit 0; fi
           [[ -f "$state" && "$target" == "$id" ]] || exit 1
           printf '%s\n' "$id"
+          ;;
+        '{{json .NetworkSettings.Networks}}')
+          jq -cn --arg mode "$mode" '
+            {"trilhacode-g2-preflight-internal":
+              {IPAMConfig:null,Links:null,
+               Aliases:(if $mode == "network_alias_missing" then []
+                        elif $mode == "network_alias_wrong" then ["unexpected"]
+                        else ["mongo","test-mongo","01234567"] end),
+               NetworkID:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+               EndpointID:"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+               Gateway:"",IPAddress:"172.22.0.2",IPPrefixLen:24,IPv6Gateway:"",
+               GlobalIPv6Address:"",GlobalIPv6PrefixLen:0,MacAddress:"02:42:ac:16:00:02"}}
+          '
           ;;
         '{{.State.Running}}') printf 'true\n' ;;
         '{{index .Config.Labels "com.trilhacode.g2-run"}}') [[ -f "$state" ]] || exit 1; sed -n '2p' "$state" ;;
@@ -182,6 +203,20 @@ def test_complete_manifest_report_passes_and_cleans_container(runner_harness):
     assert "COMPLETE" in result.stdout
     assert "private-canary" not in result.stdout + result.stderr
     assert not runner_harness.state_path.exists()
+
+
+@pytest.mark.parametrize("mode", [
+    "network_leading_slash",
+    "network_not_internal",
+    "network_extra_member",
+    "network_alias_missing",
+    "network_alias_wrong",
+])
+def test_runner_rejects_realistic_docker_network_identity_mismatches(runner_harness, mode):
+    result = runner_harness(mode=mode)
+    assert result.returncode == 69
+    assert "NETWORK_ISOLATION" in result.stdout
+    assert "COMPLETE" not in result.stdout
 
 
 @pytest.mark.parametrize("output,run_rc", [
