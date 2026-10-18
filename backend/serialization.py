@@ -5,6 +5,14 @@ from datetime import datetime
 from bson import ObjectId
 from fastapi import HTTPException
 
+_PRIVATE_USER_FIELDS = {
+    "password_hash",
+    "email_verification_token_hash",
+    "email_verification_expires_at",
+    "password_reset_token_hash",
+    "password_reset_expires_at",
+}
+
 
 def oid(value):
     try:
@@ -21,7 +29,7 @@ def ser(value):
         for k, v in value.items():
             if k == "_id":
                 out["id"] = str(v)
-            elif k == "password_hash":
+            elif k in _PRIVATE_USER_FIELDS:
                 continue
             else:
                 out[k] = ser(v)

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { apiError } from "@/lib/api";
+import { api, apiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
   const location = useLocation();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
   if (user) return <Navigate to="/" replace />;
   const isLogin = mode === "login";
@@ -25,9 +26,13 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
     setError("");
     setLoading(true);
     try {
-      if (isLogin) await login(form.email, form.password);
-      else await register(form.name, form.email, form.password);
-      navigate((location.state as { from?: string })?.from || "/", { replace: true });
+      if (isLogin) {
+        await login(form.email, form.password);
+        navigate((location.state as { from?: string })?.from || "/", { replace: true });
+      } else {
+        await register(form.name, form.email, form.password);
+        setNotice("Se o cadastro puder ser concluído, enviaremos um link de confirmação. Confira sua caixa de entrada e o spam.");
+      }
     } catch (err) {
       setError(apiError(err));
     } finally {
@@ -35,6 +40,16 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
     }
   };
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
+
+  const resend = async () => {
+    setError("");
+    try {
+      await api.post("/auth/resend-verification", { email: form.email });
+      setNotice("Se houver uma conta pendente para esse endereço, enviaremos um novo link.");
+    } catch (err) {
+      setError(apiError(err));
+    }
+  };
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
@@ -74,9 +89,10 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
-            <Input id="password" type="password" data-testid={`${mode}-password-input`} value={form.password} onChange={set("password")} required />
+            <Input id="password" type="password" data-testid={`${mode}-password-input`} value={form.password} onChange={set("password")} minLength={isLogin ? undefined : 12} autoComplete={isLogin ? "current-password" : "new-password"} required />
           </div>
           {error && <p data-testid="auth-error" className="rounded-md border border-rose-900 bg-rose-950/40 px-3 py-2 text-sm text-rose-300">{error}</p>}
+          {notice && <div role="status" className="space-y-2 rounded-md border border-emerald-900 bg-emerald-950/30 px-3 py-2 text-sm text-emerald-200"><p>{notice}</p>{!isLogin && <button type="button" onClick={resend} className="underline">Reenviar confirmação</button>}</div>}
           <Button type="submit" disabled={loading} data-testid={`${mode}-submit-button`} className="h-11 w-full rounded-full font-semibold">
             {loading ? <Loader2 className="animate-spin" /> : <>{isLogin ? "Entrar" : "Criar conta"} <ArrowRight /></>}
           </Button>
@@ -86,6 +102,7 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
               {isLogin ? "Cadastre-se" : "Entrar"}
             </Link>
           </p>
+          {isLogin && <Link to="/recuperar-senha" className="block text-sm text-emerald-400 hover:underline">Esqueci minha senha</Link>}
         </form>
       </main>
     </div>

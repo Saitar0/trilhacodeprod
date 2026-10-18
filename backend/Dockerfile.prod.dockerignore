@@ -13,6 +13,7 @@
 **/htmlcov
 **/*.log
 **/node_modules
+**/.local-emails
 backend/tests
 backend/_qa_reset_admin_password.py
 frontend

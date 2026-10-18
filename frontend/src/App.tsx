@@ -6,6 +6,9 @@ import { TopBar } from "@/components/layout/TopBar";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import AuthPage from "@/pages/AuthPage";
 import Catalog from "@/pages/student/Catalog";
+import ConfirmEmail from "@/pages/ConfirmEmail";
+import PasswordRecovery from "@/pages/PasswordRecovery";
+import PasswordReset from "@/pages/PasswordReset";
 
 const TrackViewer = lazy(() => import("@/pages/student/TrackViewer"));
 const Profile = lazy(() => import("@/pages/Profile"));
@@ -29,6 +32,9 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<AuthPage mode="login" />} />
             <Route path="/cadastro" element={<AuthPage mode="register" />} />
+            <Route path="/auth/confirm-email" element={<ConfirmEmail />} />
+            <Route path="/recuperar-senha" element={<PasswordRecovery />} />
+            <Route path="/auth/reset-password" element={<PasswordReset />} />
             <Route path="/" element={<ProtectedRoute><Catalog /></ProtectedRoute>} />
             <Route path="/estudos" element={<ProtectedRoute><MyStudy /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

@@ -14,6 +14,17 @@ BASE = {
     "cookie_secure": True,
     "admin_email": "owner@trilhacode.com",
     "admin_password": "opaque-test-only-password",
+    "email_transport": "smtp",
+    "smtp_host": "mail.trilhacode.com",
+    "smtp_from_email": "no-reply@trilhacode.com",
+    "smtp_starttls": True,
+}
+
+STAGING_SMTP = {
+    "email_transport": "smtp",
+    "smtp_host": "smtp.unit.test",
+    "smtp_from_email": "no-reply@unit.test",
+    "smtp_starttls": True,
 }
 
 
@@ -26,13 +37,13 @@ def test_accepts_valid_production_origin_and_matching_cookie_domain():
 
 
 def test_staging_cookies_default_to_secure():
-    settings = Settings(_env_file=None, env="staging")
+    settings = Settings(_env_file=None, env="staging", **STAGING_SMTP)
     assert settings.effective_cookie_secure is True
     settings.validate_runtime()
 
 
 def test_staging_rejects_explicit_insecure_cookies():
-    settings = Settings(_env_file=None, env="staging", cookie_secure=False)
+    settings = Settings(_env_file=None, env="staging", cookie_secure=False, **STAGING_SMTP)
     with pytest.raises(RuntimeError, match="COOKIE_SECURE deve ser true em staging"):
         settings.validate_runtime()
 

@@ -33,9 +33,9 @@ def test_preflight_compound_and_text_index_key_matching():
     )
 
 
-def test_concurrent_user_registration_returns_one_conflict(async_client, event_loop):
+def test_concurrent_user_registration_is_private_and_creates_one_account(async_client, event_loop):
     email = f"race_{uuid.uuid4().hex}@example.com"
-    payload = {"name": "Race User", "email": email, "password": "Test@1234"}
+    payload = {"name": "Race User", "email": email, "password": "Test@12345678"}
 
     async def register_twice():
         return await asyncio.gather(
@@ -44,7 +44,8 @@ def test_concurrent_user_registration_returns_one_conflict(async_client, event_l
         )
 
     responses = event_loop.run_until_complete(register_twice())
-    assert sorted(response.status_code for response in responses) == [200, 400]
+    assert sorted(response.status_code for response in responses) == [202, 202]
+    assert responses[0].json() == responses[1].json()
     assert event_loop.run_until_complete(db.users.count_documents({"email": email})) == 1
 
 

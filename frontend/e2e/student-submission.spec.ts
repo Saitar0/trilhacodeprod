@@ -1,4 +1,6 @@
 import { expect, request as apiRequest, test } from "@playwright/test";
+import { mkdir, readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
 
 const API_BASE_URL = "http://127.0.0.1:18000";
 
@@ -57,16 +59,37 @@ test("student can submit an exercise and retain the answer after reload", async 
     const studentApi = await apiRequest.newContext({ baseURL: API_BASE_URL });
     const studentEmail = `e2e_student_${Date.now()}@example.com`;
     const studentPassword = "e2e-only-student-password";
+    let verificationToken: string | undefined;
     try {
       const registration = await studentApi.post("/api/auth/register", {
         data: { name: "E2E Student", email: studentEmail, password: studentPassword },
       });
-      expect(registration.status(), "create an isolated disposable E2E student").toBe(200);
+      expect(registration.status(), "create an isolated disposable E2E student").toBe(202);
+      const mailbox = process.env.AUTH_TEST_MAIL_DIR || join(process.cwd(), "..", "backend", ".local-emails");
+      await mkdir(mailbox, { recursive: true });
+      await expect.poll(async () => {
+        const mailFiles = (await readdir(mailbox)).filter((file) => file.endsWith(".eml"));
+        for (const file of mailFiles) {
+          const message = await readFile(join(mailbox, file), "utf8");
+          if (message.includes(`To: ${studentEmail}`) && message.includes("Confirme seu e-mail")) {
+            const body = message.split(/\r?\n\r?\n/).slice(1).join("\n")
+              .replace(/=\r?\n/g, "")
+              .replace(/=([0-9A-F]{2})/gi, (_match, hex: string) => String.fromCharCode(parseInt(hex, 16)));
+            verificationToken = body.match(/[?&]token=([A-Za-z0-9_-]{32,})/)?.[1];
+          }
+        }
+        return Boolean(verificationToken);
+      }, { timeout: 5000 }).toBe(true);
     } finally {
       await studentApi.dispose();
     }
 
     await page.route("https://**/*", (route) => route.abort());
+    expect(verificationToken, "local test mailbox contains the verification link").toBeTruthy();
+    await page.goto(`/auth/confirm-email?token=${verificationToken}`);
+    await expect(page.getByRole("button", { name: "Confirmar e-mail" })).toBeVisible();
+    await page.getByRole("button", { name: "Confirmar e-mail" }).click();
+    await expect(page.getByRole("status")).toHaveText("E-mail confirmado. Você já pode entrar.");
     await page.goto("/login");
     await page.getByTestId("login-email-input").fill(studentEmail);
     await page.getByTestId("login-password-input").fill(studentPassword);

@@ -73,11 +73,11 @@ def test_students_cannot_fetch_private_track_metadata_directly(admin, student):
 
 
 @pytest.fixture(scope="module")
-def fresh_student(session_factory):
+def fresh_student(session_factory, create_verified_user):
     session = session_factory()
     email = f"new_{uuid.uuid4().hex[:8]}@example.com"
-    response = session.post(f"{API}/auth/register", json={"name": "Test", "email": email, "password": "Test@1234"})
-    assert response.status_code == 200
+    response = create_verified_user(session, email, name="Test")
+    assert response.status_code == 202
     return session
 
 
@@ -265,13 +265,12 @@ class TestSubmissions:
                    json={"block_id": ctx["block"]["id"], "answer": {"text": ""}})
         assert r.status_code == 400
 
-    def test_draft_submit_claim_grade_approve(self, ctx, session_factory):
+    def test_draft_submit_claim_grade_approve(self, ctx, session_factory, create_verified_user):
         # Use a fresh student to avoid pre-existing submissions
         email = f"test_stu_{uuid.uuid4().hex[:8]}@example.com"
         s = session_factory()
-        r = s.post(f"{API}/auth/register",
-                   json={"name": "Grad", "email": email, "password": "Test@1234"})
-        assert r.status_code == 200
+        r = create_verified_user(s, email, name="Grad")
+        assert r.status_code == 202
         bid = ctx["block"]["id"]
 
         # Draft
@@ -325,10 +324,10 @@ class TestSubmissions:
         assert bid in (tp.get("blocks") or {})
         assert tp["blocks"][bid]["status"] == "completed"
 
-    def test_returned_resubmit_same_attempt(self, ctx, session_factory):
+    def test_returned_resubmit_same_attempt(self, ctx, session_factory, create_verified_user):
         email = f"test_stu_{uuid.uuid4().hex[:8]}@example.com"
         s = session_factory()
-        s.post(f"{API}/auth/register", json={"name": "Rt", "email": email, "password": "Test@1234"})
+        create_verified_user(s, email, name="Rt")
         bid = ctx["block"]["id"]
         r = s.post(f"{API}/submissions/submit", json={"block_id": bid, "answer": {"text": "r"}})
         sub_id = r.json()["id"]
@@ -341,10 +340,10 @@ class TestSubmissions:
         assert r2.status_code == 200
         assert r2.json()["attempt"] == r.json()["attempt"]
 
-    def test_rejected_allow_resubmit_new_attempt(self, ctx, session_factory):
+    def test_rejected_allow_resubmit_new_attempt(self, ctx, session_factory, create_verified_user):
         email = f"test_stu_{uuid.uuid4().hex[:8]}@example.com"
         s = session_factory()
-        s.post(f"{API}/auth/register", json={"name": "Rj", "email": email, "password": "Test@1234"})
+        create_verified_user(s, email, name="Rj")
         bid = ctx["block"]["id"]
         r = s.post(f"{API}/submissions/submit", json={"block_id": bid, "answer": {"text": "r"}})
         sub_id = r.json()["id"]
