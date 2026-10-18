@@ -66,3 +66,17 @@ Antes de iniciar, registre um digest anterior comprovadamente saudável e o proc
 - Credencial de aplicação e conectividade ao Mongo existentes.
 - IPs da rede do proxy, SMTP transacional e frontend de staging.
 - Digest anterior saudável e rollback testado.
+
+
+## Estado atual verificado — 2026-10-18
+
+Este status atualiza as observações históricas acima quando divergirem. Foi feita consulta somente leitura ao recurso da API no Coolify.
+
+- Aplicação Trilha Code usa a branch staging e o domínio canônico https://api.staging.saitaro.tech; o alias www.api.staging.saitaro.tech foi removido do recurso Coolify. DNS externo não foi alterado.
+- Coolify tem health check HTTP GET /health na porta 8000. A API ainda está sem container, sem imagem/tag de registry e sem histórico de deploy. MongoDB 7 standalone permanece saudável; seus volumes e redes operacionais não foram alterados.
+- Backup externo cifrado no B2 e restauração técnica em Mongo 7 descartável foram demonstrados com dump vazio. Isso comprova o caminho técnico para dados vazios, **não** recuperação de documentos reais. O procedimento de recuperação para dados de aplicação depende de backup posterior com conteúdo e teste isolado correspondente.
+- Ainda não há digest de imagem backend atual com provenance disponível para pin, nem deploy/rollback comprovado. O workflow manual GHCR deve ser iniciado e aprovado no environment correspondente; não usar o pin legado.
+- HTTPS canônico não foi validado: enquanto não houver rota ativa, certificado confiável, resposta HTTP para /health e /ready não podem ser homologados. TLS não deve ser desativado.
+- SMTP/Resend ainda não está configurado. O app precisa dos parâmetros SMTP de staging por segredo no Coolify e de um domínio/remetente verificados antes dos testes reais de cadastro e recuperação.
+
+Nenhum deploy, migração, alteração de MongoDB, volume, rede operacional ou serviço Dev Forge ocorreu nesta retomada. Não avançar para deploy até validar imagem por digest, compatibilidade Mongo/schema, backup restaurável, variáveis necessárias, alvo/rede, rollback e SMTP de staging.
