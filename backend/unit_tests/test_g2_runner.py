@@ -61,7 +61,7 @@ case "$1" in
         '{{.Name}}') [[ "$target" == test-mongo ]] && printf '%s\n' '/test-mongo' || exit 1 ;;
         '{{json .NetworkSettings.Networks}}')
           if [[ "$target" == test-mongo ]]; then
-            jq -cn --arg mode "$mode" '
+          jq -cn --arg mode "$mode" '
             (if $mode == "mongo_not_on_g2" then {"trilhacode-staging-network":{NetworkID:"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",Aliases:["mongo"]}}
              else {"trilhacode-g2-preflight-internal":
               {IPAMConfig:null,Links:null,
@@ -123,7 +123,7 @@ case "$1" in
     printf '%s\n' "$run_id" > "$cidfile"
     ;;
   start)
-    [[ "$1" == --attach ]] || exit 125
+    [[ "$2" == --attach ]] || exit 125
     [[ -f "${G2_TEST_STARTED:?}" ]] && exit 125
     : > "$G2_TEST_STARTED"
     if [[ "$mode" == canary ]]; then printf '%s\n' 'private-canary-value' >&2; exit 1; fi
