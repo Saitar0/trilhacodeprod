@@ -1,5 +1,14 @@
 # Missão — avanço do roadmap técnico
 
+## G2-FIX — endurecimento de software (18/10/2026)
+
+- **Base:** `main` em `2e83571af259ae2452994d81acb169f19a0e3a20`; branch `codex/g2-fix`.
+- **Escopo autorizado:** software G2, testes locais/CI e PR. Sem merge, deploy, G2, publicação de imagem, acesso ou alteração da VPS, banco staging, secrets, Coolify ou Dev Forge.
+- **Implementação submetida:** URI restrita por parser PyMongo + parsing estrutural; `directConnection=true`; verificação de host/porta/db; protocolo versionado com IDs estáveis e manifesto; estados `OK`, `AUSENTE`, `CONFLITO`, `DUPLICATAS`; agregação limitada; classificação de falhas; saída sanitizada; lock host; workflow manual somente em `main`; documentação de implantação separada.
+- **Bloqueio operacional conhecido:** runner referencia digest antigo que não contém o novo módulo. Nova imagem deve ser construída, revisada, publicada e pinada por procedimento posterior autorizado; a branch não dispara esses workflows.
+- **PR:** [#22](https://github.com/Saitar0/trilhacodeprod/pull/22), aberto contra `main`, head `dd010fa243a5e8dc40b0a6b4f8948312f63c2ca8` no checkpoint. CI #39093646423 passou backend, frontend, Compose e Playwright E2E; deploys staging/produção foram pulados. Revisão independente final sem achados P1 de falso sucesso/vazamento.
+- **Próximo passo:** revisão e merge manuais do PR. A aprovação do PR não autoriza ativação/G2; imagem compatível, rollout VPS e execução G2 permanecem separados. Não despachar G2.
+
 ## Retomada QA visual/acessibilidade + diagnóstico G2
 
 **Data:** 17/10/2026

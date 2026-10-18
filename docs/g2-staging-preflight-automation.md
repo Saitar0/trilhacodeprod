@@ -1,61 +1,57 @@
-# G2 staging preflight — gated GitHub Actions bridge (NOT YET ACTIVE)
+# G2 staging MongoDB preflight
 
-This is a **proposal**, not permission to provision an SSH account or execute a database preflight.
+G2 is a manual, read-only inspection gate. This repository change hardens the software path; it does **not** install or update the runner on the VPS, create Docker networks, change Environment settings, run G2, create indexes, or authorize G3/G4/deploy.
 
-## What the workflow does
+## Components and deployment boundary
 
-The workflow `.github/workflows/g2-staging-preflight.yml` is triggered exclusively by `workflow_dispatch`. After an optional GitHub Environment approval, it sends the fixed command `trilhacode-g2-preflight` over SSH, using a dedicated key. It does **not** check out code, install a GitHub runner on the VPS, copy secrets to the VPS, or invoke Coolify deploy.
+- Workflow: `.github/workflows/g2-staging-preflight.yml`, manual `workflow_dispatch` only, and job-level guard for `refs/heads/main`.
+- SSH request: exactly `trilhacode-g2-preflight`; `StrictHostKeyChecking=yes` and a dedicated key remain required.
+- Host runner: `/usr/local/sbin/trilhacode-g2-preflight-run`; root-only and not caller-configurable.
+- Expected result manifest: `/etc/trilhacode-g2/preflight-manifest-v1.json`, installed root-owned with mode `0600`.
+- Backend command in the pinned image: `python -m backend.g2_preflight`. This validates target configuration before importing the module that creates the Mongo client.
+- Required network: `trilhacode-g2-preflight-internal`, a Docker internal network with only the intended staging MongoDB service attached before the ephemeral preflight starts. Do not reuse the current shared staging/proxy network.
 
-**Do not run** before the host-side restricted command and all controls below are independently reviewed, installed, and tested.
+The current image digest in the host runner is a pin for the previously approved image. Before activation, build and publish a new image containing `backend/g2_preflight.py`, `backend/g2_protocol.py`, and the updated `backend/indexes.py`; verify its source revision and immutable digest, then update the host runner pin and deploy the runner/manifest/image as a separate, authorized operation. A PR or CI run does not deploy these components.
 
-## Required GitHub configuration (not created by this change)
+The host environment file must remain root-owned mode `0600` and contain exactly one each of `ENV=staging`, `DB_NAME=trilhacode_staging`, `MONGO_URL`, `G2_MONGO_EXPECTED_HOST`, `G2_MONGO_EXPECTED_PORT=27017`, and `G2_MONGO_EXPECTED_CONTAINER_ID`. `MONGO_URL` must explicitly include `directConnection=true`; omission is rejected so replica-set discovery cannot redirect the client to another advertised member. The host/container ID must be the full 64-character ID reviewed for the intended service; a recreated Mongo container intentionally fails closed until its new identity is reviewed. `G2_MONGO_EXPECTED_HOST` must be the independently verified Docker network alias of that exact container. The runner checks that the internal network has only that MongoDB container attached and that the alias is present. The URI validator requires the same host, port, and database. It rejects seed lists, `mongodb+srv`, topology discovery options, unexpected schemes, and malformed URIs before a connection is created. Credentials are never printed. Root and the Docker daemon can still inspect container configuration while it exists; this remains within the host trust boundary.
 
-Create environment `staging-preflight` with required reviewers (if the repository plan supports them), restricted to the intended branch, and four *environment secrets*:
+## Versioned result protocol
 
-- `G2_STAGING_SSH_HOST`: VPS public hostname/IP (never a database endpoint).
-- `G2_STAGING_SSH_USER`: dedicated non-root preflight SSH account.
-- `G2_STAGING_SSH_KEY`: dedicated private SSH key for this single operation.
-- `G2_STAGING_SSH_KNOWN_HOSTS`: independently verified SSH server host-key entry (do **not** blindly trust `ssh-keyscan` output).
+The backend emits one JSON object on stdout with `schema_version: 1`, `result: "COMPLETE"`, and a `checks` array. Each check has only a stable manifest `id` and a `status`. The root-owned manifest is independent of the backend result. The host runner accepts exactly one JSON document and requires an exact one-to-one match with the manifest: missing, extra, duplicate, unknown, or malformed checks fail closed. Finding details, document IDs, values, exception text, stdout, and stderr are not sent to GitHub Actions.
 
-Never use the existing root key or a Coolify/MongoDB token. No secret values belong in the repository, screenshots, issue text, or logs.
+Statuses:
 
-## VPS-side design requirement — separate authorization needed
+- `OK`: the expected index definition is present, or its duplicate scan found no duplicates.
+- `AUSENTE`: the index or its collection is absent, so the corresponding duplicate scan could not be run. This is informational before G4 and never causes index creation.
+- `CONFLITO`: an index with matching keys but incompatible definition exists; the preflight fails.
+- `DUPLICATAS`: the read-only scan found duplicate key groups; the preflight fails.
 
-A dedicated SSH account must be limited in `authorized_keys` with a **forced command** and restrictive forwarding/TTY options, for example:
+Duplicate aggregation uses a bounded result and `maxTimeMS`. A server-side timeout or interrupted scan is an error, never a clean result. These aggregations can still read a large collection; a preflight timeout must be investigated and must not be retried automatically.
 
-`restrict,command="/usr/local/sbin/trilhacode-g2-preflight-guard" ssh-ed25519 PUBLIC_KEY`
+Safe failure categories and codes are emitted without driver/daemon messages: URI invalid (40), database authentication (41), database connection (42), semantic preflight rejection (43), preflight execution (44), malformed protocol (45), database operation timeout (46), Docker failure (125–127), wall timeout (124), killed process (137), interrupted execution (129/130/143), cleanup failure or unverified cleanup (74), already-running lock (75), and lock/host configuration mismatches (69/78). A complete report with conflicts or duplicates exits 43. Inconsistent report/exit status fails as protocol-invalid. Container cleanup must be confirmed before any result is reported as complete. Exit 137 is not enough to infer a timeout and remains a distinct killed-process category.
 
-This is illustrative, NOT a provisioning command. The server-side guard must ignore/reject arbitrary `SSH_ORIGINAL_COMMAND` values other than the exact fixed request. It must not permit interactive shell, port forwarding, scp, arbitrary commands, or unrelated Docker administration.
+## Read-only and non-goals
 
-**Docker socket access is root-equivalent.** Do not put the GitHub-facing SSH user in the `docker` group or give unrestricted `sudo docker` access. A separately reviewed root-owned wrapper with narrowly defined execution rights may run the preflight using the approved image and a fixed Docker network; it must verify all inputs and avoid evaluating or interpolating attacker-provided shell strings.
+The G2 entry point only lists collections/indexes and performs duplicate-detection aggregation. It does not call index creation, migrations, seeds, document writes, user administration, Coolify, or deployment commands. `AUSENTE` is not an instruction to run `ensure-indexes`.
 
-Host-side execution guard requirements:
+The ephemeral container uses the pinned image digest, fixed network, no published ports or mounts, no Docker socket, non-root UID, read-only root filesystem, dropped capabilities, `no-new-privileges`, resource limits, a wall timeout, and disabled Docker log driver. A root-only `flock` serializes runner invocations, including calls outside GitHub Actions concurrency. Only the wrapper gets Docker access, through a root-owned, fixed-purpose path.
 
-1. Confirm approved backend revision is exactly `65857f5a4d26b026f7b064862bebc29091713d9a` and use an image verified/built from this source on the VPS (GitHub runner's previous image was **not** transferred).
-2. Target only `trilhacode-staging-network` and the intended MongoDB container `3jo4k9aes1iqn4qlqqeyyh4y`; verify the name and network before running.
-3. Use a **separate MongoDB read-only credential** for `trilhacode_staging`, stored **only on the VPS** with restrictive permissions; never reveal or print the URI or environment file. Existing `trilhacode_api` role `readWrite` is broader than necessary.
-4. Execute exclusively `python -m backend.manage preflight-indexes` in a nonprivileged, ephemeral container with `--network trilhacode-staging-network`, no published ports, no mounts except an explicitly justified secure environment injection mechanism, no Docker socket, no added capabilities, read-only filesystem if compatible, resource/time limits, and default entrypoint overridden.
-5. Ensure output is sanitized before being sent to Actions. The current `DUPLICATAS` messages can contain sample document identifiers and key values: **do not publish raw output**. Return status counts and safe index identifiers, not document samples.
-6. Preserve the program's exit code: fail on authentication/network errors, CONFLITO, DUPLICATAS, timeout, and other exceptions. AUSENTE is expected before G4.
-7. Keep G1 release gates (off-VPS backup hash/retention) and G3/G4/G5 approvals independent.
+## Required checks before any separate activation approval
 
-## Non-goals
+1. Review and merge this code through the normal PR process; do not run G2 from PR validation.
+2. Build/publish the backend image from the reviewed main revision using the approved image workflow; inspect the workflow result, source revision and immutable digest. Update the VPS pin only in a separate approved deployment.
+3. Deploy the new runner and manifest to the VPS using a separately reviewed root operation; verify file hashes, owners and modes read-only afterward.
+4. Provision the dedicated internal network and connect only the verified staging MongoDB service and the ephemeral preflight. Check host-gateway and other host service paths in a disposable environment. No Coolify proxy, Dev Forge container, or other service may join this network.
+5. Verify the exact environment-file shape and Mongo alias against Docker metadata without displaying the URI or credentials. Confirm the dedicated Mongo user has read-only permissions for the target database.
+6. Prove the GitHub private key correspondence without SSH: derive and compare fingerprints offline from the owner's original key, or use a separately approved fingerprint-only workflow that makes no network connection.
+7. Confirm Environment branch restriction and approval policy. Environment values must never be printed. The current workflow fails closed on refs other than main.
+8. Run automated tests and isolation experiments only with disposable MongoDB/Docker resources. Do not use staging as a test fixture.
+9. Obtain a separate explicit approval for one G2 dispatch. G2 approval does not authorize index creation, migration, backup, or deployment steps.
 
-No SSH account, keys, MongoDB user, environment files, image or scripts are created by this PR. It does not perform any build, preflight or deploy. No changes to Dev Forge or to Docker networks/firewalls/Coolify are authorized.
+## Test contract
 
-Before activation, perform a host-only review of the wrapper, least-privilege permissions, image provenance, output filtering, and failure cases. Confirm with the user before any infrastructure writes.
+CI covers URI allow/deny cases, validation-before-import, manifest/report completeness, duplicate and conflict semantics, sanitized error categories, duplicate-scan time limits, and absence of write calls. The runner harness substitutes a Docker CLI test double to cover network/image/Docker failures, authentication and connection categories, timeout, signal interruption before/after cidfile creation, cleanup ownership, output canaries, and semantic rejection. Backend integration tests in CI use the existing disposable MongoDB service only; none targets staging. No G2 workflow is dispatched by these tests.
 
-## Verificação de identidade SSH antes da ativação
+## Rollback
 
-O workflow atual não define `-p` nem uma opção `Port`; a conexão usa a porta SSH padrão 22. O valor de `G2_STAGING_SSH_HOST` é um secret e deve ser confirmado pelo responsável no GitHub Environment `staging-preflight`. Não infira o alvo a partir do IP público da VPS.
-
-Antes de propor qualquer correção:
-
-1. Em um console administrativo autenticado da VPS, consulte a linha da chave pública ED25519 com `sudo cat /etc/ssh/ssh_host_ed25519_key.pub` e calcule sua fingerprint com `sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256`. Registre a linha pública e a fingerprint somente por canal privado; confirme que o console pertence à VPS esperada. A chave `.pub` é pública, mas não a copie para este repositório, tarefa, terminal compartilhado ou logs.
-2. O responsável confere privadamente que o hostname/IP de `G2_STAGING_SSH_HOST` identifica essa VPS. A entrada de `G2_STAGING_SSH_KNOWN_HOSTS` precisa usar exatamente essa identidade; na porta padrão 22, a forma habitual é `host ssh-ed25519 BASE64_PUBLIC_KEY`.
-3. Calcule a fingerprint da chave ED25519 na entrada conhecida, usando um arquivo temporário seguro sob controle do responsável, e compare os valores SHA256. Não copie secrets para este repositório, tarefa, terminal compartilhado ou logs.
-4. Se identidade e fingerprint coincidirem, preserve os valores. Se a identidade host estiver errada, corrija somente `G2_STAGING_SSH_HOST`; se a chave estiver ausente ou for a chave pública errada para a identidade confirmada, atualize somente `G2_STAGING_SSH_KNOWN_HOSTS` com a entrada verificada. Se a fingerprint não coincidir, pare e investigue a identidade/rotação com o administrador.
-5. Se o console autenticado estiver indisponível, pare aqui e registre o bloqueio. Não confie em `ssh-keyscan` sem comparação independente. Não desative `StrictHostKeyChecking`.
-
-A correção do secret exige aprovação do responsável da infraestrutura. Disparar o workflow G2 exige aprovação separada, pois ele consulta o Mongo de staging e pode consumir recursos.
-
+Software rollback is a reviewed revert PR. Host activation rollback is separate: stop using the new runner/image, restore the prior pinned runner/image/manifest as a coordinated compatible set, and remove the dedicated network only after confirming it is empty and the MongoDB configuration is restored. Any MongoDB recreation, Coolify change, host firewall change, or operation affecting shared infrastructure requires its own approved change plan and health checks. Do not alter Dev Forge resources.

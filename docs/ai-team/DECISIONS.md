@@ -1,5 +1,12 @@
 # Decisões técnicas
 
+## 18/10/2026 — Endurecimento G2 isolado em PR
+
+- Decisão: implementar protocolo/validação/runner e documentação em `codex/g2-fix`, sem executar G2 nem publicar imagem.
+- Razão: o backend novo não existe na imagem pinada atualmente pelo runner; ativação antes de reconstrução verificada falharia. Infraestrutura, imagem e runner no host precisam de etapa e autorização próprias.
+- Segurança: URI exige `directConnection=true` além de host/porta/db aprovados; nenhuma resposta contém URI, documentos ou IDs de negócio; runner descarta logs brutos e serializa invocações com lock root. O manifesto esperado é independente do resultado. Status ausente é informativo; conflito e duplicatas reprovam.
+- Execução: workflow G2 continua manual, restrito à ref `main`, com `StrictHostKeyChecking=yes` e comando SSH fixo. CI de PR não aciona G2.
+
 ## 17/10/2026 — Usar branch padrão atual
 
 - Decisão: criar PRs da missão contra main.

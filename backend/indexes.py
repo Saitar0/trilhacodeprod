@@ -111,6 +111,51 @@ async def preflight_indexes() -> list[str]:
     return findings
 
 
+async def preflight_index_checks(database) -> list[dict[str, str]]:
+    """Return the versioned G2 check set without document-derived values."""
+    checks: list[dict[str, str]] = []
+    existing_collections = set(await database.list_collection_names())
+    for collection_name, keys, options, unique_fields in INDEXES:
+        collection = database[collection_name]
+        collection_exists = collection_name in existing_collections
+        existing = await (await collection.list_indexes()).to_list(1000) if collection_exists else []
+        expected_keys = tuple(keys)
+        same_keys = [index for index in existing if _same_keys(index, expected_keys)]
+        expected_options = {key: value for key, value in options.items()
+                            if key in ("unique", "sparse", "expireAfterSeconds", "partialFilterExpression",
+                                       "collation", "hidden", "wildcardProjection")}
+        expected_name = options.get("name") or "_".join(f"{field}_{direction}" for field, direction in keys)
+        matches = [index for index in same_keys
+                   if _keys_match(index, expected_keys) and _options(index) == expected_options
+                   and index["name"] == expected_name]
+        if matches:
+            index_status = "OK"
+        elif same_keys:
+            index_status = "CONFLITO"
+        else:
+            index_status = "AUSENTE"
+        checks.append({"id": f"index/{collection_name}/{expected_name}", "status": index_status})
+
+        if unique_fields:
+            duplicate_status = "AUSENTE" if not collection_exists else "OK"
+            if collection_exists:
+                group_id = {field: {"$ifNull": [f"${field}", None]} for field in unique_fields}
+                pipeline = ([{"$match": options["partialFilterExpression"]}]
+                            if options.get("partialFilterExpression") else []) + [
+                    {"$group": {"_id": group_id, "count": {"$sum": 1}}},
+                    {"$match": {"count": {"$gt": 1}}},
+                    {"$limit": 1},
+                ]
+                cursor = await collection.aggregate(pipeline, maxTimeMS=10_000)
+                if await cursor.to_list(1):
+                    duplicate_status = "DUPLICATAS"
+            checks.append({
+                "id": f"duplicates/{collection_name}/{expected_name}",
+                "status": duplicate_status,
+            })
+    return checks
+
+
 async def ensure_indexes() -> None:
     for collection_name, keys, options, _unique_fields in INDEXES:
         await db[collection_name].create_index(keys, **options)

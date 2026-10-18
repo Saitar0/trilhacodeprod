@@ -11,15 +11,18 @@ readonly KEYFILE='/home/trilhacode-g2/.ssh/authorized_keys'
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly GUARD='/usr/local/sbin/trilhacode-g2-preflight-guard'
 readonly RUNNER='/usr/local/sbin/trilhacode-g2-preflight-run'
+readonly MANIFEST='/etc/trilhacode-g2/preflight-manifest-v1.json'
 readonly SUDOERS='/etc/sudoers.d/trilhacode-g2'
+readonly MANIFEST_SOURCE="$SCRIPT_DIR/preflight-manifest-v1.json"
 
 [[ -f "$PUB" && ! -L "$PUB" ]] || { echo 'Public key missing' >&2; exit 78; }
-[[ -f "$SCRIPT_DIR/trilhacode-g2-preflight-guard" && -f "$SCRIPT_DIR/trilhacode-g2-preflight-run" ]] || { echo 'Executor source missing' >&2; exit 78; }
+[[ -f "$SCRIPT_DIR/trilhacode-g2-preflight-guard" && -f "$SCRIPT_DIR/trilhacode-g2-preflight-run" && -f "$MANIFEST_SOURCE" ]] || { echo 'Executor source missing' >&2; exit 78; }
+/usr/bin/jq -e 'type == "object" and keys == ["checks", "schema_version"] and .schema_version == 1 and (.checks | type == "array" and length > 0 and all(.[]; type == "string")) and (.checks | length == (unique | length))' "$MANIFEST_SOURCE" >/dev/null || { echo 'Preflight manifest invalid' >&2; exit 78; }
 /usr/bin/id "$TARGET_USER" >/dev/null || { echo 'Dedicated user missing' >&2; exit 78; }
 groups="$(id -nG "$TARGET_USER")"
 [[ " $groups " == " $TARGET_USER " ]] || { echo 'Unexpected extra groups on G2 account' >&2; exit 78; }
 [[ -f "$KEYFILE" && ! -s "$KEYFILE" && ! -L "$KEYFILE" ]] || { echo 'authorized_keys must exist and be empty' >&2; exit 78; }
-for f in "$GUARD" "$RUNNER" "$SUDOERS"; do
+for f in "$GUARD" "$RUNNER" "$MANIFEST" "$SUDOERS"; do
   [[ ! -e "$f" && ! -L "$f" ]] || { echo "Refusing to overwrite $f" >&2; exit 78; }
 done
 [[ "$(/usr/bin/wc -l < "$PUB")" == 1 ]] || { echo 'Public key must contain one line' >&2; exit 78; }
@@ -39,6 +42,7 @@ printf 'trilhacode-g2 ALL=(root) NOPASSWD: %s\n' "$RUNNER" > "$tmp"
 
 install -o root -g root -m 0755 "$SCRIPT_DIR/trilhacode-g2-preflight-guard" "$GUARD"
 install -o root -g root -m 0700 "$SCRIPT_DIR/trilhacode-g2-preflight-run" "$RUNNER"
+install -o root -g root -m 0600 "$MANIFEST_SOURCE" "$MANIFEST"
 # Install the forced-command key before granting its narrowly scoped sudo right.
 # If the final policy install fails, the key has no privileged operation.
 # Only allow the exact remote request, no scp/sftp/TTY/forwarding.
