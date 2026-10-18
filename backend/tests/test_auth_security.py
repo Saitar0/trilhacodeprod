@@ -87,7 +87,8 @@ def test_registration_and_mail_requests_are_rate_limited_per_recipient(
 
     import services.auth
 
-    monkeypatch.setattr(services.auth, "now", lambda: datetime(2026, 1, 1, 12, tzinfo=timezone.utc))
+    fixed_now = datetime.now(timezone.utc)
+    monkeypatch.setattr(services.auth, "now", lambda: fixed_now)
     session = session_factory()
     email = f"limited_{uuid.uuid4().hex}@example.com"
     payload = {"name": "Limited", "email": email, "password": "Long-passphrase-12"}
