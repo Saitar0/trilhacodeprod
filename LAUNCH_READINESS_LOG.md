@@ -5,7 +5,7 @@ Audit base: `55d08dd734e862d46be91575226181b6bc9596b2` (`origin/main` at session
 
 ## Current mission
 
-Mission 7 — verify the corrected PR #24 CI, continue public-access/security review, and keep staging/G2 readiness evidence current.
+Mission 8 — verify CI after the latest PR #24 and course-content commits, continue release-readiness review, and keep staging/G2 evidence current.
 
 ## Mission history
 
@@ -52,6 +52,12 @@ Mission 7 — verify the corrected PR #24 CI, continue public-access/security re
 - Corrected only the three Ruff import-order findings. Local `ruff check backend` passed; local backend unit suite passed 84, with 35 Linux runner-only Docker contract tests skipped. No Mongo integration or deploy was run for this formatting-only correction.
 - Browser E2E on CI passed all student and administrator scenarios against the disposable Mongo service, including student progress and submission, and administrator track editing/import/version comparison.
 
+### Mission 7 — public lesson content review
+
+- Reviewed the deployment/backup runbooks and G2 isolation docs without triggering infrastructure operations. The G2 guardrails preserve Mongo's existing Coolify network and forbid attaching Dev Forge; the docs keep host activation, backup/restore proof, and G2 dispatch as separate gates.
+- Found malformed closing punctuation in the Fase 4 container-networking solution, duplicated in its import JSON. Corrected the Markdown source and import copy so the example now uses `--network estudo-net` and hostname `estudo-db` correctly.
+- Validated the import JSON parses and the corrected solution appears identically in both copies. No course data was imported into any live database.
+
 ## Evidence and test ledger
 
 | Date | Scope | Result | Limits |
@@ -65,6 +71,7 @@ Mission 7 — verify the corrected PR #24 CI, continue public-access/security re
 | 2026-10-18 | Playwright browser E2E | 5 tests discovered; not executed | Executor blocked Vite server start; no workaround |
 | 2026-10-18 | PR #24 CI run 39101340050 | Compose, frontend and E2E passed; 119 backend unit tests passed; Ruff failed | Exact failure was three import-order violations; remaining backend steps were skipped |
 | 2026-10-18 | Ruff repair in PR #24 worktree | `ruff check backend` passed; backend unit suite 84 passed / 35 skipped | Changes only reorder imports; awaiting CI on corrected commit |
+| 2026-10-18 | Container networking lesson source/import copy | Malformed inline-code closing delimiters corrected in both files; JSON parse passed | No live import or database write |
 
 ## Findings
 
@@ -81,7 +88,6 @@ Mission 7 — verify the corrected PR #24 CI, continue public-access/security re
 
 ## Next actions
 
-1. Push the Ruff-only correction and verify all PR #24 CI jobs on the new head.
-2. Review data-access/permissions and G2 install/runner boundaries for further proven issues.
-3. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
-4. Continue updating this log before every handoff; public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.
+1. Verify the latest PR #24 CI on its exact head after the Ruff and course-content corrections.
+2. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
+3. Continue the release gate review; public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.
