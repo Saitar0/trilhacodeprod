@@ -5,7 +5,7 @@ Audit base: `55d08dd734e862d46be91575226181b6bc9596b2` (`origin/main` at session
 
 ## Current mission
 
-Mission 8 — verify CI after the latest PR #24 and course-content commits, continue release-readiness review, and keep staging/G2 evidence current.
+Mission 9 — verify CI after the latest PR #24 commit, continue release-readiness review, and keep staging/G2 evidence current.
 
 ## Mission history
 
@@ -58,6 +58,12 @@ Mission 8 — verify CI after the latest PR #24 and course-content commits, cont
 - Found malformed closing punctuation in the Fase 4 container-networking solution, duplicated in its import JSON. Corrected the Markdown source and import copy so the example now uses `--network estudo-net` and hostname `estudo-db` correctly.
 - Validated the import JSON parses and the corrected solution appears identically in both copies. No course data was imported into any live database.
 
+### Mission 8 — video provider and production CSP alignment
+
+- Confirmed `VideoBlock` constructs Vimeo iframe URLs at `player.vimeo.com`, while all three production Nginx CSP declarations allowed only YouTube frames. This would block supported Vimeo embeds in deployed production.
+- Added `https://player.vimeo.com` to each CSP declaration and corrected the deploy guide to list both supported providers.
+- Frontend unit suite passed 9/9 after the edit; `git diff --check` passed. Production image/reverse-proxy integration remains pending CI; no deploy was performed.
+
 ## Evidence and test ledger
 
 | Date | Scope | Result | Limits |
@@ -72,6 +78,8 @@ Mission 8 — verify CI after the latest PR #24 and course-content commits, cont
 | 2026-10-18 | PR #24 CI run 39101340050 | Compose, frontend and E2E passed; 119 backend unit tests passed; Ruff failed | Exact failure was three import-order violations; remaining backend steps were skipped |
 | 2026-10-18 | Ruff repair in PR #24 worktree | `ruff check backend` passed; backend unit suite 84 passed / 35 skipped | Changes only reorder imports; awaiting CI on corrected commit |
 | 2026-10-18 | Container networking lesson source/import copy | Malformed inline-code closing delimiters corrected in both files; JSON parse passed | No live import or database write |
+| 2026-10-18 | Video CSP and embed-provider contract | Vimeo player origin added to all 3 production CSP declarations; frontend tests 9/9 passed | CI/image validation pending; no deployment |
+| 2026-10-18 | PR #24 CI run 39101630737 | Compose and frontend passed; backend and E2E still running at checkpoint | Head `05150db965c67b98359191da55c0e71a4465d11d`; superseded by later content commits |
 
 ## Findings
 
@@ -88,6 +96,6 @@ Mission 8 — verify CI after the latest PR #24 and course-content commits, cont
 
 ## Next actions
 
-1. Verify the latest PR #24 CI on its exact head after the Ruff and course-content corrections.
+1. Verify the latest PR #24 CI on its exact head after the Ruff, course-content, and CSP corrections.
 2. Keep G2 blocked until image, SSH identity, read-only Mongo account, dedicated network, backup/restore, and host runner requirements are met and separately approved.
 3. Continue the release gate review; public launch requires real staging evidence, backup/restore proof, a healthy API, and a readiness-gated deployment process.

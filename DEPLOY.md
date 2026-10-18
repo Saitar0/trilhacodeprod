@@ -67,7 +67,7 @@ Crie outra aplicação Dockerfile em cada ambiente:
 - Cadastre `VITE_BACKEND_URL` como **build variable** (não apenas runtime): `https://api.example.com` ou `https://api.staging.example.com`. O Vite incorpora variáveis `VITE_*` ao JavaScript durante o build; mudar apenas a variável runtime não altera a imagem criada.
 - Se habilitar Sentry frontend, informe `VITE_SENTRY_DSN`, `VITE_SENTRY_ENVIRONMENT` e, opcionalmente, `VITE_SENTRY_RELEASE` também como build variables.
 - A imagem `frontend/Dockerfile.prod` serve `dist/` pelo Nginx. A CSP mantém `script-src 'self'`; o HTML do Vite carrega o módulo externo empacotado e não depende de scripts inline.
-- A CSP inicial libera estilos inline (compatibilidade com componentes React), imagens/conexões HTTPS (imagens externas, API e Sentry) e frames somente do YouTube para blocos de vídeo. Scripts continuam restritos à mesma origem. Se os hosts reais de imagens/Sentry forem conhecidos, restrinja `img-src` e `connect-src` a esses hosts.
+- A CSP inicial libera estilos inline (compatibilidade com componentes React), imagens/conexões HTTPS (imagens externas, API e Sentry) e frames do YouTube e Vimeo, que são os provedores aceitos pelos blocos de vídeo. Scripts continuam restritos à mesma origem. Se os hosts reais de imagens/Sentry forem conhecidos, restrinja `img-src` e `connect-src` a esses hosts.
 
 ## 7. Sequência de release e banco de dados
 
