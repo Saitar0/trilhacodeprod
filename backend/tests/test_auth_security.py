@@ -40,6 +40,22 @@ def test_registration_requires_long_password_and_email_verification(session_fact
     assert session.get(f"{API}/profile").status_code == 200
 
 
+def test_concurrent_email_verification_consumes_token_once(session_factory, mailbox_token, async_client, event_loop):
+    session = session_factory()
+    email = f"verify_race_{uuid.uuid4().hex}@example.com"
+    assert session.post(f"{API}/auth/register", json={
+        "name": "Verify Race", "email": email, "password": "Long-passphrase-12"}).status_code == 202
+    token = mailbox_token(email, "Confirme seu e-mail")
+
+    async def consume_twice():
+        return await asyncio.gather(*(
+            async_client.post(f"{API}/auth/verify-email", json={"token": token}) for _ in range(2)
+        ))
+
+    responses = event_loop.run_until_complete(consume_twice())
+    assert sorted(response.status_code for response in responses) == [200, 400]
+
+
 def test_registration_and_recovery_responses_do_not_enumerate_accounts(session_factory, mailbox_token):
     session = session_factory()
     email = f"privacy_{uuid.uuid4().hex}@example.com"
@@ -120,6 +136,26 @@ def test_password_reset_is_single_use_and_revokes_existing_sessions(session_fact
     assert session.get(f"{API}/auth/me").status_code == 401
     assert session.post(f"{API}/auth/login", json={"email": email, "password": password}).status_code == 401
     assert session.post(f"{API}/auth/login", json={"email": email, "password": "Replacement-passphrase-24"}).status_code == 200
+
+
+def test_concurrent_password_reset_consumes_token_once(
+    session_factory, mailbox_token, create_verified_user, async_client, event_loop,
+):
+    session = session_factory()
+    email = f"reset_race_{uuid.uuid4().hex}@example.com"
+    create_verified_user(session, email)
+    assert session.post(f"{API}/auth/password-reset-request", json={"email": email}).status_code == 202
+    token = mailbox_token(email, "Redefina sua senha")
+
+    async def consume_twice():
+        return await asyncio.gather(*(
+            async_client.post(f"{API}/auth/password-reset", json={
+                "token": token, "password": f"Replacement-passphrase-{suffix}"})
+            for suffix in ("31", "32")
+        ))
+
+    responses = event_loop.run_until_complete(consume_twice())
+    assert sorted(response.status_code for response in responses) == [200, 400]
 
 
 def test_password_change_requires_minimum_and_revokes_current_session(session_factory, create_verified_user):

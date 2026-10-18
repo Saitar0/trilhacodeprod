@@ -5,6 +5,7 @@ import re
 import shutil
 import tempfile
 import uuid
+from itertools import count
 
 import httpx
 import pytest
@@ -32,6 +33,23 @@ from migrations import migrate
 from security import hash_password
 from seed import BLOCK_TYPES, SUBMITTABLE, TAXONOMIES
 from server import app
+
+_client_ids = count(1)
+_active_test_ip = None
+
+
+def _test_transport():
+    client_ip = _active_test_ip
+    if client_ip is None:
+        client_id = next(_client_ids)
+        client_ip = f"127.0.{(client_id >> 8) & 255}.{client_id & 255}"
+    return httpx.ASGITransport(app=app, client=(client_ip, 12345))
+
+
+def pytest_runtest_setup(item):
+    global _active_test_ip
+    client_id = next(_client_ids)
+    _active_test_ip = f"127.0.{(client_id >> 8) & 255}.{client_id & 255}"
 
 
 class TestSession:
@@ -61,9 +79,9 @@ def event_loop():
     asyncio.set_event_loop(None)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def async_client(event_loop):
-    client = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver")
+    client = httpx.AsyncClient(transport=_test_transport(), base_url="http://testserver")
     yield client
     event_loop.run_until_complete(client.aclose())
 
@@ -73,7 +91,7 @@ def session_factory(event_loop):
     clients = []
 
     def create():
-        client = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver")
+        client = httpx.AsyncClient(transport=_test_transport(), base_url="http://testserver")
         clients.append(client)
         return TestSession(client, event_loop)
 
