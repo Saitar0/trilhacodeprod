@@ -1,4 +1,4 @@
-# G2 — VPS executor (review-only; NOT INSTALLED)
+# G2 — VPS executor (partially installed; execution blocked)
 
 The existing GHCR image below is a legacy pin and is **not compatible** with the new runner protocol in this branch. It does not contain `backend.g2_preflight` and must not be used to activate this implementation:
 
@@ -6,7 +6,9 @@ The existing GHCR image below is a legacy pin and is **not compatible** with the
 ghcr.io/saitar0/trilhacodeprod-backend@sha256:a6bf47a3fb1c8019678c85ce5d6d6b055a61e547c62681865f8fd1be20fad71e
 ```
 
-This branch changes software and test sources only. It does not install anything on the VPS, configure GHCR access, create a MongoDB user, start a container, deploy via Coolify, publish an image, or run the preflight. **Review before merging or executing.**
+Read-only inspection of the authenticated VPS console on 2026-10-19 found the dedicated account, one forced-command public key, runner scripts, sudoers policy, and a root-only `preflight.env` already present. The required `/etc/trilhacode-g2/preflight-manifest-v1.json` is absent. SHA-256 comparisons show both installed runner scripts differ from the reviewed sources in this branch. SSH's effective policy disables password authentication, TTY, and forwarding for the account; the single authorized key forces the guard command. This does not prove that the key is the one configured in GitHub. **The installed version is unverified and must not be run or overwritten. Do not rerun the single-use installer.**
+
+This branch changes software and test sources only. It does not configure GHCR access, create or change a MongoDB user, start a container, deploy via Coolify, publish an image, or run the preflight. **Review before merging or executing.**
 
 ## Security model
 
@@ -22,8 +24,8 @@ This branch changes software and test sources only. It does not install anything
 ## Dependencies BEFORE real execution — require separate authorization
 
 1. Independently review the scripts and host state. `3jo4k9aes1iqn4qlqqeyyh4y` is the Coolify database resource UUID, not a Docker container ID. The runner now takes the expected full 64-character Docker container ID only from the protected `G2_MONGO_EXPECTED_CONTAINER_ID` setting and inspects that exact ID; if the resource is recreated, stop and review rather than weakening the comparison.
-2. Install and configure a dedicated MongoDB account with **`read` only on `trilhacode_staging`** (not `readWrite`; do not reuse API password). Verify access is restricted to the staging DB. This procedure is NOT implemented in this PR.
-3. As root, create `/etc/trilhacode-g2/preflight.env` (directory 0700, env file owner root mode 0600) with exactly the six variables documented in `docs/g2-staging-preflight-automation.md`; include `ENV=staging`, `DB_NAME=trilhacode_staging`, expected Mongo host/port/full container ID, and a properly URL-encoded staging `MONGO_URL` with explicit `directConnection=true`. **Do not paste credentials to chat, commits or logs.**
+2. The host already reports `trilhacode_g2_ro` with the `read` role on `trilhacode_staging`. Verify its effective actions and database scope through an authorized read-only check before use. Do not create a duplicate user or change MongoDB roles as part of this procedure. The role name alone is not the complete G2 gate.
+3. `/etc/trilhacode-g2/preflight.env` already exists, root-owned mode `0600`, but sanitized inspection found only the variable names `ENV`, `DB_NAME`, and `MONGO_URL`. It is not proven compatible with the reviewed runner, which requires six keys. Do not overwrite it or print values. After exact script/target review, securely validate the existing file and prepare an atomic, recoverable update with all six variables documented in `docs/g2-staging-preflight-automation.md`; include the verified Mongo host/port/full container ID and `directConnection=true`. Keep credentials out of chat, commits, and logs.
 4. After this code is reviewed and integrated, separately build and publish a backend image from the exact approved source revision. Review provenance and immutable digest, then update the runner pin only through a separately authorized host change. Provision a **read-only** GHCR credential on the VPS and pull that reviewed digest in a separate approved operation. The installer and runner **never log into GHCR or pull images**.
 5. Review the existing SSH `Match User trilhacode-g2` configuration; validate with `sshd -t`. Do not weaken other users' SSH access. Avoid placing the root SSH private key in GitHub.
 6. Provision the dedicated public key securely on the VPS outside the repository; review and explicitly authorize running `ops/g2/install-g2-host.sh /root/your-dedicated-g2-public-key.pub` as root from a **verified repository checkout**. This creates two root-owned scripts, a narrowly scoped sudoers file, and one forced-command key entry. It performs **no preflight**.
