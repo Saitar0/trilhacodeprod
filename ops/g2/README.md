@@ -54,3 +54,15 @@ This checkpoint supersedes earlier status statements in this document when they 
 - Backup B2 encryption, off-VPS GPG custody and isolated MongoDB 7 restore were technically demonstrated against an empty dump only. This is not evidence of recovery for real application data. Keep the backup gate open until a consistent nonempty application backup (when data exists) or an explicitly documented writer-consistency procedure is verified.
 - No current backend image digest/provenance or host read:packages authentication has been proved, and the GHCR publish workflow has not been dispatched in this execution. The legacy pin above remains prohibited. G2 must stay blocked until the approved image and digest, runner/manifest compatibility, restricted SSH identity and pinned host key, effective Mongo read-only scope, exact Docker ID/network isolation, and backup gates are all verified.
 - The workflow run and environment approval are manual. Do not claim a G2 result or staging deployment until the workflow itself passes and its target evidence is reviewed.
+
+
+## Published G2 image candidate
+
+The manual GHCR workflow completed successfully in run [39179762892](https://github.com/Saitar0/trilhacodeprod/actions/runs/39179762892) from main commit 41dc470c567bae50b7ebcf0662d45d43863980c9. The checkout step verified the exact SHA, and backend/Dockerfile.prod was present.
+
+Immutable image reference:
+ghcr.io/saitar0/trilhacodeprod-backend@sha256:bd62686fb5b3b362d22bfa21259ce584fe6e5c76fa73ffdfde7c000b5088df85
+
+The published tag is g2-41dc470c567bae50b7ebcf0662d45d43863980c9. Buildx provenance was enabled; the job log records OCI attestation manifest sha256:2aca52e59c803c1ff6c9ee9b18fc9bebebae9e913dfbfde77d2fef11b6a8ac76 and provenance source/revision matching this repository and commit. The exact image source contains backend/g2_preflight.py, so it includes the current G2 implementation.
+
+This is provenance evidence from the successful publication run. The VPS has not authenticated to GHCR or independently inspected the private registry index. Keep the installed legacy runner pin unchanged until the authorized host-side reconciliation is reviewed; do not run the preflight or deploy from this note alone.
