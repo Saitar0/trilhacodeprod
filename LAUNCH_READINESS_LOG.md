@@ -226,3 +226,13 @@ Este checkpoint substitui os estados operacionais anteriores deste arquivo quand
 - Checkout original e worktrees existentes foram preservados; Dev Forge, Mongo operacional, redes e volumes não foram alterados.
 
 **Próxima ação:** o responsável deve iniciar manualmente Publish backend to GHCR em [Actions](https://github.com/Saitar0/trilhacodeprod/actions/workflows/g2-publish-backend-ghcr.yml), selecionando main e aprovando somente o environment g2-image-publish após conferir o commit. Depois, compartilhar apenas o link do run/digest (nunca o token). Antes disso, posso continuar as revisões e preparo de configuração sem disparar G2 ou deploy.
+
+
+### Missão 18 — publicação da imagem backend para G2
+
+- O usuário iniciou o workflow manual. Consulta direta ao GitHub confirmou o run [39179762892](https://github.com/Saitar0/trilhacodeprod/actions/runs/39179762892), concluído com sucesso, evento workflow_dispatch, branch main.
+- Commit de origem e checkout verificado: 41dc470c567bae50b7ebcf0662d45d43863980c9. O step de validação comparou HEAD com esse SHA e confirmou backend/Dockerfile.prod. O Dockerfile copia o diretório backend, que inclui backend/g2_preflight.py.
+- Tag publicada: ghcr.io/saitar0/trilhacodeprod-backend:g2-41dc470c567bae50b7ebcf0662d45d43863980c9. Digest OCI imutável: sha256:bd62686fb5b3b362d22bfa21259ce584fe6e5c76fa73ffdfde7c000b5088df85. A imagem index lista plataforma linux/amd64.
+- A ação Buildx executou com provenance: true; o log confirma attestation manifest sha256:2aca52e59c803c1ff6c9ee9b18fc9bebebae9e913dfbfde77d2fef11b6a8ac76. Os campos BuildKit vcs:source e vcs:revision apontam para este repositório e o commit acima. Isso prova que a atestação foi gerada e publicada pelo workflow; a VPS ainda precisa fazer pull autenticado e conferir o manifesto/digest no registro.
+- O workflow usou somente GITHUB_TOKEN com contents:read e packages:write no job e não realizou SSH, deploy, migração ou operação MongoDB.
+- O runner G2 instalado no host ainda estava registrado em inspeção anterior com o digest legado sha256:a6bf47a3fb1c8019678c85ce5d6d6b055a61e547c62681865f8fd1be20fad71e. O pin não foi alterado, a imagem não foi puxada/executada pela VPS e o G2 não foi disparado. A reconciliação depende de terminal autorizado e revisão do estado atual antes de mudança.
