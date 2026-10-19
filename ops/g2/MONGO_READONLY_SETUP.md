@@ -1,12 +1,12 @@
-# G2 MongoDB read-only account — staging only (NOT EXECUTED)
+# G2 MongoDB read-only account — staging only (existing role observed; provisioning not authorized)
 
-**This is a preparation for review, not an authorization to change MongoDB.** The source file `mongo-create-readonly-user.js` is inert until an operator separately approves and runs it. No passwords are checked into GitHub.
+**This is a preparation for review, not an authorization to change MongoDB.** The source file `mongo-create-readonly-user.js` was not used in the read-only VPS inspection. The host already reports the user `trilhacode_g2_ro` with role `read` on `trilhacode_staging`; its effective actions have not been independently enumerated. Do not run the creation script or change roles unless a later inspection proves that is necessary and separately authorized. No passwords are checked into GitHub.
 
 ## Target identity (partially verified)
 
 - Coolify standalone MongoDB resource UUID: `3jo4k9aes1iqn4qlqqeyyh4y` (`trilhacode-staging-mongodb`, project Trilha Code). This is **not** a Docker container ID.
 - Coolify reports MongoDB 7, healthy, private and without a published port. Its persistent mounts are `/data/configdb` and `/data/db`; Coolify storage UUIDs are recorded in the launch log. No backup schedules are configured.
-- The full Docker container ID, Docker name, operational network attachments and aliases are **not available** through the current read-only metadata. Obtain and verify them on the authorized VPS before provisioning G2; do not substitute the Coolify resource UUID or assume a Docker network name.
+- The full Docker container ID, name, operational network attachments, and aliases were verified by read-only inspection on the authorized VPS on 2026-10-19. Keep the full container ID out of this repository; do not substitute the Coolify resource UUID or assume a Docker network name if the container is recreated.
 - Database: `trilhacode_staging` **only**.
 - New account name: `trilhacode_g2_ro`.
 - Account created **in** `trilhacode_staging` (thus application URI uses `authSource=trilhacode_staging`).
@@ -16,8 +16,8 @@
 ## Verification/approval checklist
 
 1. Confirm the full staging MongoDB Docker container ID, network, authentication configuration, and backup/restore. Never identify Mongo by a generic name that might resolve to Dev Forge. Preserve every existing operational network attachment.
-2. Confirm `mongosh` and the `passwordPrompt()` helper in the exact MongoDB container, and review the provisioning JS. The script refuses to run unless selected DB is `admin` and the target user does not already exist.
-3. Obtain separate explicit user approval to **create this one MongoDB user**. This changes MongoDB user metadata only; no application documents/indexes/migrations/seeds.
+2. Confirm the user's effective actions and database scope with an authorized read-only inspection. If any identity change is proposed, first establish that the existing user is absent or invalid and review the exact change. The provisioning script refuses to run unless selected DB is `admin` and the target user does not already exist.
+3. Do not run the provisioning script while the existing `read` role remains present and needs no change. Any later MongoDB user/role mutation requires separate review and explicit authorization.
 4. Authenticated operator should access `mongosh` using the staging MongoDB administrator with `--authenticationDatabase admin` and **select `admin` as current database**, then run reviewed file interactively in a TTY. Do not include the admin password in command arguments, logs, issue text or the repository. No MongoDB port should be published.
 5. After creation, verify `getUser("trilhacode_g2_ro")` in `trilhacode_staging` shows only role `read`. Verify login and that a read operation works while an attempted harmless write is rejected; use a disposable staging-only test database/collection only if independently authorized. Avoid any write test on real collections.
 6. Once separately authorized, build `/etc/trilhacode-g2/preflight.env` as root-only file (directory `0700`, file `0600`) with `ENV=staging`, `DB_NAME=trilhacode_staging`, and `MONGO_URL` for the staging MongoDB service. For this account, set `authSource=trilhacode_staging` and percent-encode reserved characters in user/password. Keep URI and secrets out of GitHub; never echo them.
