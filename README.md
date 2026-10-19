@@ -85,6 +85,22 @@ O Compose lê o `.env` da raiz. A tabela mostra os valores do `.env.example`; co
 | `API_PORT` | Compose/API | `8000` | Porta publicada da API; ajuste também `VITE_BACKEND_URL`. |
 | `VITE_SENTRY_DSN`, `VITE_SENTRY_ENVIRONMENT`, `VITE_SENTRY_RELEASE` | Frontend | vazios / production | Configuração opcional do Sentry no navegador; valores `VITE_*` são incorporados ao bundle no build. |
 
+### Cadastro, confirmação de e-mail e SMTP
+
+O cadastro público exige senha com pelo menos 12 caracteres. A conta precisa confirmar o endereço de e-mail antes de acessar as áreas protegidas. Os links de confirmação e recuperação expiram e só podem ser usados uma vez. Cadastro, login, reenvio e recuperação de senha têm limites contra abuso; as respostas de reenvio e recuperação não revelam se uma conta existe.
+
+Em desenvolvimento, `EMAIL_TRANSPORT=local` salva as mensagens numa caixa local descartável indicada por `LOCAL_EMAIL_DIR`; isso não entrega e-mail e não deve ser usado em staging ou produção. Para staging e produção, configure no ambiente do Coolify:
+
+| Variável | Descrição |
+|---|---|
+| `EMAIL_TRANSPORT` | Use `smtp` fora do desenvolvimento. |
+| `SMTP_HOST`, `SMTP_PORT` | Host e porta TLS do provedor SMTP. |
+| `SMTP_USERNAME`, `SMTP_PASSWORD` | Credenciais SMTP; defina ambas ou deixe ambas vazias se o provedor não exigir autenticação. Trate a senha como segredo. |
+| `SMTP_FROM_EMAIL` | Remetente validado no provedor de e-mail. |
+| `SMTP_STARTTLS`, `SMTP_SSL` | Selecione STARTTLS ou SSL conforme o provedor; não habilite os dois ao mesmo tempo. |
+
+O exemplo de desenvolvimento está em `backend/.env.example`. Os modelos operacionais com as variáveis necessárias estão em [`.env.staging.example`](.env.staging.example) e [`.env.production.example`](.env.production.example). Substitua todos os valores de exemplo; nunca use transporte local ou credenciais fictícias num ambiente público. Configure a chave SMTP como segredo no Coolify, não num arquivo versionado.
+
 Os exemplos contêm somente valores fictícios. Em staging e produção, configure os segredos no gerenciador de ambiente do Coolify; não use os valores do exemplo. O `JWT_SECRET` deve ter pelo menos 32 caracteres fora de development. O seed nunca redefine senha de usuário existente.
 
 ## Dados, seed e migrações
