@@ -1,0 +1,282 @@
+#!/bin/bash
+# Root-only G2 runner. The SSH caller cannot provide arguments or environment.
+set -Eeuo pipefail
+umask 077
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+unset BASH_ENV ENV CDPATH
+
+readonly IMAGE='ghcr.io/saitar0/trilhacodeprod-backend@sha256:bd62686fb5b3b362d22bfa21259ce584fe6e5c76fa73ffdfde7c000b5088df85'
+readonly NETWORK='trilhacode-g2-preflight-internal'
+readonly ENV_FILE='/etc/trilhacode-g2/preflight.env'
+readonly MANIFEST='/etc/trilhacode-g2/preflight-manifest-v1.json'
+readonly RUN_PREFIX='trilhacode-g2-preflight-'
+readonly DOCKER='/usr/bin/docker'
+readonly TIMEOUT='/usr/bin/timeout'
+readonly JQ='/usr/bin/jq'
+readonly FLOCK='/usr/bin/flock'
+readonly LOCK_DIR='/run/trilhacode-g2-preflight'
+readonly LOCK_FILE='/run/trilhacode-g2-preflight/runner.lock'
+
+emit_failure() {
+  printf 'G2 result: FAILED category=%s code=%s\n' "$1" "$2"
+  exit "$2"
+}
+
+[[ "$(id -u)" == 0 ]] || emit_failure INVOCATION 64
+[[ -d /run && ! -L /run && "$(stat -c '%u:%a' /run)" == '0:755' ]] || emit_failure LOCK_UNAVAILABLE 69
+if [[ ! -e "$LOCK_DIR" && ! -L "$LOCK_DIR" ]]; then
+  /usr/bin/mkdir -m 0700 -- "$LOCK_DIR" 2>/dev/null || true
+fi
+[[ -d "$LOCK_DIR" && ! -L "$LOCK_DIR" && "$(stat -c '%u:%a' "$LOCK_DIR")" == '0:700' ]] || emit_failure LOCK_UNAVAILABLE 69
+if [[ -e "$LOCK_FILE" || -L "$LOCK_FILE" ]]; then
+  [[ -f "$LOCK_FILE" && ! -L "$LOCK_FILE" && "$(stat -c '%u:%a' "$LOCK_FILE")" == '0:600' ]] || emit_failure LOCK_UNAVAILABLE 69
+fi
+exec 9>"$LOCK_FILE" || emit_failure LOCK_UNAVAILABLE 69
+[[ "$(stat -c '%u:%a' "$LOCK_FILE")" == '0:600' ]] || emit_failure LOCK_UNAVAILABLE 69
+"$FLOCK" -n 9 || emit_failure ALREADY_RUNNING 75
+[[ -f "$ENV_FILE" && ! -L "$ENV_FILE" ]] || emit_failure CONFIGURATION 78
+[[ "$(stat -c '%u:%a' "$ENV_FILE")" == '0:600' ]] || emit_failure CONFIGURATION 78
+[[ -f "$MANIFEST" && ! -L "$MANIFEST" ]] || emit_failure MANIFEST 78
+[[ "$(stat -c '%u:%a' "$MANIFEST")" == '0:600' ]] || emit_failure MANIFEST 78
+
+grep -qx 'DB_NAME=trilhacode_staging' "$ENV_FILE" || emit_failure CONFIGURATION 78
+grep -qx 'ENV=staging' "$ENV_FILE" || emit_failure CONFIGURATION 78
+/usr/bin/awk -F= '
+  NF == 0 { next }
+  $1 ~ /^(ENV|DB_NAME|MONGO_URL|G2_MONGO_EXPECTED_HOST|G2_MONGO_EXPECTED_PORT|G2_MONGO_EXPECTED_CONTAINER_ID)$/ { count[$1]++; next }
+  { bad=1 }
+  END {
+    if (bad || count["ENV"] != 1 || count["DB_NAME"] != 1 || count["MONGO_URL"] != 1 ||
+        count["G2_MONGO_EXPECTED_HOST"] != 1 || count["G2_MONGO_EXPECTED_PORT"] != 1 ||
+        count["G2_MONGO_EXPECTED_CONTAINER_ID"] != 1) exit 1
+  }
+' "$ENV_FILE" || emit_failure CONFIGURATION 78
+expected_host="$(/usr/bin/awk -F= '$1 == "G2_MONGO_EXPECTED_HOST" { n++; value=substr($0, index($0, "=")+1) } END { if (n != 1) exit 1; print value }' "$ENV_FILE")" || emit_failure TARGET_IDENTITY 78
+expected_mongo_id="$(/usr/bin/awk -F= '$1 == "G2_MONGO_EXPECTED_CONTAINER_ID" { n++; value=substr($0, index($0, "=")+1) } END { if (n != 1) exit 1; print value }' "$ENV_FILE")" || emit_failure TARGET_IDENTITY 78
+[[ "$expected_host" =~ ^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?$ ]] || emit_failure TARGET_IDENTITY 78
+grep -qx 'G2_MONGO_EXPECTED_PORT=27017' "$ENV_FILE" || emit_failure TARGET_IDENTITY 78
+[[ "$expected_mongo_id" =~ ^[0-9a-f]{64}$ ]] || emit_failure TARGET_IDENTITY 78
+readonly MONGO_CONTAINER="$expected_mongo_id"
+
+mongo_id="$("$DOCKER" inspect -f '{{.Id}}' "$MONGO_CONTAINER" 2>/dev/null)" || emit_failure DB_UNAVAILABLE 69
+[[ "$mongo_id" =~ ^[0-9a-f]{64}$ && "$mongo_id" == "$expected_mongo_id" ]] || emit_failure DB_UNAVAILABLE 69
+mongo_docker_name="$("$DOCKER" inspect -f '{{.Name}}' "$MONGO_CONTAINER" 2>/dev/null)" || emit_failure DB_UNAVAILABLE 69
+[[ "$mongo_docker_name" =~ ^/[a-zA-Z0-9][a-zA-Z0-9_.-]*$ ]] || emit_failure DB_UNAVAILABLE 69
+mongo_network_name="${mongo_docker_name#/}"
+
+"$JQ" -e 'type == "object" and keys == ["checks", "schema_version"] and .schema_version == 1 and (.checks | type == "array" and length > 0 and all(.[]; type == "string")) and (.checks | length == (unique | length))' "$MANIFEST" >/dev/null 2>&1 || emit_failure MANIFEST 78
+network_json="$("$DOCKER" network inspect "$NETWORK" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
+"$JQ" -e --arg n "$NETWORK" --arg id "$mongo_id" --arg container "$mongo_network_name" '
+  length == 1 and .[0].Name == $n and .[0].Internal == true
+  and (.[0].Containers | type == "object" and keys == [$id])
+  and .[0].Containers[$id].Name == $container
+  and (.[0].Containers[$id].IPv4Address | type == "string" and length > 0)
+' <<<"$network_json" >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
+network_id="$("$JQ" -r '.[0].Id' <<<"$network_json" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
+[[ "$network_id" =~ ^[0-9a-f]{64}$ ]] || emit_failure NETWORK_ISOLATION 69
+container_networks="$("$DOCKER" inspect -f '{{json .NetworkSettings.Networks}}' "$MONGO_CONTAINER" 2>/dev/null)" || emit_failure NETWORK_ISOLATION 69
+"$JQ" -e --arg n "$NETWORK" --arg h "$expected_host" --arg id "$network_id" '
+  type == "object" and has($n)
+  and (.[$n] | type == "object")
+  and .[$n].NetworkID == $id
+  and (.[$n].Aliases | type == "array" and index($h) != null)
+' <<<"$container_networks" >/dev/null 2>&1 || emit_failure NETWORK_ISOLATION 69
+[[ "$("$DOCKER" inspect -f '{{.State.Running}}' "$MONGO_CONTAINER" 2>/dev/null)" == true ]] || emit_failure DB_UNAVAILABLE 69
+"$DOCKER" image inspect "$IMAGE" >/dev/null 2>&1 || emit_failure IMAGE_UNAVAILABLE 69
+
+out="$(/usr/bin/mktemp)"
+token="$(/usr/bin/od -An -N16 -tx1 /dev/urandom | /usr/bin/tr -d ' \n')"
+run_name="${RUN_PREFIX}${token}"
+cidfile="${out}.cid"
+cleanup_temp() { /usr/bin/rm -f -- "$out" "$cidfile"; }
+cleanup_container() {
+  local saved_id='' container_ids='' container_id='' label='' remaining=''
+  CLEANUP_FOUND=0
+  if [[ -e "$cidfile" ]]; then
+    [[ -f "$cidfile" && ! -L "$cidfile" ]] || return 1
+    IFS= read -r saved_id < "$cidfile" || return 1
+  fi
+  container_ids="$("$DOCKER" ps -aq --filter "name=^/${run_name}$" 2>/dev/null)" || return 1
+  if [[ -z "$container_ids" ]]; then
+    if [[ -n "$saved_id" ]]; then
+      container_id="$("$DOCKER" inspect -f '{{.Id}}' "$saved_id" 2>/dev/null)" || return 1
+      [[ "$container_id" == "$saved_id" ]] || return 1
+    else
+      return 0
+    fi
+  fi
+  # The 128-bit random name and matching root-generated label prove ownership
+  # if Docker has created the container but has not written its cidfile yet.
+  if [[ -n "$container_ids" ]]; then
+    [[ "$container_ids" != *$'\n'* && "$container_ids" =~ ^[0-9a-f]{64}$ ]] || return 1
+    container_id="$container_ids"
+  fi
+  CLEANUP_FOUND=1
+  label="$("$DOCKER" inspect -f '{{index .Config.Labels "com.trilhacode.g2-run"}}' "$container_id" 2>/dev/null)" || return 1
+  [[ "$label" == "$token" ]] || return 1
+  [[ -z "$saved_id" || "$saved_id" == "$container_id" ]] || return 1
+  "$DOCKER" rm -f "$container_id" >/dev/null 2>&1 || return 1
+  remaining="$("$DOCKER" ps -aq --filter "name=^/${run_name}$" 2>/dev/null)" || return 1
+  [[ -z "$remaining" ]]
+}
+validate_ephemeral_network() {
+  local ephemeral_id='' ephemeral_networks=''
+  [[ -f "$cidfile" && ! -L "$cidfile" ]] || return 1
+  IFS= read -r ephemeral_id < "$cidfile" || return 1
+  [[ "$ephemeral_id" =~ ^[0-9a-f]{64}$ ]] || return 1
+  ephemeral_networks="$("$DOCKER" inspect -f '{{json .NetworkSettings.Networks}}' "$ephemeral_id" 2>/dev/null)" || return 1
+  "$JQ" -e --arg n "$NETWORK" --arg id "$network_id" '
+    type == "object" and keys == [$n]
+    and (.[$n] | type == "object" and .NetworkID == $id)
+  ' <<<"$ephemeral_networks" >/dev/null 2>&1
+}
+validate_ephemeral_network_config() {
+  local ephemeral_id='' network_mode='' ephemeral_networks=''
+  [[ -f "$cidfile" && ! -L "$cidfile" ]] || return 1
+  IFS= read -r ephemeral_id < "$cidfile" || return 1
+  [[ "$ephemeral_id" =~ ^[0-9a-f]{64}$ ]] || return 1
+  network_mode="$("$DOCKER" inspect -f '{{.HostConfig.NetworkMode}}' "$ephemeral_id" 2>/dev/null)" || return 1
+  [[ "$network_mode" == "$NETWORK" ]] || return 1
+  ephemeral_networks="$("$DOCKER" inspect -f '{{json .NetworkSettings.Networks}}' "$ephemeral_id" 2>/dev/null)" || return 1
+  "$JQ" -e --arg n "$NETWORK" --arg id "$network_id" '
+    type == "object" and ((keys == []) or (keys == [$n] and .[$n].NetworkID == $id))
+  ' <<<"$ephemeral_networks" >/dev/null 2>&1
+}
+validate_g2_network_membership() {
+  local current_network=''
+  current_network="$("$DOCKER" network inspect "$NETWORK" 2>/dev/null)" || return 1
+  "$JQ" -e --arg n "$NETWORK" --arg id "$mongo_id" --arg c "$mongo_network_name" --arg nid "$network_id" '
+    length == 1 and .[0].Name == $n and .[0].Internal == true and .[0].Id == $nid
+    and (.[0].Containers | type == "object" and keys == [$id])
+    and .[0].Containers[$id].Name == $c
+  ' <<<"$current_network" >/dev/null 2>&1
+}
+on_signal() {
+  local signal_code="$1"
+  trap - HUP INT TERM
+  set +e
+  if ! cleanup_container; then
+    printf 'G2 result: FAILED category=CLEANUP_FAILED code=74\n'
+    cleanup_temp
+    exit 74
+  fi
+  # Docker may have accepted create just before the client received a signal.
+  # Recheck briefly for that invocation's uniquely named container.
+  if (( CLEANUP_FOUND == 0 )); then
+    for _ in 1 2 3 4 5; do
+      /usr/bin/sleep 1
+      if ! cleanup_container; then
+        printf 'G2 result: FAILED category=CLEANUP_FAILED code=74\n'
+        cleanup_temp
+        exit 74
+      fi
+      (( CLEANUP_FOUND == 1 )) && break
+    done
+    (( CLEANUP_FOUND == 1 )) || {
+      printf 'G2 result: FAILED category=CLEANUP_UNVERIFIED code=74\n'
+      cleanup_temp
+      exit 74
+    }
+  fi
+  printf 'G2 result: FAILED category=INTERRUPTED code=%s\n' "$signal_code"
+  cleanup_temp
+  exit "$signal_code"
+}
+trap cleanup_temp EXIT
+trap 'on_signal 129' HUP
+trap 'on_signal 130' INT
+trap 'on_signal 143' TERM
+
+set +e
+"$TIMEOUT" --signal=TERM --kill-after=10s 30s "$DOCKER" create \
+  --cidfile "$cidfile" \
+  --name "$run_name" \
+  --label "com.trilhacode.g2-run=$token" \
+  --network "$NETWORK" \
+  --pull never \
+  --env-file "$ENV_FILE" \
+  --entrypoint python \
+  --user 65532:65532 \
+  --read-only \
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16m \
+  --cap-drop ALL \
+  --security-opt no-new-privileges \
+  --pids-limit 128 \
+  --memory 512m \
+  --cpus 1 \
+  --log-driver none \
+  "$IMAGE" -m backend.g2_preflight >"$out" 2>&1
+create_rc=$?
+set -e
+
+if (( create_rc != 0 )); then
+  if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+  if (( create_rc == 124 )); then emit_failure TIMEOUT 124; fi
+  if (( create_rc == 137 )); then emit_failure PROCESS_KILLED 137; fi
+  emit_failure DOCKER_FAILURE 125
+fi
+if [[ ! -s "$cidfile" ]]; then
+  if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+  emit_failure DOCKER_FAILURE 125
+fi
+
+# Inspect the actual Docker endpoint before starting the workload, not only
+# the requested --network option. An invalid endpoint is removed unstarted.
+if ! validate_ephemeral_network_config; then
+  if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+  emit_failure NETWORK_ISOLATION 69
+fi
+if ! validate_g2_network_membership; then
+  if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+  emit_failure NETWORK_ISOLATION 69
+fi
+
+set +e
+"$TIMEOUT" --signal=TERM --kill-after=10s 180s "$DOCKER" start --attach "$run_name" >"$out" 2>&1
+run_rc=$?
+set -e
+
+# Recheck the endpoint after execution, then resolve and remove only this
+# invocation's uniquely named, labelled container before reporting a result.
+ephemeral_network_failed=0
+if ! validate_ephemeral_network; then ephemeral_network_failed=1; fi
+if ! cleanup_container; then emit_failure CLEANUP_FAILED 74; fi
+if (( ephemeral_network_failed )); then emit_failure NETWORK_ISOLATION 69; fi
+if (( run_rc == 124 )); then emit_failure TIMEOUT 124; fi
+if (( run_rc == 137 )); then emit_failure PROCESS_KILLED 137; fi
+if (( run_rc == 125 || run_rc == 126 || run_rc == 127 )); then emit_failure DOCKER_FAILURE "$run_rc"; fi
+
+# Accept only a single, versioned JSON report with the exact manifest IDs.
+"$JQ" -e --slurp --slurpfile manifest "$MANIFEST" '
+  length == 1 and (.[0] | type == "object" and keys == ["checks", "result", "schema_version"]
+  and .schema_version == 1 and .result == "COMPLETE" and (.checks | type == "array")
+  and all(.checks[]; type == "object" and keys == ["id", "status"]
+      and (.id | type == "string")
+      and (.status == "OK" or .status == "AUSENTE" or .status == "CONFLITO" or .status == "DUPLICATAS"))
+  and ([.checks[].id] | length == (unique | length))
+  and ([.checks[].id] | sort) == ($manifest[0].checks | sort))
+' "$out" >/dev/null 2>&1 || {
+  # Error envelopes are deliberately separate from finding reports.
+  category="$("$JQ" -s -r 'if length == 1 then .[0] | select(type == "object" and .schema_version == 1 and .result == "ERROR" and ((keys | sort) == ["category", "result", "schema_version"])) | .category else empty end' "$out" 2>/dev/null || true)"
+  case "$category" in
+    URI_INVALID) [[ "$run_rc" == 40 ]] || emit_failure PROTOCOL_INVALID 45; emit_failure URI_INVALID 40 ;;
+    DB_AUTH) [[ "$run_rc" == 41 ]] || emit_failure PROTOCOL_INVALID 45; emit_failure DB_AUTH 41 ;;
+    DB_CONNECTION) [[ "$run_rc" == 42 ]] || emit_failure PROTOCOL_INVALID 45; emit_failure DB_CONNECTION 42 ;;
+    PREFLIGHT_REJECTED) [[ "$run_rc" == 43 ]] || emit_failure PROTOCOL_INVALID 45; emit_failure PREFLIGHT_REJECTED 43 ;;
+    PREFLIGHT_EXECUTION) [[ "$run_rc" == 44 ]] || emit_failure PROTOCOL_INVALID 45; emit_failure PREFLIGHT_EXECUTION 44 ;;
+    DB_TIMEOUT) [[ "$run_rc" == 46 ]] || emit_failure PROTOCOL_INVALID 45; emit_failure DB_TIMEOUT 46 ;;
+    *) emit_failure PROTOCOL_INVALID 45 ;;
+  esac
+}
+
+ok="$("$JQ" -s -r '.[0].checks | [.[] | select(.status == "OK")] | length' "$out")"
+missing="$("$JQ" -s -r '.[0].checks | [.[] | select(.status == "AUSENTE")] | length' "$out")"
+conflicts="$("$JQ" -s -r '.[0].checks | [.[] | select(.status == "CONFLITO")] | length' "$out")"
+duplicates="$("$JQ" -s -r '.[0].checks | [.[] | select(.status == "DUPLICATAS")] | length' "$out")"
+printf 'G2 staging preflight: OK=%s AUSENTE=%s CONFLITO=%s DUPLICATAS=%s\n' "$ok" "$missing" "$conflicts" "$duplicates"
+if (( conflicts > 0 || duplicates > 0 )); then
+  (( run_rc == 43 )) || emit_failure PROTOCOL_INVALID 45
+  emit_failure PREFLIGHT_REJECTED 43
+fi
+(( run_rc == 0 )) || emit_failure PROTOCOL_INVALID 45
+echo 'G2 staging preflight: COMPLETE (AUSENTE is informational before G4; no schema changes)'

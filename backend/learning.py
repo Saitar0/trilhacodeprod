@@ -2,10 +2,17 @@ from datetime import timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 
-from core import DEFAULT_HIERARCHY, current_user, db, is_staff, now, oid, require, ser
+from constants import DEFAULT_HIERARCHY
+from core_utils import now
+from database import db
+from permissions import is_staff, require
+from schemas.content import OkOut
+from schemas.learning import NoteIn, NoteOut, ReviewDone, ReviewIn, ReviewOut
+from schemas.versions import DeletedOut, TrackValidationOut
+from security import current_user
+from serialization import oid, ser
 
 router = APIRouter(prefix="/api")
 
@@ -82,7 +89,10 @@ async def track_locks(track_id: str, user: dict):
     nodes = [n for n in nodes if n["status"] != "archived"] if is_staff(user) else visible_nodes(nodes)
     relations = await db.relations.find({"track_id": track_id}).to_list(10000)
     bq = {"track_id": track_id} if is_staff(user) else {"track_id": track_id, "status": "published"}
-    counts = await db.content_blocks.aggregate([{"$match": bq}, {"$group": {"_id": "$node_id", "n": {"$sum": 1}}}]).to_list(10000)
+    cursor = await db.content_blocks.aggregate([
+        {"$match": bq}, {"$group": {"_id": "$node_id", "n": {"$sum": 1}}}
+    ])
+    counts = await cursor.to_list(10000)
     done = await db.progress.find({"user_id": user["id"], "track_id": track_id, "block_id": None,
                                    "status": "completed"}, {"node_id": 1}).to_list(20000)
     return compute_locks(track, nodes, relations, {c["_id"]: c["n"] for c in counts}, {d["node_id"] for d in done})
@@ -142,7 +152,7 @@ def find_cycles(relations):
     return cycles
 
 
-@router.get("/tracks/{track_id}/validate")
+@router.get("/tracks/{track_id}/validate", response_model=TrackValidationOut, response_model_exclude_unset=True)
 async def validate_track(track_id: str, _: dict = Depends(require("content.read"))):
     nodes = await db.nodes.find({"track_id": track_id}).to_list(10000)
     by_id = {str(n["_id"]): n for n in nodes}
@@ -162,24 +172,20 @@ async def validate_track(track_id: str, _: dict = Depends(require("content.read"
 
 
 # ---------- Notes ----------
-class NoteIn(BaseModel):
-    node_id: str
-    block_id: Optional[str] = None
-    body: str
-
-
-@router.get("/notes")
-async def list_notes(track_id: Optional[str] = None, node_id: Optional[str] = None, user: dict = Depends(current_user)):
+@router.get("/notes", response_model=list[NoteOut], response_model_exclude_unset=True)
+async def list_notes(track_id: Optional[str] = None, node_id: Optional[str] = None, limit: int = 2000,
+                     skip: int = 0, user: dict = Depends(current_user)):
     q = {"user_id": user["id"], "orphaned": {"$ne": True}}
     if track_id:
         q["track_id"] = track_id
     if node_id:
         q["node_id"] = node_id
-    notes = await db.notes.find(q).sort("updated_at", -1).to_list(2000)
+    page_size = min(max(limit, 1), 2000)
+    notes = await db.notes.find(q).sort("updated_at", -1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
     return await _with_titles(notes, user)
 
 
-@router.put("/notes")
+@router.put("/notes", response_model=NoteOut | DeletedOut, response_model_exclude_unset=True)
 async def upsert_note(body: NoteIn, user: dict = Depends(current_user)):
     node = await db.nodes.find_one({"_id": oid(body.node_id)})
     if not node:
@@ -209,19 +215,6 @@ async def _with_titles(items, user):
 
 
 # ---------- Reviews ----------
-class ReviewIn(BaseModel):
-    node_id: str
-    block_id: Optional[str] = None
-    when: str = "soon"
-    due_at: Optional[str] = None
-    note: str = ""
-
-
-class ReviewDone(BaseModel):
-    outcome: str = "ok"
-    reschedule: Optional[str] = None
-
-
 def _due(when: str, node: dict, due_at: Optional[str]):
     if when == "custom":
         if not due_at:
@@ -236,7 +229,7 @@ def _due(when: str, node: dict, due_at: Optional[str]):
     return now() + timedelta(days=REVIEW_BUCKETS[when])
 
 
-@router.post("/reviews")
+@router.post("/reviews", response_model=ReviewOut, response_model_exclude_unset=True)
 async def schedule_review(body: ReviewIn, user: dict = Depends(current_user)):
     node = await db.nodes.find_one({"_id": oid(body.node_id)})
     if not node:
@@ -260,16 +253,18 @@ async def _upsert_review(key, body, node, due):
                          "ease": None, "interval_days": None}}, upsert=True)
 
 
-@router.get("/reviews")
-async def list_reviews(status: str = "pending", track_id: Optional[str] = None, user: dict = Depends(current_user)):
+@router.get("/reviews", response_model=list[ReviewOut], response_model_exclude_unset=True)
+async def list_reviews(status: str = "pending", track_id: Optional[str] = None, limit: int = 2000,
+                       skip: int = 0, user: dict = Depends(current_user)):
     q = {"user_id": user["id"], "status": status, "orphaned": {"$ne": True}}
     if track_id:
         q["track_id"] = track_id
-    items = await db.reviews.find(q).sort("due_at", 1).to_list(2000)
+    page_size = min(max(limit, 1), 2000)
+    items = await db.reviews.find(q).sort("due_at", 1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
     return await _with_titles(items, user)
 
 
-@router.post("/reviews/{review_id}/complete")
+@router.post("/reviews/{review_id}/complete", response_model=ReviewOut, response_model_exclude_unset=True)
 async def complete_review(review_id: str, body: ReviewDone, user: dict = Depends(current_user)):
     rev = await db.reviews.find_one({"_id": oid(review_id), "user_id": user["id"]})
     if not rev:
@@ -289,7 +284,7 @@ async def complete_review(review_id: str, body: ReviewDone, user: dict = Depends
     return ser(await db.reviews.find_one({"_id": rev["_id"]}))
 
 
-@router.delete("/reviews/{review_id}")
+@router.delete("/reviews/{review_id}", response_model=OkOut)
 async def delete_review(review_id: str, user: dict = Depends(current_user)):
     await db.reviews.update_one({"_id": oid(review_id), "user_id": user["id"]},
                                 {"$set": {"status": "dismissed", "updated_at": now()}})

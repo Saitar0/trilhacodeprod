@@ -1,0 +1,6 @@
+.env
+.venv
+__pycache__
+*.py[cod]
+tests
+_qa_reset_admin_password.py

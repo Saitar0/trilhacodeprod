@@ -1,0 +1,9 @@
+#!/bin/sh
+# SSH authorized_keys forced command; intentionally has no Docker/shell privileges.
+set -eu
+umask 077
+if [ "${SSH_ORIGINAL_COMMAND:-}" != 'trilhacode-g2-preflight' ]; then
+  echo 'G2: unsupported request' >&2
+  exit 64
+fi
+exec /usr/bin/sudo -n /usr/local/sbin/trilhacode-g2-preflight-run

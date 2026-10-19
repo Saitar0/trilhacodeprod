@@ -23,6 +23,10 @@ if (-not (Test-Path (Join-Path $backendDir ".venv"))) {
 & (Join-Path $backendDir ".venv\Scripts\Activate.ps1")
 Set-Location $backendDir
 python -m pip install -r requirements.txt
+python -m manage ensure-indexes
+python -m manage migrate
+python -m manage seed
+python -m manage resume-restores
 $env:FRONTEND_URL = "http://localhost:3000"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$backendDir'; . '.\.venv\Scripts\Activate.ps1'; uvicorn server:app --reload --host 0.0.0.0 --port 8000" -WorkingDirectory $backendDir
 
@@ -32,7 +36,7 @@ if (-not (Test-Path "node_modules")) {
     Write-Host "Instalando dependencias do frontend..."
     npm install
 }
-$env:REACT_APP_BACKEND_URL = "http://localhost:8000"
+$env:VITE_BACKEND_URL = "http://localhost:8000"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$frontendDir'; npm start" -WorkingDirectory $frontendDir
 
 Write-Host "Backend em: http://localhost:8000"

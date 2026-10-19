@@ -56,9 +56,9 @@ export default function TrackEditor() {
           <Button size="sm" className="rounded-full" data-testid="editor-publish-button" onClick={() => setDialog("publish")}><Rocket />Publicar</Button>
         </div>
       </header>
-      <div className="grid min-h-0 flex-1 md:grid-cols-[380px_1fr]">
-        <aside className="min-h-0 border-r border-slate-800 bg-sidebar"><AdminTree vm={vm} selected={selected} onSelect={select} /></aside>
-        <main className="min-h-0 overflow-y-auto px-6 py-8 scrollbar-thin">
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-[minmax(0,1fr)] md:grid-cols-[380px_minmax(0,1fr)]">
+        <aside className="min-h-0 min-w-0 border-r border-slate-800 bg-sidebar"><AdminTree vm={vm} selected={selected} onSelect={select} /></aside>
+        <main className="min-h-0 min-w-0 overflow-y-auto px-6 py-8 scrollbar-thin">
           {selected && vm.byId.has(selected) ? <NodeEditor nodeId={selected} vm={vm} /> : <TrackSummary vm={vm} />}
         </main>
       </div>

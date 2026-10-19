@@ -1,0 +1,93 @@
+import pytest
+
+from import_payload import _bson_size_within_limit, has_valid_parent_kind, validate_import_shape
+
+
+@pytest.mark.parametrize(
+    ("payload", "path"),
+    [
+        ({"track": {"slug": []}, "nodes": []}, "track.slug"),
+        ({"track": {"title": 4}, "nodes": []}, "track.title"),
+        ({"track": {}, "nodes": [{"ref": [], "kind": "module"}]}, "nodes[0].ref"),
+        ({"track": {}, "nodes": [{"title": 4}]}, "nodes[0].title"),
+        ({"track": {}, "nodes": [{"estimated_minutes": "many"}]}, "nodes[0].estimated_minutes"),
+        ({"track": {}, "nodes": [{"estimated_minutes": {}}]}, "nodes[0].estimated_minutes"),
+        ({"track": {}, "nodes": [{"estimated_minutes": 9223372036854775808}]}, "nodes[0].estimated_minutes"),
+        ({"track": {}, "nodes": [{"estimated_minutes": -1}]}, "nodes[0].estimated_minutes"),
+        ({"track": {}, "nodes": [{"blocks": [{"data": {"correct_index": 1 << 80}}]}]}, "payload.nodes[0].blocks[0].data.correct_index"),
+        ({"track": {"settings": {"bad\x00key": True}}}, "payload.track.settings"),
+        ({"track": {}, "nodes": [{"blocks": "not-a-list"}]}, "nodes[0].blocks"),
+        ({"track": {}, "nodes": [{"blocks": [{"type": [], "data": []}]}]}, "nodes[0].blocks[0].type"),
+        ({"track": {}, "relations": ["not-an-object"]}, "relations[0]"),
+    ],
+)
+def test_import_shape_reports_malformed_values_with_a_path(payload, path):
+    errors = validate_import_shape(payload)
+
+    assert path in {error["path"] for error in errors}
+
+
+def test_import_shape_limits_nested_nodes_before_python_recursion_limit():
+    root = node = {"ref": "node-0", "kind": "phase"}
+    for index in range(1, 105):
+        child = {"ref": f"node-{index}", "kind": "phase"}
+        node["children"] = [child]
+        node = child
+
+    errors = validate_import_shape({"track": {}, "nodes": [root]})
+
+    assert any("profundidade máxima" in error["message"] for error in errors)
+
+
+def test_invalid_parent_kind_is_reported_without_hierarchy_index_lookup():
+    hierarchy = ["phase", "module", "topic"]
+
+    assert not has_valid_parent_kind("unknown", hierarchy)
+    assert has_valid_parent_kind("module", hierarchy)
+
+
+def test_import_shape_accepts_bson_signed_int64_boundaries():
+    payload = {"track": {}, "nodes": [{"estimated_minutes": 9223372036854775807}]}
+
+    assert validate_import_shape(payload) == []
+
+
+def test_bson_document_size_limit_is_rejected_by_shape_validation(monkeypatch):
+    monkeypatch.setattr("import_payload.MAX_IMPORT_DOCUMENT_BYTES", 128)
+    payload = {"track": {"title": "x" * 256}, "nodes": []}
+
+    errors = validate_import_shape(payload)
+
+    assert any(issue["path"] == "track" for issue in errors)
+    assert not _bson_size_within_limit({"data": "x" * 64}, max_bytes=32)
+
+
+def test_node_size_check_includes_generated_slug_and_import_reference(monkeypatch):
+    monkeypatch.setattr("import_payload.MAX_IMPORT_DOCUMENT_BYTES", 256)
+    payload = {"track": {}, "nodes": [{"ref": "r" * 100, "title": "t" * 100}]}
+
+    errors = validate_import_shape(payload)
+
+    assert any(issue["path"] == "nodes[0]" for issue in errors)
+
+
+def test_tag_size_check_includes_generated_name_and_slug(monkeypatch):
+    monkeypatch.setattr("import_payload.MAX_IMPORT_DOCUMENT_BYTES", 512)
+    payload = {"track": {}, "nodes": [{"title": "Node", "tags": ["t" * 250]}]}
+
+    errors = validate_import_shape(payload)
+
+    assert any(issue["path"] == "nodes[0].tags[0]" for issue in errors)
+
+
+def test_block_size_check_includes_combined_import_reference(monkeypatch):
+    monkeypatch.setattr("import_payload.MAX_IMPORT_DOCUMENT_BYTES", 550)
+    payload = {
+        "track": {},
+        "nodes": [{"ref": "n" * 20, "title": "Node", "blocks": [{"ref": "b" * 350, "type": "text"}]}],
+    }
+
+    errors = validate_import_shape(payload)
+
+    assert any(issue["path"] == "nodes[0].blocks[0]" for issue in errors)
+

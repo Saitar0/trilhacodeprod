@@ -69,7 +69,7 @@ export default function ImportTrack() {
       <PageHeader eyebrow="cadastro em lote" title="Importar estrutura"
         description="Cole ou envie um JSON com trilha, itens, relações e blocos. Sempre simule antes; reimportar o mesmo arquivo atualiza em vez de duplicar (chave: track.slug + ref de cada item)." />
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        <div className="space-y-3">
+        <div className="space-y-3" data-testid="import-form">
           <div className="flex flex-wrap gap-2">
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-700 px-4 py-1.5 text-sm text-slate-200 hover:border-slate-500">
               <Upload className="h-4 w-4" />Enviar arquivo .json
@@ -77,7 +77,8 @@ export default function ImportTrack() {
             </label>
             <Button variant="ghost" size="sm" data-testid="import-load-example" onClick={() => { setText(JSON.stringify(EXAMPLE, null, 2)); setReport(null); }}>Carregar modelo</Button>
           </div>
-          <Textarea data-testid="import-json-input" rows={24} className="font-mono text-xs" placeholder="{ &quot;track&quot;: {...}, &quot;nodes&quot;: [...], &quot;relations&quot;: [...] }"
+          <label htmlFor="import-json-input" className="text-sm font-medium text-slate-200">JSON da trilha</label>
+          <Textarea id="import-json-input" data-testid="import-json-input" rows={24} className="font-mono text-xs" placeholder="{ &quot;track&quot;: {...}, &quot;nodes&quot;: [...], &quot;relations&quot;: [...] }"
             value={text} onChange={(e) => { setText(e.target.value); setReport(null); }} />
           <div className="flex justify-end gap-2">
             <Button variant="outline" disabled={!text || busy} data-testid="import-dry-run-button" onClick={() => run(true)}><FlaskConical />Simular</Button>

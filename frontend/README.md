@@ -1,70 +1,30 @@
-# Getting Started with Create React App
+# Frontend Trilha Code
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Interface React 19 com TypeScript e Vite. O servidor de desenvolvimento fica na porta 3000; `VITE_BACKEND_URL` indica a URL da API que o navegador consegue acessar.
 
-## Available Scripts
+## Desenvolvimento
 
-In the project directory, you can run:
+```sh
+npm ci
+npm start
+```
 
-### `npm start`
+Copie `.env.example` para `.env.local` e ajuste `VITE_BACKEND_URL` se a API não estiver em `http://localhost:8000`.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Verificações
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```sh
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
 
-### `npm test`
+O bundle de produção é gerado em `dist/`. `frontend/Dockerfile.prod` instala as dependências com `npm ci`, compila a aplicação e serve o conteúdo com Nginx.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Variáveis
 
-### `npm run build`
+- `VITE_BACKEND_URL`: URL base da API, necessária para a imagem de produção e incorporada durante o build.
+- `VITE_SENTRY_DSN`, `VITE_SENTRY_ENVIRONMENT` e `VITE_SENTRY_RELEASE`: configuração opcional do Sentry no navegador.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+No Coolify, cadastre essas configurações como variáveis de build. Consulte o [guia de deploy](../DEPLOY.md) para os ambientes de staging e produção.

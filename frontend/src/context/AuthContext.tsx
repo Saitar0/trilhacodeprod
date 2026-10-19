@@ -7,7 +7,7 @@ type AuthState = User | null | false;
 interface AuthCtx {
   user: AuthState;
   login: (email: string, password: string) => Promise<User>;
-  register: (name: string, email: string, password: string) => Promise<User>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (u: User) => void;
   can: (perm: string) => boolean;
@@ -29,9 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
-    const { data } = await api.post<User>("/auth/register", { name, email, password });
-    setUserState(data);
-    return data;
+    await api.post("/auth/register", { name, email, password });
   }, []);
 
   const logout = useCallback(async () => {
