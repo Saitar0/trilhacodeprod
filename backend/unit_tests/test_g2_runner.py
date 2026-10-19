@@ -430,3 +430,9 @@ def test_raw_backend_canary_is_never_published(runner_harness):
     result = runner_harness(mode="canary", run_rc=1)
     assert result.returncode != 0
     assert "private-canary-value" not in result.stdout + result.stderr
+
+
+def test_runner_pins_published_approved_ghcr_digest():
+    source = RUNNER.read_text()
+    assert "readonly IMAGE='ghcr.io/saitar0/trilhacodeprod-backend@sha256:bd62686fb5b3b362d22bfa21259ce584fe6e5c76fa73ffdfde7c000b5088df85'" in source
+    assert "sha256:a6bf47a3fb1c8019678c85ce5d6d6b055a61e547c62681865f8fd1be20fad71e" not in source
