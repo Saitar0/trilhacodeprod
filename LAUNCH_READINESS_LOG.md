@@ -214,7 +214,7 @@ Mission 16 — G2 configuration reviewed and isolated tests run; operational bac
 
 ### Estado operacional atualizado — 2026-10-18
 
-Este checkpoint substitui os estados operacionais anteriores deste arquivo quando houver divergência. A CI do PR #27 deve ser consultada separadamente após esta atualização; nenhuma integração foi feita.
+Este checkpoint substitui os estados operacionais anteriores deste arquivo quando houver divergência. Após as atualizações documentais, a CI #39178783894 do head 0d671e4c721478f51802efee2c70e986a1861170 concluiu com sucesso nos jobs backend, frontend, Compose e E2E; deploy-staging e deploy-production foram skipped. A PR #27 continua aberta e não integrada.
 
 - Evidência externa fornecida pelo supervisor: PR #27 head original 06b492fac95bc3faff46f1e05c5518a3685b3809 teve CI #39128654645 concluída com sucesso. A revisão dos documentos detectou afirmações operacionais desatualizadas; comentário publicado na [PR #27](https://github.com/Saitar0/trilhacodeprod/pull/27). Isso não é homologação de staging.
 - Backup B2 cifrado, custódia do pacote GPG fora da VPS/B2 e restauração técnica em MongoDB 7 descartável foram comprovados em verificações anteriores. A restauração usou um dump de 314 bytes correspondente a banco vazio; portanto **não comprova recuperação de dados reais da aplicação**. A cópia de custódia permanece com o usuário. As credenciais operacionais não foram removidas.
