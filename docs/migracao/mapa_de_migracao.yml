@@ -1,0 +1,538 @@
+versao_esquema: 1
+fase: Fase_1
+destino_raiz: docs/courses/trilhacode/Conteudos_migrado/Fase_1
+ordem_unidades: ["1.1", "1.2", "2.1", "2.2", "2.3", "3.1", "3.2", "3.3", "3.4", "3.5"]
+prefixos_arquivo_id: {IDX: topic_index, T: theory, Q: quiz, K: answer_key, P: practice, KP: answer_key_pratica, R: rubric, C: checklist, M: milestone}
+arquivo_id: "f1-<key-unidade>-<caminho-relativo-sem-extensao-com-hifens>"
+parent_key: "referencia à key original; não reutilizar como ID de arquivo"
+raiz_vault_obsidian: "confirmada externamente; fora do repositorio"
+links_obsidian: "README usa links Markdown relativos; wikilinks de origem são preservados. O vault configurado não contém a árvore migrada; incompatibilidade registrada."
+compatibilidade_obsidian: "Destino fora do vault configurado; wikilinks preservados podem não resolver até integração pelo dono."
+json: "Não modificar, gerar ou importar nesta etapa."
+limitacao_answer_key: "Até a extensão futura do importador/renderer, gabaritos seguem em theory_text no JSON."
+arquivos_comuns:
+  IDX: {path: README.md, tipo: topic_index, origem: [frontmatter_original, titulo_original], uso: "índice e links; não duplica os textos comuns"}
+  OBJ: {path: 00_objetivo.md, tipo: objetivo, origem: "## Objetivo"}
+  RES: {path: 01_resumo.md, tipo: resumo, origem: "## Resumo"}
+  CRI: {path: 02_criterio_de_conclusao.md, tipo: criterio, origem: "## Critério de conclusão"}
+  CON: {path: 03_conexoes.md, tipo: conexoes, origem: "## Conexões"}
+  REF: {path: 04_referencias.md, tipo: referencias, origem: "## Referências"}
+frontmatter_filho:
+  manter_metadados_originais_em: README.md
+  campos: [arquivo_id, parent_key, tipo_arquivo, assunto, ordem]
+  campos_opcionais: [itens_origem, titulo_marco, escala_rubrica]
+  nao_repetir: [key, estimativa_minutos, tags, status]
+  titulo_marco: "título literal da documentação"
+unidades:
+  "1.1":
+    pasta: "1.1_Computacao_e_software"
+    origem: "Conteudos/Fase_1/1.1_Computacao_e_software.md"
+    assuntos: [01_problema_programa, 02_aplicacoes_locais_web_camadas, 03_cliente_servidor_fluxo_pagina, 04_http, 05_api_visao_integrada]
+    arquivos:
+      T01: "01_problema_programa/01_teoria.md"
+      Q01: "01_problema_programa/02_quiz.md"
+      K01: "01_problema_programa/03_gabarito_quiz.md"
+      T02: "02_aplicacoes_locais_web_camadas/01_teoria.md"
+      Q02: "02_aplicacoes_locais_web_camadas/02_quiz.md"
+      K02: "02_aplicacoes_locais_web_camadas/03_gabarito_quiz.md"
+      T03: "03_cliente_servidor_fluxo_pagina/01_teoria.md"
+      Q03: "03_cliente_servidor_fluxo_pagina/02_quiz.md"
+      K03: "03_cliente_servidor_fluxo_pagina/03_gabarito_quiz.md"
+      T04: "04_http/01_teoria.md"
+      Q04: "04_http/02_quiz.md"
+      K04: "04_http/03_gabarito_quiz.md"
+      T05: "05_api_visao_integrada/01_teoria.md"
+      Q05: "05_api_visao_integrada/02_quiz.md"
+      K05: "05_api_visao_integrada/03_gabarito_quiz.md"
+      P01: "90_integracao/01_pratica_guiada_identifique_papeis.md"
+      KP01: "90_integracao/02_gabarito_pratica_guiada.md"
+      P02: "90_integracao/03_pratica_independente_compare_fluxos.md"
+      KP02: "90_integracao/04_gabarito_pratica_independente.md"
+      R02: "90_integracao/05_rubrica_pratica_independente.md"
+      P03: "90_integracao/06_pratica_transferencia_pagina_real.md"
+      C03: "90_integracao/07_verificacao_final.md"
+    blocos_origem:
+      teoria:
+        "Do problema ao programa": T01
+        "Aplicações locais e aplicações web": T02
+        "Frontend, backend e banco de dados": T02
+        "Cliente e servidor": T03
+        "O que acontece ao abrir uma página": T03
+        "Requisição e resposta HTTP": T04
+        "APIs: uma interface de comunicação": T05
+        "Uma visão integrada": T05
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_problema_programa}
+        Q2: {arquivo: Q03, resposta: K03, assunto: 03_cliente_servidor_fluxo_pagina}
+        Q3: {arquivo: Q02, resposta: K02, assunto: 02_aplicacoes_locais_web_camadas}
+        Q4: {arquivo: Q04, resposta: K04, assunto: 04_http}
+        Q5: {arquivo: Q05, resposta: K05, assunto: 05_api_visao_integrada}
+      pratica:
+        P1: {arquivo: P01, resposta: KP01, assuntos: [02_aplicacoes_locais_web_camadas, 03_cliente_servidor_fluxo_pagina]}
+        P2: {arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [02_aplicacoes_locais_web_camadas, 03_cliente_servidor_fluxo_pagina, 04_http, 05_api_visao_integrada]}
+        P3: {arquivo: P03, checklist: C03, assuntos: [03_cliente_servidor_fluxo_pagina, 04_http, 05_api_visao_integrada]}
+    cobertura:
+      exclusivos:
+        01_problema_programa: [Q1]
+        02_aplicacoes_locais_web_camadas: [Q3]
+        03_cliente_servidor_fluxo_pagina: [Q2]
+        04_http: [Q4]
+        05_api_visao_integrada: [Q5]
+      compartilhados:
+        P1: [02_aplicacoes_locais_web_camadas, 03_cliente_servidor_fluxo_pagina]
+        P2: [02_aplicacoes_locais_web_camadas, 03_cliente_servidor_fluxo_pagina, 04_http, 05_api_visao_integrada]
+        P3: [03_cliente_servidor_fluxo_pagina, 04_http, 05_api_visao_integrada]
+    conexoes:
+      - {tipo: complementar, destino: "1.2"}
+      - {tipo: relacionado, destino: "7.3"}
+      - {tipo: relacionado, destino: "18.1"}
+
+  "1.2":
+    pasta: "1.2_Ambiente_de_desenvolvimento"
+    origem: "Conteudos/Fase_1/1.2_Ambiente_de_desenvolvimento.md"
+    assuntos: [01_arquivos_e_pastas, 02_editor_e_terminal, 03_instalacao, 04_variaveis_de_ambiente, 05_documentacao_e_validacao]
+    arquivos:
+      T01: "01_arquivos_e_pastas/01_teoria.md"
+      Q01: "01_arquivos_e_pastas/02_quiz.md"
+      K01: "01_arquivos_e_pastas/03_gabarito_quiz.md"
+      T02: "02_editor_e_terminal/01_teoria.md"
+      Q02: "02_editor_e_terminal/02_quiz.md"
+      K02: "02_editor_e_terminal/03_gabarito_quiz.md"
+      T03: "03_instalacao/01_teoria.md"
+      P01: "03_instalacao/02_pratica_guiada_instalacao.md"
+      KP01: "03_instalacao/03_gabarito_pratica_guiada.md"
+      T04: "04_variaveis_de_ambiente/01_teoria.md"
+      Q03: "04_variaveis_de_ambiente/02_quiz.md"
+      K03: "04_variaveis_de_ambiente/03_gabarito_quiz.md"
+      T05: "05_documentacao_e_validacao/01_teoria.md"
+      P03: "05_documentacao_e_validacao/02_pratica_transferencia_documente_ambiente.md"
+      C03: "05_documentacao_e_validacao/03_criterios_pratica_transferencia.md"
+      Q90: "90_integracao/01_quiz_integrador.md"
+      K90: "90_integracao/02_gabarito_quiz_integrador.md"
+      P02: "90_integracao/03_pratica_independente_setup.md"
+      KP02: "90_integracao/04_gabarito_pratica_independente.md"
+      R02: "90_integracao/05_rubrica_pratica_independente.md"
+    blocos_origem:
+      teoria:
+        "Arquivos e pastas": T01
+        "Editor e terminal": T02
+        "Instalação e ambiente reproduzível": T03
+        "Variáveis de ambiente": T04
+        "Ler documentação técnica": T05
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_arquivos_e_pastas}
+        Q2: {arquivo: Q01, resposta: K01, assunto: 01_arquivos_e_pastas}
+        Q3: {arquivo: Q02, resposta: K02, assunto: 02_editor_e_terminal}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 04_variaveis_de_ambiente}
+        Q5: {arquivo: Q90, resposta: K90, assuntos: [03_instalacao, 05_documentacao_e_validacao]}
+      pratica:
+        P1: {arquivo: P01, resposta: KP01, assunto: 03_instalacao}
+        P2: {arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [03_instalacao, 04_variaveis_de_ambiente]}
+        P3: {arquivo: P03, checklist: C03, assunto: 05_documentacao_e_validacao}
+    cobertura:
+      exclusivos:
+        01_arquivos_e_pastas: [Q1, Q2]
+        02_editor_e_terminal: [Q3]
+        03_instalacao: [P1]
+        04_variaveis_de_ambiente: [Q4]
+        05_documentacao_e_validacao: [P3]
+      compartilhados:
+        Q5: [03_instalacao, 05_documentacao_e_validacao]
+        P2: [03_instalacao, 04_variaveis_de_ambiente]
+    conexoes:
+      - {tipo: pre_requisito, destino: "1.1"}
+      - {tipo: complementar, destino: "2.1"}
+      - {tipo: relacionado, destino: "20.2"}
+
+  "2.1":
+    pasta: "2.1_Terminal_e_navegacao"
+    origem: "Conteudos/Fase_1/2.1_Terminal_e_navegacao.md"
+    assuntos: [01_terminal_e_caminhos, 02_operacoes_de_arquivo, 03_inspecao_e_busca, 04_entrada_saida_e_pipes]
+    arquivos:
+      T01: "01_terminal_e_caminhos/01_teoria.md"
+      Q01: "01_terminal_e_caminhos/02_quiz.md"
+      K01: "01_terminal_e_caminhos/03_gabarito_quiz.md"
+      T02: "02_operacoes_de_arquivo/01_teoria.md"
+      T03: "03_inspecao_e_busca/01_teoria.md"
+      Q03: "03_inspecao_e_busca/02_quiz.md"
+      K03: "03_inspecao_e_busca/03_gabarito_quiz.md"
+      T04: "04_entrada_saida_e_pipes/01_teoria.md"
+      Q04: "04_entrada_saida_e_pipes/02_quiz.md"
+      K04: "04_entrada_saida_e_pipes/03_gabarito_quiz.md"
+      P01: "90_integracao/01_pratica_guiada_caminhos.md"
+      KP01: "90_integracao/02_gabarito_pratica_guiada.md"
+      P02: "90_integracao/03_pratica_independente_busca.md"
+      KP02: "90_integracao/04_gabarito_pratica_independente.md"
+      R02: "90_integracao/05_rubrica_pratica_independente.md"
+      P03: "90_integracao/06_pratica_transferencia_pasta_estudo.md"
+      C03: "90_integracao/07_checklist_pratica_transferencia.md"
+    blocos_origem:
+      teoria:
+        "O terminal e o diretório atual": T01
+        "Criar, copiar, mover e remover": T02
+        "Ver conteúdo e buscar arquivos": T03
+        "Entrada, saída, redirecionamento e pipes": T04
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_terminal_e_caminhos}
+        Q2: {arquivo: Q04, resposta: K04, assunto: 04_entrada_saida_e_pipes}
+        Q3: {arquivo: Q03, resposta: K03, assunto: 03_inspecao_e_busca}
+        Q4: {arquivo: Q04, resposta: K04, assunto: 04_entrada_saida_e_pipes}
+        Q5: {arquivo: Q04, resposta: K04, assunto: 04_entrada_saida_e_pipes}
+      pratica:
+        P1: {arquivo: P01, resposta: KP01, assuntos: [01_terminal_e_caminhos, 02_operacoes_de_arquivo]}
+        P2: {arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [03_inspecao_e_busca, 04_entrada_saida_e_pipes]}
+        P3: {arquivo: P03, checklist: C03, assuntos: [01_terminal_e_caminhos, 02_operacoes_de_arquivo, 03_inspecao_e_busca, 04_entrada_saida_e_pipes]}
+    cobertura:
+      exclusivos:
+        01_terminal_e_caminhos: [Q1]
+        02_operacoes_de_arquivo: []
+        03_inspecao_e_busca: [Q3]
+        04_entrada_saida_e_pipes: [Q2, Q4, Q5]
+      compartilhados:
+        P1: [01_terminal_e_caminhos, 02_operacoes_de_arquivo]
+        P2: [03_inspecao_e_busca, 04_entrada_saida_e_pipes]
+        P3: [01_terminal_e_caminhos, 02_operacoes_de_arquivo, 03_inspecao_e_busca, 04_entrada_saida_e_pipes]
+    conexoes:
+      - {tipo: complementar, destino: "1.2"}
+      - {tipo: relacionado, destino: "3.1"}
+    propostas_em_espera:
+      - {assunto: 02_operacoes_de_arquivo, motivo: "sem item exclusivo no mapa atual"}
+
+  "2.2":
+    pasta: "2.2_Sistema_e_operacao"
+    origem: "Conteudos/Fase_1/2.2_Sistema_e_operacao.md"
+    assuntos: [01_usuarios_e_permissoes, 02_processos_e_servicos, 03_logs]
+    arquivos:
+      T01: "01_usuarios_e_permissoes/01_teoria.md"
+      Q01: "01_usuarios_e_permissoes/02_quiz.md"
+      K01: "01_usuarios_e_permissoes/03_gabarito_quiz.md"
+      T02: "02_processos_e_servicos/01_teoria.md"
+      Q02: "02_processos_e_servicos/02_quiz.md"
+      K02: "02_processos_e_servicos/03_gabarito_quiz.md"
+      T03: "03_logs/01_teoria.md"
+      Q03: "03_logs/02_quiz.md"
+      K03: "03_logs/03_gabarito_quiz.md"
+      P03: "03_logs/04_pratica_transferencia_log.md"
+      C03: "03_logs/05_criterios_pratica_transferencia.md"
+      Q90: "90_integracao/01_quiz_integrador.md"
+      K90: "90_integracao/02_gabarito_quiz_integrador.md"
+      P01: "90_integracao/03_pratica_guiada_evidencias.md"
+      KP01: "90_integracao/04_gabarito_pratica_guiada.md"
+      P02: "90_integracao/05_pratica_independente_falha_escrita.md"
+      KP02: "90_integracao/06_gabarito_pratica_independente.md"
+      R02: "90_integracao/07_rubrica_pratica_independente.md"
+    blocos_origem:
+      teoria:
+        "Usuários e permissões": T01
+        "Processos e serviços": T02
+        Logs: T03
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_usuarios_e_permissoes}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_processos_e_servicos}
+        Q3: {arquivo: Q03, resposta: K03, assunto: 03_logs}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_logs}
+        Q5: {arquivo: Q90, resposta: K90, assuntos: [01_usuarios_e_permissoes, 02_processos_e_servicos]}
+      pratica:
+        P1: {arquivo: P01, resposta: KP01, assuntos: [02_processos_e_servicos, 03_logs]}
+        P2: {arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [01_usuarios_e_permissoes, 02_processos_e_servicos]}
+        P3: {arquivo: P03, checklist: C03, assunto: 03_logs}
+    cobertura:
+      exclusivos:
+        01_usuarios_e_permissoes: [Q1]
+        02_processos_e_servicos: [Q2]
+        03_logs: [Q3, Q4, P3]
+      compartilhados:
+        Q5: [01_usuarios_e_permissoes, 02_processos_e_servicos]
+        P1: [02_processos_e_servicos, 03_logs]
+        P2: [01_usuarios_e_permissoes, 02_processos_e_servicos]
+    conexoes:
+      - {tipo: pre_requisito, destino: "2.1"}
+      - {tipo: relacionado, destino: "17.2"}
+      - {tipo: relacionado, destino: "10.1"}
+      - {tipo: relacionado, destino: "38.1"}
+
+  "2.3":
+    pasta: "2.3_Acesso_remoto"
+    origem: "Conteudos/Fase_1/2.3_Acesso_remoto.md"
+    assuntos: [01_ssh, 02_chaves, 03_ssh_com_github]
+    arquivos:
+      T01: "01_ssh/01_teoria.md"
+      Q01: "01_ssh/02_quiz.md"
+      K01: "01_ssh/03_gabarito_quiz.md"
+      T02: "02_chaves/01_teoria.md"
+      Q02: "02_chaves/02_quiz.md"
+      K02: "02_chaves/03_gabarito_quiz.md"
+      T03: "03_ssh_com_github/01_teoria.md"
+      Q03: "03_ssh_com_github/02_quiz.md"
+      K03: "03_ssh_com_github/03_gabarito_quiz.md"
+      P01: "90_integracao/01_pratica_guiada_conexao.md"
+      KP01: "90_integracao/02_gabarito_pratica_guiada.md"
+      P02: "90_integracao/03_pratica_independente_autenticacao.md"
+      KP02: "90_integracao/04_gabarito_pratica_independente.md"
+      R02: "90_integracao/05_rubrica_pratica_independente.md"
+      P03: "90_integracao/06_pratica_transferencia_ssh.md"
+      C03: "90_integracao/07_checklist_pratica_transferencia.md"
+    blocos_origem:
+      teoria:
+        "O que é SSH": T01
+        "Chaves pública e privada": T02
+        "Usar SSH com GitHub": T03
+      quiz:
+        Q1: {arquivo: Q02, resposta: K02, assunto: 02_chaves}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_chaves}
+        Q3: {arquivo: Q01, resposta: K01, assunto: 01_ssh}
+        Q4: {arquivo: Q01, resposta: K01, assunto: 01_ssh}
+        Q5: {arquivo: Q03, resposta: K03, assunto: 03_ssh_com_github}
+      pratica:
+        P1: {arquivo: P01, resposta: KP01, assuntos: [01_ssh, 02_chaves, 03_ssh_com_github]}
+        P2: {arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [01_ssh, 02_chaves, 03_ssh_com_github]}
+        P3: {arquivo: P03, checklist: C03, assuntos: [01_ssh, 02_chaves, 03_ssh_com_github]}
+    cobertura:
+      exclusivos:
+        01_ssh: [Q3, Q4]
+        02_chaves: [Q1, Q2]
+        03_ssh_com_github: [Q5]
+      compartilhados:
+        P1: [01_ssh, 02_chaves, 03_ssh_com_github]
+        P2: [01_ssh, 02_chaves, 03_ssh_com_github]
+        P3: [01_ssh, 02_chaves, 03_ssh_com_github]
+    conexoes:
+      - {tipo: pre_requisito, destino: "1.1"}
+      - {tipo: pre_requisito, destino: "2.1"}
+      - {tipo: complementar, destino: "3.3"}
+      - {tipo: relacionado, destino: "20.1"}
+      - {tipo: relacionado, destino: "34.1"}
+
+  "3.1":
+    pasta: "3.1_Git_local"
+    origem: "Conteudos/Fase_1/3.1_Git_local.md"
+    assuntos: [01_registrar_e_ignorar_mudancas, 02_inspecionar_e_recuperar_com_seguranca]
+    arquivos:
+      T01: "01_registrar_e_ignorar_mudancas/01_teoria.md"
+      Q01: "01_registrar_e_ignorar_mudancas/02_quiz.md"
+      K01: "01_registrar_e_ignorar_mudancas/03_gabarito_quiz.md"
+      T02: "02_inspecionar_e_recuperar_com_seguranca/01_teoria.md"
+      Q02: "02_inspecionar_e_recuperar_com_seguranca/02_quiz.md"
+      K02: "02_inspecionar_e_recuperar_com_seguranca/03_gabarito_quiz.md"
+      P01: "02_inspecionar_e_recuperar_com_seguranca/04_pratica_guiada_estado.md"
+      KP01: "02_inspecionar_e_recuperar_com_seguranca/05_gabarito_pratica_guiada.md"
+      P02: "02_inspecionar_e_recuperar_com_seguranca/06_pratica_independente_recuperacao.md"
+      KP02: "02_inspecionar_e_recuperar_com_seguranca/07_gabarito_pratica_independente.md"
+      R02: "02_inspecionar_e_recuperar_com_seguranca/08_rubrica_pratica_independente.md"
+      P03: "90_integracao/01_desafio_integrador_historico_local.md"
+      C03: "90_integracao/02_checklist_desafio_integrador.md"
+    blocos_origem:
+      teoria:
+        "Repositório, working tree e staging area": T01
+        "`.gitignore`": T01
+        "Inspecionar o histórico": T02
+        Branches: T02
+        "Desfazer com intenção": T02
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_registrar_e_ignorar_mudancas}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_inspecionar_e_recuperar_com_seguranca}
+        Q3: {arquivo: Q02, resposta: K02, assunto: 02_inspecionar_e_recuperar_com_seguranca}
+        Q4: {arquivo: Q01, resposta: K01, assunto: 01_registrar_e_ignorar_mudancas}
+        Q5: {arquivo: Q02, resposta: K02, assunto: 02_inspecionar_e_recuperar_com_seguranca}
+      pratica:
+        P1: {arquivo: P01, resposta: KP01, assunto: 02_inspecionar_e_recuperar_com_seguranca}
+        P2: {arquivo: P02, resposta: KP02, rubrica: R02, assunto: 02_inspecionar_e_recuperar_com_seguranca}
+        P3: {arquivo: P03, checklist: C03, assuntos: [01_registrar_e_ignorar_mudancas, 02_inspecionar_e_recuperar_com_seguranca]}
+    cobertura:
+      exclusivos:
+        01_registrar_e_ignorar_mudancas: [Q1, Q4]
+        02_inspecionar_e_recuperar_com_seguranca: [Q2, Q3, Q5, P1, P2]
+      compartilhados:
+        P3: [01_registrar_e_ignorar_mudancas, 02_inspecionar_e_recuperar_com_seguranca]
+    conexoes:
+      - {tipo: pre_requisito, destino: "2.1"}
+      - {tipo: complementar, destino: "3.2"}
+    ajustes_conexoes:
+      - "Remover relacao duplicada com 2.1; manter pre-requisito 2.1."
+    propostas_em_espera:
+      - "Quiz curto para histórico e branches; não criar."
+
+  "3.2":
+    pasta: "3.2_Trabalho_com_historico"
+    origem: "Conteudos/Fase_1/3.2_Trabalho_com_historico.md"
+    assuntos: [01_integracao_e_mensagens_commit, 02_conflitos]
+    arquivos:
+      T01: "01_integracao_e_mensagens_commit/01_teoria.md"
+      Q01: "01_integracao_e_mensagens_commit/02_quiz.md"
+      K01: "01_integracao_e_mensagens_commit/03_gabarito_quiz.md"
+      P01: "01_integracao_e_mensagens_commit/04_pratica_guiada_integracao.md"
+      KP01: "01_integracao_e_mensagens_commit/05_gabarito_pratica_guiada.md"
+      P03: "01_integracao_e_mensagens_commit/06_pratica_transferencia_integracao.md"
+      C03: "01_integracao_e_mensagens_commit/07_checklist_pratica_transferencia.md"
+      T02: "02_conflitos/01_teoria.md"
+      Q02: "02_conflitos/02_quiz.md"
+      K02: "02_conflitos/03_gabarito_quiz.md"
+      P02: "02_conflitos/04_pratica_independente_conflito.md"
+      KP02: "02_conflitos/05_gabarito_pratica_independente.md"
+      R02: "02_conflitos/06_rubrica_pratica_independente.md"
+      Q90: "90_integracao/01_quiz_integrador.md"
+      K90: "90_integracao/02_gabarito_quiz_integrador.md"
+    blocos_origem:
+      teoria:
+        "Três formas de integrar mudanças": T01
+        "Mensagens de commit": T01
+        Conflitos: T02
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_integracao_e_mensagens_commit}
+        Q2: {arquivo: Q01, resposta: K01, assunto: 01_integracao_e_mensagens_commit}
+        Q3: {arquivo: Q01, resposta: K01, assunto: 01_integracao_e_mensagens_commit}
+        Q4: {arquivo: Q02, resposta: K02, assunto: 02_conflitos}
+        Q5: {arquivo: Q90, resposta: K90, assuntos: [01_integracao_e_mensagens_commit, 02_conflitos]}
+      pratica:
+        P1: {arquivo: P01, resposta: KP01, assunto: 01_integracao_e_mensagens_commit}
+        P2: {arquivo: P02, resposta: KP02, rubrica: R02, assunto: 02_conflitos}
+        P3: {arquivo: P03, checklist: C03, assunto: 01_integracao_e_mensagens_commit}
+        P2_Entregas_1: {arquivo: P02, origem: "primeiro cabeçalho Entregas"}
+        P2_Entregas_2: {arquivo: P02, origem: "segundo cabeçalho Entregas; preservar sem reescrita"}
+    cobertura:
+      exclusivos:
+        01_integracao_e_mensagens_commit: [Q1, Q2, Q3, P1, P3]
+        02_conflitos: [Q4, P2]
+      compartilhados:
+        Q5: [01_integracao_e_mensagens_commit, 02_conflitos]
+    conexoes:
+      - {tipo: pre_requisito, destino: "3.1"}
+      - {tipo: complementar, destino: "3.3"}
+
+  "3.3":
+    pasta: "3.3_GitHub"
+    origem: "Conteudos/Fase_1/3.3_GitHub.md"
+    assuntos: [01_local_e_remoto, 02_pull_request_code_review, 03_fluxo_colaborativo, 04_segredos_credenciais]
+    arquivos:
+      T01: "01_local_e_remoto/01_teoria.md"
+      Q01: "01_local_e_remoto/02_quiz.md"
+      K01: "01_local_e_remoto/03_gabarito_quiz.md"
+      T02: "02_pull_request_code_review/01_teoria.md"
+      Q02: "02_pull_request_code_review/02_quiz.md"
+      K02: "02_pull_request_code_review/03_gabarito_quiz.md"
+      P01: "02_pull_request_code_review/04_pratica_guiada_review.md"
+      KP01: "02_pull_request_code_review/05_gabarito_pratica_guiada.md"
+      T03: "03_fluxo_colaborativo/01_teoria.md"
+      Q03: "03_fluxo_colaborativo/02_quiz.md"
+      K03: "03_fluxo_colaborativo/03_gabarito_quiz.md"
+      T04: "04_segredos_credenciais/01_teoria.md"
+      Q04: "04_segredos_credenciais/02_quiz.md"
+      K04: "04_segredos_credenciais/03_gabarito_quiz.md"
+      Q90: "90_integracao/01_quiz_integrador.md"
+      K90: "90_integracao/02_gabarito_quiz_integrador.md"
+      P02: "90_integracao/03_pratica_independente_incidentes.md"
+      KP02: "90_integracao/04_gabarito_pratica_independente.md"
+      R02: "90_integracao/05_rubrica_pratica_independente.md"
+      P03: "90_integracao/06_pratica_transferencia_pull_request.md"
+      C03: "90_integracao/07_checklist_pratica_transferencia.md"
+    blocos_origem:
+      teoria:
+        "Local e remoto": T01
+        "Pull request e code review": T02
+        "Organização e fluxo": T03
+        "Segredos e credenciais": T04
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_local_e_remoto}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_pull_request_code_review}
+        Q3: {arquivo: Q04, resposta: K04, assunto: 04_segredos_credenciais}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_fluxo_colaborativo}
+        Q5: {arquivo: Q90, resposta: K90, assuntos: [01_local_e_remoto, 03_fluxo_colaborativo]}
+      pratica:
+        P1: {arquivo: P01, resposta: KP01, assunto: 02_pull_request_code_review}
+        P2: {arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [01_local_e_remoto, 03_fluxo_colaborativo, 04_segredos_credenciais]}
+        P3: {arquivo: P03, checklist: C03, assuntos: [01_local_e_remoto, 02_pull_request_code_review, 03_fluxo_colaborativo]}
+    cobertura:
+      exclusivos:
+        01_local_e_remoto: [Q1]
+        02_pull_request_code_review: [Q2, P1]
+        03_fluxo_colaborativo: [Q4]
+        04_segredos_credenciais: [Q3]
+      compartilhados:
+        Q5: [01_local_e_remoto, 03_fluxo_colaborativo]
+        P2: [01_local_e_remoto, 03_fluxo_colaborativo, 04_segredos_credenciais]
+        P3: [01_local_e_remoto, 02_pull_request_code_review, 03_fluxo_colaborativo]
+    conexoes:
+      - {tipo: pre_requisito, destino: "2.3"}
+      - {tipo: pre_requisito, destino: "3.1"}
+      - {tipo: complementar, destino: "3.2"}
+      - {tipo: relacionado, destino: "32.1"}
+
+  "3.4":
+    pasta: "3.4_Revisita_continua"
+    origem: "Conteudos/Fase_1/3.4_Revisita_continua.md"
+    assuntos: [01_revisita_continua]
+    arquivos:
+      T01: "01_revisita_continua/01_teoria.md"
+      Q01: "01_revisita_continua/02_quiz.md"
+      K01: "01_revisita_continua/03_gabarito_quiz.md"
+      P01: "01_revisita_continua/04_pratica_revisao_periodica.md"
+      C01: "01_revisita_continua/05_checklist_pratica_revisao.md"
+      P02: "90_integracao/01_exercicio_integrador_recupere.md"
+      R02: "90_integracao/02_rubrica_exercicio_integrador.md"
+    blocos_origem:
+      teoria:
+        "Versionar como hábito": T01
+        "Revisar o histórico e as branches": T01
+        "README e escrita técnica em inglês": T01
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_revisita_continua}
+        Q2: {arquivo: Q01, resposta: K01, assunto: 01_revisita_continua}
+        Q3: {arquivo: Q01, resposta: K01, assunto: 01_revisita_continua}
+        Q4: {arquivo: Q01, resposta: K01, assunto: 01_revisita_continua}
+      pratica:
+        P1: {arquivo: P01, checklist: C01, assunto: 01_revisita_continua}
+        P2: {arquivo: P02, rubrica: R02, integracao_de_unidades: ["3.1", "3.2", "3.3"]}
+    cobertura:
+      exclusivos: {01_revisita_continua: [Q1, Q2, Q3, Q4, P1]}
+      integracao_transversal:
+        P2: {unidades: ["3.1", "3.2", "3.3"], arquivo: P02}
+    conexoes:
+      - {tipo: pre_requisito, destino: "3.2"}
+      - {tipo: pre_requisito, destino: "3.3"}
+    ajustes_conexoes:
+      - "Remover relação relacionada duplicada com 3.3; manter pre_requisito."
+
+  "3.5":
+    pasta: "3.5_Projeto_incremental"
+    origem: "Conteudos/Fase_1/3.5_Projeto_incremental.md"
+    tipo_unidade: projeto
+    escala_rubrica: "0-4"
+    arquivos:
+      T00: "teoria_contexto.md"
+      B00: "00_brief_projeto.md"
+      M01: "marco_01_escopo.md"
+      C01: "checklist_marco_01_aceite.md"
+      M02: "marco_02_repositorio_setup.md"
+      C02: "checklist_marco_02_aceite.md"
+      M03: "marco_03_historico_seguro.md"
+      C03: "checklist_marco_03_aceite.md"
+      M04: "marco_04_publicacao_remota.md"
+      C04: "checklist_marco_04_aceite.md"
+      R00: "rubrica_comum_marcos_0-4.md"
+      C00: "checklist_revisao_final.md"
+    blocos_origem:
+      teoria:
+        "O repositório como caderno de engenharia": T00
+        "Escolha de uma ideia para o Trilho A": T00
+        "Dotfiles e setup seguro": T00
+        "Critérios de um repositório sustentável": T00
+      projeto:
+        intro: {arquivo: B00, origem: ["Projeto — base de trabalho do curso", texto introdutório]}
+        M01: {arquivo: M01, titulo_marco: "Marco 1 — escolha do problema e primeiro escopo", checklist: C01}
+        M02: {arquivo: M02, titulo_marco: "Marco 2 — repositório e instruções de entrada", checklist: C02}
+        M03: {arquivo: M03, titulo_marco: "Marco 3 — histórico e configuração segura", checklist: C03}
+        M04: {arquivo: M04, titulo_marco: "Marco 4 — publicação e conferência remota", checklist: C04}
+        rubrica: {arquivo: R00, escala_rubrica: "0-4", origem: "Rubrica comum para cada marco"}
+        checklist_final: {arquivo: C00, origem: "Revisão final do projeto"}
+    cobertura:
+      tipo: projeto
+      marcos_com_checklist: [M01, M02, M03, M04]
+      escala_rubrica: "0-4"
+    conexoes:
+      - {tipo: pre_requisito, destino: "3.1"}
+      - {tipo: pre_requisito, destino: "3.2"}
+      - {tipo: pre_requisito, destino: "3.3"}
+      - {tipo: projeto_acumulado, destino: "Guia_Projetos_e_Rotacao_de_Tipos"}
+    ajustes_conexoes:
+      - "Remover relação complementar duplicada com 3.3; manter pre_requisito."
+
