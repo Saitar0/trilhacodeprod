@@ -41,9 +41,11 @@ def test_production_requires_smtp_delivery():
         _production_settings(email_transport="local").validate_runtime()
 
 
-def test_staging_requires_real_smtp_transport_and_tls():
-    with pytest.raises(RuntimeError, match="EMAIL_TRANSPORT=smtp"):
-        _staging_settings(email_transport="local").validate_runtime()
+def test_staging_accepts_local_transport_for_disposable_previews():
+    _staging_settings(email_transport="local").validate_runtime()
+
+
+def test_staging_smtp_requires_tls():
     with pytest.raises(RuntimeError, match="com TLS"):
         _staging_settings(smtp_starttls=False, smtp_ssl=False).validate_runtime()
     _staging_settings().validate_runtime()

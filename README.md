@@ -89,11 +89,11 @@ O Compose lê o `.env` da raiz. A tabela mostra os valores do `.env.example`; co
 
 O cadastro público exige senha com pelo menos 12 caracteres. A conta precisa confirmar o endereço de e-mail antes de acessar as áreas protegidas. Os links de confirmação e recuperação expiram e só podem ser usados uma vez. Cadastro, login, reenvio e recuperação de senha têm limites contra abuso; as respostas de reenvio e recuperação não revelam se uma conta existe.
 
-Em desenvolvimento, `EMAIL_TRANSPORT=local` salva as mensagens numa caixa local descartável indicada por `LOCAL_EMAIL_DIR`; isso não entrega e-mail e não deve ser usado em staging ou produção. Para staging e produção, configure no ambiente do Coolify:
+Em desenvolvimento e em previews descartáveis de staging, `EMAIL_TRANSPORT=local` salva as mensagens numa caixa local indicada por `LOCAL_EMAIL_DIR`; isso não entrega e-mail. Produção exige SMTP real com TLS. Para entrega de e-mail em staging ou produção, configure no ambiente do Coolify:
 
 | Variável | Descrição |
 |---|---|
-| `EMAIL_TRANSPORT` | Use `smtp` fora do desenvolvimento. |
+| `EMAIL_TRANSPORT` | `local` para preview descartável; `smtp` para entrega de e-mail. Produção exige `smtp`. |
 | `SMTP_HOST`, `SMTP_PORT` | Host e porta TLS do provedor SMTP. |
 | `SMTP_USERNAME`, `SMTP_PASSWORD` | Credenciais SMTP; defina ambas ou deixe ambas vazias se o provedor não exigir autenticação. Trate a senha como segredo. |
 | `SMTP_FROM_EMAIL` | Remetente validado no provedor de e-mail. |
