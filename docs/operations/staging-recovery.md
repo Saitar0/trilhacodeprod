@@ -24,7 +24,7 @@ O plano abaixo não autoriza deploy, restart, migração, criação de índice, 
 5. Compare as configurações do Coolify com o repositório: build pack Dockerfile, contexto na raiz, `backend/Dockerfile.prod`, porta `8000`. O campo Compose aparece como `/docker-compose.yaml`, enquanto o repositório usa `compose.yaml`; confirme se o campo é ignorado pelo build pack Dockerfile ou corrija a referência no recurso antes do build. O health check está desativado e o caminho cadastrado `/` não é a rota de health da API; configure `/health` e confirme também `/ready`.
 6. Verifique a URI de conexão apenas pelo gerenciador de segredos, sem imprimir valores. Confirme `DB_NAME=trilhacode_staging`, autenticação na base correta e resolução pelo hostname privado do Mongo existente. Não altere nem substitua os volumes.
 7. Defina `TRUSTED_PROXY_IPS` com os endereços/CIDRs reais do proxy Coolify após confirmar a topologia. Não copie `127.0.0.1` do padrão da imagem para uma rede de containers sem comprovação.
-8. Antes de validar cadastro, configure SMTP real por segredo de runtime, remetente/domínio autorizado, TLS e envio de saída. `EMAIL_TRANSPORT` e variáveis SMTP não estão cadastradas no recurso de staging atual. O transporte local serve somente a testes descartáveis e não demonstra entrega a usuários.
+8. Antes de validar entrega de e-mail em staging, configure SMTP real por segredo de runtime, remetente/domínio autorizado, TLS e envio de saída. O transporte local de preview grava mensagens em disco e não demonstra entrega a usuários.
 9. Confirme o artefato e o domínio do frontend. A configuração de staging consultada lista uma aplicação de API e um Mongo; não há evidência de um frontend implantado no projeto.
 
 ## Provedor de e-mail transacional
