@@ -16,7 +16,22 @@ from services.common import (
     get_document,
     next_order,
     slugify,
+    validate_reorder,
 )
+
+_ASSESSMENT_BLOCK_TYPES = {"exercise_objective", "exercise_open", "practical_challenge", "quiz"}
+_STUDENT_HIDDEN_BLOCK_FIELDS = {"answer", "correct_index", "explanation"}
+
+
+def _student_block(block: dict) -> dict:
+    """Remove assessment solutions from content returned to students."""
+    if block.get("type") not in _ASSESSMENT_BLOCK_TYPES:
+        return block
+    data = block.get("data")
+    if not isinstance(data, dict):
+        return block
+    safe_data = {key: value for key, value in data.items() if key not in _STUDENT_HIDDEN_BLOCK_FIELDS}
+    return {**block, "data": safe_data}
 
 
 async def validate_parent(track: dict, kind: str, parent_id: str | None, node_id: str | None = None) -> None:
@@ -55,8 +70,9 @@ async def create_node(data: dict, user: dict) -> dict:
 
 
 async def reorder_nodes(ordered_ids: list[str]) -> dict:
-    for index, node_id in enumerate(ordered_ids):
-        await db.nodes.update_one({"_id": oid(node_id)}, {"$set": {"order": index}})
+    ids = await validate_reorder("nodes", ordered_ids, ("track_id", "parent_id"))
+    for index, node_id in enumerate(ids):
+        await db.nodes.update_one({"_id": node_id}, {"$set": {"order": index}})
     return {"ok": True}
 
 
@@ -70,6 +86,8 @@ async def get_node(node_id: str, user: dict, blocks_limit: int = 1000, blocks_sk
     block_page_size = min(max(blocks_limit, 1), 1000)
     blocks = [] if lock and not staff else await db.content_blocks.find(block_query).sort("order", 1).skip(
         max(blocks_skip, 0)).limit(block_page_size).to_list(block_page_size)
+    if not staff:
+        blocks = [_student_block(block) for block in blocks]
     relations = await db.relations.find({"$or": [{"node_id": node_id}, {"target_id": node_id}]}).to_list(1000)
     other_ids = {rel["target_id"] if rel["node_id"] == node_id else rel["node_id"] for rel in relations}
     others = {

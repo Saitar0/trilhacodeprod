@@ -15,11 +15,46 @@ CHUNK = 4 * 1024 * 1024
 log = logging.getLogger("integrity")
 
 
+def validate_snapshot(
+    snapshot: dict, expected_stats: dict | None = None, expected_track_id: str | None = None,
+) -> None:
+    """Reject malformed or count-mismatched snapshots before they are restored."""
+    if not isinstance(snapshot, dict) or not isinstance(snapshot.get("track"), dict):
+        raise ValueError("Snapshot incompleto: trilha ausente")
+    if expected_stats is not None and not isinstance(expected_stats, dict):
+        raise ValueError("Snapshot incompleto: contagens inválidas")
+    if expected_track_id is not None and snapshot["track"].get("id") != expected_track_id:
+        raise ValueError("Snapshot incompatível: identificador da trilha divergente")
+    for key in ("nodes", "blocks", "relations"):
+        values = snapshot.get(key)
+        if not isinstance(values, list):
+            raise ValueError(f"Snapshot incompleto: {key} ausente")
+        if any(not isinstance(item, dict) for item in values):
+            raise ValueError(f"Snapshot incompleto: registros inválidos em {key}")
+        if expected_stats is not None and expected_stats.get(key) != len(values):
+            raise ValueError(f"Snapshot incompleto: contagem de {key} divergente")
+        if expected_track_id is not None and any(item.get("track_id") != expected_track_id for item in values):
+            raise ValueError(f"Snapshot incompatível: {key} de outra trilha")
+
+    node_ids = {node.get("id") for node in snapshot["nodes"]}
+    if (None in node_ids or len(node_ids) != len(snapshot["nodes"])
+            or any(node.get("parent_id") not in node_ids and node.get("parent_id")
+                   for node in snapshot["nodes"])):
+        raise ValueError("Snapshot inconsistente: hierarquia de nós inválida")
+    if any(block.get("node_id") not in node_ids for block in snapshot["blocks"]):
+        raise ValueError("Snapshot inconsistente: bloco sem nó correspondente")
+    if any(relation.get("node_id") not in node_ids or relation.get("target_id") not in node_ids
+           for relation in snapshot["relations"]):
+        raise ValueError("Snapshot inconsistente: relação sem nós correspondentes")
+
+
 # ---------- Chunked, compressed snapshots ----------
 async def store_snapshot(version_id, snapshot: dict) -> dict:
+    validate_snapshot(snapshot)
     raw = json.dumps(snapshot, ensure_ascii=False, default=str).encode()
     packed = zlib.compress(raw, 6)
     parts = [packed[i:i + CHUNK] for i in range(0, len(packed), CHUNK)] or [b""]
+    await db.version_chunks.delete_many({"version_id": str(version_id)})
     await db.version_chunks.insert_many([{"version_id": str(version_id), "seq": i, "data": Binary(p)} for i, p in enumerate(parts)])
     return {"storage": "chunked-zlib", "chunks": len(parts), "raw_bytes": len(raw), "packed_bytes": len(packed),
             "sha256": hashlib.sha256(raw).hexdigest()}
@@ -27,6 +62,7 @@ async def store_snapshot(version_id, snapshot: dict) -> dict:
 
 async def load_snapshot(version: dict) -> dict:
     if "snapshot" in version:
+        validate_snapshot(version["snapshot"], version.get("stats"), version.get("track_id"))
         return version["snapshot"]
     decompressor = zlib.decompressobj()
     raw_parts, digest, count = [], hashlib.sha256(), 0
@@ -42,24 +78,31 @@ async def load_snapshot(version: dict) -> dict:
         raise ValueError("Snapshot incompleto")
     if digest.hexdigest() != version.get("sha256"):
         raise ValueError("Snapshot corrompido (checksum)")
-    return json.loads(b"".join(raw_parts))
+    snapshot = json.loads(b"".join(raw_parts))
+    validate_snapshot(snapshot, version.get("stats"), version.get("track_id"))
+    return snapshot
 
 
-async def save_version(track_id, version, kind, note, user, snapshot, extra=None):
+async def save_version(track_id, version, kind, note, user, snapshot, extra=None, version_id=None):
     """Chunks first, metadata last: a version is only listed once fully written."""
-    vid = ObjectId()
+    validate_snapshot(snapshot, expected_track_id=track_id)
+    vid = ObjectId(version_id) if version_id else ObjectId()
     meta = await store_snapshot(vid, snapshot)
-    await db.track_versions.insert_one({
+    await db.track_versions.replace_one({"_id": vid}, {
         "_id": vid, "track_id": track_id, "version": version, "kind": kind, "note": note, **meta,
         "stats": {"nodes": len(snapshot["nodes"]), "blocks": len(snapshot["blocks"]), "relations": len(snapshot["relations"])},
-        "created_by": user["id"], "created_by_name": user.get("name", ""), "created_at": now(), **(extra or {})})
+        "snapshot_complete": True, "created_by": user["id"], "created_by_name": user.get("name", ""),
+        "created_at": now(), **(extra or {})}, upsert=True)
     return str(vid)
 
 
 async def migrate_legacy_snapshots():
     async for v in db.track_versions.find({"snapshot": {"$exists": True}}):
         meta = await store_snapshot(v["_id"], v["snapshot"])
-        await db.track_versions.update_one({"_id": v["_id"]}, {"$set": meta, "$unset": {"snapshot": ""}})
+        await db.track_versions.update_one(
+            {"_id": v["_id"]},
+            {"$set": {**meta, "snapshot_complete": False}, "$unset": {"snapshot": ""}},
+        )
 
 
 # ---------- Student visibility ----------

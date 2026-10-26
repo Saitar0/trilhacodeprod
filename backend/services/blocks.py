@@ -6,7 +6,7 @@ from core_utils import now
 from database import db
 from integrity import reconcile_orphans
 from serialization import oid
-from services.common import check_status, get_document, next_order
+from services.common import check_status, get_document, next_order, validate_reorder
 
 
 async def create_block(data: dict, user: dict) -> dict:
@@ -29,8 +29,9 @@ async def create_block(data: dict, user: dict) -> dict:
 
 
 async def reorder_blocks(ordered_ids: list[str]) -> dict:
-    for index, block_id in enumerate(ordered_ids):
-        await db.content_blocks.update_one({"_id": oid(block_id)}, {"$set": {"order": index}})
+    ids = await validate_reorder("content_blocks", ordered_ids, ("node_id",))
+    for index, block_id in enumerate(ids):
+        await db.content_blocks.update_one({"_id": block_id}, {"$set": {"order": index}})
     return {"ok": True}
 
 
