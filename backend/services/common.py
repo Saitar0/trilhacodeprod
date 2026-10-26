@@ -33,6 +33,18 @@ async def next_order(collection: str, query: dict) -> int:
     return last[0]["order"] + 1 if last else 0
 
 
+async def validate_reorder(collection: str, ordered_ids: list[str], scope_fields: tuple[str, ...] = ()) -> list:
+    if len(set(ordered_ids)) != len(ordered_ids):
+        raise HTTPException(status_code=400, detail="A lista de ordenação contém IDs repetidos")
+    ids = [oid(value) for value in ordered_ids]
+    documents = await db[collection].find({"_id": {"$in": ids}}).to_list(len(ids))
+    if len(documents) != len(ids):
+        raise HTTPException(status_code=400, detail="A lista de ordenação contém IDs inexistentes")
+    if scope_fields and len({tuple(doc.get(key) for key in scope_fields) for doc in documents}) > 1:
+        raise HTTPException(status_code=400, detail="A lista de ordenação mistura itens de escopos diferentes")
+    return ids
+
+
 async def ancestors(node: dict) -> list[dict]:
     chain = []
     current = node

@@ -43,10 +43,11 @@ export default function Versions() {
               <div className="flex items-center gap-2">
                 <span className="font-heading text-lg font-bold text-emerald-400">v{v.version}</span>
                 <span className={cn("rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase", v.kind === "backup" ? "border-slate-700 text-slate-400" : v.kind === "restore" ? "border-violet-500/40 text-violet-300" : "border-emerald-500/30 text-emerald-300")}>{KIND_LABEL[v.kind || "publish"]}</span>
-                <Button variant="ghost" size="sm" className="ml-auto h-7 text-xs" data-testid={`version-restore-${v.id}`} onClick={() => setRestoring(v)}><RotateCcw />Restaurar</Button>
+                <Button variant="ghost" size="sm" className="ml-auto h-7 text-xs" data-testid={`version-restore-${v.id}`} disabled={v.snapshot_complete !== true} title={v.snapshot_complete === true ? undefined : "A captura completa desta versão não pode ser comprovada."} onClick={() => setRestoring(v)}><RotateCcw />Restaurar</Button>
               </div>
               <p className="mt-1 text-sm text-slate-300">{v.note || "Sem notas"}{v.restored_from_version && ` (de v${v.restored_from_version})`}</p>
               <p className="font-mono text-[10px] text-slate-500">{formatDate(v.created_at)} · {v.created_by_name} · {v.stats.nodes} itens · {v.stats.blocks} blocos{v.packed_bytes != null && ` · ${(v.packed_bytes / 1024).toFixed(1)} KB`}</p>
+              {v.snapshot_complete !== true && <p className="mt-2 text-xs text-amber-300">Restauração bloqueada: não há confirmação de captura completa.</p>}
             </div>
           ))}
         </aside>

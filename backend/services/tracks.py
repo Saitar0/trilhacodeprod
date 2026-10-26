@@ -10,7 +10,7 @@ from integrity import reconcile_orphans, save_version
 from learning import find_cycles
 from permissions import can_view_track, is_staff
 from serialization import oid
-from services.common import check_status, get_document, next_order, slugify
+from services.common import check_status, get_document, next_order, slugify, validate_reorder
 from services.nodes import clone_nodes, parents_first
 from services.versions import snapshot_track
 
@@ -65,8 +65,9 @@ async def create_track(data: dict, user: dict) -> dict:
 
 
 async def reorder_tracks(ordered_ids: list[str]) -> dict:
-    for index, track_id in enumerate(ordered_ids):
-        await db.tracks.update_one({"_id": oid(track_id)}, {"$set": {"order": index}})
+    ids = await validate_reorder("tracks", ordered_ids)
+    for index, track_id in enumerate(ids):
+        await db.tracks.update_one({"_id": track_id}, {"$set": {"order": index}})
     return {"ok": True}
 
 
