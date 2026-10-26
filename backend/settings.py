@@ -151,6 +151,10 @@ class Settings(BaseSettings):
 
     def _email_configuration_problems(self) -> list[str]:
         problems = []
+        # Staging can use the local transport for disposable previews. It writes
+        # messages to disk and never delivers them; production always requires SMTP.
+        if self.email_transport == "local" and self.env == "staging":
+            return problems
         if (self.email_transport != "smtp" or not self.smtp_host or not self.smtp_from_email
                 or (not self.smtp_starttls and not self.smtp_ssl)):
             problems.append("EMAIL_TRANSPORT=smtp e SMTP_HOST/SMTP_FROM_EMAIL com TLS são obrigatórios")
