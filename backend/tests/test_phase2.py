@@ -72,6 +72,91 @@ def test_students_cannot_fetch_private_track_metadata_directly(admin, student):
         admin.delete(f"{API}/tracks/{track_id}")
 
 
+def test_student_node_payload_hides_assessment_solutions(admin, student):
+    suffix = uuid.uuid4().hex[:8]
+    created = admin.post(f"{API}/tracks", json={"title": f"TEST_answers_{suffix}"})
+    assert created.status_code == 200, created.text
+    track_id = created.json()["id"]
+    try:
+        node = admin.post(f"{API}/nodes", json={
+            "track_id": track_id, "kind": "topic", "title": "Assessment security", "status": "published"})
+        assert node.status_code == 200, node.text
+        node_id = node.json()["id"]
+        types = ("exercise_objective", "exercise_open", "practical_challenge", "quiz")
+        expected = {}
+        for index, block_type in enumerate(types):
+            answer = f"solution-{index}"
+            correct_index = index + 1
+            explanation = f"private explanation-{index}"
+            response = admin.post(f"{API}/blocks", json={
+                "node_id": node_id,
+                "type": block_type,
+                "data": {
+                    "prompt": f"Question {index}",
+                    "answer": answer,
+                    "correct_index": correct_index,
+                    "explanation": explanation,
+                },
+                "status": "published",
+            })
+            assert response.status_code == 200, response.text
+            expected[block_type] = (answer, correct_index, explanation)
+        assert admin.post(f"{API}/tracks/{track_id}/publish", json={}).status_code == 200
+
+        student_payload = student.get(f"{API}/nodes/{node_id}")
+        assert student_payload.status_code == 200, student_payload.text
+        student_blocks = {block["type"]: block["data"] for block in student_payload.json()["blocks"]}
+        assert set(student_blocks) == set(types)
+        for block_type in expected:
+            data = student_blocks[block_type]
+            assert data["prompt"].startswith("Question")
+            assert "answer" not in data
+            assert "correct_index" not in data
+            assert "explanation" not in data
+
+        staff_payload = admin.get(f"{API}/nodes/{node_id}")
+        assert staff_payload.status_code == 200, staff_payload.text
+        staff_blocks = {block["type"]: block["data"] for block in staff_payload.json()["blocks"]}
+        for block_type, (answer, correct_index, explanation) in expected.items():
+            assert staff_blocks[block_type]["answer"] == answer
+            assert staff_blocks[block_type]["correct_index"] == correct_index
+            assert staff_blocks[block_type]["explanation"] == explanation
+    finally:
+        admin.delete(f"{API}/tracks/{track_id}")
+
+
+def test_reorder_rejects_duplicate_and_cross_scope_ids(admin):
+    suffix = uuid.uuid4().hex[:8]
+    track_ids = []
+    try:
+        nodes = []
+        for index in range(2):
+            track = admin.post(f"{API}/tracks", json={"title": f"TEST_reorder_{suffix}_{index}"})
+            assert track.status_code == 200, track.text
+            track_id = track.json()["id"]
+            track_ids.append(track_id)
+            node = admin.post(f"{API}/nodes", json={
+                "track_id": track_id, "kind": "topic", "title": f"Node {index}"})
+            assert node.status_code == 200, node.text
+            nodes.append(node.json()["id"])
+            block = admin.post(f"{API}/blocks", json={
+                "node_id": node.json()["id"], "type": "theory_text", "data": {"body": "x"}})
+            assert block.status_code == 200, block.text
+            nodes[index] = {"id": nodes[index], "block_id": block.json()["id"]}
+
+        node_ids = [node["id"] for node in nodes]
+        duplicate = admin.post(f"{API}/nodes/reorder", json={"ordered_ids": [node_ids[0], node_ids[0]]})
+        assert duplicate.status_code == 400
+        mixed_nodes = admin.post(f"{API}/nodes/reorder", json={"ordered_ids": node_ids})
+        assert mixed_nodes.status_code == 400
+        mixed_blocks = admin.post(f"{API}/blocks/reorder", json={
+            "ordered_ids": [node["block_id"] for node in nodes]})
+        assert mixed_blocks.status_code == 400
+    finally:
+        for track_id in track_ids:
+            admin.delete(f"{API}/tracks/{track_id}")
+
+
 @pytest.fixture(scope="module")
 def fresh_student(session_factory, create_verified_user):
     session = session_factory()
