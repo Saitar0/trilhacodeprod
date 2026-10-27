@@ -32,7 +32,7 @@ async def set_progress(body: ProgressIn, user: dict = Depends(require("progress.
 
 @router.post("/visit", response_model=OkOut)
 async def visit(body: VisitIn, user: dict = Depends(current_user)):
-    await visit_node(body.node_id, user)
+    await visit_node(body.node_id, user, body.operation_id)
     return {"ok": True}
 
 

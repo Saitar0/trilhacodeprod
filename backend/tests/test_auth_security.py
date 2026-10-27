@@ -227,7 +227,10 @@ def test_auth_rate_limiter_is_atomic_across_concurrent_instances(event_loop):
         except HTTPException as error:
             return error.status_code
 
-    results = event_loop.run_until_complete(asyncio.gather(*(consume() for _ in range(40))))
+    async def run_concurrently():
+        return await asyncio.gather(*(consume() for _ in range(40)))
+
+    results = event_loop.run_until_complete(run_concurrently())
     assert results.count("allowed") == 5
     assert results.count(429) == 35
 

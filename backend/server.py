@@ -104,10 +104,19 @@ def _error_code(status_code: int) -> str:
 async def http_exception_handler(request: Request, exc: HTTPException):
     message = exc.detail if isinstance(exc.detail, str) else "Requisição inválida"
     request_id = getattr(request.state, "request_id", "")
-    return JSONResponse(status_code=exc.status_code, content={"error": {
+    error = {
         "code": _error_code(exc.status_code), "message": message,
         "request_id": request_id,
-    }}, headers={**(exc.headers or {}), "X-Request-ID": request_id})
+    }
+    # Preserve only the structured version-conflict payloads needed by clients
+    # to resolve concurrent note/progress writes. Other exception details stay
+    # behind the established generic error envelope.
+    if exc.status_code == 409 and isinstance(exc.detail, dict) and exc.detail.get("code") in {
+        "note_version_conflict", "progress_version_conflict", "progress_idempotency_conflict",
+    }:
+        error["details"] = exc.detail
+    return JSONResponse(status_code=exc.status_code, content={"error": error},
+                        headers={**(exc.headers or {}), "X-Request-ID": request_id})
 
 
 @app.exception_handler(RequestValidationError)

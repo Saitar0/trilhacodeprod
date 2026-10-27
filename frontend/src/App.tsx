@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
+import { PendingNoteNavigationGuard } from "@/hooks/useStudy";
 import { TopBar } from "@/components/layout/TopBar";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import AuthPage from "@/pages/AuthPage";
@@ -27,6 +28,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <PendingNoteNavigationGuard />
         <TopBar />
         <Suspense fallback={<div role="status" className="p-6">Carregando…</div>}>
           <Routes>

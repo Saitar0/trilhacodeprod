@@ -152,8 +152,11 @@ export interface ProgressRecord {
   node_id: string;
   block_id: string | null;
   status: ProgressStatus;
+  revision?: number;
+  attempts?: number;
   started_at?: string | null;
   completed_at?: string | null;
+  updated_at?: string;
   data?: Record<string, any>;
 }
 
@@ -236,6 +239,8 @@ export interface StudyNote {
   block_id: string | null;
   track_id: string;
   body: string;
+  version: number;
+  deleted?: boolean;
   updated_at: string;
   node_title?: string;
   track_title?: string;
