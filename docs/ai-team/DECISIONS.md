@@ -103,3 +103,10 @@
 
 - Decisão: não otimizar os ícones sem uma medição de requests por rota e confirmação de compatibilidade do catálogo.
 - Evidência: CI #39036366799 reportou 1.611 chunks JavaScript, soma gzip de 874,12 kB para todos os arquivos, `index` 493,75/159,36 kB e `IconCatalog` 213,07/50,83 kB (bruto/gzip). A soma de todos os chunks não representa tráfego de uma visita, pois há lazy loading.
+
+## 26/10/2026 — Notas versionadas e progresso reconciliável
+
+- Decisão: atualizar notas com `expected_version` e comparação atômica, preservando o texto local em conflito; representar exclusão como tombstone versionado.
+- Decisão: usar revisão CAS por registro de progresso e um evento pendente no mesmo documento; projetar evento/estado de trilha com IDs estáveis e reconciliar pendências em retry/leitura do histórico, sem presumir transações Mongo multidocumento.
+- Decisão: separar `operation_id` (replay técnico) de `attempt_id` (submissão explícita de quiz). Conclusão de leitura é auto-relatada e não prova domínio.
+- Evidência: Fase 1.2 em worktree isolada sobre `d2824aa6b910f747a29cbbbf8a2f123a5ad51d5c`; pytest 112/112, Vitest 21/21, Ruff, typecheck, ESLint e build passaram. Nenhuma migração/índice foi necessária.

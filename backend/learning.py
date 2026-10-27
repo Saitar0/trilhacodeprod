@@ -2,15 +2,15 @@ from datetime import timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import DuplicateKeyError, PyMongoError
 
 from constants import DEFAULT_HIERARCHY
 from core_utils import now
 from database import db
 from permissions import is_staff, require
 from schemas.content import OkOut
-from schemas.learning import NoteIn, NoteOut, ReviewDone, ReviewIn, ReviewOut
-from schemas.versions import DeletedOut, TrackValidationOut
+from schemas.learning import NoteDeletedOut, NoteIn, NoteOut, ReviewDone, ReviewIn, ReviewOut
+from schemas.versions import TrackValidationOut
 from security import current_user
 from serialization import oid, ser
 
@@ -174,8 +174,10 @@ async def validate_track(track_id: str, _: dict = Depends(require("content.read"
 # ---------- Notes ----------
 @router.get("/notes", response_model=list[NoteOut], response_model_exclude_unset=True)
 async def list_notes(track_id: Optional[str] = None, node_id: Optional[str] = None, limit: int = 2000,
-                     skip: int = 0, user: dict = Depends(current_user)):
+                     skip: int = 0, include_deleted: bool = False, user: dict = Depends(current_user)):
     q = {"user_id": user["id"], "orphaned": {"$ne": True}}
+    if not include_deleted:
+        q["deleted"] = {"$ne": True}
     if track_id:
         q["track_id"] = track_id
     if node_id:
@@ -185,19 +187,98 @@ async def list_notes(track_id: Optional[str] = None, node_id: Optional[str] = No
     return await _with_titles(notes, user)
 
 
-@router.put("/notes", response_model=NoteOut | DeletedOut, response_model_exclude_unset=True)
+def _raise_note_conflict(note: dict | None) -> None:
+    raise HTTPException(
+        status_code=409,
+        detail={"code": "note_version_conflict", "current": ser(note) if note else None},
+    )
+
+
+def _note_version_query(key: dict, version: int) -> dict:
+    query = dict(key)
+    if version == 0:
+        query["$or"] = [{"version": 0}, {"version": {"$exists": False}}]
+    else:
+        query["version"] = version
+    return query
+
+
+@router.put("/notes", response_model=NoteOut | NoteDeletedOut, response_model_exclude_unset=True)
 async def upsert_note(body: NoteIn, user: dict = Depends(current_user)):
     node = await db.nodes.find_one({"_id": oid(body.node_id)})
     if not node:
         raise HTTPException(status_code=404, detail="Conteúdo não encontrado")
     await assert_visible(node, user)
+    if body.block_id is not None:
+        block = await db.content_blocks.find_one({"_id": oid(body.block_id), "node_id": body.node_id})
+        if block is None:
+            raise HTTPException(status_code=404, detail="Bloco não encontrado")
+
     key = {"user_id": user["id"], "node_id": body.node_id, "block_id": body.block_id}
-    if not body.body.strip():
-        await db.notes.delete_one(key)
-        return {"deleted": True}
-    await db.notes.update_one(key, {"$set": {"body": body.body, "track_id": node["track_id"], "updated_at": now()},
-                                    "$setOnInsert": {"created_at": now()}}, upsert=True)
-    return ser(await db.notes.find_one(key))
+    deleting = not body.body.strip()
+
+    try:
+        existing = await db.notes.find_one(key)
+        if existing is None:
+            if body.expected_version not in (None, 0):
+                _raise_note_conflict(None)
+            if deleting:
+                return {"deleted": True, "version": 0}
+            timestamp = now()
+            document = {
+                **key,
+                "track_id": node["track_id"],
+                "body": body.body,
+                "deleted": False,
+                "version": 1,
+                "created_at": timestamp,
+                "updated_at": timestamp,
+            }
+            try:
+                await db.notes.insert_one(document)
+            except DuplicateKeyError:
+                current = await db.notes.find_one(key)
+                if current and current.get("body", "") == body.body and not current.get("deleted", False):
+                    return ser(current)
+                _raise_note_conflict(current)
+            return ser(await db.notes.find_one(key))
+
+        current_version = existing.get("version", 0)
+        if not isinstance(current_version, int) or isinstance(current_version, bool) or current_version < 0:
+            _raise_note_conflict(existing)
+        current_deleted = bool(existing.get("deleted", False))
+        desired_body = "" if deleting else body.body
+        same_value = existing.get("body", "") == desired_body and current_deleted == deleting
+        if same_value:
+            # A retry after a lost response is successful if the desired state is already stored.
+            return {"deleted": True, "version": current_version} if deleting else ser(existing)
+        if body.expected_version is not None and body.expected_version != current_version:
+            _raise_note_conflict(existing)
+        if body.expected_version is None and current_version > 0:
+            _raise_note_conflict(existing)
+
+        timestamp = now()
+        update = {
+            "$set": {
+                "body": desired_body,
+                "deleted": deleting,
+                "track_id": node["track_id"],
+                "updated_at": timestamp,
+                "version": current_version + 1,
+            }
+        }
+        result = await db.notes.update_one(_note_version_query(key, current_version), update)
+        if result.modified_count:
+            saved = await db.notes.find_one(key)
+            return {"deleted": True, "version": saved["version"]} if deleting else ser(saved)
+        current = await db.notes.find_one(key)
+        if current and current.get("body", "") == desired_body and bool(current.get("deleted", False)) == deleting:
+            return {"deleted": True, "version": current.get("version", 0)} if deleting else ser(current)
+        _raise_note_conflict(current)
+    except HTTPException:
+        raise
+    except PyMongoError:
+        raise HTTPException(status_code=503, detail="Não foi possível salvar a anotação temporariamente.") from None
 
 
 async def _with_titles(items, user):

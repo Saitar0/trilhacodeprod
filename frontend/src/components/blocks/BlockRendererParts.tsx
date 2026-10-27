@@ -3,6 +3,7 @@ import { Check, Copy, ExternalLink, Info, RotateCcw, X } from "lucide-react";
 import { Markdown } from "@/components/common/Markdown";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { createOperationId } from "@/lib/operationId";
 import { BlockProps } from "./BlockProps";
 const list = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
 
@@ -45,7 +46,7 @@ export function QuizBlock({ block, progress, onProgress }: BlockProps) {
   const [selected, setSelected] = useState<number | null>((progress?.data?.selected as number) ?? null);
   const pick = (i: number) => {
     setSelected(i);
-    onProgress?.("completed", { selected: i, correct: i === correct });
+    onProgress?.("completed", { selected: i, correct: i === correct }, createOperationId());
   };
   return (
     <div className="space-y-3">
