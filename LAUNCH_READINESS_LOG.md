@@ -138,7 +138,6 @@ Mission 12 — continue release-readiness work from passing PR CI; the remaining
 - PR operacional #26 aberta em `https://github.com/Saitar0/trilhacodeprod/pull/26`, branch `codex/g2-container-identity-fix-20261018`, head `34dce906dcf3ad4ba9d805e084877827aae4ea5f`. Run CI #39109642160 concluiu com sucesso em backend (testes sem Mongo, Ruff, integração com Mongo descartável, compileall, validação de config, build de imagem e auditoria de dependências), frontend (typecheck, lint, unit, build, imagem de produção, `nginx -t`, auditoria), Compose e E2E aluno/admin. Deploys foram pulados. Run é pré-merge e não homologa staging/produção.
 - Próxima ação: manter PR #26 sem merge automático e encaminhar para revisão; depois obter por canal autorizado leitura da VPS para inspecionar Docker e preparar backup consistente/restaurável. Manter recuperação da API bloqueada até restore, imagem por digest, branch/origem, configuração/rollback e impacto compartilhado serem verificados.
 
-
 ### Mission 19 — GHCR publication and G2 digest reconciliation
 
 - Directly queried successful GitHub Actions publication run [39179762892](https://github.com/Saitar0/trilhacodeprod/actions/runs/39179762892). It ran on `workflow_dispatch` from `main` at `41dc470c567bae50b7ebcf0662d45d43863980c9`; the publish job, authentication, image push, and immutable digest-recording steps succeeded.
@@ -156,3 +155,20 @@ Mission 12 — continue release-readiness work from passing PR CI; the remaining
 - SSH tools: local OpenSSH is present, and the known_hosts entry for `179.236.240.176` matches the Hostinger-reported host key. The local `id_ed25519` fingerprint differs from the VPS G2 authorized key; a strict, read-only SSH attempt as root was rejected. This does not establish whether the private key stored in GitHub Environment `staging-preflight` matches. `devforge_vm` was not used.
 - Coolify read-only state: staging API `trilhacode-staging-api` is `exited:unhealthy`, container absent, no deployment records, `/health` configured, and no SMTP variables are present. SMTP/Resend cannot be configured through the available read-only Coolify tools. Backup and staging restore evidence remains for an empty database only.
 - G2 is not approved: VPS image pull by digest is unverified; manifest is absent; dedicated internal network is empty; do not attach Mongo or run the preflight until the source review, runner/manifest update, image, SSH secret/host pin and read-only DB checks are all complete.
+
+### Missão 21 — sincronização de staging, SMTP e auditoria frontend (25/10/2026)
+
+- `main` em `a4c4a70fcef1d045a609a744a5d6829d42cf9bf5`; `staging` em `ca9eff662180053221410a2e811d04af1c9dffe2`. PR #30 (`main` → `staging`) permanece aberta; sua CI #40233955819 falhou no teste que exige SMTP em staging e na auditoria npm (Zod 3 vulnerável; advisories moderados em Vitest/fast-uri). E2E e Compose passaram; deploys foram pulados.
+- PR #31 aberta, head `9ff817d411eae688e54d3cd078f97e8b3d6a03c4`, remove a exceção de transporte local em staging e carrega a mitigação de dependências. CI #40235382407 concluiu com sucesso em backend, frontend, E2E isolado com Mongo descartável e Compose; staging/produção foram pulados. Nenhum merge ou deploy foi feito.
+- PR #32 aberta para `main`, head `958e4700c8d5a1f182a7c078b6735d0e84dc7557`, remove Zod 3 não utilizado e fixa versões corrigidas compatíveis de Vitest e fast-uri. CI #40235352628 concluiu com sucesso em todos os jobs de validação; deploys foram pulados. Verificação local isolada: `npm audit` sem vulnerabilidades, typecheck e lint passaram, 11 testes em 4 arquivos passaram e o build de produção passou.
+- Coolify lido nesta sessão: API e frontend de staging estão `running:healthy`, ambos com última implantação no commit `ca9eff6`. API tem caminho configurado `/health`, mas `health_check_enabled=false`; o endpoint e o frontend não resolveram por DNS nesta máquina, então TLS e saúde pública não foram homologados. Histórico de implantação não mostra uma implantação do novo `main`.
+- Ambiente do Coolify expõe `EMAIL_TRANSPORT`, mas não tem as variáveis SMTP. Resend contém o domínio `mail.saitaro.tech`, porém o usuário adiou a inclusão dos registros DNS; domínio remetente e entrega SMTP permanecem sem verificação. As ferramentas Coolify disponíveis nesta sessão são somente de leitura e não permitem inserir segredos.
+- O supervisor confirmou anteriormente backup B2 criptografado, pacote de custódia externa e restauração técnica isolada; a restauração foi em banco vazio e não comprova recuperação de dados reais da aplicação. Esta missão não alterou nem apagou essa evidência. G2 não foi executado.
+- PRs #31 e #32 não têm revisões registradas. A política de aprovação obrigatória não pôde ser consultada pela integração GitHub; confirmar a regra de branch antes de qualquer merge. O checkout original permaneceu intacto; trabalho foi feito em worktree isolado.
+
+#### Bloqueios seguintes
+
+1. Adicionar e validar no Hostinger DNS os registros TXT/CNAME fornecidos por Resend; depois criar uma chave SMTP restrita e armazená-la diretamente como segredo no Coolify.
+2. Habilitar a health check da API e confirmar DNS público de `api.staging.saitaro.tech` e `app.staging.saitaro.tech`; TLS, `/health` e `/ready` ainda não foram validados externamente.
+3. Revisar a regra de aprovação e integrar PR #32 em `main` e PR #31 em `staging` apenas quando o SMTP de staging estiver configurado. Atualizar PR #30 e aguardar CI verde antes de sincronizar staging.
+4. G2 segue bloqueado até pull GHCR na VPS por digest, reconciliação segura do runner/manifesto e identidade SSH correta. Não rodar preflight nem deploy de produção.
