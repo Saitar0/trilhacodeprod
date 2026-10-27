@@ -5,6 +5,9 @@ from database import db
 
 # (collection, keys, options, duplicate-check fields)
 INDEXES = [
+    ("tracks", [("slug", 1)],
+     {"unique": True, "name": "one_track_slug", "partialFilterExpression": {"slug": {"$type": "string"}}},
+     ("slug",)),
     ("users", [("email", 1)], {"unique": True}, ("email",)),
     (
         "auth_sessions",
@@ -15,9 +18,17 @@ INDEXES = [
     ("login_attempts", [("identifier", 1)], {}, None),
     ("login_attempts", [("last", 1)], {"expireAfterSeconds": 3600}, None),
     ("nodes", [("track_id", 1), ("parent_id", 1), ("order", 1)], {}, None),
+    ("nodes", [("track_id", 1), ("meta.import_ref", 1)],
+     {"unique": True, "name": "one_node_import_ref", "partialFilterExpression": {"meta.import_ref": {"$type": "string"}}},
+     ("track_id", "meta.import_ref")),
     ("nodes", [("title", "text"), ("summary", "text")], {"name": "node_search_text"}, None),
     ("content_blocks", [("node_id", 1), ("order", 1)], {}, None),
+    ("content_blocks", [("track_id", 1), ("meta.import_ref", 1)],
+     {"unique": True, "name": "one_block_import_ref", "partialFilterExpression": {"meta.import_ref": {"$type": "string"}}},
+     ("track_id", "meta.import_ref")),
     ("relations", [("track_id", 1)], {}, None),
+    ("relations", [("track_id", 1), ("node_id", 1), ("target_id", 1), ("type", 1)],
+     {"unique": True, "name": "one_track_relation"}, ("track_id", "node_id", "target_id", "type")),
     ("progress", [("user_id", 1), ("track_id", 1)], {}, None),
     ("progress", [("user_id", 1), ("node_id", 1), ("block_id", 1)], {"unique": True},
      ("user_id", "node_id", "block_id")),
@@ -25,6 +36,9 @@ INDEXES = [
      {"unique": True, "name": "one_user_track_state"}, ("user_id", "track_id")),
     ("learning_events", [("user_id", 1), ("at", -1)], {}, None),
     ("edit_history", [("track_id", 1), ("at", -1)], {}, None),
+    ("edit_history", [("import_operation_id", 1)],
+     {"unique": True, "name": "one_import_audit", "partialFilterExpression": {"import_operation_id": {"$type": "string"}}},
+     ("import_operation_id",)),
     ("taxonomies", [("group", 1), ("key", 1)], {"unique": True}, ("group", "key")),
     ("block_types", [("key", 1)], {"unique": True}, ("key",)),
     ("tags", [("slug", 1)], {"unique": True, "name": "one_tag_slug"}, ("slug",)),
@@ -163,5 +177,9 @@ async def preflight_index_checks(database) -> list[dict[str, str]]:
 
 
 async def ensure_indexes() -> None:
+    findings = await preflight_indexes()
+    blockers = [finding for finding in findings if finding.startswith(("CONFLITO ", "DUPLICATAS "))]
+    if blockers:
+        raise RuntimeError("Preflight bloqueou criação de índices; reconciliação manual necessária: " + "; ".join(blockers))
     for collection_name, keys, options, _unique_fields in INDEXES:
         await db[collection_name].create_index(keys, **options)

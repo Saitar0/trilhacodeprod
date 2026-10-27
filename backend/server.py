@@ -96,7 +96,7 @@ app = FastAPI(
 def _error_code(status_code: int) -> str:
     return {
         400: "bad_request", 401: "unauthorized", 403: "forbidden", 404: "not_found",
-        409: "conflict", 422: "validation_error",
+        409: "conflict", 413: "payload_too_large", 422: "validation_error",
     }.get(status_code, "request_error" if status_code < 500 else "internal_error")
 
 
