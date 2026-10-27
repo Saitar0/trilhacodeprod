@@ -101,7 +101,10 @@ test("student completes an immutable multiple-choice activity and resumes its re
     await page.goto("/login");
     await page.getByTestId("login-email-input").fill(process.env.E2E_STUDENT_EMAIL || "student@example.com");
     await page.getByTestId("login-password-input").fill(process.env.E2E_STUDENT_PASSWORD || "CI-only-password");
+    const loginResponse = page.waitForResponse((response) => response.url().endsWith("/api/auth/login"));
     await page.getByTestId("login-submit-button").click();
+    expect((await loginResponse).status(), "synthetic student login").toBe(200);
+    await expect(page.getByTestId("user-menu-trigger")).toBeVisible();
     await page.goto(`/trilhas/${trackId}/n/${topic.id}`);
 
     await expect(page.getByTestId("node-reader")).toBeVisible();
