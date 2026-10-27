@@ -790,7 +790,31 @@ def apply_declared_orders(builder, manifest: dict) -> None:
             builder.outputs[path] = engine.frontmatter(list(fields.items())) + body
 
 
-def validate_generated(builder, manifest: dict, previous: set[str], expected_coverage: dict) -> dict:
+T1_T5_TABLE_HEADER = "| Tipo escolhido | Fatia e evidência mínima do problema central |"
+DELIVERY_2_TITLE = "### Entrega 2 — Construir a fatia vertical e testar o risco central"
+
+
+def extract_t1_t5_table(text: str, location: str) -> list[str]:
+    lines = text.splitlines()
+    matches = [index for index, line in enumerate(lines) if line.strip() == T1_T5_TABLE_HEADER]
+    if len(matches) != 1:
+        raise ValueError(f"{location}: expected exactly one T1–T5 table header, found {len(matches)}")
+    table = []
+    for line in lines[matches[0]:]:
+        if not line.strip().startswith("|"):
+            break
+        table.append(line)
+    row_types = [
+        int(match.group(1))
+        for line in table
+        if (match := re.match(r"^\|\s*\*\*T([1-5])\s+—", line.strip()))
+    ]
+    if len(table) != 7 or row_types != [1, 2, 3, 4, 5]:
+        raise ValueError(f"{location}: T1–T5 table rows are incomplete or out of order: {row_types}")
+    return table
+
+
+def validate_generated(builder, manifest: dict, previous: set[str], expected_coverage: dict, source_data: dict[str, dict]) -> dict:
     errors, coverage_stats = f6.audit_source_coverage(builder)
     if errors:
         raise ValueError("source coverage audit failed: " + "; ".join(errors[:15]))
@@ -875,11 +899,27 @@ def validate_generated(builder, manifest: dict, previous: set[str], expected_cov
         raise ValueError("39.3 final checklist count differs from 12")
     if rubric_dimension_count(rubric_393) != 6:
         raise ValueError("39.3 rubric dimension count differs from 6")
-    m03 = output_by_path[(p393 / "03_empacotar_automatizar_observar.md").as_posix()]
-    c03 = output_by_path[(p393 / "C03_aceite_entrega_3.md").as_posix()]
-    if not all(f"**T{i}:**" in m03 for i in range(1, 6)):
-        raise ValueError("39.3 T1–T5 table is not retained with Delivery 3")
-    if any(f"**T{i}:**" in c03 for i in range(1, 6)):
+    m02_path = p393 / "02_fatia_vertical_risco.md"
+    m03_path = p393 / "03_empacotar_automatizar_observar.md"
+    c03_path = p393 / "C03_aceite_entrega_3.md"
+    m02 = output_by_path[m02_path.as_posix()]
+    m03 = output_by_path[m03_path.as_posix()]
+    c03 = output_by_path[c03_path.as_posix()]
+    source_393 = source_data["39.3"]["raw"]
+    source_delivery_2 = heading_range(source_393, DELIVERY_2_TITLE, level=3)["text"]
+    expected_table = extract_t1_t5_table(source_delivery_2, "39.3 source Delivery 2")
+    actual_table = extract_t1_t5_table(m02, "39.3/M02")
+    if actual_table != expected_table:
+        raise ValueError("39.3 T1–T5 table in M02 differs from the literal source Delivery 2 table")
+    table_locations = [
+        path for path, text in output_by_path.items()
+        if T1_T5_TABLE_HEADER in text
+    ]
+    if table_locations != [m02_path.as_posix()]:
+        raise ValueError(f"39.3 T1–T5 table must exist only in M02; found {table_locations}")
+    if not all(f"- **T{i}:**" in m03 for i in range(1, 6)):
+        raise ValueError("39.3 Delivery 3 instrumentation-by-type items are incomplete")
+    if T1_T5_TABLE_HEADER in c03:
         raise ValueError("39.3 T1–T5 table was duplicated into the acceptance file")
     for number in range(1, 5):
         acceptance = output_by_path[(p393 / f"C0{number}_aceite_entrega_{number}.md").as_posix()]
@@ -1000,7 +1040,7 @@ def build_reports(manifest: dict, stats: dict, prior_count: int, source_count: i
 - Os 15 pares Q/gabarito foram reconstruídos literalmente; o limite de separação foi conferido como `? **` em cada item. A concatenação Q+K reproduz cada bloco original.
 - Os itens compartilhados têm um único arquivo em `90_integracao/` e associações coerentes no frontmatter/cobertura.
 - 39.2: quatro microtópicos, checklist de 11 itens, rubrica de seis dimensões/0–2 e cinco verificações por cenário preservados.
-- 39.3: quatro entregas, quatro aceites, checklist de 12 itens e rubrica de seis dimensões/0–2 preservados. T1–T5 permanece exclusivamente no arquivo da Entrega 3.
+- 39.3: quatro entregas, quatro aceites, checklist de 12 itens e rubrica de seis dimensões/0–2 preservados. A tabela T1–T5 está na Entrega 2, em `02_fatia_vertical_risco.md`; a Entrega 3 mantém cinco itens de instrumentação por tipo.
 - Frontmatter YAML válido em todos os arquivos; paths e `arquivo_id` únicos.
 - Links Markdown relativos resolvidos: {stats['links_resolved']}; wikilinks preservados sem reescrita: {stats['wikilinks']}.
 
@@ -1041,7 +1081,7 @@ Foram validados {stats['mappings']} registros de mapeamento. A auditoria comparo
 - 8 fontes oficiais ativas; nenhum arquivo extra da pasta Fase 7 incluído.
 - 15 questões, 15 gabaritos, 11 práticas e 9 flashcards preservados.
 - Compartilhados deduplicados em destino físico único.
-- Projetos 39.2 e 39.3 preservados; quatro entregas/aceites em 39.3 e tabela T1–T5 associada à Entrega 3.
+- Projetos 39.2 e 39.3 preservados; quatro entregas/aceites em 39.3 e tabela T1–T5 na Entrega 2, em `02_fatia_vertical_risco.md`. A Entrega 3 contém cinco itens de instrumentação por tipo.
 - 2.161 arquivos das Fases 1–7, todas as fontes/backups e o JSON permaneceram intactos durante a geração.
 - Nenhum commit, push, importação ou geração da Fase 9.
 """
@@ -1083,7 +1123,7 @@ def main() -> int:
     runtime = runtime_manifest(manifest, source_data)
     builder = configure_builder(runtime)
     apply_declared_orders(builder, manifest)
-    stats = validate_generated(builder, manifest, previous, expected)
+    stats = validate_generated(builder, manifest, previous, expected, source_data)
     hashes = expected_hashes(builder)
     if len(hashes) != 124:
         raise ValueError(f"expected 124 unique expected outputs, found {len(hashes)}")

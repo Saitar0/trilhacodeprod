@@ -1847,7 +1847,8 @@ unidades:
       checklist_final_itens: 12
       rubrica_dimensoes: 6
       escala_rubrica: 0–2 por dimensão; total 12; limiar 10/12 e bloqueadores da fonte
-      tabela_T1_T5: preservar dentro do marco M03
+      tabela_T1_T5: "preservar integralmente em M02 (Entrega 2), arquivo 02_fatia_vertical_risco.md"
+      rotulos_T1_T5_entrega_3: "cinco itens de instrumentação por tipo; os rótulos não são a tabela"
       origem_pagina_fase: 'docs/courses/trilhacode/Fase_8_Infra_Operacao.md > ## Projeto de fase (Trilho B)'
       dependencias_explicitamente_descritas:
       - API, banco e testes das fases anteriores
