@@ -9,6 +9,7 @@ import pytest
 from core_utils import now
 from database import db
 from security import create_access_token
+from services.sessions import create_session
 
 API = "/api"
 
@@ -27,7 +28,10 @@ def test_registration_requires_long_password_and_email_verification(session_fact
 
     user = event_loop.run_until_complete(db.users.find_one({"email": email}))
     assert user is not None
-    tokenized = create_access_token(str(user["_id"]), email, user.get("token_version", 0))
+    session_id, _ = event_loop.run_until_complete(create_session(str(user["_id"])))
+    tokenized = create_access_token(
+        str(user["_id"]), email, user.get("token_version", 0), session_id=session_id,
+    )
     assert session.get(f"{API}/profile", headers={"Authorization": f"Bearer {tokenized}"}).status_code == 403
 
     token = mailbox_token(email, "Confirme seu e-mail")
@@ -223,7 +227,10 @@ def test_auth_rate_limiter_is_atomic_across_concurrent_instances(event_loop):
         except HTTPException as error:
             return error.status_code
 
-    results = event_loop.run_until_complete(asyncio.gather(*(consume() for _ in range(40))))
+    async def run_concurrently():
+        return await asyncio.gather(*(consume() for _ in range(40)))
+
+    results = event_loop.run_until_complete(run_concurrently())
     assert results.count("allowed") == 5
     assert results.count(429) == 35
 

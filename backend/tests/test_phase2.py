@@ -450,7 +450,9 @@ class TestNotes:
         assert up.status_code == 200
         lst = student.get(f"{API}/notes", params={"node_id": node_id}).json()
         assert any(n["body"] == "my note" for n in lst)
-        d = student.put(f"{API}/notes", json={"node_id": node_id, "body": "   "})
+        d = student.put(f"{API}/notes", json={
+            "node_id": node_id, "body": "   ", "expected_version": up.json()["version"],
+        })
         assert d.status_code == 200 and d.json().get("deleted") is True
 
 

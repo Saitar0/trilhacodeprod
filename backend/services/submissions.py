@@ -8,6 +8,7 @@ from pymongo.errors import DuplicateKeyError
 from constants import PERMISSIONS
 from core_utils import now
 from database import db
+from integrity import can_view_node
 from learning import assert_unlocked
 from permissions import is_staff
 from serialization import oid
@@ -143,6 +144,10 @@ async def get_submission(submission_id: str, user: dict) -> dict:
     if not submission or (submission["user_id"] != user["id"] and not staff):
         raise HTTPException(status_code=404, detail="Submissão não encontrada")
     block = await db.content_blocks.find_one({"_id": oid(submission["block_id"])})
+    if block and not staff:
+        node = await db.nodes.find_one({"_id": oid(block["node_id"])})
+        if not node or not await can_view_node(node, user):
+            block = None
     attempts = await db.submissions.find(
         {"user_id": submission["user_id"], "block_id": submission["block_id"]}, {"history": 0}
     ).sort("attempt", -1).to_list(50)

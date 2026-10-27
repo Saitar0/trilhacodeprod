@@ -1,4 +1,5 @@
-import { expect, request as apiRequest, test } from "@playwright/test";
+import { request as apiRequest } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { mkdir, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -10,6 +11,7 @@ test("student can submit an exercise and retain the answer after reload", async 
   const api = await apiRequest.newContext({ baseURL: API_BASE_URL });
   let blockId: string | undefined;
   let practicalBlockId: string | undefined;
+  let verificationLink: string | undefined;
 
   try {
     const adminLogin = await api.post("/api/auth/login", {
@@ -75,7 +77,14 @@ test("student can submit an exercise and retain the answer after reload", async 
             const body = message.split(/\r?\n\r?\n/).slice(1).join("\n")
               .replace(/=\r?\n/g, "")
               .replace(/=([0-9A-F]{2})/gi, (_match, hex: string) => String.fromCharCode(parseInt(hex, 16)));
-            verificationToken = body.match(/[?&]token=([A-Za-z0-9_-]{32,})/)?.[1];
+            const link = body.match(/https?:\/\/[^\s"'<>]+/)?.[0];
+            if (link) {
+              const parsed = new URL(link);
+              expect(parsed.origin).toBe(new URL(process.env.FRONTEND_URL || "http://127.0.0.1:5173").origin);
+              expect(parsed.pathname).toBe("/auth/confirm-email");
+              verificationToken = parsed.searchParams.get("token") || undefined;
+              verificationLink = parsed.toString();
+            }
           }
         }
         return Boolean(verificationToken);
@@ -86,7 +95,7 @@ test("student can submit an exercise and retain the answer after reload", async 
 
     await page.route("https://**/*", (route) => route.abort());
     expect(verificationToken, "local test mailbox contains the verification link").toBeTruthy();
-    await page.goto(`/auth/confirm-email?token=${verificationToken}`);
+    await page.goto(verificationLink!);
     await expect(page.getByRole("button", { name: "Confirmar e-mail" })).toBeVisible();
     await page.getByRole("button", { name: "Confirmar e-mail" }).click();
     await expect(page.getByRole("status")).toHaveText("E-mail confirmado. Você já pode entrar.");

@@ -9,31 +9,88 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { StudyNote } from "@/types";
+import { useAuth } from "@/context/AuthContext";
 
-const STATE_LABEL = { idle: "", saving: "salvando…", saved: "salvo" };
+const STATE_LABEL = {
+  saved: "salvo no servidor",
+  pending: "alterações não salvas",
+  saving: "salvando…",
+  error: "erro ao salvar; alterações mantidas",
+  conflict: "conflito entre versões",
+};
 
-export function NoteEditor({ nodeId, blockId, initial, testId, rows = 6 }: { nodeId: string; blockId: string | null; initial: string; testId: string; rows?: number }) {
-  const { body, setBody, state } = useAutosaveNote(nodeId, blockId, initial);
+export function NoteEditor({
+  nodeId, blockId, initial, ready, loadError, onRetryLoad, testId, rows = 6,
+}: {
+  nodeId: string;
+  blockId: string | null;
+  initial?: StudyNote;
+  ready: boolean;
+  loadError?: boolean;
+  onRetryLoad?: () => void;
+  testId: string;
+  rows?: number;
+}) {
+  const { user } = useAuth();
+  const userId = user && typeof user === "object" ? user.id : "anonymous";
+  const { body, setBody, state, conflict, retry, reloadServerVersion, overwriteServerVersion } =
+    useAutosaveNote(nodeId, blockId, initial, ready, userId);
+
+  if (!ready) {
+    return (
+      <div className="space-y-1" role={loadError ? "alert" : "status"}>
+        <p className="text-xs text-slate-400">{loadError ? "Não foi possível carregar a versão atual da anotação." : "Carregando anotação…"}</p>
+        {loadError && <Button type="button" variant="outline" size="sm" onClick={onRetryLoad}>Tentar carregar novamente</Button>}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-1">
       <Textarea data-testid={testId} rows={rows} value={body} placeholder="Suas anotações privadas (salvamento automático)" onChange={(e) => setBody(e.target.value)}
-        className="border-amber-500/20 bg-amber-500/[0.03] text-sm" />
-      <p className="h-4 text-right font-mono text-[10px] text-slate-500" data-testid={`${testId}-state`}>{STATE_LABEL[state]}</p>
+        className="border-amber-500/20 bg-amber-500/[0.03] text-sm" aria-describedby={`${testId}-state`} />
+      <div className="flex min-h-6 items-center justify-between gap-2 text-right font-mono text-[10px] text-slate-500">
+        <p role={state === "error" || state === "conflict" ? "alert" : "status"} aria-live="polite" data-testid={`${testId}-state`}>
+          {STATE_LABEL[state]}
+        </p>
+        {state === "error" && <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-[10px]" onClick={() => void retry()}>Tentar novamente</Button>}
+      </div>
+      {state === "conflict" && (
+        <div className="space-y-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3" role="alert" data-testid={`${testId}-conflict`}>
+          <p className="text-xs text-amber-100">Esta anotação mudou em outro dispositivo. Sua edição continua preservada nesta tela.</p>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={reloadServerVersion}>Usar versão do servidor</Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => void overwriteServerVersion()}>Manter minha edição e substituir</Button>
+          </div>
+          {conflict?.current && <span className="sr-only">Versão remota {conflict.current.version}</span>}
+        </div>
+      )}
     </div>
   );
 }
 
 export function useNodeNotes(nodeId: string) {
-  const { data } = useNotes({ node_id: nodeId });
-  return (blockId: string | null) => (data || []).find((n) => n.block_id === blockId)?.body || "";
+  const query = useNotes({ node_id: nodeId, include_deleted: true });
+  const noteFor = (blockId: string | null) => query.data?.find((note) => note.block_id === blockId);
+  return { ...query, noteFor };
 }
 
-export function BlockNote({ nodeId, blockId, initial }: { nodeId: string; blockId: string; initial: string }) {
-  const [open, setOpen] = useState(!!initial);
-  useEffect(() => { if (initial) setOpen(true); }, [initial]);
+export function BlockNote({
+  nodeId, blockId, initial, ready, loadError, onRetryLoad,
+}: {
+  nodeId: string;
+  blockId: string;
+  initial?: StudyNote;
+  ready: boolean;
+  loadError?: boolean;
+  onRetryLoad?: () => void;
+}) {
+  const [open, setOpen] = useState(!!initial?.body);
+  useEffect(() => { if (initial?.body) setOpen(true); }, [initial?.body]);
   return (
     <div className="mt-4">
-      {open ? <NoteEditor nodeId={nodeId} blockId={blockId} initial={initial} testId={`block-note-${blockId}`} rows={3} /> : (
+      {open ? <NoteEditor key={`${nodeId}:${blockId}`} nodeId={nodeId} blockId={blockId} initial={initial} ready={ready} loadError={loadError} onRetryLoad={onRetryLoad} testId={`block-note-${blockId}`} rows={3} /> : (
         <button data-testid={`block-note-open-${blockId}`} onClick={() => setOpen(true)} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-300">
           <NotebookPen className="h-3.5 w-3.5" />Anotar neste bloco
         </button>

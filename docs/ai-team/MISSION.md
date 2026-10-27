@@ -96,3 +96,10 @@ A missão permanece PARCIAL: as frentes técnicas selecionadas concluíram e pas
 2. Atualizar este checkpoint com os resultados finais e o status de PRs #19/#20; não fazer merge.
 3. Manter o baseline de performance até haver medição de requests em runtime.
 4. O responsável compara em canal privado o hostname confirmado no Web Console, porta SSH 22 e fingerprint da chave ED25519 com os valores do GitHub; só após comparação e aprovação específica corrigir o secret comprovadamente divergente. A aprovação para G2 permanece separada.
+
+## Fase 1.2 — Persistência confiável de aprendizagem (26/10/2026)
+
+- Base fixada: `d2824aa6b910f747a29cbbbf8a2f123a5ad51d5c`; implementação isolada em `codex/fase1-2-persistencia`.
+- Escopo local: notas versionadas com conflito explícito; autosave com estado e retry; progresso com revisão CAS, evento pendente reconciliável e IDs separados para requisição e tentativa de quiz.
+- Validação: backend 112/112; Vitest 21/21; Ruff, typecheck, ESLint e build passaram. E2E local não executado por falta de servidor/conta de teste isolados preconfigurados.
+- Estado: implementação local, sem push, merge ou deploy. `docs/courses/trilhacode/` permaneceu fora do sparse-checkout.
