@@ -11,7 +11,7 @@ from services.taxonomy import create_block_type, create_tag, create_taxonomy
 
 
 def test_preflight_compound_and_text_index_key_matching():
-    assert len(INDEXES) == 23
+    assert len(INDEXES) == 24
     assert _keys_match(
         {"key": {"user_id": 1, "at": -1}},
         (("user_id", 1), ("at", -1)),

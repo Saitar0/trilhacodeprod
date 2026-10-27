@@ -3,6 +3,7 @@
   "checks": [
     "index/users/email_1",
     "duplicates/users/email_1",
+    "index/auth_sessions/auth_session_expiry",
     "index/login_attempts/identifier_1",
     "index/login_attempts/last_1",
     "index/nodes/track_id_1_parent_id_1_order_1",

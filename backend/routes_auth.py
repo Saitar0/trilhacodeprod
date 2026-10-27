@@ -1,7 +1,10 @@
 import hmac
 import logging
+from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
+from pymongo.errors import PyMongoError
 
 from email_delivery import send_email
 from permissions import require
@@ -17,7 +20,13 @@ from schemas.users import (
     TokenIn,
     UserOut,
 )
-from security import create_access_token, create_refresh_token, current_user, decode_token
+from security import (
+    create_access_token,
+    create_refresh_token,
+    current_user,
+    decode_token,
+    require_active_session,
+)
 from services.auth import (
     authenticate_user,
     change_password,
@@ -33,6 +42,12 @@ from services.auth import (
 )
 from services.auth import (
     list_users as list_users_service,
+)
+from services.sessions import (
+    SESSION_TTL_SECONDS,
+    create_session,
+    is_valid_session_id,
+    revoke_session,
 )
 from settings import settings
 
@@ -61,11 +76,62 @@ async def _deliver_account_email(kind: str, recipient: str, token: str) -> None:
         log.warning("Account email delivery failed (%s)", kind)
 
 
-def _set_cookies(response: Response, user_id: str, email: str, token_version: int = 0):
-    options = {"httponly": True, "secure": settings.effective_cookie_secure,
-               "samesite": settings.effective_cookie_samesite, "path": "/", "domain": settings.cookie_domain}
-    response.set_cookie("access_token", create_access_token(user_id, email, token_version), max_age=900, **options)
-    response.set_cookie("refresh_token", create_refresh_token(user_id, token_version), max_age=604800, **options)
+def _cookie_options() -> dict:
+    return {
+        "httponly": True,
+        "secure": settings.effective_cookie_secure,
+        "samesite": settings.effective_cookie_samesite,
+        "path": "/",
+        "domain": settings.cookie_domain,
+    }
+
+
+def _clear_auth_cookies(response: Response) -> None:
+    options = {key: value for key, value in _cookie_options().items() if key != "httponly"}
+    response.delete_cookie("access_token", **options)
+    response.delete_cookie("refresh_token", **options)
+
+
+def _set_cookies(
+    response: Response,
+    user_id: str,
+    email: str,
+    token_version: int,
+    session_id: str,
+    refresh_expires_at: datetime,
+) -> None:
+    options = _cookie_options()
+    response.set_cookie(
+        "access_token",
+        create_access_token(user_id, email, token_version, session_id=session_id),
+        max_age=900,
+        **options,
+    )
+    response.set_cookie(
+        "refresh_token",
+        create_refresh_token(
+            user_id,
+            token_version,
+            session_id=session_id,
+            expires_at=refresh_expires_at,
+        ),
+        max_age=SESSION_TTL_SECONDS,
+        **options,
+    )
+
+
+def _session_claim(token: str | None, expected_type: str) -> tuple[str, str] | None:
+    if not token:
+        return None
+    try:
+        payload = decode_token(token, expected_type)
+    except HTTPException:
+        return None
+    session_id = payload.get("sid")
+    user_id = payload.get("sub")
+    if not is_valid_session_id(session_id) or not isinstance(user_id, str) or not user_id:
+        return None
+    return session_id, user_id
 
 
 @router.post("/auth/register", status_code=202)
@@ -133,16 +199,34 @@ async def login(body: LoginIn, request: Request, response: Response):
     await rate_limit("login-ip", _rate_key(client_ip), 120, 60)
     identifier = _rate_key(f"{client_ip}:{body.email}")
     user = await authenticate_user(body.email, body.password, identifier)
-    _set_cookies(response, user["id"], user["email"], user.get("token_version", 0))
+    session_id, refresh_expires_at = await create_session(user["id"])
+    _set_cookies(
+        response,
+        user["id"],
+        user["email"],
+        user.get("token_version", 0),
+        session_id,
+        refresh_expires_at,
+    )
     return user
 
 
 @router.post("/auth/logout", response_model=OkOut)
-async def logout(response: Response):
-    options = {"path": "/", "secure": settings.effective_cookie_secure,
-               "samesite": settings.effective_cookie_samesite, "domain": settings.cookie_domain}
-    response.delete_cookie("access_token", **options)
-    response.delete_cookie("refresh_token", **options)
+async def logout(request: Request, response: Response):
+    _clear_auth_cookies(response)
+    session = _session_claim(request.cookies.get("refresh_token"), "refresh")
+    if session is None:
+        session = _session_claim(request.cookies.get("access_token"), "access")
+    if session is not None:
+        try:
+            await revoke_session(*session)
+        except PyMongoError:
+            failure = JSONResponse(
+                status_code=503,
+                content={"detail": "Não foi possível confirmar o encerramento da sessão."},
+            )
+            _clear_auth_cookies(failure)
+            return failure
     return {"ok": True}
 
 
@@ -157,10 +241,24 @@ async def refresh(request: Request, response: Response):
     if not token:
         raise HTTPException(status_code=401, detail="Sem sessão")
     payload = decode_token(token, "refresh")
+    session_id = payload.get("sid")
+    await require_active_session(session_id, payload.get("sub"))
     user = await get_refresh_user(payload["sub"], payload.get("ver", 0))
-    response.set_cookie("access_token", create_access_token(str(user["_id"]), user["email"], user.get("token_version", 0)), httponly=True,
-                        secure=settings.effective_cookie_secure, samesite=settings.effective_cookie_samesite,
-                        max_age=900, path="/", domain=settings.cookie_domain)
+    response.set_cookie(
+        "access_token",
+        create_access_token(
+            str(user["_id"]),
+            user["email"],
+            user.get("token_version", 0),
+            session_id=session_id,
+        ),
+        httponly=True,
+        secure=settings.effective_cookie_secure,
+        samesite=settings.effective_cookie_samesite,
+        max_age=900,
+        path="/",
+        domain=settings.cookie_domain,
+    )
     return {"ok": True}
 
 

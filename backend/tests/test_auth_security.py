@@ -9,6 +9,7 @@ import pytest
 from core_utils import now
 from database import db
 from security import create_access_token
+from services.sessions import create_session
 
 API = "/api"
 
@@ -27,7 +28,10 @@ def test_registration_requires_long_password_and_email_verification(session_fact
 
     user = event_loop.run_until_complete(db.users.find_one({"email": email}))
     assert user is not None
-    tokenized = create_access_token(str(user["_id"]), email, user.get("token_version", 0))
+    session_id, _ = event_loop.run_until_complete(create_session(str(user["_id"])))
+    tokenized = create_access_token(
+        str(user["_id"]), email, user.get("token_version", 0), session_id=session_id,
+    )
     assert session.get(f"{API}/profile", headers={"Authorization": f"Bearer {tokenized}"}).status_code == 403
 
     token = mailbox_token(email, "Confirme seu e-mail")

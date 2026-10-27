@@ -26,16 +26,21 @@ def test_compatibility_facade_preserves_shared_mongo_objects():
 
 
 def test_access_and_refresh_tokens_keep_their_contract():
-    access = decode_token(create_access_token("user-id", "user@example.com"), "access")
-    refresh = decode_token(create_refresh_token("user-id"), "refresh")
+    session_id = "s" * 43
+    access = decode_token(
+        create_access_token("user-id", "user@example.com", session_id=session_id), "access"
+    )
+    refresh = decode_token(create_refresh_token("user-id", session_id=session_id), "refresh")
 
     assert access["sub"] == "user-id"
     assert access["email"] == "user@example.com"
     assert access["type"] == "access"
+    assert access["sid"] == session_id
     assert refresh["sub"] == "user-id"
     assert refresh["type"] == "refresh"
+    assert refresh["sid"] == session_id
     with pytest.raises(HTTPException) as error:
-        decode_token(create_refresh_token("user-id"), "access")
+        decode_token(create_refresh_token("user-id", session_id=session_id), "access")
     assert error.value.status_code == 401
     with pytest.raises(HTTPException) as error:
         decode_token("invalid-token", "access")
