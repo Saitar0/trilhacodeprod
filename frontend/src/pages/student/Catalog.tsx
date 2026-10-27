@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, CalendarClock, Clock3, Layers3, PlayCircle } from "lucide-react";
 import { useReviews } from "@/hooks/useStudy";
-import { groupReviews } from "@/pages/student/MyStudy";
+import { groupReviews } from "@/lib/groupReviews";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { Track, User } from "@/types";

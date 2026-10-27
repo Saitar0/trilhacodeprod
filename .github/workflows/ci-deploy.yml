@@ -1,0 +1,256 @@
+name: CI and Coolify deploy
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: "Publicar somente depois da aprovação operacional do release"
+        type: choice
+        options: [none, staging, production]
+        default: none
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  compose-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate development Compose configuration
+        run: docker compose --env-file .env.example -f compose.yaml config --quiet
+      - name: Validate isolated QA Compose configuration
+        shell: bash
+        run: |
+          qa_env=$(mktemp)
+          trap 'rm -f "$qa_env"' EXIT
+          chmod 600 "$qa_env"
+          printf '%s\n' \
+            'QA_MONGO_ROOT_USERNAME=ci_qa_user' \
+            'QA_MONGO_ROOT_PASSWORD=ci-only-password' \
+            'QA_JWT_SECRET=ci-only-jwt-secret-for-compose-validation' > "$qa_env"
+          docker compose --env-file "$qa_env" -f compose.qa.yaml config --quiet
+
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install backend test and quality dependencies
+        run: pip install -r backend/requirements-dev.txt
+      - name: Run backend tests that do not require MongoDB
+        run: python -m pytest unit_tests
+        working-directory: backend
+      - name: Run Ruff
+        run: ruff check backend
+      - name: Run isolated backend tests
+        run: python -m pytest
+        working-directory: backend
+        env:
+          ENV: development
+          MONGO_URL_TEST: mongodb://localhost:27017
+          JWT_SECRET: ci-only-not-a-secret
+      - run: python -m compileall -q backend
+        env:
+          ENV: development
+          MONGO_URL: mongodb://localhost:27017
+          DB_NAME: trilhacode_ci
+          JWT_SECRET: ci-only-not-a-secret
+      - name: Reject insecure production configuration
+        shell: bash
+        env:
+          ENV: production
+          MONGO_URL: mongodb://ci:ci@mongo.example.invalid:27017/ci?authSource=admin
+          DB_NAME: ci
+          JWT_SECRET: short
+          FRONTEND_URL: https://app.example.com
+          CORS_ORIGINS: https://app.example.com
+          COOKIE_DOMAIN: .example.com
+          COOKIE_SAMESITE: Lax
+          COOKIE_SECURE: "true"
+          ADMIN_EMAIL: admin@example.com
+          ADMIN_PASSWORD: ci-only-long-password
+        run: |
+          if output=$(PYTHONPATH=backend python -c 'import settings' 2>&1); then
+            echo "Unsafe production config was accepted" >&2
+            exit 1
+          fi
+          echo "$output"
+          case "$output" in
+            *"JWT_SECRET"*) ;;
+            *) echo "Production validation failed for an unexpected reason" >&2; exit 1 ;;
+          esac
+      - name: Build production API image
+        run: docker build -f backend/Dockerfile.prod -t trilhacode-api:ci .
+      - name: Audit production Python dependencies
+        run: pip-audit -r backend/requirements.prod.txt
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Typecheck frontend
+        run: npm run typecheck
+        working-directory: frontend
+      - name: Lint frontend
+        run: npm run lint
+        working-directory: frontend
+      - name: Test frontend
+        run: npm test
+        working-directory: frontend
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+      - name: Build production frontend image
+        run: docker build -f frontend/Dockerfile.prod --build-arg VITE_BACKEND_URL=https://api.example.invalid -t trilhacode-frontend:ci .
+      - name: Validate production Nginx configuration
+        run: docker run --rm trilhacode-frontend:ci nginx -t
+      - name: Audit frontend dependencies
+        run: npm audit --audit-level=high
+        working-directory: frontend
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Install backend test and quality dependencies
+        run: pip install -r backend/requirements-dev.txt
+      - name: Prepare the disposable E2E database
+        working-directory: backend
+        env:
+          ENV: development
+          MONGO_URL: mongodb://127.0.0.1:27017
+          DB_NAME: trilhacode_e2e
+          JWT_SECRET: e2e-only-jwt-secret-not-used-outside-this-job
+          ADMIN_EMAIL: admin@example.com
+          ADMIN_PASSWORD: e2e-only-admin-password
+          EDITOR_EMAIL: editor@example.com
+          EDITOR_PASSWORD: e2e-only-editor-password
+          STUDENT_EMAIL: student@example.com
+          STUDENT_PASSWORD: e2e-only-student-password
+        run: |
+          python manage.py ensure-indexes
+          python manage.py migrate
+          python manage.py seed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - name: Start API against the disposable MongoDB service
+        working-directory: backend
+        env:
+          ENV: development
+          MONGO_URL: mongodb://127.0.0.1:27017
+          DB_NAME: trilhacode_e2e
+          JWT_SECRET: e2e-only-jwt-secret-not-used-outside-this-job
+          FRONTEND_URL: http://127.0.0.1:5173
+          CORS_ORIGINS: http://127.0.0.1:5173
+          COOKIE_SAMESITE: lax
+          COOKIE_SECURE: "false"
+        run: |
+          nohup uvicorn server:app --host 127.0.0.1 --port 18000 > "$RUNNER_TEMP/trilhacode-e2e-api.log" 2>&1 &
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:18000/health; then exit 0; fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/trilhacode-e2e-api.log"
+          exit 1
+      - name: Start frontend against the E2E API
+        working-directory: frontend
+        env:
+          VITE_BACKEND_URL: http://127.0.0.1:18000
+        run: |
+          nohup npm run start -- --host 127.0.0.1 --port 5173 > "$RUNNER_TEMP/trilhacode-e2e-frontend.log" 2>&1 &
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:5173/login; then exit 0; fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/trilhacode-e2e-frontend.log"
+          exit 1
+      - name: Run isolated student and administrator E2E
+        run: npm run test:e2e
+        working-directory: frontend
+        env:
+          E2E_STUDENT_EMAIL: student@example.com
+          E2E_STUDENT_PASSWORD: e2e-only-student-password
+          E2E_ADMIN_EMAIL: admin@example.com
+          E2E_ADMIN_PASSWORD: e2e-only-admin-password
+
+  deploy-staging:
+    needs: [backend, frontend, e2e]
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_target == 'staging' && github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Trigger Coolify staging deployment
+        env:
+          WEBHOOK: ${{ secrets.COOLIFY_STAGING_WEBHOOK }}
+          TOKEN: ${{ secrets.COOLIFY_STAGING_TOKEN }}
+        run: |
+          test -n "$WEBHOOK" && test -n "$TOKEN"
+          curl --fail --silent --show-error \
+            --request GET "$WEBHOOK" \
+            --header "Authorization: Bearer $TOKEN"
+
+  deploy-production:
+    needs: [backend, frontend, e2e]
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_target == 'production' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Coolify production deployment
+        env:
+          WEBHOOK: ${{ secrets.COOLIFY_PRODUCTION_WEBHOOK }}
+          TOKEN: ${{ secrets.COOLIFY_PRODUCTION_TOKEN }}
+        run: |
+          test -n "$WEBHOOK" && test -n "$TOKEN"
+          curl --fail --silent --show-error \
+            --request GET "$WEBHOOK" \
+            --header "Authorization: Bearer $TOKEN"

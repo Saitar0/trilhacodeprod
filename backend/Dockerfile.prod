@@ -1,0 +1,13 @@
+FROM python:3.11-slim AS runtime
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app/backend PORT=8000 WEB_CONCURRENCY=1 TRUSTED_PROXY_IPS=127.0.0.1
+WORKDIR /app
+RUN addgroup --system app && adduser --system --ingroup app app
+COPY backend/requirements.prod.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY backend /app/backend
+COPY backend/entrypoint.prod.sh /usr/local/bin/entrypoint-prod
+RUN chmod 0755 /usr/local/bin/entrypoint-prod
+USER app
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.getenv('PORT','8000')+'/health',timeout=3)" || exit 1
+CMD ["/usr/local/bin/entrypoint-prod"]

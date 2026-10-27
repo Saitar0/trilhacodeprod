@@ -1,6 +1,9 @@
-import os
+from pydantic import EmailStr, TypeAdapter
 
-from core import db, hash_password, now, verify_password
+from core_utils import now
+from database import db
+from security import hash_password
+from settings import settings
 
 TAXONOMIES = [
     ("pedagogical_type", "solo", "Tema solo", "Estudo isolado e focado em um assunto", "sky"),
@@ -30,6 +33,7 @@ CRITERIA = f("criteria", "Critérios da rubrica (um por linha)", "list")
 RESUBMIT = f("allow_resubmit", "Permitir nova tentativa após reprovação", "boolean")
 MAX_SCORE = f("max_score", "Nota máxima (opcional)", "number")
 SUBMITTABLE = {"exercise_objective", "exercise_open", "practical_challenge"}
+_EMAIL = TypeAdapter(EmailStr)
 BLOCK_TYPES = [
     ("theory_text", "Texto teórico", "teoria", "BookOpen", [f("body", "Conteúdo", "markdown")]),
     ("summary", "Resumo curto", "teoria", "AlignLeft", [f("body", "Resumo", "textarea")]),
@@ -96,16 +100,18 @@ SEED_TREE = [
 async def _seed_user(email, password, name, role):
     if not email or not password:
         return
+    email = str(_EMAIL.validate_python(email)).lower()
     existing = await db.users.find_one({"email": email})
-    if existing is None:
-        await db.users.insert_one({"email": email, "name": name, "role": role, "password_hash": hash_password(password),
-                                   "profile": {"bio": "", "goals": "", "preferences": {}}, "created_at": now()})
-    elif not verify_password(password, existing["password_hash"]):
-        await db.users.update_one({"email": email}, {"$set": {"password_hash": hash_password(password)}})
+    if existing is not None:
+        return
+    await db.users.insert_one({"email": email, "name": name, "role": role, "password_hash": hash_password(password),
+                               "is_demo": not settings.is_production,
+                               "profile": {"bio": "", "goals": "", "preferences": {}}, "created_at": now()})
 
 
 async def _insert_node(track_id, parent_id, kind, title, order, **extra):
     doc = {"track_id": track_id, "parent_id": parent_id, "kind": kind, "title": title, "slug": title.lower(),
+           "is_demo": True,
            "summary": extra.pop("summary", ""), "description": "", "notes": "", "guidance": "",
            "pedagogical_type": extra.pop("ptype", ""), "requirement": extra.pop("req", ""),
            "depth": extra.pop("depth", ""), "status": "published", "estimated_minutes": extra.pop("minutes", 0),
@@ -130,6 +136,7 @@ async def _seed_topic(track_id, parent_id, item, order, titles):
         ]
     for i, (btype, btitle, data) in enumerate(blocks):
         await db.content_blocks.insert_one({"node_id": nid, "track_id": track_id, "type": btype, "title": btitle,
+                                            "is_demo": True,
                                             "data": data, "status": "published", "order": i, "schema_version": 1,
                                             "created_at": now(), "updated_at": now()})
 
@@ -149,6 +156,7 @@ async def _seed_track():
         return
     res = await db.tracks.insert_one({
         "title": "Trilha Code", "slug": "trilha-code",
+        "is_demo": True,
         "subtitle": "Ultra cronograma de estudos em desenvolvimento de software",
         "description": "Trilha principal da plataforma. Conteúdo demonstrativo — edite livremente no painel.",
         "cover_url": "", "status": "published", "visibility": "public", "audience": ["iniciante", "intermediário"],
@@ -174,9 +182,13 @@ async def _seed_track():
 
 
 async def run_seed():
-    await _seed_user(os.environ.get("ADMIN_EMAIL"), os.environ.get("ADMIN_PASSWORD"), "Administrador", "admin")
-    await _seed_user(os.environ.get("EDITOR_EMAIL"), os.environ.get("EDITOR_PASSWORD"), "Editora Demo", "editor")
-    await _seed_user(os.environ.get("STUDENT_EMAIL"), os.environ.get("STUDENT_PASSWORD"), "Aluno Demo", "student")
+    if settings.is_production:
+        if not await db.users.find_one({"role": "admin"}):
+            await _seed_user(settings.admin_email, settings.admin_password, "Administrador", "admin")
+    else:
+        await _seed_user(settings.admin_email, settings.admin_password, "Administrador", "admin")
+        await _seed_user(settings.editor_email, settings.editor_password, "Editora Demo", "editor")
+        await _seed_user(settings.student_email, settings.student_password, "Aluno Demo", "student")
     for i, (group, key, label, desc, color) in enumerate(TAXONOMIES):
         await db.taxonomies.update_one({"group": group, "key": key}, {"$setOnInsert": {
             "label": label, "description": desc, "color": color, "order": i, "created_at": now()}}, upsert=True)
@@ -185,18 +197,8 @@ async def run_seed():
             "label": label, "category": cat, "icon": icon, "fields": fields, "description": "", "enabled": True,
             "capabilities": ["submission"] if key in SUBMITTABLE else [],
             "order": i, "created_at": now()}}, upsert=True)
-    if not await db.migrations.find_one({"key": "block_types_submission_v1"}):
-        for key, _l, _c, _i, fields in BLOCK_TYPES:
-            existing = await db.block_types.find_one({"key": key})
-            names = {fd["name"] for fd in existing.get("fields", [])}
-            missing = [fd for fd in fields if fd["name"] not in names]
-            update = {"$addToSet": {"capabilities": "submission"}} if key in SUBMITTABLE else {}
-            if missing:
-                update["$push"] = {"fields": {"$each": missing}}
-            if update:
-                await db.block_types.update_one({"key": key}, update)
-        await db.migrations.insert_one({"key": "block_types_submission_v1", "applied_at": now()})
     for name, color in [("fundamentos", "sky"), ("web", "emerald"), ("ferramentas", "amber")]:
         await db.tags.update_one({"slug": name}, {"$setOnInsert": {"name": name, "color": color, "created_at": now()}},
                                  upsert=True)
-    await _seed_track()
+    if not settings.is_production:
+        await _seed_track()

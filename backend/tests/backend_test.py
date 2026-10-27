@@ -1,79 +1,30 @@
 """Trilha Code - Backend regression tests (pytest).
 
-Covers: auth (login/me/logout/refresh/brute force), permissions, tracks CRUD/publish/duplicate/versions,
-nodes hierarchy/reorder/duplicate, blocks, relations, progress (visit/set/overview), meta/taxonomy.
+Covers: auth (login/me/logout/refresh/brute force/profile/roles), permissions, tracks CRUD/publish/duplicate/versions,
+nodes hierarchy/reorder/duplicate, blocks, relations, progress (visit/set/overview/history), meta/taxonomy.
 """
-import os
-import time
 import uuid
 
 import pytest
-import requests
+from bson import ObjectId
 
-def _read_frontend_url():
-    try:
-        with open("/app/frontend/.env") as fh:
-            for line in fh:
-                if line.startswith("REACT_APP_BACKEND_URL"):
-                    return line.split("=", 1)[1].strip().strip('"').rstrip("/")
-    except Exception:
-        pass
-    return None
+from database import db
 
-
-BASE_URL = (os.environ.get("REACT_APP_BACKEND_URL") or _read_frontend_url() or "").rstrip("/")
-assert BASE_URL, "REACT_APP_BACKEND_URL not set"
-API = f"{BASE_URL}/api"
-
-ADMIN = ("admin@trilhacode.dev", "Admin@123")
-EDITOR = ("editor@trilhacode.dev", "Editor@123")
-STUDENT = ("aluno@trilhacode.dev", "Aluno@123")
-
-
-def _login(email, password):
-    s = requests.Session()
-    r = s.post(f"{API}/auth/login", json={"email": email, "password": password}, timeout=20)
-    assert r.status_code == 200, f"login failed {email}: {r.status_code} {r.text}"
-    return s, r.json()
-
-
-@pytest.fixture(scope="session")
-def admin_session():
-    s, _ = _login(*ADMIN)
-    return s
-
-
-@pytest.fixture(scope="session")
-def editor_session():
-    s, _ = _login(*EDITOR)
-    return s
-
-
-@pytest.fixture(scope="session")
-def student_session():
-    s, _ = _login(*STUDENT)
-    return s
-
-
-@pytest.fixture(scope="session")
-def seeded_track(admin_session):
-    tracks = admin_session.get(f"{API}/tracks").json()
-    t = next((x for x in tracks if x.get("slug") == "trilha-code"), None)
-    assert t, "Seeded trilha-code not found"
-    return t
+API = "/api"
 
 
 # ---------- Health & root ----------
-def test_root():
-    r = requests.get(f"{API}/", timeout=10)
+def test_root(session_factory):
+    r = session_factory().get(f"{API}/")
     assert r.status_code == 200 and r.json().get("ok") is True
 
 
 # ---------- Auth ----------
 class TestAuth:
-    def test_login_sets_cookies(self):
-        s, data = _login(*ADMIN)
-        assert data["email"] == ADMIN[0]
+    def test_login_sets_cookies(self, login):
+        s = login("admin@example.com")
+        data = s.get(f"{API}/auth/me").json()
+        assert data["email"] == "admin@example.com"
         assert data["role"] == "admin"
         assert "access_token" in s.cookies
         assert "refresh_token" in s.cookies
@@ -84,35 +35,51 @@ class TestAuth:
         assert r.json()["role"] == "admin"
         assert "content.write" in r.json()["permissions"]
 
-    def test_me_unauthenticated(self):
-        r = requests.get(f"{API}/auth/me")
+    def test_me_unauthenticated(self, session_factory):
+        r = session_factory().get(f"{API}/auth/me")
         assert r.status_code == 401
 
-    def test_logout_clears_cookies(self):
-        s, _ = _login(*STUDENT)
+    def test_logout_clears_cookies(self, login):
+        s = login("student@example.com")
         r = s.post(f"{API}/auth/logout")
         assert r.status_code == 200
         r2 = s.get(f"{API}/auth/me")
         assert r2.status_code == 401
 
-    def test_refresh(self):
-        s, _ = _login(*STUDENT)
+    def test_refresh(self, login):
+        s = login("student@example.com")
         r = s.post(f"{API}/auth/refresh")
         assert r.status_code == 200
 
-    def test_register_creates_student(self):
-        email = f"test_{uuid.uuid4().hex[:8]}@trilhacode.dev"
-        s = requests.Session()
-        r = s.post(f"{API}/auth/register", json={"name": "Test User", "email": email, "password": "Test@1234"})
-        assert r.status_code == 200
-        assert r.json()["role"] == "student"
-        assert r.json()["email"] == email
+    def test_register_creates_student(self, session_factory, create_verified_user):
+        email = f"test_{uuid.uuid4().hex[:8]}@example.com"
+        s = session_factory()
+        r = create_verified_user(s, email, name="Test User")
+        assert r.status_code == 202
+        assert s.get(f"{API}/auth/me").json()["role"] == "student"
+        assert s.get(f"{API}/auth/me").json()["email"] == email
 
-    def test_brute_force_lockout(self):
-        email = f"bf_{uuid.uuid4().hex[:6]}@trilhacode.dev"
+    def test_update_profile_and_admin_role_change(self, session_factory, admin_session, create_verified_user):
+        email = f"profile_{uuid.uuid4().hex[:8]}@example.com"
+        student = session_factory()
+        created = create_verified_user(student, email, name="Profile User")
+        assert created.status_code == 202
+        profile = student.put(f"{API}/profile", json={"name": "Updated User", "profile": {"bio": "hello"}})
+        assert profile.status_code == 200
+        assert profile.json()["name"] == "Updated User"
+        assert profile.json()["profile"]["bio"] == "hello"
+
+        users = admin_session.get(f"{API}/users").json()
+        user_id = next(user["id"] for user in users if user["email"] == email)
+        changed = admin_session.put(f"{API}/users/{user_id}/role", json={"role": "editor"})
+        assert changed.status_code == 200
+        assert changed.json()["role"] == "editor"
+
+    def test_brute_force_lockout(self, session_factory):
+        email = f"bf_{uuid.uuid4().hex[:6]}@example.com"
         statuses = []
         for _ in range(6):
-            r = requests.post(f"{API}/auth/login", json={"email": email, "password": "wrong"})
+            r = session_factory().post(f"{API}/auth/login", json={"email": email, "password": "wrong"})
             statuses.append(r.status_code)
         assert 429 in statuses, f"expected 429 after 5 tries, got {statuses}"
 
@@ -181,7 +148,7 @@ class TestTracks:
                 "track_id": tid, "kind": "phase", "title": "TEST phase"}).json()
             nid = n["id"]
             btypes = admin_session.get(f"{API}/meta").json()["block_types"]
-            theory = next(b for b in btypes if b["key"] == "theory_text")
+            next(b for b in btypes if b["key"] == "theory_text")
             b = admin_session.post(f"{API}/blocks", json={
                 "node_id": nid, "type": "theory_text", "title": "intro",
                 "data": {"body": "hi"}, "status": "draft"})
@@ -193,13 +160,20 @@ class TestTracks:
             assert pub.json()["version"] == 1
             assert pub.json()["status"] == "published"
 
+            # Publish a second version and preserve newest-first ordering.
+            update_node = admin_session.put(f"{API}/nodes/{nid}", json={"title": "TEST phase v2"})
+            assert update_node.status_code == 200
+            pub_v2 = admin_session.post(f"{API}/tracks/{tid}/publish", json={"note": "v2"})
+            assert pub_v2.status_code == 200 and pub_v2.json()["version"] == 2
+
             # versions list
             versions = admin_session.get(f"{API}/tracks/{tid}/versions").json()
-            assert len(versions) == 1
-            vid = versions[0]["id"]
+            assert [version["version"] for version in versions] == [2, 1]
+            assert all("snapshot" not in version for version in versions)
+            vid = versions[-1]["id"]
             v = admin_session.get(f"{API}/versions/{vid}")
             assert v.status_code == 200
-            assert "snapshot" in v.json()
+            assert v.json()["snapshot"]["track"]["id"] == tid
         finally:
             admin_session.delete(f"{API}/tracks/{tid}")
 
@@ -238,12 +212,14 @@ class TestTracks:
 
 
 # ---------- Nodes ----------
+@pytest.fixture(scope="module")
+def track(admin):
+    tr = admin.post(f"{API}/tracks", json={"title": "TEST_nodes"}).json()
+    yield tr
+    admin.delete(f"{API}/tracks/{tr['id']}")
+
+
 class TestNodes:
-    @pytest.fixture(scope="class")
-    def track(self, admin_session):
-        tr = admin_session.post(f"{API}/tracks", json={"title": "TEST_nodes"}).json()
-        yield tr
-        admin_session.delete(f"{API}/tracks/{tr['id']}")
 
     def test_hierarchy_validation(self, admin_session, track):
         tid = track["id"]
@@ -277,16 +253,16 @@ class TestNodes:
 
 
 # ---------- Blocks & Relations ----------
+@pytest.fixture(scope="module")
+def ctx(admin):
+    tr = admin.post(f"{API}/tracks", json={"title": "TEST_blocks"}).json()
+    n1 = admin.post(f"{API}/nodes", json={"track_id": tr["id"], "kind": "phase", "title": "n1"}).json()
+    n2 = admin.post(f"{API}/nodes", json={"track_id": tr["id"], "kind": "phase", "title": "n2"}).json()
+    yield {"track": tr, "n1": n1, "n2": n2}
+    admin.delete(f"{API}/tracks/{tr['id']}")
+
+
 class TestBlocksRelations:
-    @pytest.fixture(scope="class")
-    def ctx(self, admin_session):
-        tr = admin_session.post(f"{API}/tracks", json={"title": "TEST_blocks"}).json()
-        n1 = admin_session.post(f"{API}/nodes", json={
-            "track_id": tr["id"], "kind": "phase", "title": "n1"}).json()
-        n2 = admin_session.post(f"{API}/nodes", json={
-            "track_id": tr["id"], "kind": "phase", "title": "n2"}).json()
-        yield {"track": tr, "n1": n1, "n2": n2}
-        admin_session.delete(f"{API}/tracks/{tr['id']}")
 
     def test_block_crud_and_unknown_type(self, admin_session, ctx):
         bad = admin_session.post(f"{API}/blocks", json={
@@ -327,22 +303,25 @@ class TestBlocksRelations:
 
 # ---------- Progress ----------
 class TestProgress:
-    def test_visit_and_complete(self, student_session, seeded_track):
-        tree = student_session.get(f"{API}/tracks/{seeded_track['id']}/tree").json()
+    def test_visit_and_complete(self, fresh_student, seeded_track):
+        tree = fresh_student.get(f"{API}/tracks/{seeded_track['id']}/tree").json()
         topic = next((n for n in tree["nodes"] if n["kind"] == "topic"), None)
         assert topic
-        v = student_session.post(f"{API}/progress/visit", json={"node_id": topic["id"]})
+        v = fresh_student.post(f"{API}/progress/visit", json={"node_id": topic["id"]})
         assert v.status_code == 200
-        p = student_session.post(f"{API}/progress", json={
+        p = fresh_student.post(f"{API}/progress", json={
             "node_id": topic["id"], "status": "completed"})
         assert p.status_code == 200 and p.json()["status"] == "completed"
 
-        tp = student_session.get(f"{API}/progress/tracks/{seeded_track['id']}").json()
+        tp = fresh_student.get(f"{API}/progress/tracks/{seeded_track['id']}").json()
         assert topic["id"] in tp["nodes"]
         assert tp["state"]["last_node_id"] == topic["id"]
 
-        ov = student_session.get(f"{API}/progress/overview").json()
+        ov = fresh_student.get(f"{API}/progress/overview").json()
         assert "states" in ov and "completed" in ov
+        history = fresh_student.get(f"{API}/progress/history", params={"track_id": seeded_track["id"]})
+        assert history.status_code == 200
+        assert any(event["node_title"] == topic["title"] for event in history.json())
 
 
 # ---------- Meta/taxonomies ----------
@@ -364,3 +343,33 @@ class TestMeta:
         u = admin_session.put(f"{API}/taxonomies/{tid}", json={"label": "Updated"})
         assert u.status_code == 200 and u.json()["label"] == "Updated"
         admin_session.delete(f"{API}/taxonomies/{tid}")
+
+    def test_tag_and_block_type_endpoints(self, admin_session, event_loop):
+        suffix = uuid.uuid4().hex[:8]
+        tag = admin_session.post(f"{API}/tags", json={"name": f"phase-{suffix}"})
+        assert tag.status_code == 200
+        assert tag.json()["slug"] == f"phase-{suffix}"
+        tag_id = tag.json()["id"]
+        track = admin_session.post(f"{API}/tracks", json={"title": "TEST_tag_cleanup", "tag_ids": [tag_id]})
+        assert track.status_code == 200
+        track_id = track.json()["id"]
+        try:
+            node = admin_session.post(f"{API}/nodes", json={
+                "track_id": track_id, "kind": "phase", "title": "TEST_tag_cleanup", "tag_ids": [tag_id]})
+            assert node.status_code == 200
+            deleted = admin_session.delete(f"{API}/tags/{tag_id}")
+            assert deleted.status_code == 200 and deleted.json()["ok"] is True
+            assert tag_id not in admin_session.get(f"{API}/tracks/{track_id}").json()["tag_ids"]
+            stored_node = event_loop.run_until_complete(
+                db.nodes.find_one({"_id": ObjectId(node.json()["id"])})
+            )
+            assert tag_id not in stored_node["tag_ids"]
+        finally:
+            admin_session.delete(f"{API}/tracks/{track_id}")
+
+        block_type = admin_session.post(f"{API}/block-types", json={
+            "key": f"phase_{suffix}", "label": "Phase test", "capabilities": ["submission"]})
+        assert block_type.status_code == 200
+        block_type_id = block_type.json()["id"]
+        updated = admin_session.put(f"{API}/block-types/{block_type_id}", json={"label": "Updated phase test"})
+        assert updated.status_code == 200 and updated.json()["label"] == "Updated phase test"

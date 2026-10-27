@@ -6,7 +6,7 @@ import { api, apiError } from "@/lib/api";
 import { useMySubmissions } from "@/hooks/useStudy";
 import { ContentBlock, Submission } from "@/types";
 import { cn, formatDate } from "@/lib/utils";
-import { Markdown } from "@/components/common";
+import { Markdown } from "@/components/common/Markdown";
 import { RESULT_META, SubmissionBadge } from "@/components/common/SubmissionBadge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,11 +54,15 @@ function AnswerInput({ block, answer, setAnswer, disabled }: {
   }
   return (
     <div className="space-y-3">
-      <Textarea data-testid={`exercise-answer-${block.id}`} rows={5} disabled={disabled} placeholder="Escreva sua resposta (Markdown)"
+      <label htmlFor={`exercise-answer-input-${block.id}`} className="sr-only">Sua resposta para {block.title || "o exercício"}</label>
+      <Textarea id={`exercise-answer-input-${block.id}`} data-testid={`exercise-answer-${block.id}`} rows={5} disabled={disabled} placeholder="Escreva sua resposta (Markdown)"
         value={answer.text || ""} onChange={(e) => setAnswer({ ...answer, text: e.target.value })} />
       {block.type === "practical_challenge" && (
-        <Textarea data-testid={`exercise-code-${block.id}`} rows={8} disabled={disabled} className="font-mono text-xs" placeholder={block.data.starter_code || "Seu código"}
-          value={answer.code ?? ""} onChange={(e) => setAnswer({ ...answer, code: e.target.value })} />
+        <>
+          <label htmlFor={`exercise-code-input-${block.id}`} className="sr-only">Código da resposta para {block.title || "o exercício"}</label>
+          <Textarea id={`exercise-code-input-${block.id}`} data-testid={`exercise-code-${block.id}`} rows={8} disabled={disabled} className="font-mono text-xs" placeholder={block.data.starter_code || "Seu código"}
+            value={answer.code ?? ""} onChange={(e) => setAnswer({ ...answer, code: e.target.value })} />
+        </>
       )}
     </div>
   );

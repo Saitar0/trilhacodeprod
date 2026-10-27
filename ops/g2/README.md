@@ -1,0 +1,44 @@
+# G2 — VPS executor (host partially provisioned; preflight not approved)
+
+The runner is pinned to an immutable image index digest built from the approved `main` commit `41dc470c567bae50b7ebcf0662d45d43863980c9`:
+
+```text
+ghcr.io/saitar0/trilhacodeprod-backend@sha256:bd62686fb5b3b362d22bfa21259ce584fe6e5c76fa73ffdfde7c000b5088df85
+```
+
+GitHub Actions run [39179762892](https://github.com/Saitar0/trilhacodeprod/actions/runs/39179762892) completed successfully with BuildKit provenance enabled. Its recorded VCS revision matches the source commit above, and the pushed OCI index includes the platform image and a BuildKit attestation manifest. The package is private; registry access from the VPS and a pull by digest remain unverified.
+
+This branch changes runner/test/documentation sources only. It does not install anything on the VPS, configure GHCR access, create a MongoDB user, start a container, deploy via Coolify, publish another image, or run the preflight. **Review before merging or executing.**
+
+## Security model
+
+- SSH account `trilhacode-g2` is already present, password disabled, and outside `sudo`/`docker` groups.
+- The installer takes **only a dedicated Ed25519 public-key file path** and refuses to overwrite any nonempty authorized_keys or existing G2 scripts/policy.
+- The key entry enforces `restrict,command="/usr/local/sbin/trilhacode-g2-preflight-guard"`.
+- The guard checks `SSH_ORIGINAL_COMMAND` exactly equals `trilhacode-g2-preflight` and can call **only** the root-owned preflight runner via passwordless sudo. The runner is root-owned mode 0700; `sudoers` allows exactly that path with no user-provided flags.
+- Runner accepts no arguments, pins an immutable backend image, checks the expected staging container ID and a dedicated internal Docker network, validates the independent manifest, and requires `preflight.env` to be root-owned mode 0600. MongoDB keeps its existing operational network attachments and joins G2 as a secondary network; the dedicated G2 network contains only the expected MongoDB before the run. The ephemeral container's configured network mode is verified before its process starts, and its actual endpoint set must contain only G2. A root lock prevents overlapping invocations.
+- The pinned image's Dockerfile has no non-root `USER`, so the runner explicitly sets UID/GID `65532:65532`. It runs the backend in an ephemeral restricted Docker container with no ports, host mounts, privileges or Docker socket; read-only filesystem, resource limits and 180-second timeout.
+- Backend output is captured to a root-only temporary file; GitHub gets **only counts** of `OK`, `AUSENTE`, `CONFLITO`, `DUPLICATAS`. No raw error strings or sample MongoDB keys are sent to GitHub.
+- A nonzero command exit, conflict, duplicate, timeout or failed prerequisite returns a failure. Missing indexes are expected before G4.
+
+## Dependencies BEFORE real execution — require separate authorization
+
+1. Independently review the scripts and host state. `3jo4k9aes1iqn4qlqqeyyh4y` is the Coolify database resource UUID, not a Docker container ID. The runner now takes the expected full 64-character Docker container ID only from the protected `G2_MONGO_EXPECTED_CONTAINER_ID` setting and inspects that exact ID; if the resource is recreated, stop and review rather than weakening the comparison.
+2. Install and configure a dedicated MongoDB account with **`read` only on `trilhacode_staging`** (not `readWrite`; do not reuse API password). Verify access is restricted to the staging DB. This procedure is NOT implemented in this PR.
+3. As root, create `/etc/trilhacode-g2/preflight.env` (directory 0700, env file owner root mode 0600) with exactly the six variables documented in `docs/g2-staging-preflight-automation.md`; include `ENV=staging`, `DB_NAME=trilhacode_staging`, expected Mongo host/port/full container ID, and a properly URL-encoded staging `MONGO_URL` with explicit `directConnection=true`. **Do not paste credentials to chat, commits or logs.**
+4. The image candidate is already published from the approved source revision and pinned above. Provision a **read-only** GHCR credential on the VPS without exposing it in chat or shell history, then verify access and pull this exact digest in a separate authorized host operation. The installer and runner **never log into GHCR or pull images**.
+5. Review the existing SSH `Match User trilhacode-g2` configuration; validate with `sshd -t`. Do not weaken other users' SSH access. Avoid placing the root SSH private key in GitHub.
+6. The initial-install script is single-use: it refuses a nonempty `authorized_keys` and any existing guard, runner, manifest or sudoers path. The Hostinger Web Console inventory on 2026-10-18 showed an existing forced-command key, guard and runner, while the manifest was absent. **Do not run `ops/g2/install-g2-host.sh` on this host.** A separate staged-upgrade procedure must preserve the current authorized key and sudoers policy, install only reviewed files, verify hashes/ownership/modes, and retain rollback copies. This PR does not implement or authorize that host change.
+7. Independently confirm the VPS SSH host-key fingerprint and configure GitHub Environment `staging-preflight` secrets `G2_STAGING_SSH_HOST`, `G2_STAGING_SSH_USER=trilhacode-g2`, `G2_STAGING_SSH_KEY`, `G2_STAGING_SSH_KNOWN_HOSTS`. Secrets must never be printed. Restrict SSH network access as feasible. 
+8. Verify resistance to alternate SSH commands, TTY, agent/port forwarding, scp and command injection; verify no sudo Docker access except the fixed runner. Only after explicit approval, trigger the existing manual GitHub Actions staging preflight workflow.
+9. Complete G1 backup/offsite verification and preserve independent explicit approval for G3/G4/G5/G6. The G2 read-only preflight does not authorize those gates.
+
+## Operational caveats
+
+- The installer is **single-use** by design; running it twice stops rather than silently rewriting access controls.
+- The runner uses a root-only process lock, random invocation name and label, and verifies the container ID/label before cleanup. If ownership or cleanup cannot be established, it fails closed and may leave an orphan for manual host inspection; do not report a pass.
+- The digest and workflow provenance were checked against the successful Actions run. A pull from the VPS and independent registry-side digest confirmation remain pending.
+- Docker `Internal=true` limits ordinary routing through the G2 bridge but is not proof of absolute host isolation. Host-gateway services, custom routes/firewall rules, other bridges, published ports, and privileged Docker administrators remain in the host trust boundary and require separate review.
+- `preflight.env` is presented to Docker as container environment and is readable by host root/Docker admins; it is not exposed to the GitHub SSH account. Docker administrators are already privileged.
+- Mongo errors and raw findings are intentionally not exposed to GitHub. Operational diagnosis must occur securely on the VPS.
+- This source has not yet been executed against the VPS; review shell, sudo policy and Docker security options on the target OS before installation.

@@ -7,23 +7,16 @@ import { api, apiError } from "@/lib/api";
 import { useMySubmissions, useNotes, useReviews } from "@/hooks/useStudy";
 import { Review } from "@/types";
 import { cn, formatDate } from "@/lib/utils";
-import { EmptyState, Loader, Markdown, PageHeader } from "@/components/common";
+import { groupReviews } from "@/lib/groupReviews";
+import { EmptyState, Loader, PageHeader } from "@/components/common";
+import { Markdown } from "@/components/common/Markdown";
 import { RESULT_META, SubmissionBadge } from "@/components/common/SubmissionBadge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const OUTCOMES: [string, string][] = [["easy", "Fácil"], ["ok", "Ok"], ["hard", "Difícil"]];
-
-export function groupReviews(items: Review[]) {
-  const end = new Date(); end.setHours(23, 59, 59, 999);
-  const start = new Date(); start.setHours(0, 0, 0, 0);
-  return {
-    overdue: items.filter((r) => new Date(r.due_at) < start),
-    today: items.filter((r) => new Date(r.due_at) >= start && new Date(r.due_at) <= end),
-    upcoming: items.filter((r) => new Date(r.due_at) > end),
-  };
-}
+export { groupReviews } from "@/lib/groupReviews";
 
 function ReviewRow({ r }: { r: Review }) {
   const qc = useQueryClient();

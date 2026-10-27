@@ -177,6 +177,7 @@ export interface HistoryItem {
 export interface TrackVersion {
   id: string;
   version: number;
+  snapshot_complete?: boolean;
   kind?: "publish" | "backup" | "restore";
   restored_from_version?: number;
   note: string;

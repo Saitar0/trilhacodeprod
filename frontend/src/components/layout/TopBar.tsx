@@ -21,7 +21,7 @@ export function Logo() {
 }
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
-  cn("flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
+  cn("flex items-center gap-2 rounded-full px-2.5 py-2 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:px-3.5 sm:py-1.5 sm:text-sm",
     isActive ? "bg-slate-800 text-slate-50" : "text-slate-400 hover:text-slate-100");
 
 export function TopBar() {
@@ -30,10 +30,10 @@ export function TopBar() {
   if (!user) return null;
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-[#090D16]/80 backdrop-blur-xl">
-      <div className="flex h-14 items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-8">
+      <div className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-1.5 px-3 py-2 sm:h-14 sm:flex-nowrap sm:justify-between sm:px-6 sm:py-0">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1 sm:flex-initial sm:flex-nowrap sm:gap-8">
           <Logo />
-          <nav className="flex items-center gap-1">
+          <nav className="flex basis-full flex-wrap items-center gap-0 sm:basis-auto sm:flex-nowrap sm:gap-1">
             <NavLink to="/" end className={navCls} data-testid="nav-study">
               <BookMarked className="h-4 w-4" /> Estudar
             </NavLink>
@@ -48,8 +48,8 @@ export function TopBar() {
           </nav>
         </div>
         <DropdownMenu>
-          <DropdownMenuTrigger data-testid="user-menu-trigger"
-            className="flex items-center gap-2.5 rounded-full border border-slate-800 bg-slate-900/60 py-1 pl-1 pr-3 text-sm hover:border-slate-700">
+          <DropdownMenuTrigger data-testid="user-menu-trigger" aria-label={`Menu da conta de ${user.name}`}
+            className="flex items-center gap-2.5 rounded-full border border-slate-800 bg-slate-900/60 py-1 pl-1 pr-3 text-sm hover:border-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400">
             <span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-500/15 font-heading text-xs font-bold text-emerald-300">
               {user.name.slice(0, 2).toUpperCase()}
             </span>
