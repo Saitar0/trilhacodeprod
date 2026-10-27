@@ -82,6 +82,48 @@ export interface ContentBlock {
   data: Record<string, any>;
   status: EditorialStatus;
   order: number;
+  activity?: PublishedActivity;
+}
+
+export interface PublishedActivity {
+  activity_id: string;
+  activity_schema_version: number;
+  published_version_id: string;
+  activity_revision: number;
+  prompt: string;
+  options: { id: string; label: string }[];
+  completion_policy: "responded";
+  max_attempts: number;
+  evaluator_version: string;
+}
+
+export interface ActivityAttempt {
+  id: string;
+  user_id: string;
+  track_id: string;
+  node_id: string;
+  activity_id: string;
+  published_version_id: string;
+  activity_revision: number;
+  attempt_number: number;
+  state: "draft" | "submitted" | "evaluated";
+  response: { selected_option_id: string | null } | null;
+  revision: number;
+  result: { is_correct: boolean; score: number; evaluator_version: string } | null;
+  feedback: string | null;
+  projection_status: "pending" | "complete";
+  created_at: string;
+  updated_at: string;
+  submitted_at?: string | null;
+  evaluated_at?: string | null;
+  activity: PublishedActivity;
+}
+
+export interface ActivityAttemptList {
+  items: ActivityAttempt[];
+  limit: number;
+  skip: number;
+  total: number;
 }
 
 export type FieldType = "text" | "textarea" | "markdown" | "code" | "url" | "number" | "select" | "list" | "boolean";

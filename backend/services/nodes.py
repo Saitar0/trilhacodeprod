@@ -9,6 +9,7 @@ from integrity import can_view_node, reconcile_orphans
 from learning import track_locks, visible_nodes
 from permissions import can_view_track, is_staff
 from serialization import oid
+from services.activity_publications import is_assessment_candidate, public_activity
 from services.common import (
     ancestors,
     check_status,
@@ -20,7 +21,7 @@ from services.common import (
 )
 
 _ASSESSMENT_BLOCK_TYPES = {"exercise_objective", "exercise_open", "practical_challenge", "quiz"}
-_STUDENT_HIDDEN_BLOCK_FIELDS = {"answer", "correct_index", "explanation"}
+_STUDENT_HIDDEN_BLOCK_FIELDS = {"answer", "correct_index", "correct_option_id", "explanation", "feedback"}
 
 
 def _student_block(block: dict) -> dict:
@@ -30,7 +31,12 @@ def _student_block(block: dict) -> dict:
     data = block.get("data")
     if not isinstance(data, dict):
         return block
-    safe_data = {key: value for key, value in data.items() if key not in _STUDENT_HIDDEN_BLOCK_FIELDS}
+    if block.get("type") == "quiz":
+        # Keep only rendering inputs for an unpublished/legacy static quiz.
+        safe_data = {key: value for key, value in data.items()
+                     if key in {"question", "prompt", "options", "activity_schema_version"}}
+    else:
+        safe_data = {key: value for key, value in data.items() if key not in _STUDENT_HIDDEN_BLOCK_FIELDS}
     return {**block, "data": safe_data}
 
 
@@ -87,7 +93,37 @@ async def get_node(node_id: str, user: dict, blocks_limit: int = 1000, blocks_sk
     blocks = [] if lock and not staff else await db.content_blocks.find(block_query).sort("order", 1).skip(
         max(blocks_skip, 0)).limit(block_page_size).to_list(block_page_size)
     if not staff:
-        blocks = [_student_block(block) for block in blocks]
+        track = await db.tracks.find_one({"_id": oid(node["track_id"])})
+        published_version_id = (track or {}).get("published_activity_version_id")
+        activity_publications = {}
+        if published_version_id:
+            activity_publications = {
+                item["activity_id"]: item
+                async for item in db.activity_publications.find({
+                    "track_id": node["track_id"], "node_id": node_id,
+                    "published_version_id": published_version_id,
+                })
+            }
+        student_blocks = []
+        for block in blocks:
+            if block.get("type") == "quiz":
+                publication = activity_publications.get(str(block["_id"]))
+                if publication:
+                    definition = publication.get("definition") or {}
+                    safe_block = _student_block(block)
+                    safe_block["activity"] = public_activity(definition)
+                    safe_block["data"] = {
+                        "question": definition["prompt"],
+                        "options": [option["label"] for option in definition["options"]],
+                    }
+                    student_blocks.append(safe_block)
+                    continue
+                # During a republish, a valid assessment absent from the old
+                # active read model must not become an active student exercise.
+                if published_version_id and is_assessment_candidate(block):
+                    continue
+            student_blocks.append(_student_block(block))
+        blocks = student_blocks
     relations = await db.relations.find({"$or": [{"node_id": node_id}, {"target_id": node_id}]}).to_list(1000)
     other_ids = {rel["target_id"] if rel["node_id"] == node_id else rel["node_id"] for rel in relations}
     others = {

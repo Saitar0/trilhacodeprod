@@ -12,6 +12,7 @@ from database import db
 from integrity import visible_ids
 from learning import assert_unlocked, track_locks
 from serialization import oid, ser
+from services.activity_publications import is_assessment_candidate
 
 RECENT_OPERATION_LIMIT = 128
 
@@ -149,21 +150,48 @@ async def _flush_pending_progress_event(key: dict) -> None:
 
 
 async def set_progress(body: dict, user: dict) -> dict:
+    body = dict(body)
     status = body["status"]
     if status not in PROGRESS_STATUSES:
         raise HTTPException(status_code=400, detail="Status de progresso inválido")
     node = await _node(body["node_id"])
     await assert_unlocked(node, user)
     block_id = body.get("block_id")
+    attempt_id = body.get("attempt_id")
+    server_assessed = False
     if block_id is not None:
         block = await db.content_blocks.find_one({"_id": oid(block_id), "node_id": body["node_id"]})
         if block is None:
             raise HTTPException(status_code=404, detail="Bloco não encontrado")
+        if block.get("type") == "quiz" and status == "completed":
+            has_versioned_definition = await db.activity_publications.find_one(
+                {"activity_id": block_id}, {"_id": 1},
+            )
+            if has_versioned_definition or attempt_id or is_assessment_candidate(block):
+                # A previous immutable publication may still be completing a
+                # durable projection after the current pointer has advanced.
+                assessment = await db.activity_attempts.find_one({
+                    "_id": attempt_id, "user_id": user["id"], "activity_id": block_id,
+                    "track_id": node["track_id"], "node_id": body["node_id"], "state": "evaluated",
+                })
+                pinned_definition = await db.activity_publications.find_one({
+                    "track_id": node["track_id"], "activity_id": block_id,
+                    "published_version_id": (assessment or {}).get("published_version_id"),
+                }) if assessment else None
+                if assessment and pinned_definition and isinstance(assessment.get("result"), dict):
+                    server_assessed = True
+                    body["data"] = {
+                        "activity_id": block_id,
+                        "published_version_id": assessment["published_version_id"],
+                        "activity_attempt_id": assessment["_id"],
+                        "is_correct": assessment["result"].get("is_correct", False),
+                    }
+                else:
+                    raise HTTPException(status_code=403, detail="A conclusão desta atividade exige uma tentativa avaliada")
 
     key = {"user_id": user["id"], "node_id": body["node_id"], "block_id": block_id}
     data = body.get("data", {})
     operation_id = body.get("operation_id")
-    attempt_id = body.get("attempt_id")
     if attempt_id and (block_id is None or status != "completed"):
         raise HTTPException(status_code=400, detail="Uma tentativa avaliativa exige a conclusão de um bloco")
     expected_revision = body.get("expected_revision")
@@ -270,7 +298,9 @@ async def set_progress(body: dict, user: dict) -> dict:
                     "at": timestamp,
                 }
                 if status == "completed":
-                    event["evidence_kind"] = "self_reported"
+                    event["evidence_kind"] = (
+                        "server_assessed" if server_assessed else "self_reported"
+                    )
                 if operation_id:
                     event["operation_id"] = operation_id
                 if attempt_id:
