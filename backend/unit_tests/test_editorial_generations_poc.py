@@ -495,6 +495,24 @@ class EditorialGenerationPoCTests(unittest.TestCase):
         self.assertEqual(after["track"]["title"], "new generation")
         self.assertNotEqual(before["generation_id"], after["generation_id"])
 
+    def test_paused_reader_fixture_wiring_pins_generation_before_pointer_swap(self):
+        # Run the exact MongoDB integration scenario against the unit fakes so
+        # a wrong tuple unpack or missing reader wrapper fails behaviorally.
+        from integration_tests.test_editorial_generations_mongodb import (
+            EditorialGenerationsMongoDBTests,
+        )
+
+        integration_case = EditorialGenerationsMongoDBTests(
+            "test_public_reader_pins_generation_when_pointer_changes_mid_read"
+        )
+        integration_case.clock = self.clock
+        integration_case.store = EditorialGenerationsPoC(self.database, self.clock)
+        integration_case.builder_db = self.database
+        integration_case.append_db = self.database
+        integration_case.reader_db = self.database
+        integration_case.fixture_db = self.database
+        self.run_async(integration_case.test_public_reader_pins_generation_when_pointer_changes_mid_read())
+
     def test_public_projection_filters_drafts_and_private_quiz_fields(self):
         handle = self.begin("public-projection-01")
         self.prepare(handle)

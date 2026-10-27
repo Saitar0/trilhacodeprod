@@ -303,6 +303,25 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
             ),
         )
 
+    def _store_with_paused_reader(
+        self,
+        found: asyncio.Event,
+        release: asyncio.Event,
+        *,
+        builder_db=None,
+        append_db=None,
+        reader_db=None,
+        fixture_db=None,
+    ):
+        writer, (paused_reader, fixture) = self._store(
+            builder_db=builder_db,
+            append_db=append_db,
+            reader_db=reader_db,
+            fixture_db=fixture_db,
+            pause_head=(found, release),
+        )
+        return writer, paused_reader, fixture
+
     async def _begin(
         self, store, track_id: str, operation_id: str, writer_id: str = "writer-a", snap=None
     ):
@@ -688,32 +707,57 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
     async def test_public_reader_pins_generation_when_pointer_changes_mid_read(self):
         track_id = f"reader-pin-{uuid4().hex}"
         first, _ = await self._sealed_selected(track_id, title="Generation one")
-        second_snapshot = _snapshot(track_id, title="Generation two")
-        second = await self._begin(
-            self.store,
-            track_id,
-            f"reader-pin-op-{uuid4().hex}",
-            "writer-b",
-            second_snapshot,
+        second_snapshot = _snapshot(
+            track_id, title="Generation two", prompt="Generation two prompt"
         )
-        await self.store.prepare(second, second_snapshot)
         found = asyncio.Event()
         release = asyncio.Event()
-        paused_store, _ = self._store(pause_head=(found, release))
-        read_task = asyncio.create_task(paused_store.read_active_public(track_id))
-        await _wait_event(found, "reader-pinned-head")
-        selected = await self.store.select_active(
-            track_id=track_id,
-            generation_id=second.generation_id,
-            operation_id=f"reader-pin-select-{uuid4().hex}",
-        )
-        self.assertEqual(selected["generation_id"], second.generation_id)
-        release.set()
-        before_swap = await read_task
-        after_swap = await paused_store.read_active_public(track_id)
-        self.assertEqual(before_swap["generation_id"], first.generation_id)
-        self.assertEqual(before_swap["track"]["title"], "Generation one")
-        self.assertEqual(after_swap["generation_id"], second.generation_id)
+        writer, paused_reader, _fixture = self._store_with_paused_reader(found, release)
+        read_task = None
+        try:
+            read_task = asyncio.create_task(paused_reader.read_active_public(track_id))
+            await _wait_event(found, "reader-pinned-head")
+            self.assertFalse(read_task.done(), "a leitura deve permanecer pausada após fixar A")
+
+            second = await self._begin(
+                writer,
+                track_id,
+                f"reader-pin-op-{uuid4().hex}",
+                "writer-b",
+                second_snapshot,
+            )
+            await writer.prepare(second, second_snapshot)
+            selected = await writer.select_active(
+                track_id=track_id,
+                generation_id=second.generation_id,
+                operation_id=f"reader-pin-select-{uuid4().hex}",
+            )
+            self.assertEqual(selected["generation_id"], second.generation_id)
+
+            release.set()
+            before_swap = await asyncio.wait_for(read_task, timeout=_ASYNC_OPERATION_DEADLINE_SECONDS)
+            after_swap = await asyncio.wait_for(
+                paused_reader.read_active_public(track_id),
+                timeout=_ASYNC_OPERATION_DEADLINE_SECONDS,
+            )
+            self.assertEqual(before_swap["generation_id"], first.generation_id)
+            self.assertEqual(before_swap["track"]["title"], "Generation one")
+            self.assertEqual(before_swap["blocks"][0]["data"]["prompt"], "Select one")
+            self.assertEqual(after_swap["generation_id"], second.generation_id)
+            self.assertEqual(after_swap["track"]["title"], "Generation two")
+            self.assertEqual(after_swap["blocks"][0]["data"]["prompt"], "Generation two prompt")
+            public_json = json.dumps([before_swap, after_swap], sort_keys=True)
+            for forbidden in ("correct_option_id", "Private answer explanation", "writer_id"):
+                self.assertNotIn(forbidden, public_json)
+        finally:
+            release.set()
+            if read_task is not None:
+                if not read_task.done():
+                    read_task.cancel()
+                await asyncio.wait_for(
+                    asyncio.gather(read_task, return_exceptions=True),
+                    timeout=_ASYNC_OPERATION_DEADLINE_SECONDS,
+                )
 
     async def test_reader_fails_closed_on_missing_or_corrupt_chunk(self):
         for corruption in ("missing", "modified", "manifest"):
