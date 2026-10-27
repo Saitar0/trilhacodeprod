@@ -2,16 +2,17 @@ import asyncio
 import uuid
 from types import SimpleNamespace
 
+import pytest
 from bson import ObjectId
 
 from database import db
-from indexes import INDEXES, _keys_match, preflight_indexes
+from indexes import INDEXES, _keys_match, ensure_indexes, preflight_indexes
 from services.progress import visit_node
 from services.taxonomy import create_block_type, create_tag, create_taxonomy
 
 
 def test_preflight_compound_and_text_index_key_matching():
-    assert len(INDEXES) == 24
+    assert len(INDEXES) == 29
     assert _keys_match(
         {"key": {"user_id": 1, "at": -1}},
         (("user_id", 1), ("at", -1)),
@@ -244,4 +245,25 @@ def test_unique_index_preflight_reports_duplicates_and_respects_partial_indexes(
     else:
         raise AssertionError("duplicate findings must fail the public preflight command")
     assert closed == [True]
+
+
+def test_ensure_indexes_refuses_legacy_duplicates_without_writing(monkeypatch, event_loop):
+    writes = []
+
+    class Collection:
+        async def create_index(self, *args, **kwargs):
+            writes.append((args, kwargs))
+
+    class FakeDatabase:
+        def __getitem__(self, _name):
+            return Collection()
+
+    async def duplicate_findings():
+        return ["DUPLICATAS tracks.one_track_slug: legado duplicado"]
+
+    monkeypatch.setattr("indexes.db", FakeDatabase())
+    monkeypatch.setattr("indexes.preflight_indexes", duplicate_findings)
+    with pytest.raises(RuntimeError, match="reconciliação manual"):
+        event_loop.run_until_complete(ensure_indexes())
+    assert writes == []
 

@@ -111,7 +111,7 @@ async def visible_ids(user: dict, track_ids) -> set:
     track_ids = [t for t in set(track_ids) if t]
     q = {"_id": {"$in": [oid(t) for t in track_ids]}}
     if not is_staff(user):
-        q.update(status="published", visibility="public")
+        q.update(status="published", visibility="public", _import_state={"$exists": False})
     tracks = [str(t["_id"]) for t in await db.tracks.find(q, {"_id": 1}).to_list(1000)]
     nodes = await db.nodes.find({"track_id": {"$in": tracks}}, {"parent_id": 1, "status": 1, "track_id": 1}).to_list(100000)
     keep = nodes if is_staff(user) else visible_nodes(nodes)

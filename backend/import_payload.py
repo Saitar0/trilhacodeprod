@@ -1,3 +1,4 @@
+import json
 import math
 
 from bson import BSON
@@ -10,6 +11,11 @@ MAX_NODE_DEPTH = 100
 MAX_ESTIMATED_MINUTES = (1 << 63) - 1
 MIN_BSON_INT64 = -(1 << 63)
 MAX_IMPORT_DOCUMENT_BYTES = 15 * 1024 * 1024
+MAX_IMPORT_PAYLOAD_BYTES = 32 * 1024 * 1024
+MAX_IMPORT_NODES = 20000
+MAX_IMPORT_BLOCKS = 50000
+MAX_IMPORT_RELATIONS = 50000
+MAX_IMPORT_TAGS = 10000
 
 
 def _bson_size_within_limit(value, max_bytes=None):
@@ -58,6 +64,14 @@ def _validate_json_value(value, path, errors, depth=0):
 def validate_import_shape(payload: dict) -> list[dict]:
     """Reject malformed containers before import planning dereferences or hashes them."""
     errors = []
+    if not isinstance(payload, dict):
+        return [{"path": "payload", "message": "deve ser um objeto JSON"}]
+    try:
+        encoded_size = len(json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
+    except (TypeError, ValueError, UnicodeEncodeError, RecursionError):
+        encoded_size = MAX_IMPORT_PAYLOAD_BYTES + 1
+    if encoded_size > MAX_IMPORT_PAYLOAD_BYTES:
+        return [{"path": "payload", "message": "payload excede o limite de 32 MiB"}]
     _validate_json_value(payload, "payload", errors)
 
     def add(path, message):
@@ -87,6 +101,11 @@ def validate_import_shape(payload: dict) -> list[dict]:
     options = payload.get("options")
     if options is not None and not isinstance(options, dict):
         add("options", "deve ser um objeto")
+    elif isinstance(options, dict) and "create_missing_tags" in options and not isinstance(options["create_missing_tags"], bool):
+        add("options.create_missing_tags", "deve ser booleano")
+
+    counts = {"nodes": 0, "blocks": 0, "tags": 0}
+    reported_limits = set()
 
     def validate_nodes(items, path, depth=0):
         if depth > MAX_NODE_DEPTH:
@@ -102,6 +121,10 @@ def validate_import_shape(payload: dict) -> list[dict]:
             if not isinstance(node, dict):
                 add(node_path, "deve ser um objeto")
                 continue
+            counts["nodes"] += 1
+            if counts["nodes"] > MAX_IMPORT_NODES and "nodes" not in reported_limits:
+                add("nodes", f"máximo de {MAX_IMPORT_NODES} itens por importação")
+                reported_limits.add("nodes")
             for field in ("ref", "kind", "status"):
                 if field in node and not isinstance(node[field], str):
                     add(f"{node_path}.{field}", "deve ser texto")
@@ -134,11 +157,21 @@ def validate_import_shape(payload: dict) -> list[dict]:
                         if not isinstance(tag, str):
                             add(tag_path, "deve ser texto")
                             continue
+                        counts["tags"] += 1
+                        if counts["tags"] > MAX_IMPORT_TAGS and "tags" not in reported_limits:
+                            add("nodes", f"máximo de {MAX_IMPORT_TAGS} ocorrências de tags por importação")
+                            reported_limits.add("tags")
+                        if not tag.strip():
+                            add(tag_path, "não pode ser vazio")
                         tag_doc = {"name": tag, "slug": tag.lower().replace(" ", "-"), "color": "slate", "created_at": None}
                         if not _bson_size_within_limit(tag_doc):
                             add(tag_path, "documento excede o limite seguro de tamanho para importação")
                 if field == "blocks" and isinstance(values, list):
                     for j, block in enumerate(values):
+                        counts["blocks"] += 1
+                        if counts["blocks"] > MAX_IMPORT_BLOCKS and "blocks" not in reported_limits:
+                            add("nodes", f"máximo de {MAX_IMPORT_BLOCKS} blocos por importação")
+                            reported_limits.add("blocks")
                         block_path = f"{node_path}.blocks[{j}]"
                         if not isinstance(block, dict):
                             add(block_path, "deve ser um objeto")
@@ -147,6 +180,8 @@ def validate_import_shape(payload: dict) -> list[dict]:
                             add(f"{block_path}.type", "deve ser texto")
                         if "ref" in block and block["ref"] is not None and not isinstance(block["ref"], str):
                             add(f"{block_path}.ref", "deve ser texto")
+                        elif isinstance(block.get("ref"), str) and len(block["ref"]) > 512:
+                            add(f"{block_path}.ref", "máximo de 512 caracteres")
                         for field in ("title", "status"):
                             if field in block and not isinstance(block[field], str):
                                 add(f"{block_path}.{field}", "deve ser texto")
@@ -164,6 +199,8 @@ def validate_import_shape(payload: dict) -> list[dict]:
     # cap reserves space for the IDs and metadata added by _execute.
     track = payload.get("track")
     if isinstance(track, dict):
+        if isinstance(track.get("slug"), str) and len(track["slug"]) > 128:
+            add("track.slug", "máximo de 128 caracteres")
         stored_track_fields = {key: track[key] for key in (*TRACK_TEXT, "slug", "audience", "level_labels", "settings", "hierarchy") if key in track}
         if not _bson_size_within_limit(stored_track_fields):
             add("track", "documento excede o limite seguro de tamanho para importação")
@@ -229,6 +266,8 @@ def validate_import_shape(payload: dict) -> list[dict]:
     if relations is not None and not isinstance(relations, list):
         add("relations", "deve ser uma lista")
     elif isinstance(relations, list):
+        if len(relations) > MAX_IMPORT_RELATIONS:
+            add("relations", f"máximo de {MAX_IMPORT_RELATIONS} relações por importação")
         for i, relation in enumerate(relations):
             path = f"relations[{i}]"
             if not isinstance(relation, dict):
@@ -239,6 +278,8 @@ def validate_import_shape(payload: dict) -> list[dict]:
                     add(f"{path}.{field}", "deve ser texto")
             if "note" in relation and not isinstance(relation["note"], str):
                 add(f"{path}.note", "deve ser texto")
+            if "enforced" in relation and not isinstance(relation["enforced"], bool):
+                add(f"{path}.enforced", "deve ser booleano")
             if not _bson_size_within_limit(relation):
                 add(path, "documento excede o limite seguro de tamanho para importação")
 

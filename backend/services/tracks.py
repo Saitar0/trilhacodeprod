@@ -20,7 +20,7 @@ async def list_tracks(
 ) -> list[dict]:
     query = {}
     if not is_staff(user):
-        query = {"status": "published", "visibility": "public"}
+        query = {"status": "published", "visibility": "public", "_import_state": {"$exists": False}}
     elif status:
         query["status"] = status
     if query_text:
