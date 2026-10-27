@@ -1,0 +1,933 @@
+﻿unidade,origem,bloco,tipo,alias,destino,segmento,offset_inicio,offset_fim,texto_origem,normalizacao,valor_origem,valor_destino,linha_inicio,linha_fim
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,Objetivo,objetivo,OBJ,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/00_objetivo.md,## Objetivo,167,308,"## Objetivo
+Comparar ECS e EKS por nível de abstração, controle, operação e custo, reconhecendo que ambos deixam responsabilidades ao time.
+
+",literal,,,,
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,Resumo,resumo,SUM,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/01_resumo.md,## Resumo,1491,1812,"## Resumo
+- ECS é serviço AWS de orquestração com abstrações próprias; EKS gerencia Kubernetes.
+- EKS aumenta compatibilidade e controle e também a superfície operacional.
+- Opções sem servidor reduzem gestão de capacidade, não todo trabalho de operação.
+- Decisão depende de workload, equipe, custo total e requisitos.
+
+",literal,,,,
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,Critério de conclusão,criterio,CRI,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/02_criterio_de_conclusao.md,## Critério de conclusão,2104,2260,"## Critério de conclusão
+Comparar ECS e EKS em quatro dimensões (operação, portabilidade, custo total e expertise) para um workload de API containerizada.
+
+",literal,,,,
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,Conexões,conexoes,CON,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/03_conexoes.md,## Conexões,2260,2380,"## Conexões
+Complementa conceitos de pods em 37.2 e containerização em 10.2; depende dos fundamentos de cloud em 34.1.
+
+",literal,,,,
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,Referências,referencias,REF,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/04_referencias.md,## Referências,2380,2734,"## Referências
+- [AWS — What is Amazon ECS?](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/) — componentes, capacidade e serviços; conferido em 14/10/2026.
+- [AWS — What is Amazon EKS?](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) — control plane, opções operacionais e Kubernetes gerenciado; conferido em 14/10/2026.
+",literal,,,,
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,## Teoria,theory,T01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/01_ecs_eks_modelos_responsabilidades/01_teoria.md,microtópico de teoria,308,1491,"## Teoria
+Amazon ECS é orquestrador gerenciado de containers integrado à AWS. Define task definition, cluster, task e service; capacidade pode usar EC2, Fargate e outras opções suportadas. O time ainda desenha rede, IAM, health checks, implantação, autoscaling, observabilidade e custos.
+
+Amazon EKS oferece Kubernetes gerenciado. AWS gerencia o control plane e integração; a operação de nodes/capacidade, add-ons, políticas Kubernetes e upgrades depende do modo escolhido. ECS tende a seguir modelo AWS e requer menos conceitos Kubernetes. EKS oferece compatibilidade com APIs e ecossistema Kubernetes, mas a flexibilidade pode trazer complexidade de cluster, rede, permissões e custos. “Gerenciado” descreve uma divisão de responsabilidades, não ausência de operação.
+
+Escolha olhando requisitos e competência da equipe: portabilidade/ecossistema, integração AWS, governança, workload, custo fixo/variável, disponibilidade de habilidades e esforço de atualização. A comparação deve usar o mesmo workload e contabilizar cluster/control plane, compute, rede, logs e suporte. Fargate reduz gestão de nós, mas preço e limitações precisam ser comparados por uso e modalidade vigentes.
+
+",literal,,,,
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,FC01,flashcards,FC_01_ecs_eks_modelos_responsabilidades,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/01_ecs_eks_modelos_responsabilidades/F01_flashcards.md,flashcard pergunta/resposta,1826,1904,"- **ECS é Kubernetes?** Não; é orquestrador AWS com API e conceitos próprios.
+",literal,,,,
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,FC02,flashcards,FC_01_ecs_eks_modelos_responsabilidades,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/01_ecs_eks_modelos_responsabilidades/F01_flashcards.md,flashcard pergunta/resposta,1904,2007,"- **EKS elimina gestão de cluster?** Gerencia control plane; outras responsabilidades variam por modo.
+",literal,,,,
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,FC03,flashcards,FC_01_ecs_eks_modelos_responsabilidades,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/01_ecs_eks_modelos_responsabilidades/F01_flashcards.md,flashcard pergunta/resposta,2007,2104,"- **Fargate elimina observabilidade?** Não; aplicação e serviço ainda precisam ser monitorados.
+
+",literal,,,,
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,Objetivo,objetivo,OBJ,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/00_objetivo.md,## Objetivo,164,276,"## Objetivo
+Explicar ciclo de vida básico de Pod, função de Deployment e descoberta/acesso a Pods por Service.
+
+",literal,,,,
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,Resumo,resumo,SUM,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/01_resumo.md,## Resumo,1549,1860,"## Resumo
+- Pod executa containers, é efêmero e não deve ser identidade persistente.
+- Deployment mantém réplicas e coordena rollout de workload stateless.
+- Service fornece endpoint estável para conjunto de Pods selecionados.
+- Readiness/liveness têm propósitos distintos; manifests declaram estado desejado.
+
+",literal,,,,
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,Critério de conclusão,criterio,CRI,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/02_criterio_de_conclusao.md,## Critério de conclusão,2195,2350,"## Critério de conclusão
+Desenhar Pod → Deployment/ReplicaSet → Service e explicar o que acontece quando Pod é substituído e quando readiness está falsa.
+
+",literal,,,,
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,Conexões,conexoes,CON,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/03_conexoes.md,## Conexões,2350,2447,"## Conexões
+Complementa opções gerenciadas em 37.1; baseia-se na containerização local em 10.2.
+
+",literal,,,,
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,Referências,referencias,REF,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/04_referencias.md,## Referências,2447,3416,"## Referências
+- [Kubernetes — Workloads](https://kubernetes.io/docs/concepts/workloads/) — Pods e controllers como Deployment; conferido em 14/10/2026.
+- [Kubernetes — Pods](https://kubernetes.io/docs/concepts/workloads/pods/) — ciclo de vida e unidade de execução; conferido em 14/10/2026.
+- [Kubernetes — Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) — réplicas, rollout e estado desejado; conferido em 14/10/2026.
+- [Kubernetes — Service](https://kubernetes.io/docs/concepts/services-networking/service/) — seleção de Pods e endpoint estável; conferido em 14/10/2026.
+- [Kubernetes — Liveness, Readiness and Startup Probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/) — diferenças e configuração de probes; conferido em 14/10/2026.
+- [Kubernetes — Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) — objeto Secret e controles complementares; conferido em 14/10/2026.
+",literal,,,,
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,## Teoria,theory,T01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/01_pods_deployments_services_probes/01_teoria.md,microtópico de teoria,276,1549,"## Teoria
+Um **Pod** é a menor unidade implantável do Kubernetes e pode conter um ou mais containers que compartilham rede e volumes. Pod é efêmero: pode ser substituído, ganhar outro IP ou terminar. Por isso, normalmente não se cria Pod isolado para manter aplicação.
+
+Um **Deployment** descreve estado desejado de uma aplicação sem estado e mantém réplicas via ReplicaSet; alteração de template pode iniciar rollout e, se apropriado, rollback. Liveness probe verifica se deve reiniciar processo; readiness indica se deve receber tráfego. Probes mal calibradas podem causar reinícios/indisponibilidade. Um **Service** seleciona Pods por labels e oferece endereço estável e descoberta de serviço, mesmo quando Pods mudam. Tipos (ClusterIP, NodePort, LoadBalancer) definem alcance diferente; Ingress/Gateway acrescenta roteamento HTTP conforme controlador instalado.
+
+Manifestos declarativos descrevem objeto desejado; `kubectl apply` pede ao control plane convergir, não executa comandos em sequência como script. ConfigMap guarda configuração não secreta; Secret representa dado sensível, mas seu uso ainda depende de RBAC, criptografia e gestão do cluster. Kubernetes automatiza scheduling e reconciliação, não resolve sozinho desenho da aplicação, backup ou segurança.
+
+",literal,,,,
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,FC01,flashcards,FC_01_pods_deployments_services_probes,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/01_pods_deployments_services_probes/F01_flashcards.md,flashcard pergunta/resposta,1874,1979,"- **Quem recria Pod de Deployment que falhou?** Controladores mantêm estado desejado e criam substituto.
+",literal,,,,
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,FC02,flashcards,FC_01_pods_deployments_services_probes,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/01_pods_deployments_services_probes/F01_flashcards.md,flashcard pergunta/resposta,1979,2084,"- **Service aponta para IP fixo de um Pod?** Não; seleciona endpoints correspondentes ao longo do tempo.
+",literal,,,,
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,FC03,flashcards,FC_01_pods_deployments_services_probes,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/01_pods_deployments_services_probes/F01_flashcards.md,flashcard pergunta/resposta,2084,2195,"- **Readiness falha: o que acontece?** Pod deixa de receber tráfego pelo Service enquanto não estiver pronto.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,Objetivo,objetivo,OBJ,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/00_objetivo.md,## Objetivo,179,387,"## Objetivo
+Reconhecer Cloud Run, Pub/Sub e Google Kubernetes Engine (GKE), selecionar uma opção inicial para cenários simples e comparar com AWS sem presumir equivalência de produto, operação ou semântica.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,Resumo,resumo,SUM,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/01_resumo.md,## Resumo,4879,5444,"## Resumo
+- Cloud Run oferece service, job, worker pool e instance; escolha conforme o ciclo de vida do trabalho.
+- Pub/Sub desacopla publicação e consumo, mas reentrega, confirmação, ordenação e idempotência exigem desenho explícito.
+- A entrega exactly-once do Pub/Sub tem escopo e condições; não garante, por si só, efeito de negócio global único.
+- GKE Autopilot e Standard distribuem controle operacional de maneiras diferentes.
+- Compare requisitos e comportamento do workload; equivalências AWS ↔ GCP são aproximações, não mapas de substituição automática.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,Critério de conclusão,criterio,CRI,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/02_criterio_de_conclusao.md,## Critério de conclusão,8157,8407,"## Critério de conclusão
+Explicar, usando um cenário, a escolha entre Cloud Run Service/Job/Worker Pool, o fluxo básico de Pub/Sub e a diferença operacional entre GKE Autopilot e Standard; listar pelo menos dois limites de uma comparação AWS ↔ GCP.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,Conexões,conexoes,CON,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/03_conexoes.md,## Conexões,8407,8546,"## Conexões
+Relaciona-se a serviços e eventos em 35.1, serviços gerenciados em 37.1, Kubernetes básico em 37.2 e mensageria em 40.1–40.2.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,Referências,referencias,REF,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/04_referencias.md,## Referências,8546,9279,"## Referências
+- [Google Cloud — What is Cloud Run?](https://docs.cloud.google.com/run/docs/overview/what-is-cloud-run) — tipos de recursos, serviços e responsabilidades; consultado em 15/10/2026.
+- [Google Cloud — Pub/Sub overview](https://cloud.google.com/pubsub/docs/overview) — conceitos de tópicos e assinaturas; consultado em 15/10/2026.
+- [Google Cloud — Exactly-once delivery](https://docs.cloud.google.com/pubsub/docs/exactly-once-delivery) — escopo, requisitos e limitações da entrega exactly-once; consultado em 15/10/2026.
+- [Google Cloud — About GKE modes of operation](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/choose-cluster-mode) — diferenças entre Autopilot e Standard; consultado em 15/10/2026.
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,### Microtópico 1 — Escolher como executar código no Cloud Run,theory,T01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/01_modelos_de_execucao_cloud_run/01_teoria.md,microtópico de teoria,398,1928,"### Microtópico 1 — Escolher como executar código no Cloud Run
+
+Cloud Run é uma plataforma gerenciada para executar código em containers. A escolha começa pelo formato do trabalho:
+
+- **Service:** recebe requisições HTTP em um endpoint e pode também integrar-se a eventos. É apropriado para APIs, aplicações web e serviços que respondem a chamadas.
+- **Job:** executa tarefas que começam, processam trabalho e terminam; pode ser iniciado manualmente ou por uma agenda/orquestração.
+- **Worker pool:** executa trabalho em segundo plano que não depende de receber uma requisição HTTP, como consumidores de filas. O modelo de escala e os gatilhos não são os mesmos de um service.
+- **Instance:** atende alguns casos que pedem um ambiente de execução singleton e de longa duração.
+
+A plataforma reduz a necessidade de administrar servidores ou cluster, mas não elimina decisões sobre aplicação, identidade, rede, configuração, limites, observabilidade e persistência. O filesystem gravável local da instância é temporário; dados que precisam sobreviver devem ir para armazenamento apropriado. Não escolha apenas pela palavra “serverless”: confira o contrato de execução e o comportamento de escala do recurso específico.
+
+Cloud Run pode resolver problemas semelhantes aos tratados com containers gerenciados na AWS, inclusive ECS com Fargate em certos cenários. Isso não faz os serviços intercambiáveis. Runtime, forma de receber tráfego, integração, permissões, rede, escala e cobrança precisam ser comparados para o workload real.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,### Microtópico 2 — Usar Pub/Sub sem presumir entrega única,theory,T02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/02_pubsub_entrega_idempotencia/01_teoria.md,microtópico de teoria,1928,3557,"### Microtópico 2 — Usar Pub/Sub sem presumir entrega única
+
+O **Pub/Sub** separa quem publica uma mensagem de quem a processa. Publishers publicam em um tópico; uma assinatura (**subscription**) representa uma relação de consumo e entrega mensagens a subscribers. Esse desacoplamento permite que produtores e consumidores evoluam em ritmos diferentes e ajuda a distribuir eventos para consumidores independentes.
+
+O consumidor precisa definir o que significa processar e confirmar uma mensagem. Em sistemas distribuídos, uma falha pode ocorrer entre produzir o efeito de negócio e confirmar o recebimento. Por isso, o processamento deve considerar reentrega e idempotência: repetir a mesma mensagem não deve criar efeitos duplicados indevidos. Ordenação, retenção, política de retry, dead-letter e prazo de confirmação são configurações e garantias a estudar, não consequências automáticas de existir um tópico.
+
+Pub/Sub oferece uma opção de entrega exactly-once com escopo delimitado: exige subscription do tipo pull, opera dentro de uma região e possui requisitos e limites próprios. Mesmo quando esse recurso é habilitado, a aplicação ainda precisa coordenar seu efeito de negócio com a confirmação. A semântica não deve ser resumida como “o sistema inteiro processa cada evento exatamente uma vez”.
+
+AWS SNS, SQS e EventBridge podem participar de arquiteturas que atendem necessidades parecidas, mas seus papéis e combinações não correspondem diretamente a tópico e assinatura do Pub/Sub. Compare o padrão completo — publicação, roteamento, consumo, confirmação, retry e tratamento de falhas — em vez de comparar só nomes.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,### Microtópico 3 — Escolher GKE e comparar provedores pelo cenário,theory,T03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/03_gke_autopilot_standard_provedores/01_teoria.md,microtópico de teoria,3557,4879,"### Microtópico 3 — Escolher GKE e comparar provedores pelo cenário
+
+O **Google Kubernetes Engine (GKE)** é Kubernetes gerenciado. O modo de operação muda o equilíbrio entre controle e trabalho operacional:
+
+- **Autopilot:** GKE gerencia mais aspectos da infraestrutura, incluindo nós, escala e configurações recomendadas. Há restrições e convenções que podem não servir a workloads que exigem controle específico.
+- **Standard:** a equipe controla mais configurações da infraestrutura, como node pools, e assume mais decisões de operação. Essa flexibilidade também traz responsabilidades.
+
+GKE é comparável a EKS porque ambos oferecem Kubernetes gerenciado, mas uma carga não se torna portável sem revisão. Verifique versões e recursos Kubernetes usados, rede, identidade, storage, classes de nós, políticas de segurança, observabilidade, upgrade e integrações específicas de cada provedor.
+
+Uma comparação útil parte dos requisitos e segue esta lista: **execução e escala; entrega e falhas; identidade e permissões; rede e armazenamento; operação e observabilidade; quotas e disponibilidade regional; custo para o padrão de uso**. Registre o que é equivalente no comportamento necessário e o que exigiria adaptação. Para esta unidade de repertório, não é preciso criar projeto GCP, ativar cobrança ou cadastrar cartão.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,P01,practice,P01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/90_integracao/P01_pratica.md,enunciado integral da prática,6078,7092,"### Atividade 1 — Mapeamento por cenário
+Para cada cenário, escolha uma opção inicial no GCP e registre uma possível referência AWS. Justifique a escolha e descreva **dois limites da comparação**.
+
+1. Uma API HTTP sem estado que pode escalar conforme as requisições.
+2. Um evento precisa ser publicado e processado por dois consumidores independentes.
+3. Uma aplicação já usa manifests e recursos Kubernetes e depende de controle detalhado dos nós.
+
+**Entrega:** tabela com cenário, opção GCP, comparação AWS aproximada, dois limites e uma pergunta que precisa ser respondida antes de produção.
+
+**Critérios de aceite:** as escolhas correspondem ao tipo de workload; referências AWS são chamadas de aproximações; cada linha aponta dois limites concretos (por exemplo, contrato de execução, entrega, identidade, rede, operação ou cobrança).
+
+**Feedback esperado:** se a resposta disser apenas “Cloud Run = Fargate” ou “Pub/Sub = SQS”, revise: identifique o fluxo completo e os comportamentos ainda não comparados.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,P02,practice,P02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/90_integracao/P02_pratica.md,enunciado integral da prática,7092,8157,"### Atividade 2 — Revisão de risco de migração
+Considere um consumidor de eventos que grava uma cobrança em banco e só depois confirma a mensagem. Monte uma revisão curta para decidir o que precisa ser validado antes de mover a solução para Pub/Sub e Cloud Run ou para uma configuração equivalente.
+
+Inclua: (a) como evitar cobrança duplicada após reentrega; (b) quando e como confirmar ou rejeitar a mensagem; (c) requisitos de ordenação, retry e dead-letter; (d) identidade e acesso ao banco; (e) observabilidade, quotas, região e custo; (f) uma estratégia de teste sem criar conta ou recursos cloud.
+
+**Entrega:** checklist de riscos com evidência que demonstraria cada item resolvido.
+
+**Critérios de aceite:** os seis aspectos aparecem; distingue garantia de entrega de garantia do efeito de negócio; propõe idempotência ou deduplicação e teste de falha entre gravação e confirmação.
+
+**Feedback esperado:** “ativar exactly-once” isoladamente não resolve a janela entre a gravação no banco e a confirmação; explicite como a aplicação reconhece uma repetição.
+
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,FC01,flashcards,FC_01_modelos_de_execucao_cloud_run,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/01_modelos_de_execucao_cloud_run/F01_flashcards.md,flashcard pergunta/resposta,5458,5608,"- **Quando escolher Cloud Run Job em vez de Service?** Quando o trabalho executa tarefas e termina, em vez de atender continuamente requisições HTTP.
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,FC02,flashcards,FC_02_pubsub_entrega_idempotencia,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/02_pubsub_entrega_idempotencia/F02_flashcards.md,flashcard pergunta/resposta,5608,5839,"- **Uma confirmação do Pub/Sub torna o efeito de negócio exatamente único?** Não. É preciso considerar falhas entre o efeito e a confirmação, além de idempotência; o recurso exactly-once também tem escopo e requisitos específicos.
+",literal,,,,
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,FC03,flashcards,FC_03_gke_autopilot_standard_provedores,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/03_gke_autopilot_standard_provedores/F03_flashcards.md,flashcard pergunta/resposta,5839,6063,"- **O que muda entre GKE Autopilot e Standard?** Principalmente o nível de gerenciamento e controle da infraestrutura: Autopilot delega mais operações ao GKE; Standard permite mais controle e exige mais decisões da equipe.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Objetivo,objetivo,OBJ,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/00_objetivo.md,## Objetivo,192,441,"## Objetivo
+Distinguir logs, métricas e traces; selecionar o sinal adequado para uma pergunta operacional; e desenhar instrumentação que correlacione uma requisição entre componentes sem expor dados sensíveis nem criar cardinalidade desnecessária.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Resumo,resumo,SUM,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/01_resumo.md,## Resumo,5635,6314,"## Resumo
+- Logs registram eventos, métricas agregam medições e traces mostram o percurso de operações distribuídas.
+- O sinal certo depende da pergunta; a correlação ajuda a investigar, mas não demonstra causa sozinha.
+- Logs precisam de esquema estável; métricas precisam de dimensões controladas para evitar cardinalidade excessiva.
+- Trace context relaciona spans entre serviços; baggage deve transportar apenas contexto necessário e seguro.
+- OpenTelemetry padroniza instrumentação e transporte; Collector processa/encaminha sinais, enquanto o backend fornece consulta e armazenamento.
+- Instrumentação precisa considerar minimização, acesso, retenção, custo e amostragem.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Critério de conclusão,criterio,CRI,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/02_criterio_de_conclusao.md,## Critério de conclusão,9972,10243,"## Critério de conclusão
+A pessoa seleciona logs, métricas e traces para perguntas operacionais distintas; descreve a propagação de contexto em uma requisição distribuída; e propõe um esquema de telemetria com dimensões controladas e sem dados sensíveis desnecessários.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Conexões,conexoes,CON,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/03_conexoes.md,## Conexões,10243,10417,"## Conexões
+Revisita depuração em 17.2 e 7.5; complementa ferramentas e consulta de sinais em 38.2; aplica-se ao diagnóstico de incidentes e ao projeto incremental em 39.2.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Referências,referencias,REF,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/04_referencias.md,## Referências,10417,11341,"## Referências
+- [OpenTelemetry — Signals](https://opentelemetry.io/docs/concepts/signals/) — conceitos e categorias de sinais; consultado em 15/10/2026.
+- [OpenTelemetry — Logs](https://opentelemetry.io/docs/concepts/signals/logs/) — logs estruturados, esquema e correlação com traces; consultado em 15/10/2026.
+- [OpenTelemetry — Context propagation](https://opentelemetry.io/docs/concepts/context-propagation/) — propagação de contexto de trace; consultado em 15/10/2026.
+- [OpenTelemetry — Collector](https://opentelemetry.io/docs/collector/) — arquitetura do Collector e pipeline; consultado em 15/10/2026.
+- [OpenTelemetry — Semantic conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/) — convenções para descrever operações e sinais; consultado em 15/10/2026.
+- [Prometheus — Data model](https://prometheus.io/docs/concepts/) — séries temporais e dimensões de labels; consultado em 15/10/2026.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,### Microtópico 1 — Escolher o sinal pela pergunta,theory,T01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/01_escolha_dos_sinais/01_teoria.md,microtópico de teoria,452,1671,"### Microtópico 1 — Escolher o sinal pela pergunta
+
+Observabilidade começa com uma pergunta: **o que mudou, onde ocorreu e qual operação foi afetada?** Logs, métricas e traces mostram ângulos diferentes da execução e ganham valor quando podem ser correlacionados.
+
+- **Log** registra um evento com instante e contexto: por exemplo, uma tentativa de acesso negada ou uma falha ao consultar o banco. Logs são úteis para detalhes de um evento específico.
+- **Métrica** registra medições agregáveis ao longo do tempo, como quantidade de requisições, taxa de erros, duração ou uso de recursos. Serve para acompanhar tendências, comparar períodos e detectar mudanças em uma população de operações.
+- **Trace** representa o caminho de uma operação distribuída. Um trace contém spans, que registram unidades de trabalho e relações temporais entre chamadas, como API → serviço de pagamento → banco.
+
+Exemplo: um painel mostra que a latência p95 da API aumentou (métrica); um trace lento aponta que a consulta ao banco ocupa a maior parte do tempo (trace); logs associados revelam que houve timeout numa chamada externa (log). Um alerta pode indicar que algo merece atenção, mas nenhum desses sinais sozinho prova a causa raiz.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,### Microtópico 2 — Criar sinais que possam ser analisados,theory,T02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/02_logs_metricas_dimensoes_privacidade/01_teoria.md,microtópico de teoria,1671,3121,"### Microtópico 2 — Criar sinais que possam ser analisados
+
+Um log estruturado tem **esquema estável**: campos com nomes, tipos e significados consistentes. JSON pode ser um formato conveniente, mas JSON por si só não torna o registro estruturado se cada mensagem tiver campos imprevisíveis. Um conjunto inicial útil pode incluir `timestamp`, `severity`, `service.name`, `deployment.environment.name`, rota normalizada, resultado e duração. Registre a exceção necessária para investigação, sem despejar a requisição inteira.
+
+Métricas devem representar perguntas agregadas. Em uma API, exemplos são requisições por rota normalizada e código de resultado, duração por rota e saturação de recursos. Labels com valores imprevisíveis — como `user_id`, email, URL completa, ID de pedido ou texto de erro — criam muitas séries temporais. Essa **alta cardinalidade** aumenta custo e dificulta consultas; além disso, valores pessoais ou secretos podem vazar para a telemetria. Use dimensões limitadas e úteis; mantenha identificadores de uma operação em logs ou traces somente quando houver justificativa, proteção e política de retenção.
+
+Não registre tokens, senhas, cabeçalhos de autenticação, corpos completos ou dados pessoais sem necessidade autorizada. Aplique minimização, redação/mascaramento, controles de acesso e retenção compatíveis com o uso. Telemetria também é dado produzido e armazenado: deve entrar no desenho de segurança e privacidade.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,### Microtópico 3 — Acompanhar uma operação com traces e contexto,theory,T03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/03_tracing_contexto_otel/01_teoria.md,microtópico de teoria,3121,4326,"### Microtópico 3 — Acompanhar uma operação com traces e contexto
+
+Um **span** descreve uma operação, normalmente com início, duração, resultado e atributos pertinentes. Spans podem ser aninhados ou ligados para mostrar dependências. Um trace ID identifica o trace; cada span também tem um span ID. Se um serviço chama outro, o contexto precisa ser propagado para que os spans pertençam ao fluxo correto.
+
+OpenTelemetry usa o contexto de trace, incluindo o formato W3C Trace Context em muitos cenários HTTP, para transportar essa relação entre serviços instrumentados. Se uma fronteira não encaminha o contexto, o trace pode ficar dividido. Logs podem conter trace ID e span ID para facilitar a busca do evento correspondente ao trace. Métricas agregadas normalmente não representam um trace individual; a correlação entre elas depende de dimensões compatíveis, janelas de tempo ou recursos disponíveis no backend.
+
+**Baggage** é contexto adicional que pode ser propagado entre serviços. Não o use como depósito de dados pessoais, segredos ou valores sem limite: informação propagada pode chegar a diversos serviços e aumentar exposição. Propague somente campos necessários e com uma política explícita.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,### Microtópico 4 — Instrumentar com OpenTelemetry sem acoplar o backend,theory,T03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/03_tracing_contexto_otel/01_teoria.md,microtópico de teoria,4326,5635,"### Microtópico 4 — Instrumentar com OpenTelemetry sem acoplar o backend
+
+OpenTelemetry (OTel) fornece APIs e SDKs de instrumentação, protocolo de transmissão (OTLP), convenções semânticas e o Collector. Ele não é, por si só, o backend de consulta, armazenamento, dashboard ou alertas. A aplicação ou uma instrumentação automática produz sinais; um pipeline pode encaminhá-los para um Collector; o Collector pode receber, processar e exportar os dados para um ou mais destinos.
+
+As **semantic conventions** padronizam atributos para operações comuns, como HTTP e banco de dados, facilitando análise entre linguagens e serviços. Reutilize convenções existentes antes de inventar campos próprios. Instrumentação automática acelera o início, mas deve ser revisada para verificar cobertura, ruído, custo, dados coletados e propagação. Instrumentação manual deve priorizar limites importantes do negócio e dependências que não foram capturadas automaticamente.
+
+Amostragem de traces reduz volume, mas significa que nem todos os traces necessariamente estarão disponíveis. Métricas e logs podem ter regras de coleta diferentes. Para investigação de incidentes, entenda as regras de amostragem e confira se erros ou operações lentas recebem tratamento adequado; não prometa que um trace individual sempre existirá.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q01,quiz,Q01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/01_escolha_dos_sinais/Q01_quiz.md,enunciado literal,6322,6460,1. O painel mostra aumento de latência p95 para todas as chamadas de uma rota. Qual sinal é o mais adequado para detectar essa tendência? ,resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q01,answer_key,K01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/01_escolha_dos_sinais/K01_gabarito_quiz.md,resposta inline separada,6460,6531,"**Métrica de duração agregada**, segmentada por dimensões controladas.
+",resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q02,quiz,Q02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/03_tracing_contexto_otel/Q02_quiz.md,enunciado literal,6531,6643,2. Você quer descobrir em qual chamada downstream uma requisição específica ficou lenta. Qual sinal ajuda mais? ,resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q02,answer_key,K02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/03_tracing_contexto_otel/K02_gabarito_quiz.md,resposta inline separada,6643,6706,"**Trace com spans relacionados**, usando o contexto propagado.
+",resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q03,quiz,Q03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/02_logs_metricas_dimensoes_privacidade/Q03_quiz.md,enunciado literal,6706,6748,3. JSON garante que um log é estruturado? ,resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q03,answer_key,K03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/02_logs_metricas_dimensoes_privacidade/K03_gabarito_quiz.md,resposta inline separada,6748,6822,"**Não.** É preciso haver esquema estável, com campos e tipos previsíveis.
+",resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q04,quiz,Q04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/02_logs_metricas_dimensoes_privacidade/Q04_quiz.md,enunciado literal,6822,6887,4. Por que `user_id` costuma ser uma dimensão ruim para métrica? ,resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q04,answer_key,K04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/02_logs_metricas_dimensoes_privacidade/K04_gabarito_quiz.md,resposta inline separada,6887,7014,"**Seu valor pode ser quase único por evento**, multiplicando séries temporais e expondo identificador pessoal sem necessidade.
+",resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q05,quiz,Q05,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/03_tracing_contexto_otel/Q05_quiz.md,enunciado literal,7014,7084,5. O que acontece se um serviço não propaga o trace context recebido? ,resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,Q05,answer_key,K05,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/03_tracing_contexto_otel/K05_gabarito_quiz.md,resposta inline separada,7084,7236,"**O trace pode perder a ligação entre serviços** e aparecer dividido; os logs locais ainda podem existir, mas a correlação exige contexto consistente.
+
+",resposta separada no limite literal aprovado '? **',,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,P01,practice,P01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/02_logs_metricas_dimensoes_privacidade/P01_pratica.md,enunciado integral da prática,7251,8131,"### Atividade 1 — Normalizar logs para investigação
+Transforme três registros de texto fictícios em um esquema estruturado consistente para uma API: uma resposta 200, uma resposta 500 e uma chamada com timeout. Inclua timestamp, severity, `service.name`, ambiente, rota normalizada, status, duração e trace ID quando disponível. Remova token, corpo da requisição, email e outros dados desnecessários.
+
+**Entrega:** os três registros normalizados, uma breve definição dos campos e a lista de dados removidos/mascarados.
+
+**Critérios de aceite:** todos os registros usam os mesmos campos e tipos; rota não contém IDs variáveis; o erro é pesquisável sem expor segredo ou payload; a ausência de trace ID não é inventada.
+
+**Feedback esperado:** campos inconsistentes ou valores pessoais devem ser removidos ou justificados; log em JSON com chaves variáveis não é um esquema estável.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,P02,practice,P02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/90_integracao/P02_pratica.md,enunciado integral da prática,8131,9054,"### Atividade 2 — Montar o caminho de uma requisição
+Considere um fluxo fictício **Navegador → API → serviço de pedidos → serviço de pagamento → banco**. Faça um diagrama simples de spans e marque onde o trace context precisa ser encaminhado. Para cada falha, indique o sinal inicial e a próxima evidência a consultar: aumento geral de latência; uma chamada de pagamento lenta; timeout do banco em uma única requisição.
+
+**Entrega:** diagrama, campos mínimos de correlação nos logs e uma sequência de investigação para cada sintoma.
+
+**Critérios de aceite:** trace ID/span ID são usados para correlacionar sem serem rótulos de métrica; os três sintomas começam com sinais adequados; a resposta diferencia sintoma de causa confirmada.
+
+**Feedback esperado:** se o trace parar na API, verifique instrumentação e propagação na fronteira seguinte; não conclua que o pagamento causou o incidente apenas porque está no caminho.
+
+",literal,,,,
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,P03,practice,P03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/90_integracao/P03_pratica.md,enunciado integral da prática,9054,9972,"### Atividade 3 — Revisar dimensões e privacidade
+Avalie as possíveis dimensões de uma métrica de requisições: `method`, rota normalizada, código HTTP, `user_id`, email, URL completa e texto livre do erro. Classifique cada uma como útil e controlada, candidata a log/trace sob política, ou a remover. Depois proponha um sinal e uma consulta/agrupamento para investigar aumento de erros por rota.
+
+**Entrega:** classificação justificada, métrica revisada e uma regra de coleta/retention a discutir com a equipe.
+
+**Critérios de aceite:** rota e status são dimensões limitadas; IDs pessoais, URL irrestrita e texto livre não viram labels; a investigação continua possível sem indexar esses valores; reconhece controles de acesso e retenção.
+
+**Feedback esperado:** dimensões úteis para depuração nem sempre são adequadas para métricas. Escolha o sinal e a granularidade conforme a pergunta, custo e risco de exposição.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Objetivo,objetivo,OBJ,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/00_objetivo.md,## Objetivo,190,478,"## Objetivo
+Desenhar e operar um fluxo local de telemetria com OpenTelemetry, Prometheus e Grafana; consultar métricas e construir um dashboard útil para investigação; comparar esse fluxo com uma plataforma gerenciada como New Relic, considerando custo, ingestão e tratamento dos dados.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Resumo,resumo,SUM,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_resumo.md,## Resumo,6075,6801,"## Resumo
+- OTel instrumenta e encaminha sinais; Prometheus coleta e consulta séries temporais; Grafana explora data sources e apresenta painéis/alertas.
+- A aplicação e a configuração do pipeline precisam concordar sobre endpoint, nomes de métricas, labels e formato.
+- Prometheus coleta alvos configurados; alvos inacessíveis ou caminhos incorretos produzem ausência de dados, mesmo quando a aplicação executa.
+- PromQL agrega séries; p95 de histograma é uma estimativa que depende de buckets e agregação corretos.
+- Dashboard e alerta devem responder perguntas acionáveis, com unidades, janelas e responsáveis.
+- New Relic é um exemplo de backend gerenciado com decisões próprias de ingestão, retenção, preço e segurança.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Critério de conclusão,criterio,CRI,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/02_criterio_de_conclusao.md,## Critério de conclusão,10923,11195,"## Critério de conclusão
+A pessoa desenha o fluxo de sinais e explica o papel de cada ferramenta, coleta ou simula métricas, escreve consultas corretas para taxa/erro/p95, cria um dashboard interpretável e investiga uma anomalia com evidências sem expor dados sensíveis.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Conexões,conexoes,CON,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/03_conexoes.md,## Conexões,11195,11329,"## Conexões
+Pré-requisito 38.1, que apresenta os sinais e a correlação. Aplica-se ao diagnóstico e às decisões operacionais em 39.2.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Referências,referencias,REF,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/04_referencias.md,## Referências,11329,12375,"## Referências
+- [OpenTelemetry Collector — Architecture](https://opentelemetry.io/docs/collector/architecture/) — receivers, processors, exporters e pipelines; consultado em 15/10/2026.
+- [Prometheus — Getting started](https://prometheus.io/docs/tutorials/getting_started/) — scrape, alvos, armazenamento e consultas PromQL; consultado em 15/10/2026.
+- [Prometheus — Histograms and summaries](https://prometheus.io/docs/practices/histograms/) — quantis, buckets e limites da estimativa; consultado em 15/10/2026.
+- [Grafana — Data sources](https://grafana.com/docs/grafana/latest/datasources/) — conexão a fontes, Explore, painéis e alertas; consultado em 15/10/2026.
+- [Grafana — Create dashboards](https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/create-dashboard/) — criação de painéis e consultas; consultado em 15/10/2026.
+- [New Relic — OTLP endpoint](https://docs.newrelic.com/docs/opentelemetry/best-practices/opentelemetry-otlp/) — ingestão OTLP e requisitos de configuração; consultado em 15/10/2026.
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,### Microtópico 1 — Entender o fluxo e o papel de cada ferramenta,theory,T01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/01_teoria.md,microtópico de teoria,489,2232,"### Microtópico 1 — Entender o fluxo e o papel de cada ferramenta
+
+Um fluxo comum é: **aplicação instrumentada → endpoint/Collector → backend de armazenamento e consulta → dashboard/alerta**. Cada componente resolve uma parte do problema:
+
+- **OpenTelemetry (OTel):** APIs, SDKs, instrumentações, OTLP e Collector para produzir, padronizar, receber, processar e encaminhar traces, métricas e logs. O Collector pode filtrar/enriquecer dados no pipeline, mas não substitui automaticamente o backend onde a equipe consulta e retém os sinais.
+- **Prometheus:** coleta principalmente métricas por *scrape* de endpoints configurados, guarda séries temporais e consulta-as com PromQL. Exporters podem expor métricas de sistemas que não produzem o formato esperado. Planeje alcance de rede e descoberta dos alvos.
+- **Grafana:** conecta-se a *data sources* e consulta os backends para explorar dados, criar painéis e configurar alertas conforme o recurso escolhido. Um painel não transforma Grafana no armazenamento do Prometheus; a linguagem de consulta também depende da fonte.
+- **New Relic:** exemplo de plataforma gerenciada que pode receber OTLP e oferecer armazenamento, consultas, dashboards e alertas. Avalie ingestão, limites, retenção, preço, localização e política de dados antes de enviar telemetria.
+
+Duas integrações comuns não devem ser confundidas: a aplicação pode expor um endpoint de métricas para que Prometheus o colete; ou um Collector pode receber métricas OTLP e expor/exportar métricas para coleta Prometheus. O caminho depende dos componentes habilitados e da versão/distribuição do Collector. Sempre verifique o pipeline real e não suponha que todos os sinais estejam configurados só porque a aplicação inicializou o SDK.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,### Microtópico 2 — Coletar e consultar métricas no Prometheus,theory,T01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/01_teoria.md,microtópico de teoria,2232,3927,"### Microtópico 2 — Coletar e consultar métricas no Prometheus
+
+A configuração de Prometheus define alvos de *scrape* e a frequência da coleta. Se um alvo está indisponível, não basta que a aplicação esteja funcionando: confirme endereço e porta alcançáveis a partir do processo Prometheus, caminho do endpoint, formato exposto e estado do alvo na interface/consulta de targets.
+
+PromQL seleciona e agrega séries. `rate(counter[5m])` estima a taxa por segundo de um contador no intervalo; use uma janela adequada ao intervalo de coleta e à pergunta. Para comparar rotas, mantenha labels controladas como rota normalizada e status. IDs de usuário, URL completa e mensagens de erro livres não devem ser labels.
+
+Para esta prática, considere que a aplicação expõe um contador `http_requests_total{route, status}` e um histograma clássico `http_request_duration_seconds_bucket{route, le}`. Consultas possíveis:
+
+```promql
+sum by (route) (rate(http_requests_total[5m]))
+```
+
+Taxa de respostas 5xx sobre o total, para o mesmo intervalo:
+
+```promql
+sum(rate(http_requests_total{status=~""5..""}[5m]))
+/
+sum(rate(http_requests_total[5m]))
+```
+
+Estimativa de p95 por rota a partir dos buckets do histograma clássico:
+
+```promql
+histogram_quantile(
+  0.95,
+  sum by (route, le) (rate(http_request_duration_seconds_bucket[5m]))
+)
+```
+
+A consulta de quantil precisa dos buckets compatíveis e estima o valor com base neles; não é o tempo exato de 95% de cada requisição individual. Ao agregar histograma clássico, preserve o label `le`. Nomes e labels do exercício são um contrato de exemplo: bibliotecas e instrumentações OTel podem expor nomes diferentes ou exigir conversão/configuração para esse formato.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,### Microtópico 3 — Fazer Grafana responder a uma pergunta,theory,T02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/02_grafana_dashboards_operacao/01_teoria.md,microtópico de teoria,3927,5208,"### Microtópico 3 — Fazer Grafana responder a uma pergunta
+
+Grafana conecta-se a um data source, por exemplo Prometheus, e cada painel contém consulta, visualização e configuração. Antes de escolher gráfico, escreva a pergunta. Um painel de visão geral pode exibir taxa de requisições, proporção de erros, p95 e saturação; um painel de diagnóstico pode oferecer filtro por serviço/rota e links para traces quando a integração estiver configurada.
+
+Todo painel precisa tornar seu resultado interpretável: título em forma de pergunta, unidade, janela temporal, agrupamento, filtros úteis e comportamento esperado. Gráficos sem unidade, escala ou contexto temporal podem induzir a conclusões ruins. Evite duplicar a mesma informação em muitos painéis e não apresente percentis como se fossem médias.
+
+Alertas devem identificar uma condição acionável, persistente pelo tempo necessário e ligada a impacto ou sintoma relevante. Defina nome, expressão, janela, limiar, destinatário e instrução de investigação. Threshold arbitrário ou alerta em cada variação pequena gera ruído. A política de notificação e a regra de alerta podem residir no Prometheus/Alertmanager ou no Grafana, conforme a arquitetura; não configure dois caminhos redundantes sem uma razão e sem saber quem notifica.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,"### Microtópico 4 — Avaliar integração, volume e operação",theory,T02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/02_grafana_dashboards_operacao/01_teoria.md,microtópico de teoria,5208,6075,"### Microtópico 4 — Avaliar integração, volume e operação
+
+Uma plataforma gerenciada pode reduzir a operação de armazenamento e consulta, mas não elimina instrumentação, decisões de dados ou controle de custo. Integração OTLP, retenção, ingestão cobrada, limites de cardinalidade, amostragem, autenticação, rede, localização e exportação dos dados variam por produto e plano. Compare o custo estimado para volumes reais e teste quais campos chegam ao destino antes de enviar dados de produção.
+
+Em qualquer stack, monitore o próprio pipeline: alvo fora do ar, scrape atrasado, fila de exportação, falhas de exportação e ausência inesperada de sinais. Telemetria incompleta pode fazer um painel parecer saudável enquanto dados não estão chegando. Documente o caminho e a responsabilidade de cada etapa; altere uma variável por vez ao depurar conexão ou configuração.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q01,quiz,Q01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/Q01_quiz.md,enunciado literal,6809,6908,"1. Prometheus mostra “target down”, mas a aplicação responde localmente. O que verificar primeiro? ",resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q01,answer_key,K01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/K01_gabarito_quiz.md,resposta inline separada,6908,7017,"**Conectividade a partir do Prometheus, endereço/porta, caminho do endpoint e estado/configuração do alvo.**
+",resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q02,quiz,Q02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/02_grafana_dashboards_operacao/Q02_quiz.md,enunciado literal,7017,7104,2. Grafana está conectado ao Prometheus. Onde ficam as séries consultadas pelo painel? ,resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q02,answer_key,K02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/02_grafana_dashboards_operacao/K02_gabarito_quiz.md,resposta inline separada,7104,7212,"**No backend Prometheus (ou na fonte consultada), não passam a ser armazenadas pelo dashboard do Grafana.**
+",resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q03,quiz,Q03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/Q03_quiz.md,enunciado literal,7212,7262,3. O que calcula `rate(http_requests_total[5m])`? ,resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q03,answer_key,K03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/K03_gabarito_quiz.md,resposta inline separada,7262,7344,"**Uma estimativa da taxa por segundo do contador no intervalo de cinco minutos.**
+",resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q04,quiz,Q04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/Q04_quiz.md,enunciado literal,7344,7462,"4. Ao agregar um histograma clássico por rota antes de `histogram_quantile`, qual label especial deve ser preservada? ",resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q04,answer_key,K04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/K04_gabarito_quiz.md,resposta inline separada,7462,7511,"**`le`, que representa os limites dos buckets.**
+",resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q05,quiz,Q05,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/Q05_quiz.md,enunciado literal,7511,7614,5. Por que p95 estimado de um histograma não deve ser descrito como latência exata de cada requisição? ,resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,Q05,answer_key,K05,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/01_fluxo_otel_prometheus_promql/K05_gabarito_quiz.md,resposta inline separada,7614,7723,"**É uma estimativa derivada de buckets agregados; a resolução depende dos limites e dos dados observados.**
+
+",resposta separada no limite literal aprovado '? **',,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,P01,practice,P01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/90_integracao/P01_pratica.md,enunciado integral da prática,7738,8682,"### Atividade 1 — Desenhar e revisar o pipeline
+Desenhe a rota de métricas entre uma aplicação web, OpenTelemetry Collector (se usado), Prometheus e Grafana. Marque o protocolo/formato em cada fronteira, quem inicia a coleta/transmissão, onde dados são guardados e onde são consultados. Depois analise três falhas: Prometheus não alcança o endpoint; Collector recebe, mas não exporta; Grafana aponta para data source incorreto.
+
+**Entrega:** diagrama e checklist com pelo menos duas verificações observáveis por falha, incluindo alvo/status, logs ou métricas do componente e caminho de rede.
+
+**Critérios de aceite:** distingue receiver, processor e exporter do Collector; aponta backend e data source; não presume que configurar OTel cria automaticamente scrape ou persistência.
+
+**Feedback esperado:** comece pelo último ponto em que há evidência de dado, depois investigue o próximo salto; “a aplicação está rodando” não comprova ingestão.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,P02,practice,P02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/90_integracao/P02_pratica.md,enunciado integral da prática,8682,9800,"### Atividade 2 — Consultar métricas e compor um dashboard
+Use o contrato de métricas `http_requests_total{route,status}` e `http_request_duration_seconds_bucket{route,le}` descrito nesta aula. Implemente as consultas de taxa, proporção 5xx e p95, e monte um dashboard com um painel por pergunta. A atividade pode ser feita numa stack local com Compose/Prometheus/Grafana e app instrumentada, ou com dados de exemplo se o ambiente local não estiver disponível.
+
+**Entrega:** consultas, captura ou descrição dos painéis e uma legenda que informe unidade, janela, agrupamento e interpretação do p95. Se usar stack local, inclua configuração de scrape e o resultado de pelo menos uma consulta.
+
+**Critérios de aceite:** taxa e erro usam `rate` no intervalo; denominador do erro é o total no mesmo período; p95 mantém `le` na agregação e agrupa por rota; os painéis deixam clara unidade e janela; labels permanecem de baixa cardinalidade.
+
+**Feedback esperado:** se o p95 não retornar dados, confira se o endpoint expõe os buckets esperados e se a consulta preserva `le`; não substitua por média e mantenha o rótulo p95.
+
+",literal,,,,
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,P03,practice,P03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/90_integracao/P03_pratica.md,enunciado integral da prática,9800,10923,"### Atividade 3 — Simular incidente e definir resposta
+Introduza uma lentidão e um aumento controlado de respostas 5xx no serviço de exemplo. Observe a sequência do sintoma no dashboard, identifique a rota afetada, encontre o span/log relacionado se estiverem instrumentados e proponha um alerta. Se escolher uma plataforma gerenciada como New Relic, compare-a com o caminho local em termos de dados enviados, ingestão, retenção, custo, acesso e saída/portabilidade.
+
+**Entrega:** hipótese de causa com evidências, regra de alerta com condição/janela/ação, passo a passo para investigação e uma comparação curta de backend local versus gerenciado.
+
+**Critérios de aceite:** diferencia sintoma de causa comprovada; alerta evita variações transitórias quando apropriado, indica responsável e próximo passo; comparação inclui ingestão, retenção e tratamento de dados; não envia segredo ou dado pessoal.
+
+**Feedback esperado:** dashboard mostra o comportamento agregado, trace/span ajuda a localizar uma execução e logs fornecem detalhes do evento; um alerta útil orienta o que fazer e não apenas afirma que um gráfico mudou.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Objetivo,objetivo,OBJ,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/00_objetivo.md,## Objetivo,192,436,"## Objetivo
+Definir indicadores e objetivos de serviço úteis para a experiência da pessoa usuária; responder a um incidente com papéis, passos e evidências claros; e registrar aprendizados em postmortem e ADR sem reduzir a causa a uma pessoa.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Resumo,resumo,SUM,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/01_resumo.md,## Resumo,5985,6683,"## Resumo
+- SLI mede uma dimensão importante do serviço; SLO define um alvo mensurável em uma janela; SLA formaliza compromisso e consequências.
+- Error budget torna explícita a margem de eventos ruins associada ao SLO e apoia decisões de risco e mudança.
+- Resposta a incidente prioriza coordenação, impacto, mitigação segura, comunicação e preservação de evidências.
+- Runbook é acionável quando contém verificações, limites de segurança, escalonamento e validação da recuperação.
+- Postmortem sem culpa busca fatores técnicos e organizacionais; ações precisam de responsável e comprovação de eficácia.
+- ADR registra contexto, decisão, alternativas e consequências; não substitui o postmortem.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Critério de conclusão,criterio,CRI,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/02_criterio_de_conclusao.md,## Critério de conclusão,10804,11063,"## Critério de conclusão
+A pessoa distingue e define SLI/SLO/SLA; interpreta error budget; monta runbook com mitigação e validação seguras; escreve postmortem sustentado por fatos e ações verificáveis; e registra uma decisão operacional/arquitetural em ADR.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Conexões,conexoes,CON,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/03_conexoes.md,## Conexões,11063,11274,"## Conexões
+Relaciona-se ao deploy/rollback em 32.2, aos sinais e ferramentas de observabilidade em 38.1–38.2, e a decisões técnicas em 23.3. Prepara a aplicação prática no projeto incremental da fase em 39.2.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Referências,referencias,REF,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/04_referencias.md,## Referências,11274,12043,"## Referências
+- [Google SRE — Service Level Objectives](https://sre.google/sre-book/service-level-objectives/) — definição de SLI, SLO, SLA e error budget; consultado em 15/10/2026.
+- [Google SRE — Managing Incidents](https://sre.google/sre-book/managing-incidents/) — coordenação, resposta e papéis em incidentes; consultado em 15/10/2026.
+- [Google SRE — Postmortem Culture](https://sre.google/sre-book/postmortem-culture/) — aprendizagem e revisão sem culpa; consultado em 15/10/2026.
+- [Google SRE Workbook — Incident Response](https://sre.google/workbook/incident-response/) — resposta e análise de incidentes; consultado em 15/10/2026.
+- [ADR GitHub — About ADRs](https://adr.github.io/) — finalidade e formato de registros de decisão; consultado em 15/10/2026.
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,"### Microtópico 1 — Medir o que importa: SLI, SLO, SLA e error budget",theory,T01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/01_sli_slo_sla_error_budget/01_teoria.md,microtópico de teoria,447,2345,"### Microtópico 1 — Medir o que importa: SLI, SLO, SLA e error budget
+
+Um **SLI** (*service level indicator*) é uma medida quantitativa de uma dimensão do serviço que importa para quem o utiliza. Exemplos incluem a proporção de requisições válidas que terminam com sucesso, a latência dessas requisições ou a proporção de tarefas processadas no prazo. Defina população, evento bom/ruim, fonte dos dados e janela de medição. Uma métrica de CPU pode ajudar a explicar um problema, mas não substitui um indicador de experiência se a pergunta é se a pessoa conseguiu concluir a ação.
+
+Um **SLO** (*service level objective*) é o alvo para um SLI em uma janela definida. Exemplo didático, não promessa de produto: “em uma janela móvel de 28 dias, pelo menos 99% das requisições válidas de consulta retornam sucesso em até 300 ms”. A definição precisa esclarecer o que conta como requisição válida, como latência é medida e quais exclusões existem. Escolher o alvo exige contexto de produto, capacidade e expectativa; não copie um número sem justificativa.
+
+Um **SLA** (*service level agreement*) é um acordo de nível de serviço com usuários ou partes interessadas que define compromissos e consequências caso não sejam cumpridos. Pode envolver créditos ou outras obrigações. O SLO pode ser um objetivo operacional interno sem consequências contratuais. Se alguém usar os termos como sinônimos, pergunte: “há um acordo e o que acontece se o alvo não for atingido?”.
+
+O **error budget** é a margem de eventos ruins permitida pela meta para a janela definida. Em um SLO de 99% de eventos bons, o orçamento corresponde a até 1% de eventos ruins segundo a mesma população e período. O orçamento ajuda a decidir quando reduzir o ritmo de mudanças, investigar confiabilidade ou investir em prevenção. Não é autorização para causar falhas; é uma forma explícita de discutir risco junto com entrega de mudanças.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,"### Microtópico 2 — Responder ao incidente: restaurar, coordenar e usar runbook",theory,T02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/02_resposta_incidente_runbooks/01_teoria.md,microtópico de teoria,2345,3846,"### Microtópico 2 — Responder ao incidente: restaurar, coordenar e usar runbook
+
+Durante um incidente, primeiro reconheça o impacto, estabeleça coordenação e priorize mitigação segura. Em situações que envolvem mais pessoas ou equipes, papéis claros reduzem colisões: uma pessoa pode coordenar a resposta, outra executar mudanças técnicas e outra manter comunicação e registro. Em equipes pequenas, alguém pode acumular papéis, mas deve ficar claro quem está fazendo o quê e quando ocorre uma transferência de responsabilidade.
+
+Um **runbook** é um guia operacional para sintomas ou tarefas recorrentes. Deve ajudar a responder: como confirmar o sintoma; quais painéis e consultas consultar; quais hipóteses são seguras de verificar; que ações podem mitigar; como validar a recuperação; quando interromper uma ação e escalar; e onde registrar os eventos. Procedimentos potencialmente destrutivos precisam de pré-condições, verificação de impacto e caminho de reversão. Um runbook não substitui julgamento nem autorização operacional.
+
+Num incidente após deploy, uma reversão pode ser apropriada se o estado anterior for conhecido e a mudança puder ser revertida com segurança. Antes de agir, confira se houve migração de banco, mudança irreversível de formato ou dependência que torne rollback perigoso. Aplique uma mudança por vez, monitore o SLI afetado e preserve horário, sinais e decisões para análise posterior. Restaurar o serviço e entender a causa são trabalhos relacionados, mas distintos.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,### Microtópico 3 — Aprender com postmortem sem culpa,theory,T03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/03_postmortem_adrs/01_teoria.md,microtópico de teoria,3846,5102,"### Microtópico 3 — Aprender com postmortem sem culpa
+
+Um **postmortem** registra o que aconteceu e transforma evidências em prevenção e melhoria. Uma estrutura útil inclui resumo, impacto e duração, detecção, linha do tempo, mitigação, fatores contribuintes, aspectos que funcionaram, lacunas de resposta e ações corretivas/preventivas.
+
+Uma revisão **sem culpa** não omite responsabilidade nem ignora decisões. Ela evita explicar um incidente apenas como “alguém errou” e investiga quais informações, ferramentas, procedimentos, alertas, permissões, prazos e condições de trabalho moldaram as ações. Pessoas tomam decisões com o contexto disponível naquele momento; o processo procura tornar o sistema mais resiliente e a resposta mais clara na próxima vez.
+
+Diferencie **fato, hipótese e conclusão**. Use timestamps, painéis, logs, traces, histórico de deploy e registros de comunicação como evidências. Se os dados não permitem confirmar uma hipótese, anote-a como pendente e proponha como verificá-la. Uma lista de ações útil tem responsável, prazo, prioridade, critério observável de conclusão e método para conferir se a ação reduziu o risco. “Melhorar monitoramento” é vaga até especificar o sinal ausente, quem o implementa e como será validado.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,### Microtópico 4 — Registrar decisões em ADR e fechar o ciclo,theory,T03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/03_postmortem_adrs/01_teoria.md,microtópico de teoria,5102,5985,"### Microtópico 4 — Registrar decisões em ADR e fechar o ciclo
+
+Um **ADR** (*Architecture Decision Record*) documenta uma decisão técnica no contexto em que foi tomada. Um registro conciso pode conter título e estado, contexto/problema, decisão, alternativas consideradas e consequências — incluindo limitações e custos operacionais. ADR não é postmortem: postmortem aprende com um evento; ADR explica uma escolha arquitetural, que pode ter sido motivada por incidente ou por outro requisito.
+
+Feche o ciclo ligando evidências e mudanças: o SLI identifica a dimensão afetada; o dashboard/trace ajuda a investigar; o runbook orienta uma mitigação; o postmortem captura o aprendizado; as ações entram no backlog com validação; e, quando uma escolha estrutural muda, um ADR registra o porquê. Revise runbooks e alertas depois de exercícios ou incidentes para remover passos obsoletos.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q01,quiz,Q01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/01_sli_slo_sla_error_budget/Q01_quiz.md,enunciado literal,6691,6736,1. Qual a diferença central entre SLI e SLO? ,resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q01,answer_key,K01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/01_sli_slo_sla_error_budget/K01_gabarito_quiz.md,resposta inline separada,6736,6839,"**SLI é a medida; SLO é o alvo definido para essa medida dentro de condições e janela especificadas.**
+",resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q02,quiz,Q02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/01_sli_slo_sla_error_budget/Q02_quiz.md,enunciado literal,6839,6923,2. Um objetivo interno de 99% sem consequência contratual é automaticamente um SLA? ,resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q02,answer_key,K02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/01_sli_slo_sla_error_budget/K02_gabarito_quiz.md,resposta inline separada,6923,7008,"**Não; tende a ser um SLO. Um SLA formaliza compromisso e consequências acordadas.**
+",resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q03,quiz,Q03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/01_sli_slo_sla_error_budget/Q03_quiz.md,enunciado literal,7008,7120,"3. Se o SLO de eventos bons é 99%, qual a margem correspondente para eventos ruins na mesma janela e população? ",resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q03,answer_key,K03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/01_sli_slo_sla_error_budget/K03_gabarito_quiz.md,resposta inline separada,7120,7183,"**Até 1%, conforme a definição do SLI e as regras acordadas.**
+",resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q04,quiz,Q04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/02_resposta_incidente_runbooks/Q04_quiz.md,enunciado literal,7183,7276,"4. Durante uma resposta a incidente, o que priorizar antes de tentar descobrir toda a causa? ",resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q04,answer_key,K04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/02_resposta_incidente_runbooks/K04_gabarito_quiz.md,resposta inline separada,7276,7376,"**Coordenar, entender impacto e restaurar o serviço com mitigação segura, preservando evidências.**
+",resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q05,quiz,Q05,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/03_postmortem_adrs/Q05_quiz.md,enunciado literal,7376,7438,5. “A pessoa de plantão esqueceu” é um postmortem suficiente? ,resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,Q05,answer_key,K05,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/03_postmortem_adrs/K05_gabarito_quiz.md,resposta inline separada,7438,7584,"**Não. É necessário investigar fatores contribuintes, condições, procedimentos e controles, e propor ações verificáveis sem culpar indivíduos.**
+
+",resposta separada no limite literal aprovado '? **',,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,P01,practice,P01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/01_sli_slo_sla_error_budget/P01_pratica.md,enunciado integral da prática,7599,8537,"### Atividade 1 — Definir um SLI/SLO e interpretar o orçamento
+Para um endpoint de consulta fictício, proponha um SLI baseado em requisições válidas concluídas com sucesso em até 300 ms. Defina a população, evento bom/ruim, fonte do sinal e janela. Use um alvo de exemplo de 99% por 28 dias e calcule a margem correspondente de eventos ruins. Explique por que esse alvo precisaria ser validado com produto e operação antes de ser adotado.
+
+**Entrega:** definição do SLI e SLO em uma frase sem ambiguidade, regra de inclusão/exclusão e interpretação do error budget.
+
+**Critérios de aceite:** unidade, população e janela estão declaradas; sucesso considera resposta e limite de latência; orçamento usa a mesma base; o texto distingue meta pedagógica de compromisso com usuário.
+
+**Feedback esperado:** se o SLI for só CPU/memória, retorne à experiência que o serviço deveria entregar; se as exclusões alteram o denominador, documente-as.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,P02,practice,P02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/02_resposta_incidente_runbooks/P02_pratica.md,enunciado integral da prática,8537,9564,"### Atividade 2 — Escrever e executar mentalmente um runbook
+Cenário simulado: após uma publicação, a taxa de respostas 5xx cresce, uma parte dos usuários não conclui o checkout e o painel de latência também piora. Escreva um runbook curto que inclua confirmação do incidente, impacto, papéis de coordenação/operação/comunicação, consultas a usar, condições para rollback, riscos a verificar antes da reversão, validação da recuperação e escalonamento.
+
+**Entrega:** passos numerados com decisão “se/então”, sinais a consultar, cuidados de segurança e mensagem de atualização para as partes afetadas.
+
+**Critérios de aceite:** restauração e investigação aparecem como etapas distintas; nenhuma reversão é automática sem verificar compatibilidade/irreversibilidade; há responsável, gatilho de escalonamento e evidência de recuperação no SLI.
+
+**Feedback esperado:** se o runbook só disser “fazer rollback”, especifique pré-condições e como saber se a mitigação funcionou; não declare resolvido apenas porque o deploy terminou.
+
+",literal,,,,
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,P03,practice,P03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/03_postmortem_adrs/P03_pratica.md,enunciado integral da prática,9564,10804,"### Atividade 3 — Produzir postmortem e ADR a partir do cenário
+Use a linha do tempo fictícia: 10:00 publicação da versão 2.4; 10:04 aumento de 5xx; 10:08 alerta de erro recebido; 10:12 rollback iniciado; 10:16 erros voltam ao patamar anterior. Considere como evidências disponíveis: alteração recente de uma variável de configuração, runbook sem instrução para esse tipo de mudança e alerta sem indicação de rota afetada. Separe fatos de hipóteses. Escreva um resumo do incidente e três ações; depois registre um ADR sobre uma decisão de rollout ou validação de configuração.
+
+**Entrega:** postmortem com impacto (identifique dados ainda desconhecidos), timeline, fatores contribuintes, aspectos que funcionaram e ações com responsável/prazo/critério de conclusão; ADR com contexto, alternativas, decisão e consequências.
+
+**Critérios de aceite:** linguagem sem acusação individual; não inventa impacto ou causa não demonstrados; ações mitigam lacunas distintas (por exemplo, validação, alerta/runbook e prevenção) e têm evidência de conclusão; ADR não repete o postmortem.
+
+**Feedback esperado:** “não sabemos” é melhor que afirmar impacto sem dado; uma ação concluída precisa de evidência e a eficácia deve ser revisada após a mudança.
+
+",literal,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,Objetivo,objetivo,OBJ,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/00_objetivo.md,## Objetivo,201,525,"## Objetivo
+Evoluir o projeto principal do **Trilho A**, escolhido em 3.5 e implantado na Fase 7, em uma entrega operável e observável: proteger o fluxo de deploy, instrumentar o comportamento central do tipo de projeto, construir um painel útil e exercitar uma falha em ambiente seguro com rollback, runbook e postmortem.
+
+",literal,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,Critério de conclusão,criterio,CRI,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/02_criterio_de_conclusao.md,## Critério de conclusão,12336,12639,"## Critério de conclusão
+As quatro entregas e evidências estão no repositório; o projeto passa pelo menos 10/12 na rubrica sem zerar dimensões bloqueadoras; uma terceira pessoa consegue reproduzir deploy de teste, consulta do dashboard, verificação de recuperação e leitura do postmortem com o README.
+
+",literal,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,Conexões,conexoes,CON,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/03_conexoes.md,## Conexões,12639,12870,"## Conexões
+Continua o Projeto principal do Trilho A iniciado em 3.5 e implantado em 32.2/36.1. Usa sinais e ferramentas de 38.1–38.2 e práticas operacionais de 39.1. O projeto da Fase 8 no Trilho B é independente e está em 39.3.
+
+",literal,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,Referências,referencias,REF,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/04_referencias.md,## Referências,12870,14015,"## Referências
+- [Guia de Projetos — Trilhos A e B e rotação de tipos](../../Guia_Projetos_e_Rotacao_de_Tipos.md) — escopo do Trilho A e entrega por tipo de projeto.
+- [HashiCorp — Terraform plan](https://developer.hashicorp.com/terraform/cli/commands/plan) — revisão de mudanças planejadas antes de aplicar.
+- [HashiCorp — Terraform plan tutorial](https://developer.hashicorp.com/terraform/tutorials/cli/plan) — fluxo de plano/aplicação e proteção de artefatos sensíveis.
+- [OpenTelemetry — Instrumentation](https://opentelemetry.io/docs/concepts/instrumentation/) — instrumentação por API/SDK e opções automáticas.
+- [OpenTelemetry Collector — Architecture](https://opentelemetry.io/docs/collector/architecture/) — receber, processar e exportar telemetria.
+- [Google SRE — Managing Incidents](https://sre.google/sre-book/managing-incidents/) — coordenação e resposta a incidentes.
+- [Google SRE — Postmortem Culture](https://sre.google/sre-book/postmortem-culture/) — análise de fatores e aprendizado sem culpa.
+- [Prometheus — Getting started](https://prometheus.io/docs/tutorials/getting_started/) — scrape, métricas e consulta operacional.
+",literal; destinos relativos corrigidos conforme manifesto autorizado: 1,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,## Teoria > Microtópico 1 — Preparar uma entrega repetível e reversível,theory,T01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/02_teoria_preparar-uma-entrega-repetivel-e-reversivel.md,microtópico de teoria,1567,3180,"### Microtópico 1 — Preparar uma entrega repetível e reversível
+
+Antes de alterar a aplicação, registre o estado inicial do projeto: versão/commit, ambiente, fluxo principal, dependências e como saber se o serviço está saudável. Confirme que dev/staging e produção não compartilham credenciais, variáveis, state ou recursos por engano. Na pipeline existente, localize os gates, o health check e as evidências de implantação; não adicione etapas duplicadas sem necessidade.
+
+Para a infraestrutura, revise o plano antes de aplicar: os recursos a criar, alterar e destruir devem corresponder à mudança planejada. Separe aprovação e aplicação quando o fluxo de equipe exigir revisão. Não trate o Terraform como mecanismo universal de rollback: aplicar uma configuração antiga pode não reverter dados, migrations, mensagens já processadas, alterações externas ou recursos irreversíveis. Faça rollback de aplicação ou infraestrutura conforme o tipo de mudança, pré-condições, estado e plano ensaiado.
+
+**Entrega 1 — Baseline e deploy controlado.** Descreva o fluxo, o estado inicial, a configuração por ambiente e o caminho de deploy/rollback. Execute ou simule os gates e faça uma implantação em teste, com evidência do commit, resultado de pipeline, health check e plano revisado. Documente como evitar segredos no repositório e nos artefatos.
+
+**Critérios de aceite:** ambientes e configuração estão identificados; pipeline executa o fluxo previsto; plano não contém mudanças surpresa; health check comprova resposta; rollback tem pré-condições e não depende de presumir que dados persistentes podem ser desfeitos.
+
+",literal,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,## Teoria > Microtópico 2 — Instrumentar o fluxo de negócio e o risco próprio do projeto,theory,T02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/03_teoria_instrumentar-o-fluxo-de-negocio-e-o-risco-proprio-do-projeto.md,microtópico de teoria,3180,5746,"### Microtópico 2 — Instrumentar o fluxo de negócio e o risco próprio do projeto
+
+Adicione instrumentação OpenTelemetry ao caminho principal e às dependências que podem explicar falhas ou demora. Use nome de serviço, versão e ambiente como atributos de recurso estáveis; propague contexto entre chamadas; defina quais métricas, logs e traces são necessários. Para cada sinal, escreva a pergunta que ele responde. Evite tokens, payloads, dados pessoais e IDs únicos como labels de métricas. Registre amostragem, retenção e o que não é coletado.
+
+O indicador mais importante da Fase 8 depende do tipo do projeto definido no [Guia de Projetos — Trilhos A e B](../../Guia_de_Projetos_e_Rotacao_de_Tipos.md):
+
+| Tipo do Trilho A | Evidência operacional específica nesta fase |
+|---|---|
+| **T1 — Transacional** | Métrica de pedidos/transações concluídos por período; verificação de que estoque/reserva não ultrapassa o limite e que repetição segura não duplica uma operação. Se o risco central de transação/idempotência ainda não foi implementado nas fases anteriores, entregue a base mínima necessária conforme o guia. |
+| **T2 — SaaS multiempresa** | Configuração separada por ambiente e rollback demonstrado; teste de fumaça confirma que uma empresa não acessa dados de outra. Não use identificador de empresa/usuário como label de alta cardinalidade nem exponha dados do tenant. |
+| **T3 — Tempo real e colaboração** | Deploy preserva conexão WebSocket/SSE através de proxy e HTTPS; métrica de conexões abertas e teste com clientes conectando, reconectando e recebendo atualização. |
+| **T4 — Conteúdo, feed e busca** | Latência observável por rota normalizada, especialmente listagem/busca; painel permite localizar rota lenta e relacionar uma execução a trace. |
+| **T5 — Dados e processamento assíncrono** | Job/container emite logs estruturados e métricas de duração e falhas; execução de teste deixa estado/resultado consultável sem duplicar efeitos indevidos. |
+
+**Entrega 2 — Instrumentação com foco no tipo.** Implemente o sinal específico da linha correspondente e a cobertura comum do caminho de requisição/job. Inclua um teste automatizado ou procedimento repetível que gere o comportamento esperado e produza uma evidência observável.
+
+**Critérios de aceite:** o sinal mede o comportamento descrito, não apenas disponibilidade do host; nomes/labels são estáveis e de baixa cardinalidade; um trace de teste pode ser correlacionado entre os componentes cobertos; dados sensíveis são removidos; limites de instrumentação ou de cobertura ficam documentados.
+
+",literal; destinos relativos corrigidos conforme manifesto autorizado: 0,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,"## Teoria > Microtópico 3 — Construir dashboard, regra de alerta e runbook",theory,T03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/04_teoria_construir-dashboard-regra-de-alerta-e-runbook.md,microtópico de teoria,5746,7393,"### Microtópico 3 — Construir dashboard, regra de alerta e runbook
+
+O dashboard deve refletir a pergunta “a pessoa consegue completar o fluxo?” e o sinal específico do projeto. Inclua uma visão de tráfego/execuções, erros, distribuição de duração e saturação ou capacidade apropriada; acrescente o painel especializado da tabela anterior. Rotas devem ser normalizadas; agregações e janelas devem ser explícitas. Para distribuições, prefira histogramas que permitam agregação compatível e identifique quantis como estimativas quando aplicável.
+
+Adicione uma regra de alerta com condição, janela, limiar justificável, impacto ou SLI relacionado, destinatário e próximo passo. Um valor alto isolado sem impacto/ação tende a gerar ruído. O runbook vinculado precisa indicar como confirmar o alerta, quais consultas e traces examinar, como mitigar com segurança, como validar recuperação e quando escalar. Anote limites conhecidos: amostragem, atraso de coleta, falta de instrumentação ou impossibilidade de verificar determinada dependência.
+
+**Entrega 3 — Observabilidade acionável.** Entregue dashboard, regra de alerta (pode ser descrita se a ferramenta local não suportar alerting) e runbook curto. Faça uma revisão em que outra pessoa consiga encontrar a rota/operação afetada a partir de um sintoma, sem instruções orais do autor.
+
+**Critérios de aceite:** painéis têm título, unidade, período e agrupamento; cada alerta orienta uma ação; consultas não dependem de valores pessoais ou labels ilimitadas; runbook tem verificação, mitigação, validação e escalonamento; ao menos uma execução conecta o sintoma agregado a um trace/log relacionado.
+
+",literal,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,"## Teoria > Microtópico 4 — Simular falha, fazer rollback e aprender",theory,T04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/05_teoria_simular-falha-fazer-rollback-e-aprender.md,microtópico de teoria,7393,9180,"### Microtópico 4 — Simular falha, fazer rollback e aprender
+
+Planeje um exercício de *game day* de baixo risco em teste/staging: por exemplo, publicar uma configuração inválida, criar uma lentidão limitada em endpoint de teste ou interromper uma dependência não crítica. Defina antes o alvo, limite, condição de parada, observador e procedimento de recuperação. Não injete falha em produção. Se uma falha for insegura ou difícil de reverter, use uma timeline/dados sintéticos e execute o tabletop sem alterar serviços.
+
+Durante o exercício, registre quando a mudança foi aplicada, quando o sinal apareceu, quem coordenou e executou, como o impacto foi avaliado, qual mitigação foi adotada e como a recuperação foi confirmada no SLI. Se ocorrer rollback, confira migrations, estado, eventos, dependências e plano de infraestrutura antes de restaurar uma versão. Preserve a evidência necessária para entender o evento.
+
+Feche com postmortem: fatos separados de hipóteses; impacto conhecido e desconhecido; timeline; fatores contribuintes; resposta; o que funcionou; lacunas; ações com responsável, prazo e evidência de conclusão/eficácia. Registre em ADR decisões arquiteturais que mudaram e as consequências/alternativas relevantes; não transforme o ADR em cópia do postmortem.
+
+**Entrega 4 — Exercício, rollback e aprendizado.** Execute a simulação segura ou tabletop, produza relatório de evidências e postmortem, atualize runbook/alerta quando necessário e registre um ADR se houve decisão arquitetural relevante.
+
+**Critérios de aceite:** escopo e condição de parada foram definidos antes; exercício não atinge produção nem dado real; resposta usa sinais existentes; recuperação é comprovada; postmortem não atribui a causa a uma pessoa; ações têm responsável, prazo e verificação.
+
+",literal,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,Escopo e regras,project_scope,SCO,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/01_escopo_regras.md,escopo/regras do projeto,525,1556,"## Escopo e regras
+
+- Continue o mesmo projeto do Trilho A; não crie um novo projeto nem substitua o Projeto de Fase do Trilho B (39.3).
+- Parta do deploy e da infraestrutura como código existentes. Esta etapa integra e verifica o trabalho de 32.2, 36.1, 38.1, 38.2 e 39.1; não é necessário reconstruir toda a pipeline ou reimplementar fases anteriores.
+- Use ambiente local ou de teste/staging. Não injete falha, tráfego artificial ou carga de teste em produção, nem use dados reais de pessoas.
+- Planeje custos e limite recursos de laboratório. Ao terminar, confirme o estado dos recursos e destrua os recursos temporários conforme o procedimento da Fase 7.
+- Segredos não vão para o repositório, artefatos de build, logs ou traces. Um plano/arquivo de Terraform pode carregar valores sensíveis mesmo quando uma variável é marcada como sensível; proteja esses artefatos e não os publique no Git.
+- A carga indicada no cabeçalho é a estimativa global atual da unidade; este material não divide o trabalho em previsões por marco.
+
+",literal,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,rubrica,rubric,R00,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/07_rubrica_final.md,rubrica do projeto,10330,11457,"## Rubrica final
+
+Avalie cada dimensão de 0 a 2: **0 — ausente ou sem evidência; 1 — parcial, pouco reproduzível ou com lacunas; 2 — completo, reproduzível e coerente com o projeto**.
+
+| Dimensão | O que comprova nível 2 |
+|---|---|
+| Deploy e recuperação | pipeline/gates, plano revisado, health check e rollback com limites documentados. |
+| Requisito do tipo | sinal e teste específicos de T1–T5 atendem ao critério do guia. |
+| Instrumentação | métricas/traces/logs são úteis, correlacionáveis e sem dados sensíveis/cardinalidade indevida. |
+| Painel e runbook | pergunta operacional, alerta, sequência de investigação e validação estão claros. |
+| Exercício e aprendizado | simulação segura tem evidências, postmortem sistêmico e ações verificáveis. |
+| Reprodução e higiene | README, configuração por ambiente, teste, proteção de segredos e limpeza são suficientes para outra pessoa repetir. |
+
+**Aceite:** pelo menos **10 de 12 pontos**, sem nota 0 em deploy/recuperação, requisito do tipo ou proteção/higiene de dados. Uma nota 1 exige registrar a lacuna e a próxima ação antes de apresentar o projeto como concluído.
+
+",bloco literal do projeto,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,checklist,checklist,C90,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/06_checklist_entrega.md,checklist final,9180,10330,"## Checklist de entrega
+
+- [ ] README descreve o projeto escolhido, o ambiente, pré-requisitos, como reproduzir a implantação e como limpar recursos temporários.
+- [ ] Evidência de deploy e health check corresponde ao commit e ao ambiente informados.
+- [ ] Plano de infraestrutura foi revisado antes da aplicação; state, credenciais e artefatos sensíveis foram protegidos.
+- [ ] Sinais OTel têm service, versão e ambiente; escopo, retenção, sampling e exclusões estão documentados.
+- [ ] A métrica/prática específica do tipo T1–T5 foi entregue e ligada a uma forma de teste.
+- [ ] Dashboard explica taxa/execuções, falhas, duração, capacidade e dimensão do tipo escolhido.
+- [ ] Uma anomalia de teste pode ser seguida do sinal agregado à operação/trace/log correspondente.
+- [ ] Alerta/runbook indicam impacto, ação, validação e escalonamento.
+- [ ] Testes de fumaça/contrato relevantes foram executados e têm saída ou relatório reproduzível.
+- [ ] Simulação/rollback foi segura e registrada; postmortem separa fatos/hipóteses e define ações verificáveis.
+- [ ] README informa limitações, custo/limites de laboratório e o que não foi instrumentado.
+
+",bloco literal do projeto,,,,
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,5 cenários,project_scenarios,V00,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/08_verificacoes_por_cenario.md,verificações por cenário do projeto,11457,12336,"## Verificações por cenário
+
+Use estes cenários como teste de aceite do projeto, adaptando-os ao tipo escolhido:
+
+1. Uma publicação em teste falha no health check. A pipeline bloqueia/identifica o problema e o serviço não é declarado saudável sem evidência.
+2. Uma requisição/execução do fluxo principal produz sinal com nome de serviço, versão e ambiente e não inclui token, payload ou identificador pessoal.
+3. Um indicador piora após deploy. O dashboard aponta qual fluxo/rota/job foi afetado e o runbook instrui a consultar o trace/log relevante.
+4. O rollback ou a mitigação é iniciada. Há verificação de dependências e dados persistentes antes da ação, e uma checagem do SLI confirma recuperação.
+5. Ao final do laboratório, a pessoa consegue explicar quais recursos continuam ativos e como encerrar os temporários sem apagar recursos compartilhados ou dados necessários.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,Objetivo,objetivo,OBJ,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/00_objetivo.md,## Objetivo,200,539,"## Objetivo
+Construir e implantar uma fatia vertical curta de um tipo técnico do Trilho B que ainda esteja pendente, incluindo a base mínima necessária, container, pipeline e sinal de observabilidade próprio; demonstrar o problema central com teste ou cenário reproduzível e deixar custo, segurança, rollback e encerramento documentados.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,Critério de conclusão,criterio,CRI,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/02_criterio_de_conclusao.md,## Critério de conclusão,12102,12421,"## Critério de conclusão
+Entregas 1–4 aprovadas pela rubrica; fatia vertical em ambiente de teste passa pelo teste do tipo; container e pipeline reproduzem a implantação; sinal específico evidencia o comportamento; documentação demonstra segurança, recuperação e limpeza; e cobertura é atualizada somente após aceite.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,Conexões,conexoes,CON,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/03_conexoes.md,## Conexões,12421,12700,"## Conexões
+Complementa a evolução do Trilho A em 39.2 sem duplicá-la. Reutiliza API, banco e testes das fases anteriores; Docker/pipeline/infra de 32.2 e 36.1; sinais e ferramentas de 38.1–38.2; operação de 39.1. Regras de rotação e escopo estão no Guia de Projetos e Rotação.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,Referências,referencias,REF,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/04_referencias.md,## Referências,12700,13603,"## Referências
+- [Guia de Projetos — Trilhos A e B e rotação de tipos](../../Guia_Projetos_e_Rotacao_de_Tipos.md) — disponibilidade, rotação e bases mínimas dos projetos.
+- [Docker — Build best practices](https://docs.docker.com/build/building/best-practices/) — construção de imagem e recomendações para builds.
+- [Docker — Build secrets](https://docs.docker.com/build/building/secrets/) — uso de secrets sem incorporá-los à imagem.
+- [GitHub Actions — Managing deployment environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) — ambientes, segredos e proteções de deploy.
+- [OpenTelemetry — Signals](https://opentelemetry.io/docs/concepts/signals/) — traces, métricas e logs como sinais complementares.
+- [Google SRE — Managing Incidents](https://sre.google/sre-book/managing-incidents/) — coordenação, resposta e prática de incidentes.
+
+",literal; destinos relativos corrigidos conforme manifesto autorizado: 2,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,Escopo e regras,project_scope,SCO,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/01_escopo_regras.md,escopo/regras do projeto,539,1817,"## Escopo e regras
+
+- Este projeto é independente do projeto principal do Trilho A trabalhado em 39.2. Não copie nem reimplemente o mesmo projeto; siga as ideias distintas do [Guia de Projetos — Trilhos A e B e rotação de tipos](../../Guia_Projetos_e_Rotacao_de_Tipos.md).
+- Para a Fase 8, os tipos disponíveis são T1–T5. Consulte a tabela de cobertura atualizada; repetições são opcionais e não completam um tipo pendente.
+- Exiba três opções obedecendo à prioridade de rotação do guia. Escolha uma opção pendente e use a ideia indicada para o tipo; marque a cobertura somente depois de comprovar aceite.
+- A versão da fase é autocontida: se for a primeira vez do tipo, inclua a base mínima da Fase 5 (schema PostgreSQL com migrations e API simples, conforme o tipo), além do container, pipeline e métrica pedida na Fase 8. Se a base já existe, reutilize-a e faça apenas o recorte necessário.
+- Mantenha a fatia vertical mínima: problema central, não aplicação completa. Telas, polimento visual e funcionalidades laterais ficam fora.
+- Use ambiente local ou sandbox/staging controlado, dados sintéticos, credenciais temporárias e limite de recursos. Nunca injete falhas em produção. Ao terminar, destrua recursos temporários e confirme que não restaram serviços pagos ativos.
+
+",literal; destinos relativos corrigidos conforme manifesto autorizado: 2,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M01,project_milestone,M01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/01_tipo_ideia_contrato.md,marco,1843,2798,"### Entrega 1 — Escolher tipo, ideia e contrato de aceite
+
+Leia a disponibilidade/cobertura, aplique a ordem de rotação e registre as três opções, indicando claramente quais são novas e quais são opcionais repetidas. Escolha uma opção não concluída. Se a ideia tiver afinidade com o projeto do Trilho A, use a ideia de tipo recomendada no guia (por exemplo, ingressos, clínicas, quadro colaborativo, catálogo de receitas ou importador) para não duplicar o projeto principal.
+
+Escreva uma página curta de escopo: usuário/cenário, problema técnico difícil, operação principal, o que ficará fora, dados fictícios e uma hipótese que o teste precisa comprovar. Defina antes como saber se a entrega funcionou e qual evidência será guardada.
+
+**Evidências:** tipos disponíveis e estado de cobertura; três opções com justificativa de prioridade; tipo escolhido; ideia; diagrama simples do fluxo; contrato de aceite; lista de itens explicitamente fora do escopo.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M01,checklist,C01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/C01_aceite_entrega_1.md,critério de aceite,2798,3049,"**Teste/aceite:** uma terceira pessoa consegue identificar a regra de rotação, repetir a escolha com a tabela de cobertura e explicar qual comportamento provará o problema central. Repetição opcional não pode ser contada como tipo pendente concluído.
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M01,project_milestone,M01,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/01_tipo_ideia_contrato.md,marco após aceite,3049,3248,"
+**Feedback:** se o projeto escolhido reproduzir o Trilho A, troque a ideia de negócio antes de implementar; se o aceite for apenas “app está no ar”, acrescente um comportamento específico do tipo.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M02,project_milestone,M02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/02_fatia_vertical_risco.md,marco,3248,4945,"### Entrega 2 — Construir a fatia vertical e testar o risco central
+
+Implemente o menor fluxo que atravessa persistência/API/processamento e prova o problema técnico. Quando a base mínima da Fase 5 for necessária, mantenha o schema entre duas e quatro tabelas com migrations e uma API autenticada simples. Limite autenticação e telas ao necessário para executar o cenário; não enfraqueça autorização para simplificar o teste.
+
+| Tipo escolhido | Fatia e evidência mínima do problema central |
+|---|---|
+| **T1 — Transacional** | Ingressos/pedidos com reserva de estoque e pagamento simulado idempotente. Teste concorrência ou repetição e prove que não há venda além do estoque nem efeito duplicado. |
+| **T2 — SaaS multiempresa** | Agenda de clínicas com tenant e papel. Teste negativo prova que uma clínica não lê nem modifica dados de outra, inclusive por identificador direto. |
+| **T3 — Tempo real e colaboração** | Quadro/votação compartilhada. Teste com dois clientes autenticados prova atualização, reconexão e estado esperado após uma desconexão, sem permitir acesso não autorizado à conexão. |
+| **T4 — Conteúdo, feed e busca** | Catálogo de receitas com paginação, filtros e ordenação definida. Testes cobrem limites, combinações de filtro, ordem estável e resposta quando não há resultados. |
+| **T5 — Dados e processamento assíncrono** | Importador de vendas e relatório. Teste de arquivo sintético cobre validação, progresso/estado consultável, falha e repetição sem duplicar registros/efeitos. |
+
+**Evidências:** migrations/schema, API ou job funcional, teste executável com saída salva, exemplo de entrada/resultado sintético, decisão sobre autorização/erros e limites conhecidos.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M02,checklist,C02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/C02_aceite_entrega_2.md,critério de aceite,4945,5149,"**Teste/aceite:** o teste exercita o risco que define o tipo (não apenas o caminho feliz); executa-se a partir de ambiente limpo; resultado não depende de dados reais ou de configuração secreta embutida.
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M02,project_milestone,M02,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/02_fatia_vertical_risco.md,marco após aceite,5149,5380,"
+**Feedback:** se a demonstração exige explicar manualmente o resultado, transforme a hipótese em asserção automatizada ou procedimento passo a passo com saída esperada. Não atribua à aplicação garantias que o teste não verifica.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M03,project_milestone,M03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/03_empacotar_automatizar_observar.md,marco,5380,7403,"### Entrega 3 — Empacotar, automatizar e observar
+
+Crie um Dockerfile reproduzível e uma pipeline que execute verificações, construa a imagem e publique/implante no ambiente de teste previsto. Use uma base confiável e mantenha ferramentas de build fora da imagem final quando houver build multi-stage apropriado. Identifique a imagem por versão/commit para ligar o que está implantado ao código revisado.
+
+Configure credenciais e variáveis por mecanismo seguro do ambiente/CI; não passe segredos por `ARG`/`ENV` de build, nem os inclua em imagem, arquivo versionado, log ou artifact. A pipeline precisa mostrar claramente qual etapa testa, qual gera a imagem, qual implanta e qual verifica a saúde. Use revisão/aprovação para aplicar mudanças de infraestrutura quando o fluxo exigir; artefato de plano Terraform pode conter dados sensíveis e não deve ser commitado.
+
+Implemente logs estruturados sem payload sensível e uma métrica de baixa cardinalidade específica do tipo escolhido:
+
+- **T1:** pedidos por minuto, acompanhados de resultado/erro de reserva ou pagamento simulado.
+- **T2:** deploy parametrizado por ambiente, staging e rollback; teste de isolamento entre tenants acompanhado por contador de tentativas cross-tenant negadas, sem incluir `tenant_id` como label.
+- **T3:** conexão WebSocket/SSE mantida por proxy e HTTPS; métrica de conexões abertas.
+- **T4:** latência por endpoint/rota normalizada, com painel de paginação/filtros relevantes.
+- **T5:** logs estruturados e métricas de duração e falhas do job.
+
+Conecte o sinal ao painel/consulta em Grafana/Prometheus ou ferramenta equivalente. Um sinal de disponibilidade de host não substitui a métrica do risco central. Registre o que não foi instrumentado, sampling, retenção, limites de custo e sinais ausentes.
+
+**Evidências:** Dockerfile e configuração da pipeline; execução vinculada ao commit; saída dos gates; imagem versionada; implantação em sandbox/staging; health check; consulta/painel com a métrica do tipo; exemplo de log/traces redigidos.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M03,checklist,C03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/C03_aceite_entrega_3.md,critério de aceite,7403,7657,"**Teste/aceite:** mudança que falha em teste não é implantada como válida; configuração de ambiente não aparece dentro da imagem; sinal muda quando o cenário sintético é gerado; painel e logs não expõem segredo, dado pessoal nem identificador ilimitado.
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M03,project_milestone,M03,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/03_empacotar_automatizar_observar.md,marco após aceite,7657,7865,"
+**Feedback:** “pipeline verde” e “endpoint responde” são evidências necessárias, mas insuficientes. Relacione o sinal ao problema técnico e prove que o ambiente está executando a imagem do commit avaliado.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M04,project_milestone,M04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/04_demonstrar_reverter_encerrar.md,marco,7865,9300,"### Entrega 4 — Demonstrar, reverter, documentar e encerrar
+
+Faça uma demonstração curta em staging/sandbox que comece do estado registrado, gere o cenário do tipo, mostre o teste e observe a métrica/log/painel. Provoque apenas uma falha controlada, limitada e reversível que valide uma parte importante do sistema — ou use um tabletop se a falha tiver risco não aceitável. Combine antes o limite de carga, condição de parada, pessoa responsável pela recuperação e como confirmar a recuperação.
+
+Demonstre rollback de forma compatível com o tipo de alteração. Reverter binário não reverte automaticamente migration destrutiva, transações concluídas, eventos emitidos ou estado externo; verifique compatibilidade e escreva o procedimento de recuperação antes do ensaio. Após a mudança, compare comportamento com o SLI ou teste de aceite e confirme saúde do serviço.
+
+Finalize README e revisão de entrega: passos para preparar, testar, construir, implantar, observar, reverter e destruir; arquitetura e dependências; decisões; limitações; custo estimado/observado; riscos; evidências. Atualize a cobertura do tipo apenas após aprovação do aceite.
+
+**Evidências:** gravação/capturas ou roteiro reproduzível; execução de teste; histórico de pipeline/deploy; métrica antes/durante/depois; evidência do rollback/recuperação; README; confirmação de encerramento dos recursos temporários; linha da tabela de cobertura preenchida após aceite.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M04,checklist,C04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/C04_aceite_entrega_4.md,critério de aceite,9300,9542,"**Teste/aceite:** outra pessoa consegue reproduzir o cenário sintético, encontrar a evidência do sinal, executar ou revisar a recuperação e limpar o ambiente sem acesso a credenciais do autor. Nenhum recurso pago fica ativo inadvertidamente.
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,M04,project_milestone,M04,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/04_demonstrar_reverter_encerrar.md,marco após aceite,9542,9792,"
+**Feedback:** se a falha não for segura, não execute em cloud; use um tabletop com dados sintéticos e identifique a limitação. Registre como pendente qualquer prova que dependa de ambiente ainda indisponível, sem marcar a cobertura como concluída.
+
+",literal,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,rubrica,rubric,R00,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/R00_rubrica_final.md,rubrica do projeto,10924,12102,"## Rubrica final
+
+Avalie cada dimensão de 0 a 2: **0 — ausente ou não demonstrada; 1 — parcial, frágil ou pouco reproduzível; 2 — demonstrada com evidência reproduzível e coerente com o tipo escolhido**.
+
+| Dimensão | Evidência para nível 2 |
+|---|---|
+| Rotação e recorte | Tipo pendente, ideia distinta do Trilho A e escopo vertical mínimo. |
+| Problema central | Teste exercita o risco definidor de T1–T5, com resultado esperado verificável. |
+| Base e segurança | API/schema mínima necessária; autenticação/autorização, dados sintéticos e segredos protegidos. |
+| Container e pipeline | Build reproduzível, gates antes do deploy e vínculo commit → imagem → ambiente. |
+| Observabilidade específica | Sinal adequado ao tipo, baixa cardinalidade, painel/log e evidência do cenário. |
+| Operação e encerramento | Rollback/recuperação, documentação, custo/limites e remoção dos recursos temporários. |
+
+**Aceite:** pelo menos **10 de 12 pontos**, sem nota 0 em rotação/escopo, problema central ou segurança. Repetição opcional não conta para a cobertura. Se houver item 0 ou pontuação abaixo do mínimo, registre a lacuna e a ação para corrigi-la; não declare o tipo concluído.
+
+",bloco literal do projeto,,,,
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,checklist,checklist,C90,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/C90_checklist_final.md,checklist final,9792,10924,"## Checklist de entrega
+
+- [ ] Três opções foram selecionadas pela regra da rotação; uma opção pendente foi escolhida e o tipo está identificado.
+- [ ] Projeto de tipo do Trilho B não é duplicação do projeto principal do Trilho A.
+- [ ] README define usuário/cenário, problema técnico, escopo excluído e contrato de aceite.
+- [ ] Base mínima da Fase 5 foi incluída quando necessária (schema, migrations e API simples conforme tipo).
+- [ ] Teste reproduzível prova o problema central; resultado esperado e evidência estão registrados.
+- [ ] Dockerfile constrói a fatia e pipeline executa gates antes de implantar.
+- [ ] Ambiente de teste é isolado, configuração é parametrizada e segredos não entram em imagem/log/Git.
+- [ ] Métrica/log/painel específico do tipo foi produzido com labels controladas e sem dado sensível.
+- [ ] Implantação está ligada ao commit/imagem e há evidência de health check.
+- [ ] Rollback ou recuperação considera migrations e estado persistente.
+- [ ] README explica reprodução, limites, custos/limites e encerramento dos recursos.
+- [ ] Tabela de cobertura só foi atualizada após demonstração de aceite.
+
+",bloco literal do projeto,,,,
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,title,topic_index,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/README.md,H1_para_title_e_indice,0,30,"# 37.1 — Serviços gerenciados
+",metadado estrutural convertido para YAML; valor preservado,"""37.1 — Serviços gerenciados""","""37.1 — Serviços gerenciados""",1,1
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,key,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/README.md,lista_para_frontmatter,31,43,"- key: 37.1
+",metadado estrutural convertido para YAML; valor preservado,"""37.1""","""37.1""",3,3
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,tipo,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/README.md,lista_para_frontmatter,43,56,"- tipo: solo
+",metadado estrutural convertido para YAML; valor preservado,"""solo""","""solo""",4,4
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,carater,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/README.md,lista_para_frontmatter,56,78,"- carater: repertorio
+",metadado estrutural convertido para YAML; valor preservado,"""repertorio""","""repertorio""",5,5
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,profundidade,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/README.md,lista_para_frontmatter,78,105,"- profundidade: repertorio
+",metadado estrutural convertido para YAML; valor preservado,"""repertorio""","""repertorio""",6,6
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,estimativa_minutos,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/README.md,lista_para_frontmatter,105,130,"- estimativa_minutos: 45
+",metadado estrutural convertido para YAML; valor preservado,45,45,7,7
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,tags,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/README.md,lista_para_frontmatter,130,147,"- tags: [#infra]
+",metadado estrutural convertido para YAML; valor preservado,"[""#infra""]","[""#infra""]",8,8
+37.1,docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md,status,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.1_Servicos_gerenciados/README.md,lista_para_frontmatter,147,166,"- status: rascunho
+",metadado estrutural convertido para YAML; valor preservado,"""rascunho""","""rascunho""",9,9
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,title,topic_index,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/README.md,H1_para_title_e_indice,0,27,"# 37.2 — Kubernetes básico
+",metadado estrutural convertido para YAML; valor preservado,"""37.2 — Kubernetes básico""","""37.2 — Kubernetes básico""",1,1
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,key,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/README.md,lista_para_frontmatter,28,40,"- key: 37.2
+",metadado estrutural convertido para YAML; valor preservado,"""37.2""","""37.2""",3,3
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,tipo,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/README.md,lista_para_frontmatter,40,53,"- tipo: solo
+",metadado estrutural convertido para YAML; valor preservado,"""solo""","""solo""",4,4
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,carater,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/README.md,lista_para_frontmatter,53,75,"- carater: repertorio
+",metadado estrutural convertido para YAML; valor preservado,"""repertorio""","""repertorio""",5,5
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,profundidade,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/README.md,lista_para_frontmatter,75,102,"- profundidade: repertorio
+",metadado estrutural convertido para YAML; valor preservado,"""repertorio""","""repertorio""",6,6
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,estimativa_minutos,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/README.md,lista_para_frontmatter,102,127,"- estimativa_minutos: 45
+",metadado estrutural convertido para YAML; valor preservado,45,45,7,7
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,tags,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/README.md,lista_para_frontmatter,127,144,"- tags: [#infra]
+",metadado estrutural convertido para YAML; valor preservado,"[""#infra""]","[""#infra""]",8,8
+37.2,docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md,status,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.2_Kubernetes_basico/README.md,lista_para_frontmatter,144,163,"- status: rascunho
+",metadado estrutural convertido para YAML; valor preservado,"""rascunho""","""rascunho""",9,9
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,title,topic_index,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/README.md,H1_para_title_e_indice,0,21,"# 37.3 — GCP: noções
+",metadado estrutural convertido para YAML; valor preservado,"""37.3 — GCP: noções""","""37.3 — GCP: noções""",1,1
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,key,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/README.md,lista_para_frontmatter,22,34,"- key: 37.3
+",metadado estrutural convertido para YAML; valor preservado,"""37.3""","""37.3""",3,3
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,tipo,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/README.md,lista_para_frontmatter,34,47,"- tipo: solo
+",metadado estrutural convertido para YAML; valor preservado,"""solo""","""solo""",4,4
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,carater,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/README.md,lista_para_frontmatter,47,69,"- carater: repertorio
+",metadado estrutural convertido para YAML; valor preservado,"""repertorio""","""repertorio""",5,5
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,profundidade,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/README.md,lista_para_frontmatter,69,96,"- profundidade: repertorio
+",metadado estrutural convertido para YAML; valor preservado,"""repertorio""","""repertorio""",6,6
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,estimativa_minutos,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/README.md,lista_para_frontmatter,96,121,"- estimativa_minutos: 45
+",metadado estrutural convertido para YAML; valor preservado,45,45,7,7
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,tags,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/README.md,lista_para_frontmatter,121,159,"- tags: [#infra, #cloud, #mensageria]
+",metadado estrutural convertido para YAML; valor preservado,"[""#infra"", ""#cloud"", ""#mensageria""]","[""#infra"", ""#cloud"", ""#mensageria""]",8,8
+37.3,docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md,status,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/37.3_GCP_nocoes/README.md,lista_para_frontmatter,159,178,"- status: rascunho
+",metadado estrutural convertido para YAML; valor preservado,"""rascunho""","""rascunho""",9,9
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,title,topic_index,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/README.md,H1_para_title_e_indice,0,29,"# 38.1 — Sinais operacionais
+",metadado estrutural convertido para YAML; valor preservado,"""38.1 — Sinais operacionais""","""38.1 — Sinais operacionais""",1,1
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,key,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/README.md,lista_para_frontmatter,30,42,"- key: 38.1
+",metadado estrutural convertido para YAML; valor preservado,"""38.1""","""38.1""",3,3
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,tipo,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/README.md,lista_para_frontmatter,42,55,"- tipo: solo
+",metadado estrutural convertido para YAML; valor preservado,"""solo""","""solo""",4,4
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,carater,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/README.md,lista_para_frontmatter,55,78,"- carater: obrigatorio
+",metadado estrutural convertido para YAML; valor preservado,"""obrigatorio""","""obrigatorio""",5,5
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,profundidade,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/README.md,lista_para_frontmatter,78,100,"- profundidade: media
+",metadado estrutural convertido para YAML; valor preservado,"""media""","""media""",6,6
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,estimativa_minutos,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/README.md,lista_para_frontmatter,100,125,"- estimativa_minutos: 90
+",metadado estrutural convertido para YAML; valor preservado,90,90,7,7
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,tags,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/README.md,lista_para_frontmatter,125,172,"- tags: [#infra, #qualidade, #observabilidade]
+",metadado estrutural convertido para YAML; valor preservado,"[""#infra"", ""#qualidade"", ""#observabilidade""]","[""#infra"", ""#qualidade"", ""#observabilidade""]",8,8
+38.1,docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md,status,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.1_Sinais_operacionais/README.md,lista_para_frontmatter,172,191,"- status: rascunho
+",metadado estrutural convertido para YAML; valor preservado,"""rascunho""","""rascunho""",9,9
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,title,topic_index,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/README.md,H1_para_title_e_indice,0,21,"# 38.2 — Ferramentas
+",metadado estrutural convertido para YAML; valor preservado,"""38.2 — Ferramentas""","""38.2 — Ferramentas""",1,1
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,key,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/README.md,lista_para_frontmatter,22,34,"- key: 38.2
+",metadado estrutural convertido para YAML; valor preservado,"""38.2""","""38.2""",3,3
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,tipo,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/README.md,lista_para_frontmatter,34,50,"- tipo: pratica
+",metadado estrutural convertido para YAML; valor preservado,"""pratica""","""pratica""",4,4
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,carater,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/README.md,lista_para_frontmatter,50,73,"- carater: obrigatorio
+",metadado estrutural convertido para YAML; valor preservado,"""obrigatorio""","""obrigatorio""",5,5
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,profundidade,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/README.md,lista_para_frontmatter,73,95,"- profundidade: media
+",metadado estrutural convertido para YAML; valor preservado,"""media""","""media""",6,6
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,estimativa_minutos,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/README.md,lista_para_frontmatter,95,121,"- estimativa_minutos: 120
+",metadado estrutural convertido para YAML; valor preservado,120,120,7,7
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,tags,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/README.md,lista_para_frontmatter,121,170,"- tags: [#ferramentas, #infra, #observabilidade]
+",metadado estrutural convertido para YAML; valor preservado,"[""#ferramentas"", ""#infra"", ""#observabilidade""]","[""#ferramentas"", ""#infra"", ""#observabilidade""]",8,8
+38.2,docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md,status,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/38.2_Ferramentas/README.md,lista_para_frontmatter,170,189,"- status: rascunho
+",metadado estrutural convertido para YAML; valor preservado,"""rascunho""","""rascunho""",9,9
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,title,topic_index,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/README.md,H1_para_title_e_indice,0,25,"# 39.1 — Operação madura
+",metadado estrutural convertido para YAML; valor preservado,"""39.1 — Operação madura""","""39.1 — Operação madura""",1,1
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,key,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/README.md,lista_para_frontmatter,26,38,"- key: 39.1
+",metadado estrutural convertido para YAML; valor preservado,"""39.1""","""39.1""",3,3
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,tipo,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/README.md,lista_para_frontmatter,38,56,"- tipo: integrado
+",metadado estrutural convertido para YAML; valor preservado,"""integrado""","""integrado""",4,4
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,carater,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/README.md,lista_para_frontmatter,56,79,"- carater: obrigatorio
+",metadado estrutural convertido para YAML; valor preservado,"""obrigatorio""","""obrigatorio""",5,5
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,profundidade,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/README.md,lista_para_frontmatter,79,101,"- profundidade: media
+",metadado estrutural convertido para YAML; valor preservado,"""media""","""media""",6,6
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,estimativa_minutos,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/README.md,lista_para_frontmatter,101,126,"- estimativa_minutos: 90
+",metadado estrutural convertido para YAML; valor preservado,90,90,7,7
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,tags,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/README.md,lista_para_frontmatter,126,172,"- tags: [#infra, #qualidade, #confiabilidade]
+",metadado estrutural convertido para YAML; valor preservado,"[""#infra"", ""#qualidade"", ""#confiabilidade""]","[""#infra"", ""#qualidade"", ""#confiabilidade""]",8,8
+39.1,docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md,status,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.1_Operacao_madura/README.md,lista_para_frontmatter,172,191,"- status: rascunho
+",metadado estrutural convertido para YAML; valor preservado,"""rascunho""","""rascunho""",9,9
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,title,topic_index,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/README.md,H1_para_title_e_indice,0,37,"# 39.2 — Projeto incremental da fase
+",metadado estrutural convertido para YAML; valor preservado,"""39.2 — Projeto incremental da fase""","""39.2 — Projeto incremental da fase""",1,1
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,key,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/README.md,lista_para_frontmatter,38,50,"- key: 39.2
+",metadado estrutural convertido para YAML; valor preservado,"""39.2""","""39.2""",3,3
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,tipo,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/README.md,lista_para_frontmatter,50,66,"- tipo: projeto
+",metadado estrutural convertido para YAML; valor preservado,"""projeto""","""projeto""",4,4
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,carater,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/README.md,lista_para_frontmatter,66,89,"- carater: obrigatorio
+",metadado estrutural convertido para YAML; valor preservado,"""obrigatorio""","""obrigatorio""",5,5
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,profundidade,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/README.md,lista_para_frontmatter,89,110,"- profundidade: alta
+",metadado estrutural convertido para YAML; valor preservado,"""alta""","""alta""",6,6
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,estimativa_minutos,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/README.md,lista_para_frontmatter,110,136,"- estimativa_minutos: 780
+",metadado estrutural convertido para YAML; valor preservado,780,780,7,7
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,tags,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/README.md,lista_para_frontmatter,136,181,"- tags: [#infra, #observabilidade, #projeto]
+",metadado estrutural convertido para YAML; valor preservado,"[""#infra"", ""#observabilidade"", ""#projeto""]","[""#infra"", ""#observabilidade"", ""#projeto""]",8,8
+39.2,docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md,status,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.2_Projeto_incremental_da_fase/README.md,lista_para_frontmatter,181,200,"- status: rascunho
+",metadado estrutural convertido para YAML; valor preservado,"""rascunho""","""rascunho""",9,9
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,title,topic_index,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/README.md,H1_para_title_e_indice,0,36,"# 39.3 — Projeto de fase (Trilho B)
+",metadado estrutural convertido para YAML; valor preservado,"""39.3 — Projeto de fase (Trilho B)""","""39.3 — Projeto de fase (Trilho B)""",1,1
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,key,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/README.md,lista_para_frontmatter,37,49,"- key: 39.3
+",metadado estrutural convertido para YAML; valor preservado,"""39.3""","""39.3""",3,3
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,tipo,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/README.md,lista_para_frontmatter,49,65,"- tipo: projeto
+",metadado estrutural convertido para YAML; valor preservado,"""projeto""","""projeto""",4,4
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,carater,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/README.md,lista_para_frontmatter,65,88,"- carater: obrigatorio
+",metadado estrutural convertido para YAML; valor preservado,"""obrigatorio""","""obrigatorio""",5,5
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,profundidade,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/README.md,lista_para_frontmatter,88,109,"- profundidade: alta
+",metadado estrutural convertido para YAML; valor preservado,"""alta""","""alta""",6,6
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,estimativa_minutos,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/README.md,lista_para_frontmatter,109,135,"- estimativa_minutos: 660
+",metadado estrutural convertido para YAML; valor preservado,660,660,7,7
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,tags,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/README.md,lista_para_frontmatter,135,180,"- tags: [#projeto, #infra, #observabilidade]
+",metadado estrutural convertido para YAML; valor preservado,"[""#projeto"", ""#infra"", ""#observabilidade""]","[""#projeto"", ""#infra"", ""#observabilidade""]",8,8
+39.3,docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md,status,metadata_conversion,IDX,docs/courses/trilhacode/Conteudos_migrado/Fase_8/39.3_Projeto_de_fase_Trilho_B/README.md,lista_para_frontmatter,180,199,"- status: rascunho
+",metadado estrutural convertido para YAML; valor preservado,"""rascunho""","""rascunho""",9,9

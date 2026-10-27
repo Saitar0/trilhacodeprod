@@ -1,0 +1,1957 @@
+versao_esquema: 1
+status_manifesto: aprovado_para_execucao
+fase: Fase_8
+base_commit: b74e053879bd7c8ec8093479e5c645bba9cc6be8
+id_prefix: f8
+destino_raiz: docs/courses/trilhacode/Conteudos_migrado/Fase_8
+ordem_unidades:
+- '37.1'
+- '37.2'
+- '37.3'
+- '38.1'
+- '38.2'
+- '39.1'
+- '39.2'
+- '39.3'
+paths:
+  unidade_pasta: relativa_a_destino_raiz
+  arquivos_unidade: relativos_a_pasta_da_unidade
+  origem: relativa_a_raiz_do_repositorio
+  links_markdown: relativos_ao_arquivo_de_destino
+  sem_absolutos: true
+regras:
+  estrutural_apenas: true
+  criar_conteudo_educacional: false
+  preservar_texto_origem: true
+  itens_compartilhados: um destino físico em 90_integracao, associados aos assuntos por cobertura
+  metadados: lista Markdown transportada ao README YAML, sem alterar valores
+  json: intocado
+  originais: intocados
+  propostas: não executar
+  quiz_resposta_inline:
+    marcador_literal_contextual: '? **'
+    marcador_inicio_resposta: '**'
+    split: manter o enunciado até o espaço após a interrogação; iniciar o gabarito no primeiro asterisco
+    validacao: o marcador deve ocorrer exatamente uma vez em cada item Q de 38.1, 38.2 e 39.1; a concatenação Q + K deve reconstruir o item-fonte sem alteração
+fontes_decisao:
+  mapa_historico: não localizado; agrupamentos são [PROPOSTA]
+  pagina_oficial: docs/courses/trilhacode/Fase_8_Infra_Operacao.md
+  referencias: docs/courses/trilhacode/Referencias_Fase_8.md
+  roadmap: docs/courses/trilhacode/Roadmap_Completo_Integrado_Obsidian_Sincronizado.md
+modulos:
+- id: '37'
+  nome: Orquestração gerenciada e outras clouds
+  unidades:
+  - '37.1'
+  - '37.2'
+  - '37.3'
+- id: '38'
+  nome: Observabilidade
+  unidades:
+  - '38.1'
+  - '38.2'
+- id: '39'
+  nome: Operação madura e projeto da fase
+  unidades:
+  - '39.1'
+  - '39.2'
+  - '39.3'
+pre_requisito_fase: Fase 7 (pipeline, cloud e Terraform), conforme página oficial.
+fontes_auxiliares_nao_migradas:
+- id: 37.1-F7
+  origem: docs/courses/trilhacode/Conteudos/Fase_7/37.1_Servicos_gerenciados.md
+  sha256: 2B8823F965D41F8733F5D55CFBFBFB4D1EC019E97804C64B96E9932176634027
+  acao: manter intacta e fora da Fase 8; sem fusão automática; conteúdo adicional pendente de decisão editorial
+- id: 37.2-F7
+  origem: docs/courses/trilhacode/Conteudos/Fase_7/37.2_Kubernetes_basico.md
+  sha256: 34959A8FBFC4156E6A3C7A0A46A4D88974A18561148276C9F7C9CAD09BF6103C
+  acao: manter intacta e fora da Fase 8; sem fusão automática; conteúdo adicional pendente de decisão editorial
+hashes_fase8:
+  '37.1': BB4443823E00A5078929C25F1144D4D6E39F47CA31492E745EF299243197BA43
+  '37.2': F864C16CBE297BB08B3CE5745B89F43D33FCA8F0933C49A8FF830706C456E3FE
+unidades:
+  '37.1':
+    key: '37.1'
+    pasta: 37.1_Servicos_gerenciados
+    origem: docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+    titulo_original: 37.1 — Serviços gerenciados
+    modulo:
+      id: '37'
+      nome: Orquestração gerenciada e outras clouds
+    metadados_originais:
+      key: '37.1'
+      tipo: solo
+      carater: repertorio
+      profundidade: repertorio
+      estimativa_minutos: 45
+      tags:
+      - '#infra'
+      status: rascunho
+    metadados_origem: lista Markdown sob o H1; transportar ao frontmatter do README sem alterações
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f8-37-1-readme-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+          seletor: '# 37.1 — Serviços gerenciados'
+        nota: Índice, metadados originais e links relativos.
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f8-37-1-00-objetivo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+          seletor: '## Objetivo'
+      SUM:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f8-37-1-01-resumo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+          seletor: '## Resumo'
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f8-37-1-02-criterio-de-conclusao-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+          seletor: '## Critério de conclusão'
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f8-37-1-03-conexoes-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+          seletor: '## Conexões'
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f8-37-1-04-referencias-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+          seletor: '## Referências'
+      T01:
+        path: 01_ecs_eks_modelos_responsabilidades/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-37-1-01-ecs-eks-modelos-responsabilidades-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+          seletores:
+          - '## Teoria'
+          concatenacao_ordem_fonte: true
+        assunto: 01_ecs_eks_modelos_responsabilidades
+        itens_origem:
+        - '## Teoria (bloco integral; fonte sem subtítulos de microtópico)'
+        ordem: 1
+        nota: Seção contínua sem microtópicos titulados; manter como um assunto repertorial.
+      FC_01_ecs_eks_modelos_responsabilidades:
+        path: 01_ecs_eks_modelos_responsabilidades/F01_flashcards.md
+        tipo: flashcards
+        arquivo_id: f8-37-1-01-ecs-eks-modelos-responsabilidades-f01-flashcards-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+          seletores:
+          - '## Flashcards > cartão 1'
+          - '## Flashcards > cartão 2'
+          - '## Flashcards > cartão 3'
+          concatenacao_ordem_fonte: true
+        assunto: 01_ecs_eks_modelos_responsabilidades
+        itens_origem:
+        - FC01
+        - FC02
+        - FC03
+        ordem: 1
+    relacoes_curriculares_fonte:
+      origem: '## Conexões'
+      tratamento: copiar literalmente
+    pre_requisitos_declarados: []
+    classificacao: '[PROPOSTA] reconstruída das fontes; não foi localizado mapa aprovado da Fase 8'
+    assuntos:
+    - 01_ecs_eks_modelos_responsabilidades
+    detalhe_assuntos:
+    - slug: 01_ecs_eks_modelos_responsabilidades
+      titulo: ECS, EKS e responsabilidades gerenciadas
+      microtopicos:
+      - '## Teoria (bloco contínuo, sem subtítulos na fonte)'
+    cobertura:
+      01_ecs_eks_modelos_responsabilidades:
+        quiz_exclusivos: []
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas: []
+        flashcards_exclusivos:
+        - FC01
+        - FC02
+        - FC03
+        flashcards_compartilhados: []
+    projeto:
+      inclui: false
+  '37.2':
+    key: '37.2'
+    pasta: 37.2_Kubernetes_basico
+    origem: docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+    titulo_original: 37.2 — Kubernetes básico
+    modulo:
+      id: '37'
+      nome: Orquestração gerenciada e outras clouds
+    metadados_originais:
+      key: '37.2'
+      tipo: solo
+      carater: repertorio
+      profundidade: repertorio
+      estimativa_minutos: 45
+      tags:
+      - '#infra'
+      status: rascunho
+    metadados_origem: lista Markdown sob o H1; transportar ao frontmatter do README sem alterações
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f8-37-2-readme-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+          seletor: '# 37.2 — Kubernetes básico'
+        nota: Índice, metadados originais e links relativos.
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f8-37-2-00-objetivo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+          seletor: '## Objetivo'
+      SUM:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f8-37-2-01-resumo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+          seletor: '## Resumo'
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f8-37-2-02-criterio-de-conclusao-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+          seletor: '## Critério de conclusão'
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f8-37-2-03-conexoes-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+          seletor: '## Conexões'
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f8-37-2-04-referencias-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+          seletor: '## Referências'
+      T01:
+        path: 01_pods_deployments_services_probes/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-37-2-01-pods-deployments-services-probes-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+          seletores:
+          - '## Teoria'
+          concatenacao_ordem_fonte: true
+        assunto: 01_pods_deployments_services_probes
+        itens_origem:
+        - '## Teoria (bloco integral; fonte sem subtítulos de microtópico)'
+        ordem: 1
+        nota: Seção contínua sem microtópicos titulados; manter como um assunto repertorial.
+      FC_01_pods_deployments_services_probes:
+        path: 01_pods_deployments_services_probes/F01_flashcards.md
+        tipo: flashcards
+        arquivo_id: f8-37-2-01-pods-deployments-services-probes-f01-flashcards-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+          seletores:
+          - '## Flashcards > cartão 1'
+          - '## Flashcards > cartão 2'
+          - '## Flashcards > cartão 3'
+          concatenacao_ordem_fonte: true
+        assunto: 01_pods_deployments_services_probes
+        itens_origem:
+        - FC01
+        - FC02
+        - FC03
+        ordem: 1
+    relacoes_curriculares_fonte:
+      origem: '## Conexões'
+      tratamento: copiar literalmente
+    pre_requisitos_declarados: []
+    classificacao: '[PROPOSTA] reconstruída das fontes; não foi localizado mapa aprovado da Fase 8'
+    assuntos:
+    - 01_pods_deployments_services_probes
+    detalhe_assuntos:
+    - slug: 01_pods_deployments_services_probes
+      titulo: Pods, workloads, Services e probes
+      microtopicos:
+      - '## Teoria (bloco contínuo, sem subtítulos na fonte)'
+    cobertura:
+      01_pods_deployments_services_probes:
+        quiz_exclusivos: []
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas: []
+        flashcards_exclusivos:
+        - FC01
+        - FC02
+        - FC03
+        flashcards_compartilhados: []
+    projeto:
+      inclui: false
+  '37.3':
+    key: '37.3'
+    pasta: 37.3_GCP_nocoes
+    origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+    titulo_original: '37.3 — GCP: noções'
+    modulo:
+      id: '37'
+      nome: Orquestração gerenciada e outras clouds
+    metadados_originais:
+      key: '37.3'
+      tipo: solo
+      carater: repertorio
+      profundidade: repertorio
+      estimativa_minutos: 45
+      tags:
+      - '#infra'
+      - '#cloud'
+      - '#mensageria'
+      status: rascunho
+    metadados_origem: lista Markdown sob o H1; transportar ao frontmatter do README sem alterações
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f8-37-3-readme-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletor: '# 37.3 — GCP: noções'
+        nota: Índice, metadados originais e links relativos.
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f8-37-3-00-objetivo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletor: '## Objetivo'
+      SUM:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f8-37-3-01-resumo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletor: '## Resumo'
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f8-37-3-02-criterio-de-conclusao-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletor: '## Critério de conclusão'
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f8-37-3-03-conexoes-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletor: '## Conexões'
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f8-37-3-04-referencias-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletor: '## Referências'
+      T01:
+        path: 01_modelos_de_execucao_cloud_run/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-37-3-01-modelos-de-execucao-cloud-run-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletores: &id001
+          - '### Microtópico 1 — Escolher como executar código no Cloud Run'
+          concatenacao_ordem_fonte: true
+        assunto: 01_modelos_de_execucao_cloud_run
+        ordem: 1
+      T02:
+        path: 02_pubsub_entrega_idempotencia/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-37-3-02-pubsub-entrega-idempotencia-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletores: &id002
+          - '### Microtópico 2 — Usar Pub/Sub sem presumir entrega única'
+          concatenacao_ordem_fonte: true
+        assunto: 02_pubsub_entrega_idempotencia
+        ordem: 2
+      T03:
+        path: 03_gke_autopilot_standard_provedores/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-37-3-03-gke-autopilot-standard-provedores-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletores: &id003
+          - '### Microtópico 3 — Escolher GKE e comparar provedores pelo cenário'
+          concatenacao_ordem_fonte: true
+        assunto: 03_gke_autopilot_standard_provedores
+        ordem: 3
+      P01:
+        path: 90_integracao/P01_pratica.md
+        tipo: practice
+        arquivo_id: f8-37-3-90-integracao-p01-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletor: '## Atividades > Atividade 1 — Mapeamento por cenário'
+        assuntos:
+        - 01_modelos_de_execucao_cloud_run
+        - 02_pubsub_entrega_idempotencia
+        - 03_gke_autopilot_standard_provedores
+        itens_origem:
+        - P01
+        ordem: 1
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: compartilhado
+      P02:
+        path: 90_integracao/P02_pratica.md
+        tipo: practice
+        arquivo_id: f8-37-3-90-integracao-p02-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletor: '## Atividades > Atividade 2 — Revisão de risco de migração'
+        assuntos:
+        - 01_modelos_de_execucao_cloud_run
+        - 02_pubsub_entrega_idempotencia
+        itens_origem:
+        - P02
+        ordem: 2
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: compartilhado
+      FC_01_modelos_de_execucao_cloud_run:
+        path: 01_modelos_de_execucao_cloud_run/F01_flashcards.md
+        tipo: flashcards
+        arquivo_id: f8-37-3-01-modelos-de-execucao-cloud-run-f01-flashcards-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletores:
+          - '## Flashcards > cartão 1'
+          concatenacao_ordem_fonte: true
+        assunto: 01_modelos_de_execucao_cloud_run
+        itens_origem:
+        - FC01
+        ordem: 1
+      FC_02_pubsub_entrega_idempotencia:
+        path: 02_pubsub_entrega_idempotencia/F02_flashcards.md
+        tipo: flashcards
+        arquivo_id: f8-37-3-02-pubsub-entrega-idempotencia-f02-flashcards-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletores:
+          - '## Flashcards > cartão 2'
+          concatenacao_ordem_fonte: true
+        assunto: 02_pubsub_entrega_idempotencia
+        itens_origem:
+        - FC02
+        ordem: 2
+      FC_03_gke_autopilot_standard_provedores:
+        path: 03_gke_autopilot_standard_provedores/F03_flashcards.md
+        tipo: flashcards
+        arquivo_id: f8-37-3-03-gke-autopilot-standard-provedores-f03-flashcards-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/37.3_GCP_nocoes.md
+          seletores:
+          - '## Flashcards > cartão 3'
+          concatenacao_ordem_fonte: true
+        assunto: 03_gke_autopilot_standard_provedores
+        itens_origem:
+        - FC03
+        ordem: 3
+    relacoes_curriculares_fonte:
+      origem: '## Conexões'
+      tratamento: copiar literalmente
+    pre_requisitos_declarados: []
+    classificacao: '[PROPOSTA] reconstruída das fontes; não foi localizado mapa aprovado da Fase 8'
+    assuntos:
+    - 01_modelos_de_execucao_cloud_run
+    - 02_pubsub_entrega_idempotencia
+    - 03_gke_autopilot_standard_provedores
+    detalhe_assuntos:
+    - slug: 01_modelos_de_execucao_cloud_run
+      titulo: Modelos de execução no Cloud Run
+      microtopicos: *id001
+    - slug: 02_pubsub_entrega_idempotencia
+      titulo: Pub/Sub, entrega e idempotência
+      microtopicos: *id002
+    - slug: 03_gke_autopilot_standard_provedores
+      titulo: GKE e comparação de provedores
+      microtopicos: *id003
+    cobertura:
+      01_modelos_de_execucao_cloud_run:
+        quiz_exclusivos: []
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        - P02
+        flashcards_exclusivos:
+        - FC01
+        flashcards_compartilhados: []
+      02_pubsub_entrega_idempotencia:
+        quiz_exclusivos: []
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        - P02
+        flashcards_exclusivos:
+        - FC02
+        flashcards_compartilhados: []
+      03_gke_autopilot_standard_provedores:
+        quiz_exclusivos: []
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        flashcards_exclusivos:
+        - FC03
+        flashcards_compartilhados: []
+    projeto:
+      inclui: false
+  '38.1':
+    key: '38.1'
+    pasta: 38.1_Sinais_operacionais
+    origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+    titulo_original: 38.1 — Sinais operacionais
+    modulo:
+      id: '38'
+      nome: Observabilidade
+    metadados_originais:
+      key: '38.1'
+      tipo: solo
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 90
+      tags:
+      - '#infra'
+      - '#qualidade'
+      - '#observabilidade'
+      status: rascunho
+    metadados_origem: lista Markdown sob o H1; transportar ao frontmatter do README sem alterações
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f8-38-1-readme-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '# 38.1 — Sinais operacionais'
+        nota: Índice, metadados originais e links relativos.
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f8-38-1-00-objetivo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Objetivo'
+      SUM:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f8-38-1-01-resumo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Resumo'
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f8-38-1-02-criterio-de-conclusao-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Critério de conclusão'
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f8-38-1-03-conexoes-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Conexões'
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f8-38-1-04-referencias-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Referências'
+      T01:
+        path: 01_escolha_dos_sinais/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-38-1-01-escolha-dos-sinais-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletores: &id004
+          - '### Microtópico 1 — Escolher o sinal pela pergunta'
+          concatenacao_ordem_fonte: true
+        assunto: 01_escolha_dos_sinais
+        ordem: 1
+      T02:
+        path: 02_logs_metricas_dimensoes_privacidade/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-38-1-02-logs-metricas-dimensoes-privacidade-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletores: &id005
+          - '### Microtópico 2 — Criar sinais que possam ser analisados'
+          concatenacao_ordem_fonte: true
+        assunto: 02_logs_metricas_dimensoes_privacidade
+        ordem: 2
+      T03:
+        path: 03_tracing_contexto_otel/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-38-1-03-tracing-contexto-otel-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletores: &id006
+          - '### Microtópico 3 — Acompanhar uma operação com traces e contexto'
+          - '### Microtópico 4 — Instrumentar com OpenTelemetry sem acoplar o backend'
+          concatenacao_ordem_fonte: true
+        assunto: 03_tracing_contexto_otel
+        ordem: 3
+      Q01:
+        path: 01_escolha_dos_sinais/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-1-01-escolha-dos-sinais-q01-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 1'
+        assunto: 01_escolha_dos_sinais
+        itens_origem:
+        - Q01
+        ordem: 1
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K01:
+        path: 01_escolha_dos_sinais/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-1-01-escolha-dos-sinais-k01-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 1'
+        assunto: 01_escolha_dos_sinais
+        itens_origem:
+        - Q01
+        responde_a: Q01
+        ordem: 1
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q02:
+        path: 03_tracing_contexto_otel/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-1-03-tracing-contexto-otel-q02-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 2'
+        assunto: 03_tracing_contexto_otel
+        itens_origem:
+        - Q02
+        ordem: 2
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K02:
+        path: 03_tracing_contexto_otel/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-1-03-tracing-contexto-otel-k02-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 2'
+        assunto: 03_tracing_contexto_otel
+        itens_origem:
+        - Q02
+        responde_a: Q02
+        ordem: 2
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q03:
+        path: 02_logs_metricas_dimensoes_privacidade/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-1-02-logs-metricas-dimensoes-privacidade-q03-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 3'
+        assunto: 02_logs_metricas_dimensoes_privacidade
+        itens_origem:
+        - Q03
+        ordem: 3
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K03:
+        path: 02_logs_metricas_dimensoes_privacidade/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-1-02-logs-metricas-dimensoes-privacidade-k03-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 3'
+        assunto: 02_logs_metricas_dimensoes_privacidade
+        itens_origem:
+        - Q03
+        responde_a: Q03
+        ordem: 3
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q04:
+        path: 02_logs_metricas_dimensoes_privacidade/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-1-02-logs-metricas-dimensoes-privacidade-q04-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 4'
+        assunto: 02_logs_metricas_dimensoes_privacidade
+        itens_origem:
+        - Q04
+        ordem: 4
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K04:
+        path: 02_logs_metricas_dimensoes_privacidade/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-1-02-logs-metricas-dimensoes-privacidade-k04-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 4'
+        assunto: 02_logs_metricas_dimensoes_privacidade
+        itens_origem:
+        - Q04
+        responde_a: Q04
+        ordem: 4
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q05:
+        path: 03_tracing_contexto_otel/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-1-03-tracing-contexto-otel-q05-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 5'
+        assunto: 03_tracing_contexto_otel
+        itens_origem:
+        - Q05
+        ordem: 5
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K05:
+        path: 03_tracing_contexto_otel/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-1-03-tracing-contexto-otel-k05-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Quiz > item 5'
+        assunto: 03_tracing_contexto_otel
+        itens_origem:
+        - Q05
+        responde_a: Q05
+        ordem: 5
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      P01:
+        path: 02_logs_metricas_dimensoes_privacidade/P01_pratica.md
+        tipo: practice
+        arquivo_id: f8-38-1-02-logs-metricas-dimensoes-privacidade-p01-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Atividades > Atividade 1 — Normalizar logs para investigação'
+        assunto: 02_logs_metricas_dimensoes_privacidade
+        itens_origem:
+        - P01
+        ordem: 1
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: exclusivo
+      P02:
+        path: 90_integracao/P02_pratica.md
+        tipo: practice
+        arquivo_id: f8-38-1-90-integracao-p02-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Atividades > Atividade 2 — Montar o caminho de uma requisição'
+        assuntos:
+        - 01_escolha_dos_sinais
+        - 03_tracing_contexto_otel
+        itens_origem:
+        - P02
+        ordem: 2
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: compartilhado
+      P03:
+        path: 90_integracao/P03_pratica.md
+        tipo: practice
+        arquivo_id: f8-38-1-90-integracao-p03-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.1_Sinais_operacionais.md
+          seletor: '## Atividades > Atividade 3 — Revisar dimensões e privacidade'
+        assuntos:
+        - 01_escolha_dos_sinais
+        - 02_logs_metricas_dimensoes_privacidade
+        itens_origem:
+        - P03
+        ordem: 3
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: compartilhado
+    relacoes_curriculares_fonte:
+      origem: '## Conexões'
+      tratamento: copiar literalmente
+    pre_requisitos_declarados: []
+    classificacao: '[PROPOSTA] reconstruída das fontes; não foi localizado mapa aprovado da Fase 8'
+    assuntos:
+    - 01_escolha_dos_sinais
+    - 02_logs_metricas_dimensoes_privacidade
+    - 03_tracing_contexto_otel
+    detalhe_assuntos:
+    - slug: 01_escolha_dos_sinais
+      titulo: Escolha de sinais pela pergunta
+      microtopicos: *id004
+    - slug: 02_logs_metricas_dimensoes_privacidade
+      titulo: Logs e métricas analisáveis, dimensões e privacidade
+      microtopicos: *id005
+    - slug: 03_tracing_contexto_otel
+      titulo: Tracing, propagação de contexto e OpenTelemetry
+      microtopicos: *id006
+    cobertura:
+      01_escolha_dos_sinais:
+        quiz_exclusivos:
+        - Q01
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P02
+        - P03
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_logs_metricas_dimensoes_privacidade:
+        quiz_exclusivos:
+        - Q03
+        - Q04
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P01
+        praticas_compartilhadas:
+        - P03
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      03_tracing_contexto_otel:
+        quiz_exclusivos:
+        - Q02
+        - Q05
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P02
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    projeto:
+      inclui: false
+  '38.2':
+    key: '38.2'
+    pasta: 38.2_Ferramentas
+    origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+    titulo_original: 38.2 — Ferramentas
+    modulo:
+      id: '38'
+      nome: Observabilidade
+    metadados_originais:
+      key: '38.2'
+      tipo: pratica
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 120
+      tags:
+      - '#ferramentas'
+      - '#infra'
+      - '#observabilidade'
+      status: rascunho
+    metadados_origem: lista Markdown sob o H1; transportar ao frontmatter do README sem alterações
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f8-38-2-readme-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '# 38.2 — Ferramentas'
+        nota: Índice, metadados originais e links relativos.
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f8-38-2-00-objetivo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Objetivo'
+      SUM:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f8-38-2-01-resumo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Resumo'
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f8-38-2-02-criterio-de-conclusao-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Critério de conclusão'
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f8-38-2-03-conexoes-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Conexões'
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f8-38-2-04-referencias-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Referências'
+      T01:
+        path: 01_fluxo_otel_prometheus_promql/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-38-2-01-fluxo-otel-prometheus-promql-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletores: &id007
+          - '### Microtópico 1 — Entender o fluxo e o papel de cada ferramenta'
+          - '### Microtópico 2 — Coletar e consultar métricas no Prometheus'
+          concatenacao_ordem_fonte: true
+        assunto: 01_fluxo_otel_prometheus_promql
+        ordem: 1
+      T02:
+        path: 02_grafana_dashboards_operacao/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-38-2-02-grafana-dashboards-operacao-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletores: &id008
+          - '### Microtópico 3 — Fazer Grafana responder a uma pergunta'
+          - '### Microtópico 4 — Avaliar integração, volume e operação'
+          concatenacao_ordem_fonte: true
+        assunto: 02_grafana_dashboards_operacao
+        ordem: 2
+      Q01:
+        path: 01_fluxo_otel_prometheus_promql/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-2-01-fluxo-otel-prometheus-promql-q01-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 1'
+        assunto: 01_fluxo_otel_prometheus_promql
+        itens_origem:
+        - Q01
+        ordem: 1
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K01:
+        path: 01_fluxo_otel_prometheus_promql/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-2-01-fluxo-otel-prometheus-promql-k01-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 1'
+        assunto: 01_fluxo_otel_prometheus_promql
+        itens_origem:
+        - Q01
+        responde_a: Q01
+        ordem: 1
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q02:
+        path: 02_grafana_dashboards_operacao/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-2-02-grafana-dashboards-operacao-q02-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 2'
+        assunto: 02_grafana_dashboards_operacao
+        itens_origem:
+        - Q02
+        ordem: 2
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K02:
+        path: 02_grafana_dashboards_operacao/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-2-02-grafana-dashboards-operacao-k02-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 2'
+        assunto: 02_grafana_dashboards_operacao
+        itens_origem:
+        - Q02
+        responde_a: Q02
+        ordem: 2
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q03:
+        path: 01_fluxo_otel_prometheus_promql/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-2-01-fluxo-otel-prometheus-promql-q03-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 3'
+        assunto: 01_fluxo_otel_prometheus_promql
+        itens_origem:
+        - Q03
+        ordem: 3
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K03:
+        path: 01_fluxo_otel_prometheus_promql/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-2-01-fluxo-otel-prometheus-promql-k03-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 3'
+        assunto: 01_fluxo_otel_prometheus_promql
+        itens_origem:
+        - Q03
+        responde_a: Q03
+        ordem: 3
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q04:
+        path: 01_fluxo_otel_prometheus_promql/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-2-01-fluxo-otel-prometheus-promql-q04-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 4'
+        assunto: 01_fluxo_otel_prometheus_promql
+        itens_origem:
+        - Q04
+        ordem: 4
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K04:
+        path: 01_fluxo_otel_prometheus_promql/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-2-01-fluxo-otel-prometheus-promql-k04-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 4'
+        assunto: 01_fluxo_otel_prometheus_promql
+        itens_origem:
+        - Q04
+        responde_a: Q04
+        ordem: 4
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q05:
+        path: 01_fluxo_otel_prometheus_promql/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f8-38-2-01-fluxo-otel-prometheus-promql-q05-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 5'
+        assunto: 01_fluxo_otel_prometheus_promql
+        itens_origem:
+        - Q05
+        ordem: 5
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K05:
+        path: 01_fluxo_otel_prometheus_promql/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-38-2-01-fluxo-otel-prometheus-promql-k05-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Quiz > item 5'
+        assunto: 01_fluxo_otel_prometheus_promql
+        itens_origem:
+        - Q05
+        responde_a: Q05
+        ordem: 5
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      P01:
+        path: 90_integracao/P01_pratica.md
+        tipo: practice
+        arquivo_id: f8-38-2-90-integracao-p01-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Atividades > Atividade 1 — Desenhar e revisar o pipeline'
+        assuntos:
+        - 01_fluxo_otel_prometheus_promql
+        - 02_grafana_dashboards_operacao
+        itens_origem:
+        - P01
+        ordem: 1
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: compartilhado
+      P02:
+        path: 90_integracao/P02_pratica.md
+        tipo: practice
+        arquivo_id: f8-38-2-90-integracao-p02-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Atividades > Atividade 2 — Consultar métricas e compor um dashboard'
+        assuntos:
+        - 01_fluxo_otel_prometheus_promql
+        - 02_grafana_dashboards_operacao
+        itens_origem:
+        - P02
+        ordem: 2
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: compartilhado
+      P03:
+        path: 90_integracao/P03_pratica.md
+        tipo: practice
+        arquivo_id: f8-38-2-90-integracao-p03-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/38.2_Ferramentas.md
+          seletor: '## Atividades > Atividade 3 — Simular incidente e definir resposta'
+        assuntos:
+        - 01_fluxo_otel_prometheus_promql
+        - 02_grafana_dashboards_operacao
+        itens_origem:
+        - P03
+        ordem: 3
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: compartilhado
+    relacoes_curriculares_fonte:
+      origem: '## Conexões'
+      tratamento: copiar literalmente
+    pre_requisitos_declarados: []
+    classificacao: '[PROPOSTA] reconstruída das fontes; não foi localizado mapa aprovado da Fase 8'
+    assuntos:
+    - 01_fluxo_otel_prometheus_promql
+    - 02_grafana_dashboards_operacao
+    detalhe_assuntos:
+    - slug: 01_fluxo_otel_prometheus_promql
+      titulo: Fluxo de telemetria e Prometheus
+      microtopicos: *id007
+    - slug: 02_grafana_dashboards_operacao
+      titulo: Grafana, dashboards e integração operacional
+      microtopicos: *id008
+    cobertura:
+      01_fluxo_otel_prometheus_promql:
+        quiz_exclusivos:
+        - Q01
+        - Q03
+        - Q04
+        - Q05
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        - P02
+        - P03
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_grafana_dashboards_operacao:
+        quiz_exclusivos:
+        - Q02
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        - P02
+        - P03
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    projeto:
+      inclui: false
+  '39.1':
+    key: '39.1'
+    pasta: 39.1_Operacao_madura
+    origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+    titulo_original: 39.1 — Operação madura
+    modulo:
+      id: '39'
+      nome: Operação madura e projeto da fase
+    metadados_originais:
+      key: '39.1'
+      tipo: integrado
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 90
+      tags:
+      - '#infra'
+      - '#qualidade'
+      - '#confiabilidade'
+      status: rascunho
+    metadados_origem: lista Markdown sob o H1; transportar ao frontmatter do README sem alterações
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f8-39-1-readme-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '# 39.1 — Operação madura'
+        nota: Índice, metadados originais e links relativos.
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f8-39-1-00-objetivo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Objetivo'
+      SUM:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f8-39-1-01-resumo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Resumo'
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f8-39-1-02-criterio-de-conclusao-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Critério de conclusão'
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f8-39-1-03-conexoes-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Conexões'
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f8-39-1-04-referencias-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Referências'
+      T01:
+        path: 01_sli_slo_sla_error_budget/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-39-1-01-sli-slo-sla-error-budget-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletores: &id009
+          - '### Microtópico 1 — Medir o que importa: SLI, SLO, SLA e error budget'
+          concatenacao_ordem_fonte: true
+        assunto: 01_sli_slo_sla_error_budget
+        ordem: 1
+      T02:
+        path: 02_resposta_incidente_runbooks/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-39-1-02-resposta-incidente-runbooks-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletores: &id010
+          - '### Microtópico 2 — Responder ao incidente: restaurar, coordenar e usar runbook'
+          concatenacao_ordem_fonte: true
+        assunto: 02_resposta_incidente_runbooks
+        ordem: 2
+      T03:
+        path: 03_postmortem_adrs/01_teoria.md
+        tipo: theory
+        arquivo_id: f8-39-1-03-postmortem-adrs-01-teoria-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletores: &id011
+          - '### Microtópico 3 — Aprender com postmortem sem culpa'
+          - '### Microtópico 4 — Registrar decisões em ADR e fechar o ciclo'
+          concatenacao_ordem_fonte: true
+        assunto: 03_postmortem_adrs
+        ordem: 3
+      Q01:
+        path: 01_sli_slo_sla_error_budget/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f8-39-1-01-sli-slo-sla-error-budget-q01-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 1'
+        assunto: 01_sli_slo_sla_error_budget
+        itens_origem:
+        - Q01
+        ordem: 1
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K01:
+        path: 01_sli_slo_sla_error_budget/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-39-1-01-sli-slo-sla-error-budget-k01-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 1'
+        assunto: 01_sli_slo_sla_error_budget
+        itens_origem:
+        - Q01
+        responde_a: Q01
+        ordem: 1
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q02:
+        path: 01_sli_slo_sla_error_budget/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f8-39-1-01-sli-slo-sla-error-budget-q02-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 2'
+        assunto: 01_sli_slo_sla_error_budget
+        itens_origem:
+        - Q02
+        ordem: 2
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K02:
+        path: 01_sli_slo_sla_error_budget/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-39-1-01-sli-slo-sla-error-budget-k02-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 2'
+        assunto: 01_sli_slo_sla_error_budget
+        itens_origem:
+        - Q02
+        responde_a: Q02
+        ordem: 2
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q03:
+        path: 01_sli_slo_sla_error_budget/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f8-39-1-01-sli-slo-sla-error-budget-q03-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 3'
+        assunto: 01_sli_slo_sla_error_budget
+        itens_origem:
+        - Q03
+        ordem: 3
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K03:
+        path: 01_sli_slo_sla_error_budget/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-39-1-01-sli-slo-sla-error-budget-k03-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 3'
+        assunto: 01_sli_slo_sla_error_budget
+        itens_origem:
+        - Q03
+        responde_a: Q03
+        ordem: 3
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q04:
+        path: 02_resposta_incidente_runbooks/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f8-39-1-02-resposta-incidente-runbooks-q04-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 4'
+        assunto: 02_resposta_incidente_runbooks
+        itens_origem:
+        - Q04
+        ordem: 4
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K04:
+        path: 02_resposta_incidente_runbooks/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-39-1-02-resposta-incidente-runbooks-k04-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 4'
+        assunto: 02_resposta_incidente_runbooks
+        itens_origem:
+        - Q04
+        responde_a: Q04
+        ordem: 4
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      Q05:
+        path: 03_postmortem_adrs/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f8-39-1-03-postmortem-adrs-q05-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 5'
+        assunto: 03_postmortem_adrs
+        itens_origem:
+        - Q05
+        ordem: 5
+        segmento: enunciado sem resposta inline
+        classificacao: exclusivo
+      K05:
+        path: 03_postmortem_adrs/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f8-39-1-03-postmortem-adrs-k05-gabarito-quiz-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Quiz > item 5'
+        assunto: 03_postmortem_adrs
+        itens_origem:
+        - Q05
+        responde_a: Q05
+        ordem: 5
+        segmento: resposta inline existente; texto literal
+        classificacao: exclusivo
+      P01:
+        path: 01_sli_slo_sla_error_budget/P01_pratica.md
+        tipo: practice
+        arquivo_id: f8-39-1-01-sli-slo-sla-error-budget-p01-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Atividades > Atividade 1 — Definir um SLI/SLO e interpretar o orçamento'
+        assunto: 01_sli_slo_sla_error_budget
+        itens_origem:
+        - P01
+        ordem: 1
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: exclusivo
+      P02:
+        path: 02_resposta_incidente_runbooks/P02_pratica.md
+        tipo: practice
+        arquivo_id: f8-39-1-02-resposta-incidente-runbooks-p02-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Atividades > Atividade 2 — Escrever e executar mentalmente um runbook'
+        assunto: 02_resposta_incidente_runbooks
+        itens_origem:
+        - P02
+        ordem: 2
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: exclusivo
+      P03:
+        path: 03_postmortem_adrs/P03_pratica.md
+        tipo: practice
+        arquivo_id: f8-39-1-03-postmortem-adrs-p03-pratica-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.1_Operacao_madura.md
+          seletor: '## Atividades > Atividade 3 — Produzir postmortem e ADR a partir do cenário'
+        assunto: 03_postmortem_adrs
+        itens_origem:
+        - P03
+        ordem: 3
+        nota: Entrega, critérios de aceite e feedback mantidos no bloco original.
+        classificacao: exclusivo
+    relacoes_curriculares_fonte:
+      origem: '## Conexões'
+      tratamento: copiar literalmente
+    pre_requisitos_declarados: []
+    classificacao: '[PROPOSTA] reconstruída das fontes; não foi localizado mapa aprovado da Fase 8'
+    assuntos:
+    - 01_sli_slo_sla_error_budget
+    - 02_resposta_incidente_runbooks
+    - 03_postmortem_adrs
+    detalhe_assuntos:
+    - slug: 01_sli_slo_sla_error_budget
+      titulo: SLI, SLO, SLA e error budget
+      microtopicos: *id009
+    - slug: 02_resposta_incidente_runbooks
+      titulo: Resposta a incidentes e runbooks
+      microtopicos: *id010
+    - slug: 03_postmortem_adrs
+      titulo: Postmortems, ADRs e aprendizado operacional
+      microtopicos: *id011
+    cobertura:
+      01_sli_slo_sla_error_budget:
+        quiz_exclusivos:
+        - Q01
+        - Q02
+        - Q03
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P01
+        praticas_compartilhadas: []
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_resposta_incidente_runbooks:
+        quiz_exclusivos:
+        - Q04
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P02
+        praticas_compartilhadas: []
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      03_postmortem_adrs:
+        quiz_exclusivos:
+        - Q05
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P03
+        praticas_compartilhadas: []
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    projeto:
+      inclui: false
+  '39.2':
+    key: '39.2'
+    pasta: 39.2_Projeto_incremental_da_fase
+    origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+    titulo_original: 39.2 — Projeto incremental da fase
+    modulo:
+      id: '39'
+      nome: Operação madura e projeto da fase
+    metadados_originais:
+      key: '39.2'
+      tipo: projeto
+      carater: obrigatorio
+      profundidade: alta
+      estimativa_minutos: 780
+      tags:
+      - '#infra'
+      - '#observabilidade'
+      - '#projeto'
+      status: rascunho
+    metadados_origem: lista Markdown sob o H1; transportar ao frontmatter do README sem alterações
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f8-39-2-readme-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '# 39.2 — Projeto incremental da fase'
+        nota: Índice, metadados originais e links relativos.
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f8-39-2-00-objetivo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Objetivo'
+      SCO:
+        path: 01_escopo_regras.md
+        tipo: project_scope
+        arquivo_id: f8-39-2-01-escopo-regras-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Escopo e regras'
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f8-39-2-02-criterio-de-conclusao-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Critério de conclusão'
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f8-39-2-03-conexoes-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Conexões'
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f8-39-2-04-referencias-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Referências'
+      T01:
+        path: 02_teoria_preparar-uma-entrega-repetivel-e-reversivel.md
+        tipo: theory
+        arquivo_id: f8-39-2-02-teoria-preparar-uma-entrega-repetivel-e-reversivel-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Teoria > Microtópico 1 — Preparar uma entrega repetível e reversível'
+        itens_origem:
+        - MT01
+        ordem: 1
+      T02:
+        path: 03_teoria_instrumentar-o-fluxo-de-negocio-e-o-risco-proprio-do-projeto.md
+        tipo: theory
+        arquivo_id: f8-39-2-03-teoria-instrumentar-o-fluxo-de-negocio-e-o-risco-proprio-do-projeto-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Teoria > Microtópico 2 — Instrumentar o fluxo de negócio e o risco próprio do projeto'
+        itens_origem:
+        - MT02
+        ordem: 2
+      T03:
+        path: 04_teoria_construir-dashboard-regra-de-alerta-e-runbook.md
+        tipo: theory
+        arquivo_id: f8-39-2-04-teoria-construir-dashboard-regra-de-alerta-e-runbook-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Teoria > Microtópico 3 — Construir dashboard, regra de alerta e runbook'
+        itens_origem:
+        - MT03
+        ordem: 3
+      T04:
+        path: 05_teoria_simular-falha-fazer-rollback-e-aprender.md
+        tipo: theory
+        arquivo_id: f8-39-2-05-teoria-simular-falha-fazer-rollback-e-aprender-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Teoria > Microtópico 4 — Simular falha, fazer rollback e aprender'
+        itens_origem:
+        - MT04
+        ordem: 4
+      C90:
+        path: 06_checklist_entrega.md
+        tipo: checklist
+        arquivo_id: f8-39-2-06-checklist-entrega-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Checklist de entrega'
+        itens_origem:
+        - 11 itens
+      R00:
+        path: 07_rubrica_final.md
+        tipo: rubric
+        arquivo_id: f8-39-2-07-rubrica-final-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Rubrica final'
+        itens_origem:
+        - 6 dimensões
+        escala_rubrica: 0–2 por dimensão; 6 dimensões; total 12; aceite ≥10/12, com bloqueadores literais da fonte
+      V00:
+        path: 08_verificacoes_por_cenario.md
+        tipo: project_scenarios
+        arquivo_id: f8-39-2-08-verificacoes-por-cenario-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.2_Projeto_incremental_da_fase.md
+          seletor: '## Verificações por cenário'
+        itens_origem:
+        - 5 cenários
+    relacoes_curriculares_fonte:
+      origem: '## Conexões'
+      tratamento: copiar literalmente
+    pre_requisitos_declarados: []
+    classificacao: '[PROPOSTA] reconstruída das fontes; não foi localizado mapa aprovado da Fase 8'
+    assuntos: []
+    projeto:
+      inclui: true
+      tipo: incremental
+      container: raiz da unidade sem assunto fictício
+      marcos_formais: []
+      nota: quatro blocos são microtópicos teóricos, não marcos; não criar M1–M4
+      checklist_final_itens: 11
+      rubrica_dimensoes: 6
+      escala_rubrica: 0–2 por dimensão, total 12; limiar 10/12 e bloqueadores da fonte
+      verificacoes_por_cenario: 5
+      origem_pagina_fase: 'docs/courses/trilhacode/Fase_8_Infra_Operacao.md > ## Projeto incremental'
+      dependencias_explicitamente_descritas:
+      - projeto principal Trilho A iniciado em 3.5
+      - deploy da Fase 7 em 32.2/36.1
+      - sinais/ferramentas 38.1–38.2
+      - operação 39.1
+    cobertura: {}
+  '39.3':
+    key: '39.3'
+    pasta: 39.3_Projeto_de_fase_Trilho_B
+    origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+    titulo_original: 39.3 — Projeto de fase (Trilho B)
+    modulo:
+      id: '39'
+      nome: Operação madura e projeto da fase
+    metadados_originais:
+      key: '39.3'
+      tipo: projeto
+      carater: obrigatorio
+      profundidade: alta
+      estimativa_minutos: 660
+      tags:
+      - '#projeto'
+      - '#infra'
+      - '#observabilidade'
+      status: rascunho
+    metadados_origem: lista Markdown sob o H1; transportar ao frontmatter do README sem alterações
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f8-39-3-readme-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '# 39.3 — Projeto de fase (Trilho B)'
+        nota: Índice, metadados originais e links relativos.
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f8-39-3-00-objetivo-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '## Objetivo'
+      SCO:
+        path: 01_escopo_regras.md
+        tipo: project_scope
+        arquivo_id: f8-39-3-01-escopo-regras-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '## Escopo e regras'
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f8-39-3-02-criterio-de-conclusao-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '## Critério de conclusão'
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f8-39-3-03-conexoes-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '## Conexões'
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f8-39-3-04-referencias-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '## Referências'
+      M01:
+        path: 01_tipo_ideia_contrato.md
+        tipo: project_milestone
+        arquivo_id: f8-39-3-01-tipo-ideia-contrato-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '### Entrega 1 — Escolher tipo, ideia e contrato de aceite'
+        itens_origem:
+        - M1
+        ordem: 1
+        titulo_marco: Entrega 1 — Escolher tipo, ideia e contrato de aceite
+      C01:
+        path: C01_aceite_entrega_1.md
+        tipo: checklist
+        arquivo_id: f8-39-3-c01-aceite-entrega-1-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '### Entrega 1 — Escolher tipo, ideia e contrato de aceite > Teste/aceite'
+          marcador_literal: '**Teste/aceite:**'
+          separacao: segmento a partir do marcador literal, sem reescrita
+        itens_origem:
+        - C01
+        ordem: 1
+      M02:
+        path: 02_fatia_vertical_risco.md
+        tipo: project_milestone
+        arquivo_id: f8-39-3-02-fatia-vertical-risco-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '### Entrega 2 — Construir a fatia vertical e testar o risco central'
+        itens_origem:
+        - M2
+        ordem: 2
+        titulo_marco: Entrega 2 — Construir a fatia vertical e testar o risco central
+      C02:
+        path: C02_aceite_entrega_2.md
+        tipo: checklist
+        arquivo_id: f8-39-3-c02-aceite-entrega-2-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '### Entrega 2 — Construir a fatia vertical e testar o risco central > Teste/aceite'
+          marcador_literal: '**Teste/aceite:**'
+          separacao: segmento a partir do marcador literal, sem reescrita
+        itens_origem:
+        - C02
+        ordem: 2
+      M03:
+        path: 03_empacotar_automatizar_observar.md
+        tipo: project_milestone
+        arquivo_id: f8-39-3-03-empacotar-automatizar-observar-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '### Entrega 3 — Empacotar, automatizar e observar'
+        itens_origem:
+        - M3
+        ordem: 3
+        titulo_marco: Entrega 3 — Empacotar, automatizar e observar
+      C03:
+        path: C03_aceite_entrega_3.md
+        tipo: checklist
+        arquivo_id: f8-39-3-c03-aceite-entrega-3-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '### Entrega 3 — Empacotar, automatizar e observar > Teste/aceite'
+          marcador_literal: '**Teste/aceite:**'
+          separacao: segmento a partir do marcador literal, sem reescrita
+        itens_origem:
+        - C03
+        ordem: 3
+      M04:
+        path: 04_demonstrar_reverter_encerrar.md
+        tipo: project_milestone
+        arquivo_id: f8-39-3-04-demonstrar-reverter-encerrar-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '### Entrega 4 — Demonstrar, reverter, documentar e encerrar'
+        itens_origem:
+        - M4
+        ordem: 4
+        titulo_marco: Entrega 4 — Demonstrar, reverter, documentar e encerrar
+      C04:
+        path: C04_aceite_entrega_4.md
+        tipo: checklist
+        arquivo_id: f8-39-3-c04-aceite-entrega-4-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '### Entrega 4 — Demonstrar, reverter, documentar e encerrar > Teste/aceite'
+          marcador_literal: '**Teste/aceite:**'
+          separacao: segmento a partir do marcador literal, sem reescrita
+        itens_origem:
+        - C04
+        ordem: 4
+      C90:
+        path: C90_checklist_final.md
+        tipo: checklist
+        arquivo_id: f8-39-3-c90-checklist-final-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '## Checklist de entrega'
+        itens_origem:
+        - 12 itens
+      R00:
+        path: R00_rubrica_final.md
+        tipo: rubric
+        arquivo_id: f8-39-3-r00-rubrica-final-md
+        origem:
+          arquivo_origem: docs/courses/trilhacode/Conteudos/Fase_8/39.3_Projeto_de_fase_Trilho_B.md
+          seletor: '## Rubrica final'
+        itens_origem:
+        - 6 dimensões
+        escala_rubrica: 0–2 por dimensão; total 12; aceite ≥10/12, com bloqueadores literais da fonte
+    relacoes_curriculares_fonte:
+      origem: '## Conexões'
+      tratamento: copiar literalmente
+    pre_requisitos_declarados: []
+    classificacao: '[PROPOSTA] reconstruída das fontes; não foi localizado mapa aprovado da Fase 8'
+    assuntos: []
+    projeto:
+      inclui: true
+      tipo: phase_b
+      container: raiz da unidade sem assunto fictício
+      marcos_formais:
+      - id: M1
+        arquivo: M01
+        titulo_marco: Entrega 1 — Escolher tipo, ideia e contrato de aceite
+        origem: '### Entrega 1 — Escolher tipo, ideia e contrato de aceite'
+      - id: M2
+        arquivo: M02
+        titulo_marco: Entrega 2 — Construir a fatia vertical e testar o risco central
+        origem: '### Entrega 2 — Construir a fatia vertical e testar o risco central'
+      - id: M3
+        arquivo: M03
+        titulo_marco: Entrega 3 — Empacotar, automatizar e observar
+        origem: '### Entrega 3 — Empacotar, automatizar e observar'
+      - id: M4
+        arquivo: M04
+        titulo_marco: Entrega 4 — Demonstrar, reverter, documentar e encerrar
+        origem: '### Entrega 4 — Demonstrar, reverter, documentar e encerrar'
+      checklist_final_itens: 12
+      rubrica_dimensoes: 6
+      escala_rubrica: 0–2 por dimensão; total 12; limiar 10/12 e bloqueadores da fonte
+      tabela_T1_T5: preservar dentro do marco M03
+      origem_pagina_fase: 'docs/courses/trilhacode/Fase_8_Infra_Operacao.md > ## Projeto de fase (Trilho B)'
+      dependencias_explicitamente_descritas:
+      - API, banco e testes das fases anteriores
+      - Docker/pipeline/infra 32.2 e 36.1
+      - sinais/ferramentas 38.1–38.2
+      - operação 39.1
+      - guia de rotação de projetos
+    cobertura: {}
+projeto_incremental:
+  titulo_literal: Tracing e métricas em dashboard e postmortem simulado de um incidente, sobre o deploy da Fase
+    7.
+  origem: 'docs/courses/trilhacode/Fase_8_Infra_Operacao.md > ## Projeto incremental'
+  referencia_a_unidade: '39.2'
+  cria_arquivo_novo: false
+  cria_no_json: false
+  marcos_formais: false
+lacunas_cobertura:
+- unidade: '37.1'
+  assunto: 01_ecs_eks_modelos_responsabilidades
+  situação: 3 flashcards; sem quiz/prática na fonte ativa F8
+  proposta: '[PROPOSTA] preservar repertório e registrar ausência, sem criar item'
+- unidade: '37.2'
+  assunto: 01_pods_deployments_services_probes
+  situação: 3 flashcards; sem quiz/prática na fonte ativa F8
+  proposta: '[PROPOSTA] preservar repertório e registrar ausência, sem criar item'
+- unidade: '37.3'
+  assuntos:
+  - 01_modelos_de_execucao_cloud_run
+  - 02_pubsub_entrega_idempotencia
+  - 03_gke_autopilot_standard_provedores
+  situação: 3 flashcards; P1 integradora de três assuntos e P2 integradora de dois; sem quiz
+  proposta: '[PROPOSTA] registrar que a verificação é de repertório/integrada; não criar quiz focal'
+estimativa_arquivos:
+  por_tipo:
+    topic_index: 8
+    objetivo: 8
+    resumo: 6
+    criterio: 8
+    conexoes: 8
+    referencias: 8
+    theory: 17
+    flashcards: 5
+    practice: 11
+    quiz: 15
+    answer_key: 15
+    project_scope: 2
+    checklist: 6
+    rubric: 2
+    project_scenarios: 1
+    project_milestone: 4
+  por_unidade:
+    '37.1': 8
+    '37.2': 8
+    '37.3': 14
+    '38.1': 22
+    '38.2': 21
+    '39.1': 22
+    '39.2': 13
+    '39.3': 16
+  total: 124
+contagens_fontes:
+  unidades_ativas: 8
+  unidades_convencionais: 6
+  contêineres_projeto: 2
+  assuntos_convencionais: 13
+  microtopicos_titulados: 19
+  teorias_sinteticas_sem_subtopicos: 2
+  questoes: 15
+  respostas_inline: 15
+  praticas_convencionais: 11
+  flashcards: 9
+  marcos_formais: 4
+  checklists_aceite_marcos: 4
+  checklists_finais: 2
+  rubricas_projeto: 2
+  arquivos_previstos: 124
+normalizacoes_structurais_propostas:
+- metadados de lista para YAML no README, valores preservados
+- separação das respostas inline somente no delimitador literal existente
+- aceites de 39.3 separados pelo marcador literal **Teste/aceite:**
+- preservar wikilinks; a raiz do vault continua por confirmar
+cabecalhos_container_nao_exportados:
+- '## Teoria'
+- '## Flashcards'
+- '## Atividades'
+- '## Quiz'
+- '## Entregas verificáveis'
+normalizacoes_structurais_autorizadas:
+  links_markdown:
+  - unidade: '39.2'
+    origem_literal: ../../Guia_de_Projetos_e_Rotacao_de_Tipos.md
+    destino_literal: ../../../Guia_Projetos_e_Rotacao_de_Tipos.md
+    ocorrencias_esperadas: 1
+    motivo: o nome literal não existe; o único guia com o mesmo título visível está comprovadamente em alvo_comprovado
+    alvo_comprovado: docs/courses/trilhacode/Guia_Projetos_e_Rotacao_de_Tipos.md
+  - unidade: '39.2'
+    origem_literal: ../../Guia_Projetos_e_Rotacao_de_Tipos.md
+    destino_literal: ../../../Guia_Projetos_e_Rotacao_de_Tipos.md
+    ocorrencias_esperadas: 1
+    motivo: ajustar profundidade relativa da localização migrada
+    alvo_comprovado: docs/courses/trilhacode/Guia_Projetos_e_Rotacao_de_Tipos.md
+  - unidade: '39.3'
+    origem_literal: ../../Guia_Projetos_e_Rotacao_de_Tipos.md
+    destino_literal: ../../../Guia_Projetos_e_Rotacao_de_Tipos.md
+    ocorrencias_esperadas: 2
+    motivo: ajustar profundidade relativa da localização migrada
+    alvo_comprovado: docs/courses/trilhacode/Guia_Projetos_e_Rotacao_de_Tipos.md
