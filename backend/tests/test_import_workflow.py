@@ -1,10 +1,12 @@
 import asyncio
 import uuid
+from datetime import timedelta
 
 import pytest
 from bson import ObjectId
 from httpx import ASGITransport, AsyncClient
 
+from core_utils import now
 from database import db
 from server import app
 
@@ -84,6 +86,20 @@ def test_interrupted_published_import_is_hidden_and_same_payload_recovers(
     first = admin_session.post(f"{API}/import/track?dry_run=false", json=payload)
     assert first.status_code == 200, first.text
     track_id = first.json()["track"]["id"]
+    phase_node = event_loop.run_until_complete(db.nodes.find_one({"track_id": track_id, "meta.import_ref": "phase-1"}))
+    pending_node_id = ObjectId()
+    event_loop.run_until_complete(db.nodes.insert_one({
+        "_id": pending_node_id, "track_id": track_id, "parent_id": str(phase_node["_id"]),
+        "meta": {"import_ref": "synthetic-prerequisite"}, "kind": "topic", "title": "Prerequisite",
+        "status": "published", "order": 1,
+    }))
+    event_loop.run_until_complete(db.relations.insert_one({
+        "track_id": track_id, "node_id": str(phase_node["_id"]), "target_id": str(pending_node_id),
+        "type": "prerequisite", "enforced": True,
+    }))
+    event_loop.run_until_complete(db.tracks.update_one(
+        {"_id": ObjectId(track_id)}, {"$set": {"settings.enforce_prerequisites": True}},
+    ))
     old_nodes = event_loop.run_until_complete(db.nodes.find({"track_id": track_id}).to_list(10))
     stable_node_ids = {node["meta"]["import_ref"]: str(node["_id"]) for node in old_nodes}
     old_block = event_loop.run_until_complete(db.content_blocks.find_one({"track_id": track_id}))
@@ -98,9 +114,23 @@ def test_interrupted_published_import_is_hidden_and_same_payload_recovers(
         "block_id": str(old_block["_id"]), "body": "synthetic student note", "version": 1,
         "deleted": False,
     }))
+    event_loop.run_until_complete(db.learning_events.insert_one({
+        "user_id": student["id"], "track_id": track_id, "node_id": topic_id,
+        "block_id": None, "type": "complete", "data": {}, "at": now(),
+    }))
+    submission_id = ObjectId()
+    event_loop.run_until_complete(db.submissions.insert_one({
+        "_id": submission_id, "user_id": student["id"], "track_id": track_id,
+        "node_id": topic_id, "node_title": "Topic 1", "block_id": str(old_block["_id"]),
+        "block_type": old_block["type"], "block_title": "Intro", "attempt": 1,
+        "status": "submitted", "answer": {"text": "synthetic answer"},
+    }))
     published = admin_session.post(f"/api/tracks/{track_id}/publish", json={})
     assert published.status_code == 200, published.text
     previous_version = published.json()["version"]
+    visible_progress = student_session.get(f"/api/progress/tracks/{track_id}")
+    assert visible_progress.status_code == 200, visible_progress.text
+    assert str(phase_node["_id"]) in visible_progress.json()["locks"]
 
     changed_payload = _payload(slug)
     changed_payload["nodes"][0]["children"][0]["title"] = "Topic revised"
@@ -126,6 +156,23 @@ def test_interrupted_published_import_is_hidden_and_same_payload_recovers(
         db.import_jobs.count_documents({"slug": slug, "status": "interrupted"})
     ) == 1
     assert student_session.get(f"/api/tracks/{track_id}/tree").status_code == 404
+    assert student_session.get(f"/api/tracks/{track_id}").status_code == 404
+    assert student_session.get(f"/api/nodes/{topic_id}").status_code == 404
+    hidden_progress = student_session.get(f"/api/progress/tracks/{track_id}")
+    assert hidden_progress.status_code == 200, hidden_progress.text
+    assert hidden_progress.json()["locks"] == {}
+    assert all(track["id"] != track_id for track in student_session.get("/api/tracks").json())
+    assert all(node["id"] != topic_id for node in student_session.get(
+        "/api/search", params={"q": "Topic revised"},
+    ).json())
+    history = student_session.get("/api/progress/history", params={"track_id": track_id})
+    assert history.status_code == 200, history.text
+    topic_event = next(item for item in history.json() if item["node_id"] == topic_id)
+    assert topic_event["node_title"] != "Topic revised"
+    submission_detail = student_session.get(f"/api/submissions/{submission_id}")
+    assert submission_detail.status_code == 200, submission_detail.text
+    assert submission_detail.json()["block"] is None
+    assert submission_detail.json()["submission"]["answer"] == {"text": "synthetic answer"}
     different_payload = _payload(slug)
     different_payload["track"]["title"] = "Different operation while recovery is pending"
     conflict = admin_session.post(f"{API}/import/track?dry_run=false", json=different_payload)
@@ -137,7 +184,7 @@ def test_interrupted_published_import_is_hidden_and_same_payload_recovers(
     track = event_loop.run_until_complete(db.tracks.find_one({"_id": ObjectId(track_id)}))
     assert "_import_state" not in track
     assert track["version"] == previous_version + 1
-    assert event_loop.run_until_complete(db.nodes.count_documents({"track_id": track_id})) == 2
+    assert event_loop.run_until_complete(db.nodes.count_documents({"track_id": track_id})) == 3
     assert event_loop.run_until_complete(db.content_blocks.count_documents({"track_id": track_id})) == 1
     new_nodes = event_loop.run_until_complete(db.nodes.find({"track_id": track_id}).to_list(10))
     assert {node["meta"]["import_ref"]: str(node["_id"]) for node in new_nodes} == stable_node_ids
@@ -182,6 +229,9 @@ def test_failure_after_track_creation_can_resume_without_duplicate_entities(admi
         db.nodes.count_documents({"track_id": str(partial_track["_id"])})
     ) == 0
     monkeypatch.setattr(imports, "_set_import_phase", original)
+    event_loop.run_until_complete(db.import_locks.update_one(
+        {"_id": slug}, {"$set": {"status": "running", "lease_until": now() - timedelta(seconds=1)}},
+    ))
 
     recovered = admin_session.post(f"{API}/import/track?dry_run=false", json=payload)
     assert recovered.status_code == 200, recovered.text
@@ -189,6 +239,9 @@ def test_failure_after_track_creation_can_resume_without_duplicate_entities(admi
     assert event_loop.run_until_complete(db.tracks.count_documents({"slug": slug})) == 1
     assert event_loop.run_until_complete(db.nodes.count_documents({"track_id": track_id})) == 2
     assert event_loop.run_until_complete(db.content_blocks.count_documents({"track_id": track_id})) == 1
+    lock = event_loop.run_until_complete(db.import_locks.find_one({"_id": slug}))
+    assert lock["status"] == "completed"
+    assert "lease_until" not in lock
 
 
 def test_concurrent_equivalent_imports_do_not_duplicate_tracks_or_content(admin_session, event_loop):

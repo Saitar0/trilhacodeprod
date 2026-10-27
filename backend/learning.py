@@ -7,7 +7,7 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 from constants import DEFAULT_HIERARCHY
 from core_utils import now
 from database import db
-from permissions import is_staff, require
+from permissions import can_view_track, is_staff, require
 from schemas.content import OkOut
 from schemas.learning import NoteDeletedOut, NoteIn, NoteOut, ReviewDone, ReviewIn, ReviewOut
 from schemas.versions import TrackValidationOut
@@ -83,7 +83,7 @@ def compute_locks(track, nodes, relations, block_counts, completed):
 
 async def track_locks(track_id: str, user: dict):
     track = await db.tracks.find_one({"_id": oid(track_id)})
-    if not track:
+    if not track or (not is_staff(user) and not can_view_track(track, user)):
         return {}
     nodes = await db.nodes.find({"track_id": track_id}).to_list(10000)
     nodes = [n for n in nodes if n["status"] != "archived"] if is_staff(user) else visible_nodes(nodes)

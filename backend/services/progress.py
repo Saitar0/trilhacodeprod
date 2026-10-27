@@ -9,6 +9,7 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 from constants import PROGRESS_STATUSES
 from core_utils import now
 from database import db
+from integrity import visible_ids
 from learning import assert_unlocked, track_locks
 from serialization import oid, ser
 
@@ -436,7 +437,8 @@ async def list_progress_history(track_id: str | None, limit: int, skip: int, use
         query["track_id"] = track_id
     page_size = min(max(limit, 1), 100)
     events = await db.learning_events.find(query).sort("at", -1).skip(max(skip, 0)).limit(page_size).to_list(page_size)
-    ids = list({event["node_id"] for event in events})
+    allowed_ids = await visible_ids(user, [event["track_id"] for event in events])
+    ids = list({event["node_id"] for event in events if event["node_id"] in allowed_ids})
     titles = {
         str(node["_id"]): node["title"]
         for node in await db.nodes.find({"_id": {"$in": [oid(item_id) for item_id in ids]}}, {"title": 1}).to_list(200)
