@@ -77,6 +77,7 @@ test("student completes an immutable multiple-choice activity and resumes its re
       data: { note: "Synthetic E2E activity", publish_children: true },
     });
     expect(publishResponse.status()).toBe(200);
+    const publishedVersionId = (await publishResponse.json()).published_activity_version_id as string;
 
     // A valid but unpublished block added after publication must remain hidden.
     const hiddenResponse = await admin.post("/api/blocks", {
@@ -105,19 +106,44 @@ test("student completes an immutable multiple-choice activity and resumes its re
     await page.getByTestId("login-submit-button").click();
     expect((await loginResponse).status(), "synthetic student login").toBe(200);
     await expect(page.getByTestId("user-menu-trigger")).toBeVisible();
+    const nodeResponsePromise = page.waitForResponse((response) =>
+      response.request().method() === "GET" && response.url().includes(`/api/nodes/${topic.id}`),
+    );
     await page.goto(`/trilhas/${trackId}/n/${topic.id}`);
 
+    const nodeResponse = await nodeResponsePromise;
+    expect(nodeResponse.status(), "student reads the published node").toBe(200);
+    expect(nodeResponse.headers()["content-type"]).toContain("application/json");
+    const publicNode = await nodeResponse.json() as {
+      blocks: Array<{ id: string; activity?: Record<string, unknown>; data?: Record<string, unknown> }>;
+    };
+    const publicActivity = publicNode.blocks.find((block) => block.id === activityId);
+    expect(publicActivity?.activity).toMatchObject({
+      activity_id: activityId,
+      published_version_id: publishedVersionId,
+      prompt: "Qual opção identifica a resposta correta?",
+      options: [
+        { id: "wrong", label: "Alternativa incorreta" },
+        { id: "right", label: "Alternativa correta" },
+      ],
+    });
+    expect(publicActivity?.activity).not.toHaveProperty("correct_option_id");
+    expect(publicActivity?.activity).not.toHaveProperty("feedback");
+    expect(publicActivity?.data).not.toHaveProperty("correct_option_id");
+
     await expect(page.getByTestId("node-reader")).toBeVisible();
-    await expect(page.getByText("Qual opção identifica a resposta correta?")).toBeVisible();
+    await expect(page.getByText("Atividade pronta para iniciar.")).toBeVisible();
+    await expect(page.getByText("Qual opção identifica a resposta correta?")).toHaveCount(0);
     await expect(page.getByText("This must remain private.")).toHaveCount(0);
 
     const hiddenStart = await admin.post(`/api/activities/${hiddenActivityId}/attempts`, {
       headers: { Origin: "http://127.0.0.1:5173", "Idempotency-Key": randomUUID() },
-      data: { published_version_id: (await publishResponse.json()).published_activity_version_id },
+      data: { published_version_id: publishedVersionId },
     });
     expect(hiddenStart.status(), "unpublished assessment is not startable").toBe(404);
 
     await page.getByRole("button", { name: "Iniciar atividade" }).click();
+    await expect(page.getByText("Qual opção identifica a resposta correta?")).toBeVisible();
     await page.getByRole("radio", { name: "Alternativa incorreta" }).check();
     const wrongResponse = page.waitForResponse((response) =>
       response.url().includes(`/api/activities/${activityId}/attempts/`) && response.url().endsWith("/submit"),
