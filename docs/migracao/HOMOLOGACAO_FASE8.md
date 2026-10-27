@@ -18,7 +18,7 @@
 ## Projetos
 
 - **39.2:** quatro microtópicos de apoio, checklist de 11 itens, rubrica de seis dimensões na escala 0–2 e cinco verificações por cenário. Nenhum marco formal foi criado.
-- **39.3:** quatro entregas e quatro aceites originais, checklist final de 12 itens e rubrica de seis dimensões na escala 0–2. A tabela T1–T5 permanece associada à Entrega 3.
+- **39.3:** quatro entregas e quatro aceites originais, checklist final de 12 itens e rubrica de seis dimensões na escala 0–2. A tabela T1–T5 está na Entrega 2, em `02_fatia_vertical_risco.md`, como na fonte original. A Entrega 3 contém cinco itens sobre instrumentação por tipo, não essa tabela.
 
 ## Ressalvas e preservação
 

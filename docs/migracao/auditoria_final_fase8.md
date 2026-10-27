@@ -19,7 +19,7 @@ Foram validados 192 registros de mapeamento. A auditoria comparou faixas textuai
 - 8 fontes oficiais ativas; nenhum arquivo extra da pasta Fase 7 incluído.
 - 15 questões, 15 gabaritos, 11 práticas e 9 flashcards preservados.
 - Compartilhados deduplicados em destino físico único.
-- Projetos 39.2 e 39.3 preservados; quatro entregas/aceites em 39.3 e tabela T1–T5 associada à Entrega 3.
+- Projetos 39.2 e 39.3 preservados; quatro entregas/aceites em 39.3 e tabela T1–T5 na Entrega 2, em `02_fatia_vertical_risco.md`, como na fonte original. A Entrega 3 contém cinco itens sobre instrumentação por tipo.
 - 2.161 arquivos das Fases 1–7, todas as fontes/backups e o JSON permaneceram intactos durante a geração.
 - Nenhum commit, push, importação ou geração da Fase 9.
 

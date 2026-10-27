@@ -55,7 +55,7 @@
 - Os 15 pares Q/gabarito foram reconstruídos literalmente; o limite de separação foi conferido como `? **` em cada item. A concatenação Q+K reproduz cada bloco original.
 - Os itens compartilhados têm um único arquivo em `90_integracao/` e associações coerentes no frontmatter/cobertura.
 - 39.2: quatro microtópicos, checklist de 11 itens, rubrica de seis dimensões/0–2 e cinco verificações por cenário preservados.
-- 39.3: quatro entregas, quatro aceites, checklist de 12 itens e rubrica de seis dimensões/0–2 preservados. T1–T5 permanece exclusivamente no arquivo da Entrega 3.
+- 39.3: quatro entregas, quatro aceites, checklist de 12 itens e rubrica de seis dimensões/0–2 preservados. T1–T5 permanece no arquivo da Entrega 2, `02_fatia_vertical_risco.md`, conforme a fonte. A Entrega 3 contém cinco itens sobre instrumentação por tipo.
 - Frontmatter YAML válido em todos os arquivos; paths e `arquivo_id` únicos.
 - Links Markdown relativos resolvidos: 120; wikilinks preservados sem reescrita: 0.
 
