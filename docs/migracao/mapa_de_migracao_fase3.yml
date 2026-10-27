@@ -1,0 +1,835 @@
+versao_esquema: 1
+fase: Fase_3
+base_commit: fba3a029f8956d349c430c797331b459733281f3
+id_prefix: f3
+destino_raiz: docs/courses/trilhacode/Conteudos_migrado/Fase_3
+ordem_unidades: ["6.1", "6.2", "6.3", "6.4", "7.1", "7.2", "7.3", "7.4", "7.5", "8.1", "8.2", "8.3", "8.5", "8.6"]
+prefixos_arquivo_id:
+  IDX: topic_index
+  T: theory
+  Q: quiz
+  K: answer_key
+  P: practice
+  KP: answer_key_pratica
+  R: rubric
+  C: checklist
+  M: milestone
+  SCP: project_scope
+arquivo_id: "f3-<key-unidade-com-hifens>-<caminho-relativo-sem-extensao-com-hifens>"
+paths:
+  unidade_pasta: relativa_a_destino_raiz
+  arquivos_unidade: relativos_a_pasta_da_unidade
+  origem: relativa_a_raiz_do_repositorio
+  sem_absolutos: true
+arquivos_comuns:
+  IDX: {path: README.md, tipo: topic_index, origem: [frontmatter_original, titulo_original], uso: "índice do tópico e metadados originais"}
+  OBJ: {path: 00_objetivo.md, tipo: objetivo, origem: "## Objetivo"}
+  RES: {path: 01_resumo.md, tipo: resumo, origem: "## Resumo"}
+  CRI: {path: 02_criterio_de_conclusao.md, tipo: criterio, origem: "## Critério de conclusão"}
+  CON: {path: 03_conexoes.md, tipo: conexoes, origem: "## Conexões"}
+  REF: {path: 04_referencias.md, tipo: referencias, origem: "## Referências"}
+frontmatter:
+  indice_unidade:
+    obrigatorios: [arquivo_id, tipo_arquivo]
+    preservar_sem_alterar: [title, key, tipo, carater, profundidade, estimativa_minutos, tags, status]
+    tipo_arquivo: topic_index
+  arquivo_unidade:
+    obrigatorios: [arquivo_id, parent_key, tipo_arquivo, ordem, itens_origem]
+    contextuais: {assunto: "arquivo exclusivo", assuntos: "arquivo compartilhado"}
+    omitir: [key, estimativa_minutos, tags, status]
+  arquivo_marco:
+    obrigatorios: [arquivo_id, parent_key, tipo_arquivo, ordem, itens_origem, titulo_marco]
+    tipo_arquivo: milestone
+  arquivo_checklist_marco:
+    obrigatorios: [arquivo_id, parent_key, tipo_arquivo, ordem, itens_origem, titulo_marco]
+    tipo_arquivo: checklist
+  arquivo_rubrica:
+    obrigatorios: [arquivo_id, parent_key, tipo_arquivo, ordem, itens_origem, escala_rubrica]
+    tipo_arquivo: rubric
+json: "Não modificar, gerar ou importar nesta etapa."
+regras:
+  estrutural_apenas: true
+  criar_conteudo_educacional: false
+  preservar_texto_origem: true
+  blocos_compartilhados: "um único arquivo físico sob 90_integracao; associações ficam no manifesto"
+  dividir_por_regex_generica: false
+  8_4: {status: aposentado, nota: "incorporado a 27.3 e 18.1; sem pasta e sem nó"}
+  cobertura: "um item é exclusivo de um assunto ou compartilhado entre assuntos, nunca ambos"
+  conexoes: "não repetir a mesma unidade com tipos de relação diferentes; preservar pré-requisito em caso de duplicação"
+estimativa_arquivos:
+  topic_index: 14
+  objetivo: 14
+  resumo: 12
+  criterio: 14
+  conexoes: 14
+  referencias: 14
+  escopo_projeto: 2
+  teoria: 40
+  quiz: 39
+  answer_key_quiz: 39
+  pratica: 36
+  answer_key_pratica: 22
+  checklist_aceite: 26
+  rubrica: 19
+  marco: 8
+  total: 313
+unidades:
+  "6.1":
+    pasta: 6.1_Fundamentos
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/6.1_Fundamentos.md
+    assuntos: [01_valores_e_tipos, 02_variaveis_e_reatribuicao, 03_operadores_e_conversao, 04_decisoes_e_repeticoes]
+    arquivos:
+      T01: 01_valores_e_tipos/01_teoria.md
+      Q01: 01_valores_e_tipos/02_quiz.md
+      K01: 01_valores_e_tipos/03_gabarito_quiz.md
+      T02: 02_variaveis_e_reatribuicao/01_teoria.md
+      Q02: 02_variaveis_e_reatribuicao/02_quiz.md
+      K02: 02_variaveis_e_reatribuicao/03_gabarito_quiz.md
+      T03: 03_operadores_e_conversao/01_teoria.md
+      Q03: 03_operadores_e_conversao/02_quiz.md
+      K03: 03_operadores_e_conversao/03_gabarito_quiz.md
+      T04: 04_decisoes_e_repeticoes/01_teoria.md
+      Q04: 04_decisoes_e_repeticoes/02_quiz.md
+      K04: 04_decisoes_e_repeticoes/03_gabarito_quiz.md
+      P01: 90_integracao/P01_pratica_guiada_acumulador.md
+      KP01: 90_integracao/KP01_gabarito_pratica_guiada_acumulador.md
+      P02: 90_integracao/P02_pratica_independente_contagem_limite.md
+      KP02: 90_integracao/KP02_gabarito_pratica_contagem_limite.md
+      C02: 90_integracao/C02_criterios_contagem_limite.md
+      P03: 90_integracao/P03_pratica_transferencia_console_notas.md
+      C03: 90_integracao/C03_aceite_console_notas.md
+      R03: 90_integracao/R03_rubrica_console_notas.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Valores e tipos": T01
+        "Variáveis e reatribuição": T02
+        "Operadores e conversão": T03
+        "Decisões com condicionais": T04
+        "Repetições e encerramento": T04
+      quiz:
+        Q1: {arquivo: Q02, resposta: K02, assunto: 02_variaveis_e_reatribuicao}
+        Q2: {arquivo: Q03, resposta: K03, assunto: 03_operadores_e_conversao}
+        Q3: {arquivo: Q04, resposta: K04, assunto: 04_decisoes_e_repeticoes}
+        Q4: {arquivo: Q01, resposta: K01, assunto: 01_valores_e_tipos}
+        Q5: {arquivo: Q03, resposta: K03, assunto: 03_operadores_e_conversao}
+      pratica:
+        P1: {titulo: "1. Guiada — depure um acumulador", arquivo: P01, resposta: KP01, assuntos: [02_variaveis_e_reatribuicao, 03_operadores_e_conversao, 04_decisoes_e_repeticoes]}
+        P2: {titulo: "2. Independente — conte resultados acima de um limite", arquivo: P02, resposta: KP02, checklist: C02, assuntos: [02_variaveis_e_reatribuicao, 03_operadores_e_conversao, 04_decisoes_e_repeticoes]}
+        P3: {titulo: "3. Transferência — console de notas", arquivo: P03, checklist: C03, rubrica: R03, assuntos: [01_valores_e_tipos, 02_variaveis_e_reatribuicao, 03_operadores_e_conversao, 04_decisoes_e_repeticoes]}
+      separacao_inline_literal:
+        P2: {inicio: "O gabarito é o rastreamento e esses resultados, não uma forma única de escrever o algoritmo.", fim: "algoritmo.", destino: KP02}
+    cobertura:
+      exclusivos:
+        01_valores_e_tipos: [Q4]
+        02_variaveis_e_reatribuicao: [Q1]
+        03_operadores_e_conversao: [Q2, Q5]
+        04_decisoes_e_repeticoes: [Q3]
+      compartilhados:
+        P1: [02_variaveis_e_reatribuicao, 03_operadores_e_conversao, 04_decisoes_e_repeticoes]
+        P2: [02_variaveis_e_reatribuicao, 03_operadores_e_conversao, 04_decisoes_e_repeticoes]
+        P3: [01_valores_e_tipos, 02_variaveis_e_reatribuicao, 03_operadores_e_conversao, 04_decisoes_e_repeticoes]
+    rubricas:
+      R03: "0–2 por critério; 4 critérios; total 8; conclusão com pelo menos 6/8"
+    conexoes:
+      - {tipo: relacionado, destino: "1.2"}
+      - {tipo: complementar, destino: "6.2"}
+
+  "6.2":
+    pasta: 6.2_Estruturas_basicas
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/6.2_Estruturas_basicas.md
+    assuntos: [01_funcoes_retorno_responsabilidade, 02_arrays_objetos_colecoes, 03_escopo_fluxo_dados, 04_transformacao_mutacao]
+    arquivos:
+      T01: 01_funcoes_retorno_responsabilidade/01_teoria.md
+      Q01: 01_funcoes_retorno_responsabilidade/02_quiz.md
+      K01: 01_funcoes_retorno_responsabilidade/03_gabarito_quiz.md
+      T02: 02_arrays_objetos_colecoes/01_teoria.md
+      Q02: 02_arrays_objetos_colecoes/02_quiz.md
+      K02: 02_arrays_objetos_colecoes/03_gabarito_quiz.md
+      T03: 03_escopo_fluxo_dados/01_teoria.md
+      Q03: 03_escopo_fluxo_dados/02_quiz.md
+      K03: 03_escopo_fluxo_dados/03_gabarito_quiz.md
+      T04: 04_transformacao_mutacao/01_teoria.md
+      Q04: 04_transformacao_mutacao/02_quiz.md
+      K04: 04_transformacao_mutacao/03_gabarito_quiz.md
+      P01: 01_funcoes_retorno_responsabilidade/P01_pratica_guiada_retorno.md
+      KP01: 01_funcoes_retorno_responsabilidade/KP01_gabarito_retorno.md
+      P02: 90_integracao/P02_pratica_independente_modelagem_tarefas.md
+      C02: 90_integracao/C02_criterios_modelagem_tarefas.md
+      P03: 90_integracao/P03_pratica_transferencia_relatorio_tarefas.md
+      C03: 90_integracao/C03_aceite_relatorio_tarefas.md
+      R03: 90_integracao/R03_rubrica_relatorio_tarefas.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Funções, parâmetros e argumentos": T01
+        "Retorno e responsabilidade": T01
+        "Arrays, objetos e coleção de entidades": T02
+        "Escopo e fluxo de dados": T03
+        "Transformação e mutação": T04
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_funcoes_retorno_responsabilidade}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_arrays_objetos_colecoes}
+        Q3: {arquivo: Q03, resposta: K03, assunto: 03_escopo_fluxo_dados}
+        Q4: {arquivo: Q01, resposta: K01, assunto: 01_funcoes_retorno_responsabilidade}
+        Q5: {arquivo: Q04, resposta: K04, assunto: 04_transformacao_mutacao}
+      pratica:
+        P1: {titulo: "1. Guiada — diferencie exibição de retorno", arquivo: P01, resposta: KP01, assunto: 01_funcoes_retorno_responsabilidade}
+        P2: {titulo: "2. Independente — modele e conte tarefas", arquivo: P02, checklist: C02, assuntos: [01_funcoes_retorno_responsabilidade, 02_arrays_objetos_colecoes, 03_escopo_fluxo_dados]}
+        P3: {titulo: "3. Transferência — relatório de tarefas", arquivo: P03, checklist: C03, rubrica: R03, assuntos: [01_funcoes_retorno_responsabilidade, 02_arrays_objetos_colecoes, 03_escopo_fluxo_dados, 04_transformacao_mutacao]}
+    cobertura:
+      exclusivos:
+        01_funcoes_retorno_responsabilidade: [Q1, Q4, P1]
+        02_arrays_objetos_colecoes: [Q2]
+        03_escopo_fluxo_dados: [Q3]
+        04_transformacao_mutacao: [Q5]
+      compartilhados:
+        P2: [01_funcoes_retorno_responsabilidade, 02_arrays_objetos_colecoes, 03_escopo_fluxo_dados]
+        P3: [01_funcoes_retorno_responsabilidade, 02_arrays_objetos_colecoes, 03_escopo_fluxo_dados, 04_transformacao_mutacao]
+    rubricas:
+      R03: "0–2 por critério; 4 critérios; total 8; conclusão com pelo menos 6/8"
+    conexoes:
+      - {tipo: pre_requisito, destino: "6.1"}
+      - {tipo: complementar, destino: "6.3"}
+      - {tipo: relacionado, destino: "7.3"}
+      - {tipo: relacionado, destino: "7.4"}
+      - {tipo: relacionado, destino: "25.2"}
+
+  "6.3":
+    pasta: 6.3_Base_moderna
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/6.3_Base_moderna.md
+    assuntos: [01_declaracoes_arrow_retorno, 02_template_strings, 03_destructuring, 04_spread_rest_copia_rasa]
+    relacoes_assuntos:
+      - {tipo: conceitual, assuntos: [03_destructuring, 04_spread_rest_copia_rasa]}
+    arquivos:
+      T01: 01_declaracoes_arrow_retorno/01_teoria.md
+      Q01: 01_declaracoes_arrow_retorno/02_quiz.md
+      K01: 01_declaracoes_arrow_retorno/03_gabarito_quiz.md
+      T02: 02_template_strings/01_teoria.md
+      Q02: 02_template_strings/02_quiz.md
+      K02: 02_template_strings/03_gabarito_quiz.md
+      T03: 03_destructuring/01_teoria.md
+      Q03: 03_destructuring/02_quiz.md
+      K03: 03_destructuring/03_gabarito_quiz.md
+      T04: 04_spread_rest_copia_rasa/01_teoria.md
+      Q04: 04_spread_rest_copia_rasa/02_quiz.md
+      K04: 04_spread_rest_copia_rasa/03_gabarito_quiz.md
+      P01: 01_declaracoes_arrow_retorno/P01_pratica_guiada_retorno_objeto.md
+      KP01: 01_declaracoes_arrow_retorno/KP01_gabarito_retorno_objeto.md
+      P02: 04_spread_rest_copia_rasa/P02_pratica_independente_copia.md
+      KP02: 04_spread_rest_copia_rasa/KP02_gabarito_copia.md
+      P03: 90_integracao/P03_pratica_transferencia_refatoracao.md
+      C03: 90_integracao/C03_aceite_refatoracao.md
+      R03: 90_integracao/R03_rubrica_refatoracao.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Declarações modernas e escopo": T01
+        "Arrow functions e retorno": T01
+        "Template strings": T02
+        "Destructuring": T03
+        "Spread e rest": T04
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_declaracoes_arrow_retorno}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_template_strings}
+        Q3: {arquivo: Q04, resposta: K04, assunto: 04_spread_rest_copia_rasa}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_destructuring}
+        Q5: {arquivo: Q01, resposta: K01, assunto: 01_declaracoes_arrow_retorno}
+      pratica:
+        P1: {titulo: "1. Guiada — corrija retorno e literal de objeto", arquivo: P01, resposta: KP01, assunto: 01_declaracoes_arrow_retorno}
+        P2: {titulo: "2. Independente — detecte compartilhamento em uma cópia", arquivo: P02, resposta: KP02, assunto: 04_spread_rest_copia_rasa}
+        P3: {titulo: "3. Transferência — refatore sem alterar o comportamento", arquivo: P03, checklist: C03, rubrica: R03, assuntos: [01_declaracoes_arrow_retorno, 02_template_strings, 03_destructuring, 04_spread_rest_copia_rasa]}
+    cobertura:
+      exclusivos:
+        01_declaracoes_arrow_retorno: [Q1, Q5, P1]
+        02_template_strings: [Q2]
+        03_destructuring: [Q4]
+        04_spread_rest_copia_rasa: [Q3, P2]
+      compartilhados:
+        P3: [01_declaracoes_arrow_retorno, 02_template_strings, 03_destructuring, 04_spread_rest_copia_rasa]
+    rubricas:
+      R03: "0–2 por critério; 4 critérios; total 8; conclusão com pelo menos 6/8"
+    conexoes:
+      - {tipo: pre_requisito, destino: "6.2"}
+      - {tipo: relacionado, destino: "25.1"}
+
+  "6.4":
+    pasta: 6.4_Node_e_npm
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/6.4_Node_e_npm.md
+    assuntos: [01_node_execucao_modulos, 02_manifesto_dependencias, 03_lockfile_instalacao_reproduzivel, 04_scripts_ferramentas_qualidade]
+    arquivos:
+      T01: 01_node_execucao_modulos/01_teoria.md
+      Q01: 01_node_execucao_modulos/02_quiz.md
+      K01: 01_node_execucao_modulos/03_gabarito_quiz.md
+      T02: 02_manifesto_dependencias/01_teoria.md
+      Q02: 02_manifesto_dependencias/02_quiz.md
+      K02: 02_manifesto_dependencias/03_gabarito_quiz.md
+      T03: 03_lockfile_instalacao_reproduzivel/01_teoria.md
+      Q03: 03_lockfile_instalacao_reproduzivel/02_quiz.md
+      K03: 03_lockfile_instalacao_reproduzivel/03_gabarito_quiz.md
+      T04: 04_scripts_ferramentas_qualidade/01_teoria.md
+      Q04: 04_scripts_ferramentas_qualidade/02_quiz.md
+      K04: 04_scripts_ferramentas_qualidade/03_gabarito_quiz.md
+      P01: 90_integracao/P01_pratica_guiada_manifesto_npm.md
+      KP01: 90_integracao/KP01_gabarito_manifesto_npm.md
+      P02: 90_integracao/P02_pratica_independente_instalacao.md
+      C02: 90_integracao/C02_criterios_instalacao.md
+      P03: 90_integracao/P03_pratica_transferencia_projeto_node.md
+      C03: 90_integracao/C03_aceite_projeto_node.md
+      R03: 90_integracao/R03_rubrica_projeto_node.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Node.js e execução fora do navegador": T01
+        "Manifesto e dependências": T02
+        "Lockfile e instalação reproduzível": T03
+        "Scripts e ferramentas de qualidade": T04
+      quiz:
+        Q1: {arquivo: Q02, resposta: K02, assunto: 02_manifesto_dependencias}
+        Q2: {arquivo: Q03, resposta: K03, assunto: 03_lockfile_instalacao_reproduzivel}
+        Q3: {arquivo: Q04, resposta: K04, assunto: 04_scripts_ferramentas_qualidade}
+        Q4: {arquivo: Q04, resposta: K04, assunto: 04_scripts_ferramentas_qualidade}
+        Q5: {arquivo: Q01, resposta: K01, assunto: 01_node_execucao_modulos}
+      pratica:
+        P1: {titulo: "1. Guiada — leia um manifesto npm", arquivo: P01, resposta: KP01, assuntos: [01_node_execucao_modulos, 02_manifesto_dependencias, 03_lockfile_instalacao_reproduzivel, 04_scripts_ferramentas_qualidade]}
+        P2: {titulo: "2. Independente — investigue uma instalação não reproduzível", arquivo: P02, checklist: C02, assuntos: [02_manifesto_dependencias, 03_lockfile_instalacao_reproduzivel, 04_scripts_ferramentas_qualidade]}
+        P3: {titulo: "3. Transferência — monte um pequeno projeto Node/npm", arquivo: P03, checklist: C03, rubrica: R03, assuntos: [01_node_execucao_modulos, 02_manifesto_dependencias, 03_lockfile_instalacao_reproduzivel, 04_scripts_ferramentas_qualidade]}
+    cobertura:
+      exclusivos:
+        01_node_execucao_modulos: [Q5]
+        02_manifesto_dependencias: [Q1]
+        03_lockfile_instalacao_reproduzivel: [Q2]
+        04_scripts_ferramentas_qualidade: [Q3, Q4]
+      compartilhados:
+        P1: [01_node_execucao_modulos, 02_manifesto_dependencias, 03_lockfile_instalacao_reproduzivel, 04_scripts_ferramentas_qualidade]
+        P2: [02_manifesto_dependencias, 03_lockfile_instalacao_reproduzivel, 04_scripts_ferramentas_qualidade]
+        P3: [01_node_execucao_modulos, 02_manifesto_dependencias, 03_lockfile_instalacao_reproduzivel, 04_scripts_ferramentas_qualidade]
+    rubricas:
+      R03: "0–2 por critério; 4 critérios; total 8; conclusão com pelo menos 6/8"
+    conexoes:
+      - {tipo: pre_requisito, destino: "1.2"}
+      - {tipo: pre_requisito, destino: "2.1"}
+      - {tipo: pre_requisito, destino: "6.3"}
+      - {tipo: complementar, destino: "8.3"}
+      - {tipo: relacionado, destino: "10.1"}
+      - {tipo: relacionado, destino: "17.1"}
+      - {tipo: relacionado, destino: "28.1"}
+
+  "7.1":
+    pasta: 7.1_Navegador_e_interacao
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/7.1_Navegador_e_interacao.md
+    assuntos: [01_dom_selecao, 02_texto_seguro_dom, 03_eventos_comportamento_padrao, 04_formularios_validacao_cliente]
+    arquivos:
+      T01: 01_dom_selecao/01_teoria.md
+      Q01: 01_dom_selecao/02_quiz.md
+      K01: 01_dom_selecao/03_gabarito_quiz.md
+      T02: 02_texto_seguro_dom/01_teoria.md
+      Q02: 02_texto_seguro_dom/02_quiz.md
+      K02: 02_texto_seguro_dom/03_gabarito_quiz.md
+      T03: 03_eventos_comportamento_padrao/01_teoria.md
+      Q03: 03_eventos_comportamento_padrao/02_quiz.md
+      K03: 03_eventos_comportamento_padrao/03_gabarito_quiz.md
+      T04: 04_formularios_validacao_cliente/01_teoria.md
+      Q04: 04_formularios_validacao_cliente/02_quiz.md
+      K04: 04_formularios_validacao_cliente/03_gabarito_quiz.md
+      P01: 90_integracao/P01_pratica_guiada_texto_seguro.md
+      KP01: 90_integracao/KP01_gabarito_texto_seguro.md
+      P02: 90_integracao/P02_pratica_independente_contador_evento.md
+      C02: 90_integracao/C02_aceite_contador_evento.md
+      P03: 90_integracao/P03_pratica_transferencia_formulario.md
+      C03: 90_integracao/C03_aceite_formulario.md
+      R03: 90_integracao/R03_rubrica_formulario.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "DOM e seleção de elementos": T01
+        "Texto e marcação no DOM": T02
+        "Eventos e comportamento padrão": T03
+        "Formulários e validação nativa": T04
+        "Limites da validação no cliente": T04
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_dom_selecao}
+        Q2: {arquivo: Q03, resposta: K03, assunto: 03_eventos_comportamento_padrao}
+        Q3: {arquivo: Q04, resposta: K04, assunto: 04_formularios_validacao_cliente}
+        Q4: {arquivo: Q02, resposta: K02, assunto: 02_texto_seguro_dom}
+        Q5: {arquivo: Q03, resposta: K03, assunto: 03_eventos_comportamento_padrao}
+      pratica:
+        P1: {titulo: "1. Guiada — selecione e escreva conteúdo com segurança", arquivo: P01, resposta: KP01, assuntos: [01_dom_selecao, 02_texto_seguro_dom]}
+        P2: {titulo: "2. Independente — implemente um contador acionado por evento", arquivo: P02, checklist: C02, assuntos: [01_dom_selecao, 03_eventos_comportamento_padrao]}
+        P3: {titulo: "3. Transferência — formulário interativo acessível", arquivo: P03, checklist: C03, rubrica: R03, assuntos: [01_dom_selecao, 02_texto_seguro_dom, 03_eventos_comportamento_padrao, 04_formularios_validacao_cliente]}
+    cobertura:
+      exclusivos:
+        01_dom_selecao: [Q1]
+        02_texto_seguro_dom: [Q4]
+        03_eventos_comportamento_padrao: [Q2, Q5]
+        04_formularios_validacao_cliente: [Q3]
+      compartilhados:
+        P1: [01_dom_selecao, 02_texto_seguro_dom]
+        P2: [01_dom_selecao, 03_eventos_comportamento_padrao]
+        P3: [01_dom_selecao, 02_texto_seguro_dom, 03_eventos_comportamento_padrao, 04_formularios_validacao_cliente]
+    rubricas:
+      R03: "0–2 por critério; 4 critérios; total 8; conclusão com pelo menos 6/8"
+    conexoes:
+      - {tipo: pre_requisito, destino: "4.2"}
+      - {tipo: pre_requisito, destino: "6.2"}
+      - {tipo: revisita, destino: "4.1"}
+      - {tipo: relacionado, destino: "25.2"}
+
+  "7.2":
+    pasta: 7.2_Organizacao_do_codigo
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/7.2_Organizacao_do_codigo.md
+    assuntos: [01_modulos_exportacoes, 02_carregamento_diagnostico, 03_responsabilidades_coesao]
+    arquivos:
+      T01: 01_modulos_exportacoes/01_teoria.md
+      Q01: 01_modulos_exportacoes/02_quiz.md
+      K01: 01_modulos_exportacoes/03_gabarito_quiz.md
+      T02: 02_carregamento_diagnostico/01_teoria.md
+      Q02: 02_carregamento_diagnostico/02_quiz.md
+      K02: 02_carregamento_diagnostico/03_gabarito_quiz.md
+      T03: 03_responsabilidades_coesao/01_teoria.md
+      Q03: 03_responsabilidades_coesao/02_quiz.md
+      K03: 03_responsabilidades_coesao/03_gabarito_quiz.md
+      P01: 01_modulos_exportacoes/P01_pratica_guiada_ligacao_modulos.md
+      KP01: 01_modulos_exportacoes/KP01_gabarito_ligacao_modulos.md
+      C01: 01_modulos_exportacoes/C01_aceite_ligacao_modulos.md
+      P02: 90_integracao/P02_pratica_independente_mapa_modulos.md
+      KP02: 90_integracao/KP02_gabarito_mapa_modulos.md
+      R02: 90_integracao/R02_rubrica_mapa_modulos.md
+      P03: 90_integracao/P03_pratica_transferencia_modularizacao.md
+      R03: 90_integracao/R03_rubrica_modularizacao.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "1. Módulo, escopo e interface": T01
+        "2. Exportações e imports": T01
+        "3. Carregamento e diagnóstico no navegador": T02
+        "4. Responsabilidades, coesão e dependências": T03
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_modulos_exportacoes}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_carregamento_diagnostico}
+        Q3: {arquivo: Q02, resposta: K02, assunto: 02_carregamento_diagnostico}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_responsabilidades_coesao}
+        Q5: {arquivo: Q01, resposta: K01, assunto: 01_modulos_exportacoes}
+      pratica:
+        P1: {titulo: "1. Guiada — corrija a ligação entre módulos", arquivo: P01, resposta: KP01, checklist: C01, assunto: 01_modulos_exportacoes}
+        P2: {titulo: "2. Independente — desenhe o mapa de módulos", arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [01_modulos_exportacoes, 03_responsabilidades_coesao]}
+        P3: {titulo: "3. Transferência — modularize uma página de tarefas", arquivo: P03, rubrica: R03, assuntos: [01_modulos_exportacoes, 02_carregamento_diagnostico, 03_responsabilidades_coesao]}
+    cobertura:
+      exclusivos:
+        01_modulos_exportacoes: [Q1, Q5, P1]
+        02_carregamento_diagnostico: [Q2, Q3]
+        03_responsabilidades_coesao: [Q4]
+      compartilhados:
+        P2: [01_modulos_exportacoes, 03_responsabilidades_coesao]
+        P3: [01_modulos_exportacoes, 02_carregamento_diagnostico, 03_responsabilidades_coesao]
+    rubricas:
+      R02: "0–2 por critério; 4 critérios; total 8; conclusão com pelo menos 6/8"
+      R03: "0–2 por critério; 4 critérios; total 8; conclusão com pelo menos 6/8"
+    conexoes:
+      - {tipo: pre_requisito, destino: "6.2"}
+      - {tipo: relacionado, destino: "8.3"}
+
+  "7.3":
+    pasta: 7.3_Dados_e_comunicacao
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/7.3_Dados_e_comunicacao.md
+    assuntos: [01_formato_e_contrato_json, 02_requisicao_async_resposta_erros]
+    arquivos:
+      T01: 01_formato_e_contrato_json/01_teoria.md
+      T02: 02_requisicao_async_resposta_erros/01_teoria.md
+      Q02: 02_requisicao_async_resposta_erros/02_quiz.md
+      K02: 02_requisicao_async_resposta_erros/03_gabarito_quiz.md
+      P01: 90_integracao/P01_pratica_guiada_resultados_http.md
+      KP01: 90_integracao/KP01_gabarito_resultados_http.md
+      C01: 90_integracao/C01_aceite_resultados_http.md
+      P02: 90_integracao/P02_pratica_independente_leitura_robusta.md
+      KP02: 90_integracao/KP02_gabarito_leitura_robusta.md
+      R02: 90_integracao/R02_rubrica_leitura_robusta.md
+      P03: 90_integracao/P03_pratica_integrada_catalogo_remoto.md
+      R03: 90_integracao/R03_rubrica_catalogo_remoto.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "1. Dados JSON e contrato da API": T01
+        "2. Requisição HTTP e fluxo assíncrono": T02
+        "3. Resposta HTTP, corpo e parsing": T02
+        "4. Estados da interface, rede e CORS": T02
+      quiz:
+        Q1: {arquivo: Q02, resposta: K02, assunto: 02_requisicao_async_resposta_erros}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_requisicao_async_resposta_erros}
+        Q3: {arquivo: Q02, resposta: K02, assunto: 02_requisicao_async_resposta_erros}
+        Q4: {arquivo: Q02, resposta: K02, assunto: 02_requisicao_async_resposta_erros}
+        Q5: {arquivo: Q02, resposta: K02, assunto: 02_requisicao_async_resposta_erros}
+      pratica:
+        P1: {titulo: "1. Guiada — rastreie quatro resultados diferentes", arquivo: P01, resposta: KP01, checklist: C01, assuntos: [01_formato_e_contrato_json, 02_requisicao_async_resposta_erros]}
+        P2: {titulo: "2. Independente — implemente uma função de leitura robusta", arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [01_formato_e_contrato_json, 02_requisicao_async_resposta_erros]}
+        P3: {titulo: "3. Integrada — catálogo remoto com estados de interface", arquivo: P03, rubrica: R03, assuntos: [01_formato_e_contrato_json, 02_requisicao_async_resposta_erros]}
+    cobertura:
+      exclusivos:
+        02_requisicao_async_resposta_erros: [Q1, Q2, Q3, Q4, Q5]
+      compartilhados:
+        P1: [01_formato_e_contrato_json, 02_requisicao_async_resposta_erros]
+        P2: [01_formato_e_contrato_json, 02_requisicao_async_resposta_erros]
+        P3: [01_formato_e_contrato_json, 02_requisicao_async_resposta_erros]
+    propostas_pendentes:
+      - "[PROPOSTA] 01_formato_e_contrato_json: quiz curto exclusivo; não criar nesta migração."
+    rubricas:
+      R02: "0–2 por critério; 4 critérios; total 8; conclusão com pelo menos 6/8"
+      R03: "0–2 por critério; 5 critérios; total 10; conclusão com pelo menos 8/10"
+    conexoes:
+      - {tipo: pre_requisito, destino: "6.3"}
+      - {tipo: pre_requisito, destino: "7.1"}
+      - {tipo: revisita, destino: "1.1"}
+      - {tipo: relacionado, destino: "18.1"}
+      - {tipo: relacionado, destino: "27.1"}
+
+  "7.4":
+    pasta: 7.4_Revisita_de_logica
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/7.4_Revisita_de_logica.md
+    assuntos: [01_transformacoes_e_colecoes, 02_complexidade, 03_pilhas_e_filas]
+    arquivos:
+      T01: 01_transformacoes_e_colecoes/01_teoria.md
+      Q01: 01_transformacoes_e_colecoes/02_quiz.md
+      K01: 01_transformacoes_e_colecoes/03_gabarito_quiz.md
+      T02: 02_complexidade/01_teoria.md
+      Q02: 02_complexidade/02_quiz.md
+      K02: 02_complexidade/03_gabarito_quiz.md
+      T03: 03_pilhas_e_filas/01_teoria.md
+      Q03: 03_pilhas_e_filas/02_quiz.md
+      K03: 03_pilhas_e_filas/03_gabarito_quiz.md
+      P01: 90_integracao/P01_pratica_relatorio_dados.md
+      C01: 90_integracao/C01_aceite_relatorio_dados.md
+      P02: 90_integracao/P02_exercicio_integrador_recuperacao.md
+      KP02: 90_integracao/KP02_gabarito_integrador.md
+      P03: 90_integracao/P03_retomada_espacada.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "parágrafo 1 — map/filter/reduce, encadeamento e funções pequenas": T01
+        "parágrafo 2 — arrays, objetos e coleções": T01
+        "parágrafo 3 — O(n), passagens e loops aninhados": T02
+        "parágrafo 4 — pilhas, filas e custo de shift": T03
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_transformacoes_e_colecoes}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_complexidade}
+        Q3: {arquivo: Q03, resposta: K03, assunto: 03_pilhas_e_filas}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_pilhas_e_filas}
+      pratica:
+        P1: {titulo: "Prática — relatório sobre dados", secao: "Prática — relatório sobre dados", arquivo: P01, checklist: C01, assuntos: [01_transformacoes_e_colecoes, 02_complexidade, 03_pilhas_e_filas]}
+        P2: {titulo: "Exercício integrador — recuperação sem consulta", secao: "Exercício integrador — recuperação sem consulta", arquivo: P02, resposta: KP02, assuntos: [01_transformacoes_e_colecoes, 02_complexidade, 03_pilhas_e_filas]}
+        P3: {titulo: "Retomada espaçada", secao: "Retomada espaçada", arquivo: P03, referencia_gabarito: KP02, assuntos: [01_transformacoes_e_colecoes, 02_complexidade, 03_pilhas_e_filas]}
+      separacao_inline_literal:
+        P2:
+          inicio: "<details>\n<summary>Gabarito comentado — abra somente após tentar</summary>\n\n"
+          fim: "</details>"
+          destino: KP02
+    cobertura:
+      exclusivos:
+        01_transformacoes_e_colecoes: [Q1]
+        02_complexidade: [Q2]
+        03_pilhas_e_filas: [Q3, Q4]
+      compartilhados:
+        P1: [01_transformacoes_e_colecoes, 02_complexidade, 03_pilhas_e_filas]
+        P2: [01_transformacoes_e_colecoes, 02_complexidade, 03_pilhas_e_filas]
+        P3: [01_transformacoes_e_colecoes, 02_complexidade, 03_pilhas_e_filas]
+    limites_literais_teoria:
+      - {item: "parágrafo 1 — map/filter/reduce, encadeamento e funções pequenas", inicio: "`map()` transforma cada elemento", fim: "Funções pequenas tornam a transformação mais fácil de explicar.", arquivo: T01}
+      - {item: "parágrafo 2 — arrays, objetos e coleções", inicio: "Arrays são adequados para sequências e coleções;", fim: "Escolha estrutura conforme a operação principal: percorrer, ordenar, procurar por identificador ou representar estado.", arquivo: T01}
+      - {item: "parágrafo 3 — O(n), passagens e loops aninhados", inicio: "**O(n)** descreve crescimento proporcional ao número de itens", fim: "São aproximações para comparar crescimento, não medições exatas de tempo.", arquivo: T02}
+      - {item: "parágrafo 4 — pilhas, filas e custo de shift", inicio: "Uma **pilha** segue LIFO", fim: "não assuma que toda operação de fila tem custo constante.", arquivo: T03}
+    conexoes:
+      - {tipo: pre_requisito_revisita, destino: "6.2"}
+      - {tipo: relacionado, destino: "23.2"}
+
+  "7.5":
+    pasta: 7.5_Depuracao_no_navegador
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/7.5_Depuracao_no_navegador.md
+    decisao_assuntos: "aprovado: dois assuntos; reprodução, Console/Elements e Sources no primeiro; Network no segundo"
+    assuntos: [01_reproducao_console_elements_sources, 02_network_requisicoes]
+    arquivos:
+      T01: 01_reproducao_console_elements_sources/01_teoria.md
+      Q01: 01_reproducao_console_elements_sources/02_quiz.md
+      K01: 01_reproducao_console_elements_sources/03_gabarito_quiz.md
+      T02: 02_network_requisicoes/01_teoria.md
+      Q02: 02_network_requisicoes/02_quiz.md
+      K02: 02_network_requisicoes/03_gabarito_quiz.md
+      P01: 01_reproducao_console_elements_sources/P01_pratica_guiada_seletor.md
+      KP01: 01_reproducao_console_elements_sources/KP01_gabarito_seletor.md
+      C01: 01_reproducao_console_elements_sources/C01_aceite_seletor.md
+      P02: 02_network_requisicoes/P02_pratica_independente_network.md
+      KP02: 02_network_requisicoes/KP02_gabarito_network.md
+      R02: 02_network_requisicoes/R02_rubrica_network.md
+      P03: 90_integracao/P03_pratica_integrada_interacao_requisicao.md
+      R03: 90_integracao/R03_rubrica_interacao_requisicao.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "1. Reproduzir e formular uma hipótese": T01
+        "2. Console e Elements: mensagens, DOM e estado visível": T01
+        "3. Sources: breakpoint, escopo e pilha de chamadas": T01
+        "4. Network: investigar requisições": T02
+      quiz:
+        Q1: {arquivo: Q02, resposta: K02, assunto: 02_network_requisicoes}
+        Q2: {arquivo: Q01, resposta: K01, assunto: 01_reproducao_console_elements_sources}
+        Q3: {arquivo: Q01, resposta: K01, assunto: 01_reproducao_console_elements_sources}
+        Q4: {arquivo: Q02, resposta: K02, assunto: 02_network_requisicoes}
+        Q5: {arquivo: Q02, resposta: K02, assunto: 02_network_requisicoes}
+      pratica:
+        P1: {titulo: "1. Guiada — localize um seletor sem correspondência", arquivo: P01, resposta: KP01, checklist: C01, assunto: 01_reproducao_console_elements_sources}
+        P2: {titulo: "2. Independente — classifique evidências da Network", arquivo: P02, resposta: KP02, rubrica: R02, assunto: 02_network_requisicoes}
+        P3: {titulo: "3. Integrada — corrija interação e requisição com evidência", arquivo: P03, rubrica: R03, assuntos: [01_reproducao_console_elements_sources, 02_network_requisicoes]}
+    cobertura:
+      exclusivos:
+        01_reproducao_console_elements_sources: [Q2, Q3, P1]
+        02_network_requisicoes: [Q1, Q4, Q5, P2]
+      compartilhados:
+        P3: [01_reproducao_console_elements_sources, 02_network_requisicoes]
+    rubricas:
+      R02: "0–2 por critério; 4 critérios; total 8; conclusão com pelo menos 6/8"
+      R03: "0–2 por critério; 5 critérios; total 10; conclusão com pelo menos 8/10"
+    conexoes:
+      - {tipo: pre_requisito, destino: "7.1"}
+      - {tipo: relacionado, destino: "17.2"}
+
+  "8.1":
+    pasta: 8.1_Fundamentos_de_tipagem
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/8.1_Fundamentos_de_tipagem.md
+    assuntos: [01_tipos_primitivos_anotacoes, 02_unions_narrowing, 03_inferencia_contratos_forma_objetos]
+    arquivos:
+      T01: 01_tipos_primitivos_anotacoes/01_teoria.md
+      Q01: 01_tipos_primitivos_anotacoes/02_quiz.md
+      K01: 01_tipos_primitivos_anotacoes/03_gabarito_quiz.md
+      T02: 02_unions_narrowing/01_teoria.md
+      Q02: 02_unions_narrowing/02_quiz.md
+      K02: 02_unions_narrowing/03_gabarito_quiz.md
+      T03: 03_inferencia_contratos_forma_objetos/01_teoria.md
+      Q03: 03_inferencia_contratos_forma_objetos/02_quiz.md
+      K03: 03_inferencia_contratos_forma_objetos/03_gabarito_quiz.md
+      P01: 02_unions_narrowing/P01_pratica_guiada_union.md
+      KP01: 02_unions_narrowing/KP01_gabarito_union.md
+      C01: 02_unions_narrowing/C01_aceite_union.md
+      P02: 90_integracao/P02_pratica_independente_contratos_tarefas.md
+      KP02: 90_integracao/KP02_gabarito_contratos_tarefas.md
+      R02: 90_integracao/R02_rubrica_contratos_tarefas.md
+      P03: 90_integracao/P03_pratica_integrada_resumo_tarefas.md
+      KP03: 90_integracao/KP03_solucao_referencia_resumo.md
+      R03: 90_integracao/R03_rubrica_resumo_tarefas.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "1. Tipos primitivos e anotações": T01
+        "2. Inferência e contratos explícitos": T03
+        "3. Unions e narrowing": T02
+        "4. Aliases, interfaces e forma dos objetos": T03
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_tipos_primitivos_anotacoes}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_unions_narrowing}
+        Q3: {arquivo: Q02, resposta: K02, assunto: 02_unions_narrowing}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_inferencia_contratos_forma_objetos}
+        Q5: {arquivo: Q03, resposta: K03, assunto: 03_inferencia_contratos_forma_objetos}
+      pratica:
+        P1: {titulo: "1. Guiada — corrija operações inválidas numa union", arquivo: P01, resposta: KP01, checklist: C01, assunto: 02_unions_narrowing}
+        P2: {titulo: "2. Independente — modele tarefas com contratos claros", arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [02_unions_narrowing, 03_inferencia_contratos_forma_objetos]}
+        P3: {titulo: "3. Integrada — tipagem de um resumo de tarefas", arquivo: P03, resposta: KP03, rubrica: R03, assuntos: [01_tipos_primitivos_anotacoes, 02_unions_narrowing, 03_inferencia_contratos_forma_objetos]}
+    cobertura:
+      exclusivos:
+        01_tipos_primitivos_anotacoes: [Q1]
+        02_unions_narrowing: [Q2, Q3, P1]
+        03_inferencia_contratos_forma_objetos: [Q4, Q5]
+      compartilhados:
+        P2: [02_unions_narrowing, 03_inferencia_contratos_forma_objetos]
+        P3: [01_tipos_primitivos_anotacoes, 02_unions_narrowing, 03_inferencia_contratos_forma_objetos]
+    rubricas:
+      R02: "0–2 por critério; 5 critérios; total 10; conclusão com pelo menos 8/10"
+      R03: "0–2 por critério; 5 critérios; total 10; conclusão com pelo menos 8/10"
+    conexoes:
+      - {tipo: pre_requisito, destino: "6.3"}
+      - {tipo: complementar, destino: "8.2"}
+
+  "8.2":
+    pasta: 8.2_Estrutura_e_modelagem
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/8.2_Estrutura_e_modelagem.md
+    assuntos: [01_formas_dados_unions, 02_generics_composicao_contratos, 03_unknown_validacao_runtime]
+    arquivos:
+      T01: 01_formas_dados_unions/01_teoria.md
+      Q01: 01_formas_dados_unions/02_quiz.md
+      K01: 01_formas_dados_unions/03_gabarito_quiz.md
+      T02: 02_generics_composicao_contratos/01_teoria.md
+      Q02: 02_generics_composicao_contratos/02_quiz.md
+      K02: 02_generics_composicao_contratos/03_gabarito_quiz.md
+      T03: 03_unknown_validacao_runtime/01_teoria.md
+      Q03: 03_unknown_validacao_runtime/02_quiz.md
+      K03: 03_unknown_validacao_runtime/03_gabarito_quiz.md
+      P01: 01_formas_dados_unions/P01_pratica_guiada_resultado.md
+      KP01: 01_formas_dados_unions/KP01_gabarito_resultado.md
+      C01: 01_formas_dados_unions/C01_aceite_resultado.md
+      P02: 02_generics_composicao_contratos/P02_pratica_independente_repositorio.md
+      KP02: 02_generics_composicao_contratos/KP02_gabarito_repositorio.md
+      R02: 02_generics_composicao_contratos/R02_rubrica_repositorio.md
+      P03: 90_integracao/P03_pratica_integrada_catalogo.md
+      KP03: 90_integracao/KP03_gabarito_catalogo.md
+      R03: 90_integracao/R03_rubrica_catalogo.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "1. Formas de dados e ausência": T01
+        "2. Unions discriminadas e narrowing": T01
+        "3. Generics preservam relações": T02
+        "4. unknown e validação em runtime": T03
+        "5. Composição de contratos": T02
+      quiz:
+        Q1: {arquivo: Q02, resposta: K02, assunto: 02_generics_composicao_contratos}
+        Q2: {arquivo: Q01, resposta: K01, assunto: 01_formas_dados_unions}
+        Q3: {arquivo: Q03, resposta: K03, assunto: 03_unknown_validacao_runtime}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_unknown_validacao_runtime}
+        Q5: {arquivo: Q02, resposta: K02, assunto: 02_generics_composicao_contratos}
+      pratica:
+        P1: {titulo: "1. Guiada — estreite o resultado", arquivo: P01, resposta: KP01, checklist: C01, assunto: 01_formas_dados_unions}
+        P2: {titulo: "2. Independente — componha uma coleção genérica", arquivo: P02, resposta: KP02, rubrica: R02, assunto: 02_generics_composicao_contratos}
+        P3: {titulo: "3. Integrada — valide resposta de catálogo", arquivo: P03, resposta: KP03, rubrica: R03, assuntos: [01_formas_dados_unions, 02_generics_composicao_contratos, 03_unknown_validacao_runtime]}
+    cobertura:
+      exclusivos:
+        01_formas_dados_unions: [Q2, P1]
+        02_generics_composicao_contratos: [Q1, Q5, P2]
+        03_unknown_validacao_runtime: [Q3, Q4]
+      compartilhados:
+        P3: [01_formas_dados_unions, 02_generics_composicao_contratos, 03_unknown_validacao_runtime]
+    rubricas:
+      R02: "0–2 por critério; 5 critérios; total 10; conclusão com pelo menos 8/10"
+      R03: "0–2 por critério; 5 critérios; total 10; conclusão com pelo menos 8/10"
+    conexoes:
+      - {tipo: pre_requisito, destino: "8.1"}
+      - {tipo: relacionado, destino: "27.3"}
+      - {tipo: relacionado, destino: "18.1"}
+
+  "8.3":
+    pasta: 8.3_Configuracao_e_uso
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/8.3_Configuracao_e_uso.md
+    assuntos: [01_escopo_selecao_arquivos, 02_opcoes_runtime_build, 03_checagem_emissao_diagnosticos, 04_migracao_gradual]
+    arquivos:
+      T01: 01_escopo_selecao_arquivos/01_teoria.md
+      Q01: 01_escopo_selecao_arquivos/02_quiz.md
+      K01: 01_escopo_selecao_arquivos/03_gabarito_quiz.md
+      T02: 02_opcoes_runtime_build/01_teoria.md
+      Q02: 02_opcoes_runtime_build/02_quiz.md
+      K02: 02_opcoes_runtime_build/03_gabarito_quiz.md
+      T03: 03_checagem_emissao_diagnosticos/01_teoria.md
+      Q03: 03_checagem_emissao_diagnosticos/02_quiz.md
+      K03: 03_checagem_emissao_diagnosticos/03_gabarito_quiz.md
+      T04: 04_migracao_gradual/01_teoria.md
+      Q04: 04_migracao_gradual/02_quiz.md
+      K04: 04_migracao_gradual/03_gabarito_quiz.md
+      P01: 01_escopo_selecao_arquivos/P01_pratica_guiada_configuracao.md
+      KP01: 01_escopo_selecao_arquivos/KP01_gabarito_configuracao.md
+      C01: 01_escopo_selecao_arquivos/C01_aceite_configuracao.md
+      P02: 90_integracao/P02_pratica_independente_configuracao_migracao.md
+      KP02: 90_integracao/KP02_gabarito_configuracao_migracao.md
+      R02: 90_integracao/R02_rubrica_configuracao_migracao.md
+      P03: 90_integracao/P03_pratica_integrada_migrar_modulo.md
+      R03: 90_integracao/R03_rubrica_migrar_modulo.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "1. Escopo do projeto e seleção de arquivos": T01
+        "2. Opções de acordo com runtime e build": T02
+        "3. Checagem, emissão e diagnósticos": T03
+        "4. Migração gradual de JavaScript": T04
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_escopo_selecao_arquivos}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_opcoes_runtime_build}
+        Q3: {arquivo: Q01, resposta: K01, assunto: 01_escopo_selecao_arquivos}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_checagem_emissao_diagnosticos}
+        Q5: {arquivo: Q04, resposta: K04, assunto: 04_migracao_gradual}
+      pratica:
+        P1: {titulo: "1. Guiada — descubra por que a configuração não se aplica", arquivo: P01, resposta: KP01, checklist: C01, assunto: 01_escopo_selecao_arquivos}
+        P2: {titulo: "2. Independente — proponha uma configuração de migração", arquivo: P02, resposta: KP02, rubrica: R02, assuntos: [01_escopo_selecao_arquivos, 02_opcoes_runtime_build, 04_migracao_gradual]}
+        P3: {titulo: "3. Integrada — migre um módulo e documente o fluxo", arquivo: P03, rubrica: R03, assuntos: [02_opcoes_runtime_build, 03_checagem_emissao_diagnosticos, 04_migracao_gradual]}
+    cobertura:
+      exclusivos:
+        01_escopo_selecao_arquivos: [Q1, Q3, P1]
+        02_opcoes_runtime_build: [Q2]
+        03_checagem_emissao_diagnosticos: [Q4]
+        04_migracao_gradual: [Q5]
+      compartilhados:
+        P2: [01_escopo_selecao_arquivos, 02_opcoes_runtime_build, 04_migracao_gradual]
+        P3: [02_opcoes_runtime_build, 03_checagem_emissao_diagnosticos, 04_migracao_gradual]
+    rubricas:
+      R02: "0–2 por critério; 5 critérios; total 10; conclusão com pelo menos 8/10"
+      R03: "0–2 por critério; 5 critérios; total 10; conclusão com pelo menos 8/10"
+    conexoes:
+      - {tipo: pre_requisito, destino: "6.4"}
+      - {tipo: pre_requisito, destino: "8.2"}
+
+  "8.5":
+    tipo_unidade: projeto
+    secoes_projeto: {escopo: "Escopo do projeto", marcos: "Marcos de entrega", checklist_final: "Checklist final de entrega", rubrica: "Rubrica de avaliação"}
+    pasta: 8.5_Projeto_incremental
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/8.5_Projeto_incremental.md
+    assuntos: [01_projeto_incremental]
+    arquivos:
+      SCP: 01_projeto_incremental/00_escopo.md
+      M01: 01_projeto_incremental/M01_recorte_cenario_contrato_dados.md
+      C01: 01_projeto_incremental/C01_aceite_recorte_cenario_contrato_dados.md
+      M02: 01_projeto_incremental/M02_estrutura_semantica_interface_adaptavel.md
+      C02: 01_projeto_incremental/C02_aceite_estrutura_semantica.md
+      M03: 01_projeto_incremental/M03_dados_interacao_typescript.md
+      C03: 01_projeto_incremental/C03_aceite_dados_interacao.md
+      M04: 01_projeto_incremental/M04_build_publicacao_documentacao.md
+      C04: 01_projeto_incremental/C04_aceite_build_publicacao.md
+      C90: 01_projeto_incremental/C90_checklist_final.md
+      R00: 01_projeto_incremental/R00_rubrica.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      escopo: SCP
+      marcos:
+        M1: {titulo_marco: "Marco 1 — recorte, cenário e contrato de dados", arquivo: M01, aceite: C01}
+        M2: {titulo_marco: "Marco 2 — estrutura semântica e interface adaptável", arquivo: M02, aceite: C02}
+        M3: {titulo_marco: "Marco 3 — dados e interação com TypeScript", arquivo: M03, aceite: C03}
+        M4: {titulo_marco: "Marco 4 — build, publicação e documentação", arquivo: M04, aceite: C04}
+      checklist_final: C90
+      rubrica: {arquivo: R00, escala_rubrica: "0–4 por dimensão; 4 dimensões; total 16"}
+    cobertura_projeto:
+      sequencia_interna_inferida: [M1, M2, M3, M4]
+      prerequisitos_explicitos: ["7.3", "8.3"]
+    conexoes:
+      - {tipo: pre_requisito, destino: "7.3"}
+      - {tipo: pre_requisito, destino: "8.3"}
+      - {tipo: complementar, destino: "8.6"}
+      - {tipo: projeto_acumulado, destino: "Guia_Projetos_e_Rotacao_de_Tipos"}
+
+  "8.6":
+    tipo_unidade: projeto
+    secoes_projeto: {escopo: "Escopo e opções", marcos: "Marcos de entrega", checklist_final: "Checklist final de escolha e entrega", rubrica: "Rubrica de avaliação"}
+    pasta: 8.6_Projeto_de_fase_Trilho_B
+    origem: docs/courses/trilhacode/Conteudos/Fase_3/8.6_Projeto_de_fase_Trilho_B.md
+    assuntos: [01_projeto_trilho_b]
+    arquivos:
+      SCP: 01_projeto_trilho_b/00_escopo.md
+      M01: 01_projeto_trilho_b/M01_escolha_cobertura_hipotese_tipo.md
+      C01: 01_projeto_trilho_b/C01_aceite_escolha_cobertura.md
+      M02: 01_projeto_trilho_b/M02_cenario_dados_interface_minima.md
+      C02: 01_projeto_trilho_b/C02_aceite_cenario_tipo.md
+      M03: 01_projeto_trilho_b/M03_regra_principal_verificacao.md
+      C03: 01_projeto_trilho_b/C03_aceite_regra_principal.md
+      M04: 01_projeto_trilho_b/M04_documentar_publicar_cobertura.md
+      C04: 01_projeto_trilho_b/C04_aceite_documentar_publicar.md
+      C90: 01_projeto_trilho_b/C90_checklist_final.md
+      R00: 01_projeto_trilho_b/R00_rubrica.md
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      escopo: SCP
+      marcos:
+        M1: {titulo_marco: "Marco 1 — escolha, cobertura e hipótese do tipo", arquivo: M01, aceite: C01}
+        M2: {titulo_marco: "Marco 2 — cenário, dados e interface mínima", arquivo: M02, aceite: C02}
+        M3: {titulo_marco: "Marco 3 — implementar e verificar a regra principal", arquivo: M03, aceite: C03}
+        M4: {titulo_marco: "Marco 4 — documentar, publicar e registrar cobertura", arquivo: M04, aceite: C04}
+      checklist_final: C90
+      rubrica: {arquivo: R00, escala_rubrica: "0–4 por dimensão; 4 dimensões; total 16"}
+    cobertura_projeto:
+      sequencia_interna_inferida: [M1, M2, M3, M4]
+      prerequisito_explicito: "8.3"
+      tipos_fonte: [T1, T2, T4]
+    conexoes:
+      - {tipo: pre_requisito, destino: "8.3"}
+      - {tipo: complementar, destino: "8.5"}
+      - {tipo: referencia_escopo, destino: "Guia_Projetos_e_Rotacao_de_Tipos"}
+
