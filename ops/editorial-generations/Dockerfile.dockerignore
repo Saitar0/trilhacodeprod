@@ -10,3 +10,4 @@
 !ops/
 !ops/editorial-generations/
 !ops/editorial-generations/run_homologation.py
+!ops/editorial-generations/requirements.lock

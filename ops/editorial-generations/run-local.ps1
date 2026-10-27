@@ -82,6 +82,9 @@ finally {
     }
     $rootPassword = $null
     [Array]::Clear($randomBytes, 0, $randomBytes.Length)
+    $values["EDITORIAL_POC_ROOT_PASSWORD"] = $null
+    $values.Clear()
+    $originalEnvironment.Clear()
 }
 
 exit $exitCode

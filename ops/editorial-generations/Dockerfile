@@ -3,7 +3,10 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /repo/backend
 
-RUN python -m pip install --no-cache-dir pymongo==4.18.2
+COPY ops/editorial-generations/requirements.lock /tmp/editorial-generations-requirements.lock
+RUN python -m pip install --no-cache-dir --only-binary=:all: \
+    -r /tmp/editorial-generations-requirements.lock \
+    && rm /tmp/editorial-generations-requirements.lock
 RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin harness
 
 COPY backend/services/editorial_generations_poc.py /repo/backend/services/editorial_generations_poc.py

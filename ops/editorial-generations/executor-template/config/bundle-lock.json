@@ -1,0 +1,17 @@
+{
+  "format_version": 1,
+  "transport": {
+    "enabled": false,
+    "executor_repository": "",
+    "release_tag": "editorial-generations-mongodb7-REPLACE_WITH_SOURCE_SHA12",
+    "asset_name": "editorial-generations-mongodb7-REPLACE_WITH_SOURCE_SHA.zip"
+  },
+  "package": {
+    "source_repository": "Saitar0/trilhacodeprod",
+    "source_sha": "REPLACE_WITH_FULL_SOURCE_SHA",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "python": "3.11",
+    "pymongo": "4.18.2",
+    "mongodb_major": 7
+  }
+}

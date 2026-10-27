@@ -25,17 +25,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY' >> "$GITHUB_ENV"
+          root_password="$(python3 - <<'PY'
           import secrets
-          run_id = secrets.token_hex(16)
-          print(f"EDITORIAL_POC_RUN_ID={run_id}")
-          print(f"EDITORIAL_POC_PROJECT=editorial-poc-{run_id}")
-          print("EDITORIAL_POC_DISPOSABLE=1")
-          print("EDITORIAL_POC_MONGO_HOST=mongo")
-          print("EDITORIAL_POC_MONGO_PORT=27017")
-          print("EDITORIAL_POC_ROOT_USERNAME=pocroot")
-          print(f"EDITORIAL_POC_ROOT_PASSWORD={secrets.token_urlsafe(36)}")
+          print(secrets.token_urlsafe(36))
           PY
+          )"
+          printf '::add-mask::%s\n' "$root_password"
+          run_id="$(python3 -c 'import secrets; print(secrets.token_hex(16))')"
+          {
+            printf 'EDITORIAL_POC_RUN_ID=%s\n' "$run_id"
+            printf 'EDITORIAL_POC_PROJECT=editorial-poc-%s\n' "$run_id"
+            printf 'EDITORIAL_POC_DISPOSABLE=1\n'
+            printf 'EDITORIAL_POC_MONGO_HOST=mongo\n'
+            printf 'EDITORIAL_POC_MONGO_PORT=27017\n'
+            printf 'EDITORIAL_POC_ROOT_USERNAME=pocroot\n'
+            printf 'EDITORIAL_POC_ROOT_PASSWORD=%s\n' "$root_password"
+          } >> "$GITHUB_ENV"
+          unset root_password run_id
 
       - name: Verify disposable Docker runtime
         run: |
