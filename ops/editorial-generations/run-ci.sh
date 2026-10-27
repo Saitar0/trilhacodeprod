@@ -8,6 +8,7 @@ PROJECT="editorial-poc-$RUN_ID"
 ROOT_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(36))')"
 ROOT_USERNAME="pocroot"
 RESOURCES_MAY_EXIST=0
+COMPOSE_TIMEOUT_SECONDS="32m"
 
 if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
   printf '::add-mask::%s\n' "$ROOT_PASSWORD"
@@ -26,7 +27,7 @@ fi
 
 cleanup() {
   local status=$?
-  trap - EXIT
+  trap - EXIT INT TERM
   if (( RESOURCES_MAY_EXIST )); then
     python3 "$SCRIPT_DIR/cleanup_compose.py" --compose-file "$COMPOSE_FILE" || {
       if (( status == 0 )); then status=3; fi
@@ -35,7 +36,13 @@ cleanup() {
   unset EDITORIAL_POC_ROOT_PASSWORD ROOT_PASSWORD
   exit "$status"
 }
+on_signal() {
+  local status="$1"
+  exit "$status"
+}
 trap cleanup EXIT
+trap 'on_signal 130' INT
+trap 'on_signal 143' TERM
 
 if [[ -n "${MONGO_URL:-}${MONGO_URL_TEST:-}${DATABASE_URL:-}${EDITORIAL_POC_MONGO_URI:-}" ]]; then
   echo "Harness recusado: configuração MongoDB externa detectada." >&2
@@ -60,7 +67,8 @@ if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
   printf 'cleanup_needed=true\n' >> "$GITHUB_OUTPUT"
 fi
 set +e
-docker compose --project-name "$PROJECT" --file "$COMPOSE_FILE" \
+timeout --signal=TERM --kill-after=20s "$COMPOSE_TIMEOUT_SECONDS" \
+  docker compose --project-name "$PROJECT" --file "$COMPOSE_FILE" \
   up --build --abort-on-container-exit --exit-code-from harness harness
 EXIT_CODE=$?
 set -e

@@ -12,6 +12,7 @@ import asyncio
 import json
 import os
 import re
+import time
 import unittest
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
@@ -20,12 +21,37 @@ from uuid import uuid4
 from pymongo import AsyncMongoClient, errors
 from pymongo.errors import DuplicateKeyError
 
+from integration_tests.harness_diagnostics import emit_lifecycle, install_signal_diagnostics
 from services.editorial_generations_poc import (
     CHUNK_BYTES,
     EditorialGenerationsPoC,
     GenerationConflict,
     GenerationInvalid,
 )
+
+_WAIT_DEADLINE_SECONDS = 10
+_ASYNC_OPERATION_DEADLINE_SECONDS = 12
+
+
+async def _wait_event(event: asyncio.Event, label: str) -> None:
+    try:
+        await asyncio.wait_for(event.wait(), timeout=_WAIT_DEADLINE_SECONDS)
+    except TimeoutError as exc:
+        raise TimeoutError(f"timeout aguardando evento de sincronização: {label}") from exc
+
+
+async def _wait_barrier(barrier: asyncio.Barrier, label: str) -> None:
+    try:
+        await asyncio.wait_for(barrier.wait(), timeout=_WAIT_DEADLINE_SECONDS)
+    except TimeoutError as exc:
+        raise TimeoutError(f"timeout aguardando barreira de sincronização: {label}") from exc
+
+
+async def _bounded_gather(*awaitables, label: str, timeout: float = 20):
+    try:
+        return await asyncio.wait_for(asyncio.gather(*awaitables), timeout=timeout)
+    except TimeoutError as exc:
+        raise TimeoutError(f"timeout aguardando operações concorrentes: {label}") from exc
 
 _RUN_ID = os.environ.get("EDITORIAL_POC_RUN_ID", "")
 _DB_NAME = os.environ.get("EDITORIAL_POC_DB", "")
@@ -85,7 +111,7 @@ class _PauseAfterFind:
     async def find_one(self, query):
         value = await self._collection.find_one(query)
         self._found.set()
-        await self._release.wait()
+        await _wait_event(self._release, "reader-release")
         return value
 
 
@@ -156,7 +182,48 @@ def _fail_at(target: str):
 class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
     @classmethod
     def setUpClass(cls):
-        _require_harness()
+        test_id = f"{cls.__module__}.{cls.__qualname__}.setUpClass"
+        started = time.monotonic()
+        emit_lifecycle("class_setup", "start", test_id)
+        try:
+            _require_harness()
+        except BaseException:
+            emit_lifecycle("class_setup", "failed", test_id, duration=time.monotonic() - started)
+            raise
+        emit_lifecycle("class_setup", "end", test_id, duration=time.monotonic() - started)
+
+    def _callSetUp(self):
+        self._harness_test_id = self.id()
+        loop = self._asyncioRunner.get_loop()
+        install_signal_diagnostics(loop, self._harness_test_id)
+        started = time.monotonic()
+        emit_lifecycle("setup", "start", self._harness_test_id)
+        try:
+            super()._callSetUp()
+        except BaseException:
+            emit_lifecycle("setup", "failed", self._harness_test_id, duration=time.monotonic() - started)
+            raise
+        emit_lifecycle("setup", "end", self._harness_test_id, duration=time.monotonic() - started)
+
+    def _callTestMethod(self, method):
+        started = time.monotonic()
+        emit_lifecycle("test_body", "start", self._harness_test_id)
+        try:
+            super()._callTestMethod(method)
+        except BaseException:
+            emit_lifecycle("test_body", "failed", self._harness_test_id, duration=time.monotonic() - started)
+            raise
+        emit_lifecycle("test_body", "end", self._harness_test_id, duration=time.monotonic() - started)
+
+    def _callTearDown(self):
+        started = time.monotonic()
+        emit_lifecycle("teardown", "start", self._harness_test_id)
+        try:
+            super()._callTearDown()
+        except BaseException:
+            emit_lifecycle("teardown", "failed", self._harness_test_id, duration=time.monotonic() - started)
+            raise
+        emit_lifecycle("teardown", "end", self._harness_test_id, duration=time.monotonic() - started)
 
     async def asyncSetUp(self):
         self.clients = []
@@ -191,13 +258,15 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
 
     async def asyncTearDown(self):
         for client in self.clients:
-            await client.close()
+            await asyncio.wait_for(client.close(), timeout=5)
 
     async def _client(self, user_env: str, password_env: str):
         # Match the canonical backend client: BSON dates are UTC-aware on read.
-        client = AsyncMongoClient(_uri(user_env, password_env), tz_aware=True)
-        await client.admin.command("ping")
+        client = AsyncMongoClient(_uri(user_env, password_env), tz_aware=True, timeoutMS=10_000)
         self.clients.append(client)
+        await asyncio.wait_for(
+            client.admin.command("ping"), timeout=_ASYNC_OPERATION_DEADLINE_SECONDS
+        )
         return client
 
     def _store(
@@ -277,7 +346,7 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
         barrier = asyncio.Barrier(2)
 
         async def acquire(store, writer_id):
-            await barrier.wait()
+            await _wait_barrier(barrier, "concurrent-acquisition")
             try:
                 return await self._begin(
                     store, track_id, "same-operation-0001", writer_id, snapshot
@@ -285,9 +354,10 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
             except GenerationConflict:
                 return None
 
-        first, second = await asyncio.gather(
+        first, second = await _bounded_gather(
             acquire(self.store, "writer-one"),
             acquire(other_store, "writer-two"),
+            label="concurrent-acquisition",
         )
         self.assertEqual(sum(item is not None for item in (first, second)), 1)
         rows = await self.builder_db["poc_editorial_generations"].count_documents(
@@ -383,11 +453,12 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
 
         async def align(stage, _context):
             if stage == "after_chunk_ownership_check":
-                await barrier.wait()
+                await _wait_barrier(barrier, "parallel-seal")
 
-        results = await asyncio.gather(
+        results = await _bounded_gather(
             self.store.prepare(handle, snapshot, failpoint=align),
             other_store.prepare(handle, snapshot, failpoint=align),
+            label="parallel-seal",
         )
         self.assertTrue(all(result["state"] == "sealed" for result in results))
         count = await self.append_db["poc_editorial_generation_manifests"].count_documents(
@@ -414,7 +485,7 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
         barrier = asyncio.Barrier(2)
 
         async def select(handle, op):
-            await barrier.wait()
+            await _wait_barrier(barrier, "head-selection-cas")
             try:
                 selected_store = (
                     self.store if handle.generation_id == a.generation_id else second_store
@@ -427,9 +498,10 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
             except GenerationConflict:
                 return None
 
-        one, two = await asyncio.gather(
+        one, two = await _bounded_gather(
             select(a, f"select-a-{uuid4().hex}"),
             select(b, f"select-b-{uuid4().hex}"),
+            label="head-selection-cas",
         )
         self.assertEqual(sum(item is not None for item in (one, two)), 1)
         winner_handle = a if one else b
@@ -495,12 +567,12 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
         async def pause_after_ownership(stage, _context):
             if stage == "after_chunk_ownership_check":
                 entered.set()
-                await release.wait()
+                await _wait_event(release, "old-writer-release")
 
         old_task = asyncio.create_task(
             self.store.prepare(old, snapshot, failpoint=pause_after_ownership)
         )
-        await entered.wait()
+        await _wait_event(entered, "old-writer-entered")
         self.clock.advance(timedelta(minutes=3))
         new_store, _ = self._store(
             builder_db=self.builder_db_two,
@@ -629,7 +701,7 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
         release = asyncio.Event()
         paused_store, _ = self._store(pause_head=(found, release))
         read_task = asyncio.create_task(paused_store.read_active_public(track_id))
-        await found.wait()
+        await _wait_event(found, "reader-pinned-head")
         selected = await self.store.select_active(
             track_id=track_id,
             generation_id=second.generation_id,

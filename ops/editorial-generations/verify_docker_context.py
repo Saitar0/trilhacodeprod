@@ -7,6 +7,8 @@ import os
 import subprocess
 import sys
 
+from runtime_supervision import run_bounded_capture
+
 DOCKER_OVERRIDES = (
     "DOCKER_HOST",
     "DOCKER_CONTEXT",
@@ -24,12 +26,14 @@ class DockerContextError(RuntimeError):
 
 
 def _run(*args: str) -> str:
-    result = subprocess.run(
-        ["docker", *args],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result = run_bounded_capture(
+            ["docker", *args],
+            check=False,
+            timeout=10,
+        )
+    except subprocess.TimeoutExpired:
+        raise DockerContextError(f"Docker {' '.join(args[:2])} excedeu 10 segundos") from None
     if result.returncode:
         raise DockerContextError(f"Docker {' '.join(args[:2])} indisponível")
     return result.stdout.strip()
@@ -48,6 +52,8 @@ def verify() -> tuple[str, str]:
             "{{json .Endpoints.docker}}",
         )
     )
+    if not isinstance(endpoint_document, dict):
+        raise DockerContextError("Docker retornou metadados de endpoint inválidos")
     host = endpoint_document.get("Host", "")
     if sys.platform == "win32":
         if host.casefold() != WINDOWS_DOCKER_DESKTOP_LINUX_ENDPOINT.casefold():

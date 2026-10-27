@@ -30,7 +30,7 @@ O builder lê blobs de um commit Git exato e usa allowlist estrita. ZIP, manifes
 
 ## Isolamento da execução
 
-O pacote mantém `mongo:7` standalone, rede Compose interna, tmpfs para `/data/db`, nenhuma porta publicada e nenhum volume persistente. O runner cria projeto e senha aleatórios; a senha é mascarada no log antes de ser exportada ao ambiente. O script de execução recusa configuração Mongo externa, valida contexto Docker e Compose, e o cleanup verifica contexto, projeto e labels antes de remover recursos delimitados. Não há `docker system prune`, socket montado no container, SSH, deploy, publicação de imagens ou chamadas à aplicação.
+O pacote mantém `mongo:7` standalone, rede Compose interna, tmpfs para `/data/db`, nenhuma porta publicada e nenhum volume persistente. O runner cria projeto e senha aleatórios; a senha é mascarada no log antes de ser exportada ao ambiente. O script de execução recusa configuração Mongo externa, valida contexto Docker e Compose, e o cleanup verifica contexto, projeto e labels antes de remover recursos delimitados. O executor supervisiona cada teste integrado em processo isolado, aplica limites de inatividade e deadline e reserva tempo próprio para cleanup. Falhas mantêm evidências temporárias e apresentam detalhes redigidos. Não há `docker system prune`, socket montado no container, SSH, deploy, publicação de imagens ou chamadas à aplicação.
 
 ## Verificação local
 

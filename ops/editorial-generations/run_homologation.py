@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
+import ast
 import os
 import re
 import secrets
-import subprocess
 import sys
+import time
 from pathlib import Path
 from urllib.parse import quote_plus
 
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
+from runtime_supervision import run_supervised, sanitize_output
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BACKEND = REPO_ROOT / "backend"
@@ -29,6 +31,13 @@ FORBIDDEN_CONNECTION_ENV = (
 )
 RUN_ID_RE = re.compile(r"[a-f0-9]{32}\Z")
 PROJECT_RE = re.compile(r"editorial-poc-[a-f0-9]{32}\Z")
+UNIT_TIMEOUT_SECONDS = 180
+INTEGRATION_TEST_TIMEOUT_SECONDS = 60
+INTEGRATION_SUITE_TIMEOUT_SECONDS = 20 * 60
+INTEGRATION_IDLE_SECONDS = 30
+PREPARATION_BUDGET_SECONDS = 5 * 60
+INTEGRATION_TEST_MODULE = "integration_tests.test_editorial_generations_mongodb"
+INTEGRATION_TEST_CLASS = "EditorialGenerationsMongoDBTests"
 
 
 class HarnessSafetyError(RuntimeError):
@@ -250,27 +259,139 @@ def provision(client, run_id: str, project: str) -> tuple[str, str, dict[str, st
         raise
 
 
-def run_suite(environment: dict[str, str]) -> int:
-    commands = (
-        [
-            sys.executable,
-            "-m",
-            "unittest",
-            "unit_tests.test_editorial_generations_poc",
-            "-v",
-        ],
-        [
-            sys.executable,
-            "-m",
-            "unittest",
-            "integration_tests.test_editorial_generations_mongodb",
-            "-v",
-        ],
+def integration_test_names() -> list[str]:
+    """Discover only async/sync test methods from the fixed homologation class."""
+    source = BACKEND / "integration_tests" / "test_editorial_generations_mongodb.py"
+    tree = ast.parse(source.read_text(encoding="utf-8"), filename=str(source))
+    test_class = next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == INTEGRATION_TEST_CLASS
+        ),
+        None,
     )
-    for command in commands:
-        result = subprocess.run(command, cwd=BACKEND, env=environment, check=False)
+    if test_class is None:
+        raise HarnessSafetyError("Classe de testes de integração ausente")
+    names = sorted(
+        node.name
+        for node in test_class.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and node.name.startswith("test_")
+    )
+    if not names:
+        raise HarnessSafetyError("Nenhum teste integrado foi descoberto")
+    return names
+
+
+def _run_supervised(
+    command: list[str],
+    *,
+    label: str,
+    environment: dict[str, str],
+    timeout_seconds: float,
+    inactivity_timeout_seconds: float | None,
+    request_diagnostics: bool,
+):
+    return run_supervised(
+        command,
+        label=label,
+        env=environment,
+        cwd=str(BACKEND),
+        timeout_seconds=timeout_seconds,
+        inactivity_timeout_seconds=inactivity_timeout_seconds,
+        request_diagnostics=request_diagnostics,
+        output=lambda line: print(line, flush=True),
+    )
+
+
+def run_suite(environment: dict[str, str]) -> int:
+    unit_command = [
+        sys.executable,
+        "-u",
+        "-m",
+        "unittest",
+        "unit_tests.test_editorial_generations_poc",
+        "-v",
+    ]
+    print("SUITE unit-tests start; deadline=180s", flush=True)
+    unit_result = _run_supervised(
+        unit_command,
+        label="unit-tests",
+        environment=environment,
+        timeout_seconds=UNIT_TIMEOUT_SECONDS,
+        inactivity_timeout_seconds=60,
+        request_diagnostics=False,
+    )
+    print(
+        f"SUITE unit-tests end; returncode={unit_result.returncode}; "
+        f"duration={unit_result.duration_seconds:.2f}s; timeout={unit_result.timed_out}",
+        flush=True,
+    )
+    if unit_result.returncode:
+        return unit_result.returncode
+
+    names = integration_test_names()
+    suite_deadline = time.monotonic() + INTEGRATION_SUITE_TIMEOUT_SECONDS
+    print(
+        f"SUITE integration start; tests={len(names)}; deadline=1200s; "
+        f"per_test={INTEGRATION_TEST_TIMEOUT_SECONDS}s",
+        flush=True,
+    )
+    for index, test_name in enumerate(names, start=1):
+        remaining = suite_deadline - time.monotonic()
+        if remaining <= 0:
+            print(
+                f"SUITE integration budget exhausted before test={test_name}; "
+                f"completed={index - 1}/{len(names)}",
+                file=sys.stderr,
+                flush=True,
+            )
+            return 124
+        test_timeout = min(INTEGRATION_TEST_TIMEOUT_SECONDS, remaining)
+        test_environment = dict(environment)
+        test_environment["EDITORIAL_POC_TEST_DEADLINE_EPOCH"] = str(
+            time.time() + test_timeout
+        )
+        label = f"{index}/{len(names)} {INTEGRATION_TEST_CLASS}.{test_name}"
+        print(
+            f"TEST_CASE start: {label}; deadline={test_timeout:.1f}s; "
+            f"run={environment.get('EDITORIAL_POC_RUN_ID', '')[:8]}",
+            flush=True,
+        )
+        command = [
+            sys.executable,
+            "-u",
+            "-m",
+            "unittest",
+            "-v",
+            f"{INTEGRATION_TEST_MODULE}.{INTEGRATION_TEST_CLASS}.{test_name}",
+        ]
+        started = time.monotonic()
+        result = _run_supervised(
+            command,
+            label=label,
+            environment=test_environment,
+            timeout_seconds=test_timeout,
+            inactivity_timeout_seconds=INTEGRATION_IDLE_SECONDS,
+            request_diagnostics=True,
+        )
+        duration = time.monotonic() - started
+        state = "timeout" if result.timed_out else ("passed" if result.returncode == 0 else "failed")
+        print(
+            f"TEST_CASE end: {label}; result={state}; returncode={result.returncode}; "
+            f"duration={duration:.2f}s; last_progress={result.last_progress_seconds_ago:.2f}s",
+            flush=True,
+        )
         if result.returncode:
+            print(
+                f"SUITE integration stopped; completed={index - 1}/{len(names)}; "
+                f"failed_test={test_name}; remaining_tests={len(names) - index}",
+                file=sys.stderr,
+                flush=True,
+            )
             return result.returncode
+    print(f"SUITE integration end; passed={len(names)}; failed=0; skipped=0", flush=True)
     return 0
 
 
@@ -280,10 +401,11 @@ def main() -> int:
     marker = ""
     run_id = project = host = port = ""
     exit_code = 1
+    preparation_started = time.monotonic()
     try:
         run_id, project, host, port, username = required_environment()
         password = os.environ["EDITORIAL_POC_ROOT_PASSWORD"]
-        client = MongoClient(root_uri(host, port, username, password))
+        client = MongoClient(root_uri(host, port, username, password), timeoutMS=10_000)
         build_info = client.admin.command("buildInfo")
         version = build_info.get("version", "")
         hello = client.admin.command("hello")
@@ -303,6 +425,14 @@ def main() -> int:
             f"Topologia: standalone; projeto descartável {project}; banco exclusivo em memória."
         )
         database_name, marker, credentials = provision(client, run_id, project)
+        preparation_duration = time.monotonic() - preparation_started
+        print(
+            f"STAGE provision end; duration={preparation_duration:.2f}s; "
+            f"budget={PREPARATION_BUDGET_SECONDS}s",
+            flush=True,
+        )
+        if preparation_duration > PREPARATION_BUDGET_SECONDS:
+            raise HarnessSafetyError("Provisionamento excedeu o orçamento de 5 minutos")
 
         child_environment = {
             key: os.environ[key]
@@ -328,8 +458,12 @@ def main() -> int:
             }
         )
         exit_code = run_suite(child_environment)
-    except (HarnessSafetyError, PyMongoError) as exc:
-        print(f"Harness bloqueado: {type(exc).__name__}: {exc}", file=sys.stderr)
+    except (HarnessSafetyError, PyMongoError, OSError) as exc:
+        safe_error = sanitize_output(
+            f"{type(exc).__name__}: {exc}",
+            [value for key, value in os.environ.items() if "PASSWORD" in key.upper()],
+        )
+        print(f"Harness bloqueado: {safe_error}", file=sys.stderr, flush=True)
         exit_code = 2
     finally:
         if client is not None:
@@ -339,10 +473,15 @@ def main() -> int:
                     print(
                         "Limpeza: banco efêmero removido após validar o marcador desta execução."
                     )
-                except (HarnessSafetyError, PyMongoError) as exc:
+                except (HarnessSafetyError, PyMongoError, OSError) as exc:
+                    safe_error = sanitize_output(
+                        f"{type(exc).__name__}: {exc}",
+                        [value for key, value in os.environ.items() if "PASSWORD" in key.upper()],
+                    )
                     print(
-                        f"Limpeza recusada/falhou: {type(exc).__name__}: {exc}",
+                        f"Limpeza recusada/falhou: {safe_error}",
                         file=sys.stderr,
+                        flush=True,
                     )
                     if exit_code == 0:
                         exit_code = 3

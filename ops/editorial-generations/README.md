@@ -47,6 +47,14 @@ Barreiras/eventos e um relógio controlado determinam os interleavings. O servid
 
 O workflow separado editorial-generations-mongodb.yml tem somente workflow_dispatch, contents: read, checkout sem credenciais persistidas, timeout e cleanup delimitado por labels. Ele não consulta secrets do repositório e não contém deploy, publicação, SSH ou execução de código externo. Este workflow foi preparado, mas não foi executado nesta fase.
 
+### Limites de tempo e diagnóstico
+
+O runner de homologação inicia os 24 testes unitários em um processo limitado a 180 s e executa cada teste integrado em processo isolado, com deadline de 60 s por caso e limite total da suíte integrada de 20 min. O provisionamento tem orçamento de 5 min, cada operação MongoDB usa timeout de cliente de 10 s, e o cleanup Compose tem deadline próprio de 180 s. O script CI limita o `docker compose up` a 32 min, reservando 3 min para a limpeza Compose dentro da etapa de 37 min; o workflow ainda reserva uma etapa externa de cleanup de 5 min e deixa 3 min de margem no limite do job.
+
+Cada caso integrado registra início/fim de setup, corpo e teardown, duração, resultado, execução sanitizada e tempo restante. Após 30 s sem saída, o supervisor solicita diagnóstico de stacks sem variáveis locais; no deadline, encerra apenas o grupo de processos do caso. Os eventos e deadlines tornam um caso travado identificável, mas não demonstram retroativamente qual caso bloqueou a execução 40564853383.
+
+O cleanup valida projeto, identidade, Compose fixo e labels, aplica prazo a cada chamada, confirma a ausência dos recursos identificados e falha fechado se o daemon ou a propriedade não puderem ser comprovados. Erros capturados são redigidos e limitados em tamanho. Falha de cleanup mantém o pacote temporário para diagnóstico; nenhum comando global de prune é usado.
+
 ## Limites conhecidos
 
 * O DTO da PoC continua usando filtros conservadores de campos; isso não substitui uma allowlist versionada por tipo de bloco.

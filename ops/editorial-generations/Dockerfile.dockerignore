@@ -6,8 +6,10 @@
 !backend/unit_tests/test_editorial_generations_poc.py
 !backend/integration_tests/
 !backend/integration_tests/__init__.py
+!backend/integration_tests/harness_diagnostics.py
 !backend/integration_tests/test_editorial_generations_mongodb.py
 !ops/
 !ops/editorial-generations/
 !ops/editorial-generations/run_homologation.py
+!ops/editorial-generations/runtime_supervision.py
 !ops/editorial-generations/requirements.lock

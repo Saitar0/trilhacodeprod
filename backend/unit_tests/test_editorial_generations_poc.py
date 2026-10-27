@@ -285,10 +285,10 @@ class EditorialGenerationPoCTests(unittest.TestCase):
             async def pause_after_check(stage, _context):
                 if stage == "after_chunk_ownership_check":
                     checked.set()
-                    await release.wait()
+                    await asyncio.wait_for(release.wait(), timeout=5)
 
             old_task = asyncio.create_task(self.store.prepare(handle, snapshot(), failpoint=pause_after_check))
-            await checked.wait()
+            await asyncio.wait_for(checked.wait(), timeout=5)
             self.clock.advance(timedelta(minutes=3))
             new_handle = await self.store.begin(track_id=TRACK_ID, operation_id="fence-race-0001",
                                                 writer_id="writer-new", snapshot=snapshot())
@@ -313,15 +313,18 @@ class EditorialGenerationPoCTests(unittest.TestCase):
                                          writer_id="writer-a", snapshot=snapshot(title="A"))
             two = await self.store.begin(track_id=TRACK_ID, operation_id="parallel-op-002",
                                          writer_id="writer-b", snapshot=snapshot(title="B"))
-            await asyncio.gather(self.store.prepare(one, snapshot(title="A")),
-                                 self.store.prepare(two, snapshot(title="B")))
-            results = await asyncio.gather(
+            await asyncio.wait_for(
+                asyncio.gather(self.store.prepare(one, snapshot(title="A")),
+                               self.store.prepare(two, snapshot(title="B"))),
+                timeout=10,
+            )
+            results = await asyncio.wait_for(asyncio.gather(
                 self.store.select_active(track_id=TRACK_ID, generation_id=one.generation_id,
                                          operation_id="select-parallel-a"),
                 self.store.select_active(track_id=TRACK_ID, generation_id=two.generation_id,
                                          operation_id="select-parallel-b"),
                 return_exceptions=True,
-            )
+            ), timeout=10)
             self.assertEqual(sum(not isinstance(item, Exception) for item in results), 1)
             self.assertEqual(sum(isinstance(item, GenerationConflict) for item in results), 1)
             head = await self.database.poc_editorial_generation_heads.find_one({"_id": TRACK_ID})
@@ -335,8 +338,11 @@ class EditorialGenerationPoCTests(unittest.TestCase):
         async def scenario():
             handle = await self.store.begin(track_id=TRACK_ID, operation_id="seal-race-0001",
                                             writer_id="writer-1", snapshot=snapshot())
-            results = await asyncio.gather(self.store.prepare(handle, snapshot()),
-                                           self.store.prepare(handle, snapshot()))
+            results = await asyncio.wait_for(
+                asyncio.gather(self.store.prepare(handle, snapshot()),
+                               self.store.prepare(handle, snapshot())),
+                timeout=10,
+            )
             return handle, results
 
         handle, results = self.run_async(scenario())
@@ -384,15 +390,18 @@ class EditorialGenerationPoCTests(unittest.TestCase):
                                      writer_id="instance-a", snapshot=snapshot(title="A"))
             b = await writer_b.begin(track_id=TRACK_ID, operation_id="multi-instance-b",
                                      writer_id="instance-b", snapshot=snapshot(title="B"))
-            await asyncio.gather(writer_a.prepare(a, snapshot(title="A")),
-                                 writer_b.prepare(b, snapshot(title="B")))
-            results = await asyncio.gather(
+            await asyncio.wait_for(
+                asyncio.gather(writer_a.prepare(a, snapshot(title="A")),
+                               writer_b.prepare(b, snapshot(title="B"))),
+                timeout=10,
+            )
+            results = await asyncio.wait_for(asyncio.gather(
                 writer_a.select_active(track_id=TRACK_ID, generation_id=a.generation_id,
                                        operation_id="multi-select-a"),
                 writer_b.select_active(track_id=TRACK_ID, generation_id=b.generation_id,
                                        operation_id="multi-select-b"),
                 return_exceptions=True,
-            )
+            ), timeout=10)
             return results
 
         outcomes = self.run_async(scenario())
@@ -468,13 +477,13 @@ class EditorialGenerationPoCTests(unittest.TestCase):
             async def barrier(stage, _context):
                 if stage == "before_pointer_cas":
                     at_swap.set()
-                    await release.wait()
+                    await asyncio.wait_for(release.wait(), timeout=5)
 
             selector = asyncio.create_task(self.store.select_active(
                 track_id=TRACK_ID, generation_id=second.generation_id,
                 operation_id="read-pin-select2", failpoint=barrier,
             ))
-            await at_swap.wait()
+            await asyncio.wait_for(at_swap.wait(), timeout=5)
             read_before = await self.store.read_active_public(TRACK_ID)
             release.set()
             await selector
