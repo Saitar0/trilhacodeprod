@@ -1,0 +1,2806 @@
+versao_esquema: 1
+status_manifesto: rascunho_para_aprovacao
+fase: Fase_7
+base_commit: 53956919fc145e897f5ac7763513812b03f04dba
+id_prefix: f7
+destino_raiz: docs/courses/trilhacode/Conteudos_migrado/Fase_7
+ordem_unidades:
+- '32.1'
+- '32.2'
+- '33.1'
+- '34.1'
+- '35.1'
+- '36.1'
+- '36.2'
+paths:
+  unidade_pasta: relativa_a_destino_raiz
+  arquivos_unidade: relativos_a_pasta_da_unidade
+  origem: relativa_a_raiz_do_repositorio
+  links_markdown: relativos_ao_arquivo_de_destino
+  sem_absolutos: true
+regras:
+  estrutural_apenas: true
+  criar_conteudo_educacional: false
+  preservar_texto_origem: true
+  blocos_compartilhados: um arquivo físico por item em 90_integracao; a cobertura associa o item a cada assunto
+  metadados: copiar lista Markdown da fonte ao frontmatter YAML do README sem alterar valores
+  json: intocado
+  originais: intocados
+  propostas_pedagogicas: não executar
+fontes_decisao:
+  mapa_fase7_anterior: não localizado; assuntos e classificações deste rascunho são [PROPOSTA]
+  fontes:
+  - docs/courses/trilhacode/Fase_7_Infra_Deploy_e_Cloud.md
+  - docs/courses/trilhacode/Referencias_Fase_7.md
+  - docs/courses/trilhacode/Conteudos/Fase_7/32.1_Automacao.md
+  - docs/courses/trilhacode/Conteudos/Fase_7/32.2_Entrega.md
+  - docs/courses/trilhacode/Conteudos/Fase_7/33.1_Conceitos.md
+  - docs/courses/trilhacode/Conteudos/Fase_7/34.1_Base_de_cloud.md
+  - docs/courses/trilhacode/Conteudos/Fase_7/35.1_Servicos_e_eventos.md
+  - docs/courses/trilhacode/Conteudos/Fase_7/36.1_Infra_como_codigo.md
+  - docs/courses/trilhacode/Conteudos/Fase_7/36.2_Ambientes.md
+  - docs/courses/trilhacode/Fase_8_Infra_Operacao.md
+  - docs/courses/trilhacode/Conteudos/Fase_8/37.1_Servicos_gerenciados.md
+  - docs/courses/trilhacode/Conteudos/Fase_8/37.2_Kubernetes_basico.md
+fontes_auxiliares_nao_migradas:
+- id: '37.1'
+  origem: docs/courses/trilhacode/Conteudos/Fase_7/37.1_Servicos_gerenciados.md
+  evidencia: ausente da lista de módulos da página Fase 7; listado como repertório no Módulo 37 da Fase 8 e há fonte 37.1
+    correspondente em Conteudos/Fase_8. Sem marca formal de aposentadoria no arquivo Fase_7.
+  destino: null
+  acao: não incluir na árvore Fase 7; manter fonte intacta; destino editorial pendente
+- id: '37.2'
+  origem: docs/courses/trilhacode/Conteudos/Fase_7/37.2_Kubernetes_basico.md
+  evidencia: ausente da lista de módulos da página Fase 7; listado como repertório no Módulo 37 da Fase 8 e há fonte 37.2
+    correspondente em Conteudos/Fase_8. Sem marca formal de aposentadoria no arquivo Fase_7.
+  destino: null
+  acao: não incluir na árvore Fase 7; manter fonte intacta; destino editorial pendente
+cabecalhos_container_nao_exportados:
+- '## Teoria'
+- '## Quiz'
+- '## Atividades práticas'
+fronteiras_curriculares:
+  32.1_3.3_24.1_29.2_10.1: 32.1 retoma GitHub e gates; não substitui testes de backend em 24.1, testes de interface em 29.2
+    nem containerização de 10.1.
+  32.2_36.x: 32.2 cobre identidade do artefato, promoção e rollback app/dados; 36.1–36.2 cobrem Terraform e provisionamento.
+  33.1_35.1_40.1: 33.1 cobre conceitos/garantias; 35.1 seleciona serviços AWS gerenciados; 40.1 aplica RabbitMQ, conforme
+    relações da fonte.
+  34.1_20.x_35.1_36.x: 34.1 cobre fundamentos AWS; 20.2–20.3 são segurança da aplicação; 35.1 serviços gerenciados; 36.x IaC/ambientes.
+  36.1_36.2: 36.1 base de Terraform; 36.2 aplica state/identidade/gates ao deploy da Fase 7.
+projeto_incremental_fase:
+- referencia_id: f7-projeto-incremental-trilha-a
+  titulo_literal: Deploy automatizado do projeto na AWS com Terraform e pipeline.
+  origem: 'docs/courses/trilhacode/Fase_7_Infra_Deploy_e_Cloud.md > ## Projeto incremental'
+  detalhe_em_unidade: '36.2'
+  atividade_alias: P02
+  atividade_origem: Atividade 2 — Construa pipeline Terraform + deploy para staging
+  arquivo_novo: false
+  marcos_novos: false
+  nota: Referência ao bloco P02 existente; não cria índice, exercício, marco, rubrica geral ou nó JSON.
+normalizacoes_structurais_autorizadas: []
+estimativa_blocos:
+  unidades_ativas: 7
+  unidades_auxiliares_ambíguas: 2
+  assuntos_propostos: 23
+  microtopicos_teoria: 28
+  questoes_quiz: 35
+  respostas_inline_existentes: 35
+  praticas: 21
+  solucoes_pratica_independentes: 0
+  rubricas_independentes: 0
+  aceites_embutidos: 21
+  checklists_independentes: 0
+  flashcards: 0
+  marcos_formais: 0
+estimativa_arquivos:
+  topic_index: 7
+  objetivo: 7
+  resumo: 7
+  criterio: 7
+  conexoes: 7
+  referencias: 7
+  theory: 23
+  quiz: 35
+  answer_key: 35
+  practice: 21
+  integracao_fisicos: 13
+  total: 156
+  por_unidade:
+    '32.1': 21
+    '32.2': 23
+    '33.1': 22
+    '34.1': 23
+    '35.1': 23
+    '36.1': 22
+    '36.2': 22
+contagens_mapeamento:
+  blocos_origem_distintos: 126
+  destinos_de_bloco: 161
+unidades:
+  '32.1':
+    key: '32.1'
+    pasta: 32.1_Automacao
+    origem: docs/courses/trilhacode/Conteudos/Fase_7/32.1_Automacao.md
+    titulo_original: 32.1 — Automação
+    modulo:
+      id: '32'
+      nome: CI/CD e entrega
+    metadados_originais:
+      key: '32.1'
+      tipo: solo
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 180
+      tags:
+      - '#infra'
+      - '#qualidade'
+      status: rascunho
+    metadados_origem: lista Markdown sob H1; valores copiados sem alteração ao frontmatter do README
+    assuntos:
+    - 01_workflow_reprodutibilidade_quality_gates
+    - 02_seguranca_actions_falhas
+    detalhe_assuntos_propostos:
+    - slug: 01_workflow_reprodutibilidade_quality_gates
+      titulo: Workflow, reprodutibilidade e quality gates
+      microtopicos:
+      - T01
+      - T02
+    - slug: 02_seguranca_actions_falhas
+      titulo: Segurança, dependências de Actions e leitura de falhas
+      microtopicos:
+      - T03
+      - T04
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f7-32-1-readme-md
+        origem: h1_and_original_metadata
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f7-32-1-00-objetivo-md
+        origem:
+          seletor: '## Objetivo'
+          linhas:
+            inicio: 11
+            fim: 13
+            linhas: 3
+      RES:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f7-32-1-01-resumo-md
+        origem:
+          seletor: '## Resumo'
+          linhas:
+            inicio: 81
+            fim: 88
+            linhas: 8
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f7-32-1-02-criterio-de-conclusao-md
+        origem:
+          seletor: '## Critério de conclusão'
+          linhas:
+            inicio: 163
+            fim: 165
+            linhas: 3
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f7-32-1-03-conexoes-md
+        origem:
+          seletor: '## Conexões'
+          linhas:
+            inicio: 166
+            fim: 168
+            linhas: 3
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f7-32-1-04-referencias-md
+        origem:
+          seletor: '## Referências'
+          linhas:
+            inicio: 169
+            fim: 176
+            linhas: 8
+      T01:
+        path: 01_workflow_reprodutibilidade_quality_gates/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-32-1-01-workflow-reprodutibilidade-quality-gates-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 1 — Workflow, evento, job e step'
+          linhas:
+            inicio: 16
+            fim: 23
+            linhas: 8
+        - seletor: '### Microtópico 2 — Reprodutibilidade e quality gates'
+          linhas:
+            inicio: 24
+            fim: 31
+            linhas: 8
+        assunto: 01_workflow_reprodutibilidade_quality_gates
+      T02:
+        path: 02_seguranca_actions_falhas/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-32-1-02-seguranca-actions-falhas-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 3 — Permissões, secrets e dependências de Actions'
+          linhas:
+            inicio: 32
+            fim: 39
+            linhas: 8
+        - seletor: '### Microtópico 4 — Leitura de falhas e limites da análise estática'
+          linhas:
+            inicio: 40
+            fim: 80
+            linhas: 41
+        assunto: 02_seguranca_actions_falhas
+      Q01:
+        path: 01_workflow_reprodutibilidade_quality_gates/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-1-01-workflow-reprodutibilidade-quality-gates-q01-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 91
+            fim: 96
+            linhas: 6
+          segmento: enunciado
+        assunto: 01_workflow_reprodutibilidade_quality_gates
+        classificacao: exclusivo
+        ordem: 1
+        itens_origem:
+        - Q01
+      K01:
+        path: 01_workflow_reprodutibilidade_quality_gates/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-1-01-workflow-reprodutibilidade-quality-gates-k01-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 91
+            fim: 96
+            linhas: 6
+          segmento: resposta esperada inline existente
+        assunto: 01_workflow_reprodutibilidade_quality_gates
+        responde_a: Q01
+        separacao: marcador literal da fonte; não inferir resposta
+      Q02:
+        path: 01_workflow_reprodutibilidade_quality_gates/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-1-01-workflow-reprodutibilidade-quality-gates-q02-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 97
+            fim: 99
+            linhas: 3
+          segmento: enunciado
+        assunto: 01_workflow_reprodutibilidade_quality_gates
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - Q02
+      K02:
+        path: 01_workflow_reprodutibilidade_quality_gates/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-1-01-workflow-reprodutibilidade-quality-gates-k02-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 97
+            fim: 99
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 01_workflow_reprodutibilidade_quality_gates
+        responde_a: Q02
+        separacao: marcador literal da fonte; não inferir resposta
+      Q03:
+        path: 01_workflow_reprodutibilidade_quality_gates/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-1-01-workflow-reprodutibilidade-quality-gates-q03-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 100
+            fim: 102
+            linhas: 3
+          segmento: enunciado
+        assunto: 01_workflow_reprodutibilidade_quality_gates
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - Q03
+      K03:
+        path: 01_workflow_reprodutibilidade_quality_gates/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-1-01-workflow-reprodutibilidade-quality-gates-k03-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 100
+            fim: 102
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 01_workflow_reprodutibilidade_quality_gates
+        responde_a: Q03
+        separacao: marcador literal da fonte; não inferir resposta
+      Q04:
+        path: 02_seguranca_actions_falhas/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-1-02-seguranca-actions-falhas-q04-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 103
+            fim: 105
+            linhas: 3
+          segmento: enunciado
+        assunto: 02_seguranca_actions_falhas
+        classificacao: exclusivo
+        ordem: 4
+        itens_origem:
+        - Q04
+      K04:
+        path: 02_seguranca_actions_falhas/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-1-02-seguranca-actions-falhas-k04-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 103
+            fim: 105
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 02_seguranca_actions_falhas
+        responde_a: Q04
+        separacao: marcador literal da fonte; não inferir resposta
+      Q05:
+        path: 02_seguranca_actions_falhas/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-1-02-seguranca-actions-falhas-q05-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 106
+            fim: 108
+            linhas: 3
+          segmento: enunciado
+        assunto: 02_seguranca_actions_falhas
+        classificacao: exclusivo
+        ordem: 5
+        itens_origem:
+        - Q05
+      K05:
+        path: 02_seguranca_actions_falhas/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-1-02-seguranca-actions-falhas-k05-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 106
+            fim: 108
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 02_seguranca_actions_falhas
+        responde_a: Q05
+        separacao: marcador literal da fonte; não inferir resposta
+      P01:
+        path: 90_integracao/P01_pratica.md
+        tipo: practice
+        arquivo_id: f7-32-1-90-integracao-p01-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 1 — Monte o workflow mínimo reproduzível'
+          linhas:
+            inicio: 111
+            fim: 127
+            linhas: 17
+        assuntos:
+        - 01_workflow_reprodutibilidade_quality_gates
+        - 02_seguranca_actions_falhas
+        classificacao: compartilhado
+        ordem: 1
+        itens_origem:
+        - P01
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P02:
+        path: 01_workflow_reprodutibilidade_quality_gates/P02_pratica.md
+        tipo: practice
+        arquivo_id: f7-32-1-01-workflow-reprodutibilidade-quality-gates-p02-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 2 — Prove o bloqueio do quality gate'
+          linhas:
+            inicio: 128
+            fim: 144
+            linhas: 17
+        assunto: 01_workflow_reprodutibilidade_quality_gates
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - P02
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P03:
+        path: 02_seguranca_actions_falhas/P03_pratica.md
+        tipo: practice
+        arquivo_id: f7-32-1-02-seguranca-actions-falhas-p03-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 3 — Faça uma revisão de segurança e manutenção'
+          linhas:
+            inicio: 145
+            fim: 162
+            linhas: 18
+        assunto: 02_seguranca_actions_falhas
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - P03
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+    cobertura:
+      01_workflow_reprodutibilidade_quality_gates:
+        quiz_exclusivos:
+        - Q01
+        - Q02
+        - Q03
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P02
+        praticas_compartilhadas:
+        - P01
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_seguranca_actions_falhas:
+        quiz_exclusivos:
+        - Q04
+        - Q05
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P03
+        praticas_compartilhadas:
+        - P01
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    relacoes_curriculares_fonte: Retoma o uso do GitHub em 3.3, a base de automação/CI da Fase 5 e os testes de 24.1 e 29.2.
+      Reutiliza a imagem/container discutido em 10.1 quando o projeto empacota a aplicação, mas CI de código não exige publicar
+      uma imagem.
+    pre_requisitos_declarados: []
+    referencias_bibliograficas: 7
+    classificacao: '[PROPOSTA] reconstruída de microtópicos e enunciados; não localizada decisão aprovada de Fase 7'
+  '32.2':
+    key: '32.2'
+    pasta: 32.2_Entrega
+    origem: docs/courses/trilhacode/Conteudos/Fase_7/32.2_Entrega.md
+    titulo_original: 32.2 — Entrega
+    modulo:
+      id: '32'
+      nome: CI/CD e entrega
+    metadados_originais:
+      key: '32.2'
+      tipo: integrado
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 180
+      tags:
+      - '#infra'
+      status: rascunho
+    metadados_origem: lista Markdown sob H1; valores copiados sem alteração ao frontmatter do README
+    assuntos:
+    - 01_identidade_do_artefato
+    - 02_ambientes_autorizacao_promocao
+    - 03_saude_pos_deploy
+    - 04_rollback_schema_dados
+    detalhe_assuntos_propostos:
+    - slug: 01_identidade_do_artefato
+      titulo: Identidade e promoção do artefato
+      microtopicos:
+      - T01
+    - slug: 02_ambientes_autorizacao_promocao
+      titulo: Ambientes, autorização e promoção
+      microtopicos:
+      - T02
+    - slug: 03_saude_pos_deploy
+      titulo: Verificação de saúde após deploy
+      microtopicos:
+      - T03
+    - slug: 04_rollback_schema_dados
+      titulo: Rollback, compatibilidade de schema e dados
+      microtopicos:
+      - T04
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f7-32-2-readme-md
+        origem: h1_and_original_metadata
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f7-32-2-00-objetivo-md
+        origem:
+          seletor: '## Objetivo'
+          linhas:
+            inicio: 11
+            fim: 13
+            linhas: 3
+      RES:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f7-32-2-01-resumo-md
+        origem:
+          seletor: '## Resumo'
+          linhas:
+            inicio: 92
+            fim: 99
+            linhas: 8
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f7-32-2-02-criterio-de-conclusao-md
+        origem:
+          seletor: '## Critério de conclusão'
+          linhas:
+            inicio: 175
+            fim: 177
+            linhas: 3
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f7-32-2-03-conexoes-md
+        origem:
+          seletor: '## Conexões'
+          linhas:
+            inicio: 178
+            fim: 180
+            linhas: 3
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f7-32-2-04-referencias-md
+        origem:
+          seletor: '## Referências'
+          linhas:
+            inicio: 181
+            fim: 187
+            linhas: 7
+      T01:
+        path: 01_identidade_do_artefato/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-32-2-01-identidade-do-artefato-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 1 — Construa uma vez e identifique o artefato'
+          linhas:
+            inicio: 16
+            fim: 23
+            linhas: 8
+        assunto: 01_identidade_do_artefato
+      T02:
+        path: 02_ambientes_autorizacao_promocao/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-32-2-02-ambientes-autorizacao-promocao-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 2 — Ambientes, autorização e promoção'
+          linhas:
+            inicio: 24
+            fim: 33
+            linhas: 10
+        assunto: 02_ambientes_autorizacao_promocao
+      T03:
+        path: 03_saude_pos_deploy/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-32-2-03-saude-pos-deploy-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 3 — Verifique a saúde depois de publicar'
+          linhas:
+            inicio: 34
+            fim: 41
+            linhas: 8
+        assunto: 03_saude_pos_deploy
+      T04:
+        path: 04_rollback_schema_dados/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-32-2-04-rollback-schema-dados-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 4 — Faça rollback sem confundir aplicação e dados'
+          linhas:
+            inicio: 42
+            fim: 91
+            linhas: 50
+        assunto: 04_rollback_schema_dados
+      Q01:
+        path: 01_identidade_do_artefato/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-2-01-identidade-do-artefato-q01-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 102
+            fim: 107
+            linhas: 6
+          segmento: enunciado
+        assunto: 01_identidade_do_artefato
+        classificacao: exclusivo
+        ordem: 1
+        itens_origem:
+        - Q01
+      K01:
+        path: 01_identidade_do_artefato/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-2-01-identidade-do-artefato-k01-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 102
+            fim: 107
+            linhas: 6
+          segmento: resposta esperada inline existente
+        assunto: 01_identidade_do_artefato
+        responde_a: Q01
+        separacao: marcador literal da fonte; não inferir resposta
+      Q02:
+        path: 03_saude_pos_deploy/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-2-03-saude-pos-deploy-q02-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 108
+            fim: 110
+            linhas: 3
+          segmento: enunciado
+        assunto: 03_saude_pos_deploy
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - Q02
+      K02:
+        path: 03_saude_pos_deploy/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-2-03-saude-pos-deploy-k02-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 108
+            fim: 110
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 03_saude_pos_deploy
+        responde_a: Q02
+        separacao: marcador literal da fonte; não inferir resposta
+      Q03:
+        path: 02_ambientes_autorizacao_promocao/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-2-02-ambientes-autorizacao-promocao-q03-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 111
+            fim: 113
+            linhas: 3
+          segmento: enunciado
+        assunto: 02_ambientes_autorizacao_promocao
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - Q03
+      K03:
+        path: 02_ambientes_autorizacao_promocao/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-2-02-ambientes-autorizacao-promocao-k03-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 111
+            fim: 113
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 02_ambientes_autorizacao_promocao
+        responde_a: Q03
+        separacao: marcador literal da fonte; não inferir resposta
+      Q04:
+        path: 04_rollback_schema_dados/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-2-04-rollback-schema-dados-q04-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 114
+            fim: 116
+            linhas: 3
+          segmento: enunciado
+        assunto: 04_rollback_schema_dados
+        classificacao: exclusivo
+        ordem: 4
+        itens_origem:
+        - Q04
+      K04:
+        path: 04_rollback_schema_dados/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-2-04-rollback-schema-dados-k04-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 114
+            fim: 116
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 04_rollback_schema_dados
+        responde_a: Q04
+        separacao: marcador literal da fonte; não inferir resposta
+      Q05:
+        path: 04_rollback_schema_dados/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f7-32-2-04-rollback-schema-dados-q05-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 117
+            fim: 119
+            linhas: 3
+          segmento: enunciado
+        assunto: 04_rollback_schema_dados
+        classificacao: exclusivo
+        ordem: 5
+        itens_origem:
+        - Q05
+      K05:
+        path: 04_rollback_schema_dados/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-32-2-04-rollback-schema-dados-k05-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 117
+            fim: 119
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 04_rollback_schema_dados
+        responde_a: Q05
+        separacao: marcador literal da fonte; não inferir resposta
+      P01:
+        path: 90_integracao/P01_pratica.md
+        tipo: practice
+        arquivo_id: f7-32-2-90-integracao-p01-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 1 — Produza e promova um artefato'
+          linhas:
+            inicio: 122
+            fim: 138
+            linhas: 17
+        assuntos:
+        - 01_identidade_do_artefato
+        - 02_ambientes_autorizacao_promocao
+        classificacao: compartilhado
+        ordem: 1
+        itens_origem:
+        - P01
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P02:
+        path: 90_integracao/P02_pratica.md
+        tipo: practice
+        arquivo_id: f7-32-2-90-integracao-p02-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 2 — Detecte falha e recupere a aplicação'
+          linhas:
+            inicio: 139
+            fim: 156
+            linhas: 18
+        assuntos:
+        - 03_saude_pos_deploy
+        - 04_rollback_schema_dados
+        classificacao: compartilhado
+        ordem: 2
+        itens_origem:
+        - P02
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P03:
+        path: 04_rollback_schema_dados/P03_pratica.md
+        tipo: practice
+        arquivo_id: f7-32-2-04-rollback-schema-dados-p03-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 3 — Planeje compatibilidade e restauração'
+          linhas:
+            inicio: 157
+            fim: 174
+            linhas: 18
+        assunto: 04_rollback_schema_dados
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - P03
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+    cobertura:
+      01_identidade_do_artefato:
+        quiz_exclusivos:
+        - Q01
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_ambientes_autorizacao_promocao:
+        quiz_exclusivos:
+        - Q03
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      03_saude_pos_deploy:
+        quiz_exclusivos:
+        - Q02
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P02
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      04_rollback_schema_dados:
+        quiz_exclusivos:
+        - Q04
+        - Q05
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P03
+        praticas_compartilhadas:
+        - P02
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    relacoes_curriculares_fonte: Depende de CI e checks de 32.1. Retoma integridade e transações em 12.2 e operação em 18.2;
+      prepara deploy, infraestrutura e ambiente de 36.1–36.2.
+    pre_requisitos_declarados:
+    - '32.1'
+    referencias_bibliograficas: 6
+    classificacao: '[PROPOSTA] reconstruída de microtópicos e enunciados; não localizada decisão aprovada de Fase 7'
+  '33.1':
+    key: '33.1'
+    pasta: 33.1_Conceitos
+    origem: docs/courses/trilhacode/Conteudos/Fase_7/33.1_Conceitos.md
+    titulo_original: 33.1 — Conceitos
+    modulo:
+      id: '33'
+      nome: 'Mensageria: conceitos'
+    metadados_originais:
+      key: '33.1'
+      tipo: solo
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 90
+      tags:
+      - '#infra'
+      - '#arquitetura'
+      status: rascunho
+    metadados_origem: lista Markdown sob H1; valores copiados sem alteração ao frontmatter do README
+    assuntos:
+    - 01_modelos_mensageria_entrega
+    - 02_retry_backoff_dlq
+    - 03_idempotencia_outbox_consistencia
+    detalhe_assuntos_propostos:
+    - slug: 01_modelos_mensageria_entrega
+      titulo: Modelos de mensageria, confirmação e entrega
+      microtopicos:
+      - T01
+      - T02
+    - slug: 02_retry_backoff_dlq
+      titulo: Retry, backoff, poison messages e DLQ
+      microtopicos:
+      - T03
+    - slug: 03_idempotencia_outbox_consistencia
+      titulo: Idempotência, outbox e consistência
+      microtopicos:
+      - T04
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f7-33-1-readme-md
+        origem: h1_and_original_metadata
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f7-33-1-00-objetivo-md
+        origem:
+          seletor: '## Objetivo'
+          linhas:
+            inicio: 11
+            fim: 13
+            linhas: 3
+      RES:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f7-33-1-01-resumo-md
+        origem:
+          seletor: '## Resumo'
+          linhas:
+            inicio: 50
+            fim: 57
+            linhas: 8
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f7-33-1-02-criterio-de-conclusao-md
+        origem:
+          seletor: '## Critério de conclusão'
+          linhas:
+            inicio: 131
+            fim: 133
+            linhas: 3
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f7-33-1-03-conexoes-md
+        origem:
+          seletor: '## Conexões'
+          linhas:
+            inicio: 134
+            fim: 136
+            linhas: 3
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f7-33-1-04-referencias-md
+        origem:
+          seletor: '## Referências'
+          linhas:
+            inicio: 137
+            fim: 143
+            linhas: 7
+      T01:
+        path: 01_modelos_mensageria_entrega/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-33-1-01-modelos-mensageria-entrega-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 1 — Produtor, broker, fila e tópico'
+          linhas:
+            inicio: 16
+            fim: 23
+            linhas: 8
+        - seletor: '### Microtópico 2 — Entrega, confirmação e redelivery'
+          linhas:
+            inicio: 24
+            fim: 31
+            linhas: 8
+        assunto: 01_modelos_mensageria_entrega
+      T02:
+        path: 02_retry_backoff_dlq/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-33-1-02-retry-backoff-dlq-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 3 — Retry, backoff, poison message e DLQ'
+          linhas:
+            inicio: 32
+            fim: 39
+            linhas: 8
+        assunto: 02_retry_backoff_dlq
+      T03:
+        path: 03_idempotencia_outbox_consistencia/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-33-1-03-idempotencia-outbox-consistencia-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 4 — Idempotência, outbox e consistência'
+          linhas:
+            inicio: 40
+            fim: 49
+            linhas: 10
+        assunto: 03_idempotencia_outbox_consistencia
+      Q01:
+        path: 01_modelos_mensageria_entrega/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f7-33-1-01-modelos-mensageria-entrega-q01-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 60
+            fim: 62
+            linhas: 3
+          segmento: enunciado
+        assunto: 01_modelos_mensageria_entrega
+        classificacao: exclusivo
+        ordem: 1
+        itens_origem:
+        - Q01
+      K01:
+        path: 01_modelos_mensageria_entrega/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-33-1-01-modelos-mensageria-entrega-k01-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 60
+            fim: 62
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 01_modelos_mensageria_entrega
+        responde_a: Q01
+        separacao: marcador literal da fonte; não inferir resposta
+      Q02:
+        path: 01_modelos_mensageria_entrega/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f7-33-1-01-modelos-mensageria-entrega-q02-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 63
+            fim: 68
+            linhas: 6
+          segmento: enunciado
+        assunto: 01_modelos_mensageria_entrega
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - Q02
+      K02:
+        path: 01_modelos_mensageria_entrega/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-33-1-01-modelos-mensageria-entrega-k02-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 63
+            fim: 68
+            linhas: 6
+          segmento: resposta esperada inline existente
+        assunto: 01_modelos_mensageria_entrega
+        responde_a: Q02
+        separacao: marcador literal da fonte; não inferir resposta
+      Q03:
+        path: 03_idempotencia_outbox_consistencia/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f7-33-1-03-idempotencia-outbox-consistencia-q03-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 69
+            fim: 71
+            linhas: 3
+          segmento: enunciado
+        assunto: 03_idempotencia_outbox_consistencia
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - Q03
+      K03:
+        path: 03_idempotencia_outbox_consistencia/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-33-1-03-idempotencia-outbox-consistencia-k03-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 69
+            fim: 71
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 03_idempotencia_outbox_consistencia
+        responde_a: Q03
+        separacao: marcador literal da fonte; não inferir resposta
+      Q04:
+        path: 02_retry_backoff_dlq/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f7-33-1-02-retry-backoff-dlq-q04-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 72
+            fim: 74
+            linhas: 3
+          segmento: enunciado
+        assunto: 02_retry_backoff_dlq
+        classificacao: exclusivo
+        ordem: 4
+        itens_origem:
+        - Q04
+      K04:
+        path: 02_retry_backoff_dlq/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-33-1-02-retry-backoff-dlq-k04-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 72
+            fim: 74
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 02_retry_backoff_dlq
+        responde_a: Q04
+        separacao: marcador literal da fonte; não inferir resposta
+      Q05:
+        path: 03_idempotencia_outbox_consistencia/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f7-33-1-03-idempotencia-outbox-consistencia-q05-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 75
+            fim: 77
+            linhas: 3
+          segmento: enunciado
+        assunto: 03_idempotencia_outbox_consistencia
+        classificacao: exclusivo
+        ordem: 5
+        itens_origem:
+        - Q05
+      K05:
+        path: 03_idempotencia_outbox_consistencia/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-33-1-03-idempotencia-outbox-consistencia-k05-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 75
+            fim: 77
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 03_idempotencia_outbox_consistencia
+        responde_a: Q05
+        separacao: marcador literal da fonte; não inferir resposta
+      P01:
+        path: 90_integracao/P01_pratica.md
+        tipo: practice
+        arquivo_id: f7-33-1-90-integracao-p01-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 1 — Desenhe o ciclo da mensagem e as falhas'
+          linhas:
+            inicio: 80
+            fim: 96
+            linhas: 17
+        assuntos:
+        - 01_modelos_mensageria_entrega
+        - 02_retry_backoff_dlq
+        - 03_idempotencia_outbox_consistencia
+        classificacao: compartilhado
+        ordem: 1
+        itens_origem:
+        - P01
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P02:
+        path: 03_idempotencia_outbox_consistencia/P02_pratica.md
+        tipo: practice
+        arquivo_id: f7-33-1-03-idempotencia-outbox-consistencia-p02-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 2 — Torne o consumidor idempotente'
+          linhas:
+            inicio: 97
+            fim: 113
+            linhas: 17
+        assunto: 03_idempotencia_outbox_consistencia
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - P02
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P03:
+        path: 90_integracao/P03_pratica.md
+        tipo: practice
+        arquivo_id: f7-33-1-90-integracao-p03-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 3 — Defina política de retry e DLQ'
+          linhas:
+            inicio: 114
+            fim: 130
+            linhas: 17
+        assuntos:
+        - 02_retry_backoff_dlq
+        - 03_idempotencia_outbox_consistencia
+        classificacao: compartilhado
+        ordem: 3
+        itens_origem:
+        - P03
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+    cobertura:
+      01_modelos_mensageria_entrega:
+        quiz_exclusivos:
+        - Q01
+        - Q02
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_retry_backoff_dlq:
+        quiz_exclusivos:
+        - Q04
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        - P03
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      03_idempotencia_outbox_consistencia:
+        quiz_exclusivos:
+        - Q03
+        - Q05
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P02
+        praticas_compartilhadas:
+        - P01
+        - P03
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    relacoes_curriculares_fonte: Retoma Redis/filas em 15.1 e decisões arquiteturais em 18.1–18.2. Prepara mensageria gerenciada
+      em 35.1, implementação com RabbitMQ em 40.1 e a etapa de retry/DLQ do projeto 46.3.
+    pre_requisitos_declarados: []
+    referencias_bibliograficas: 6
+    classificacao: '[PROPOSTA] reconstruída de microtópicos e enunciados; não localizada decisão aprovada de Fase 7'
+  '34.1':
+    key: '34.1'
+    pasta: 34.1_Base_de_cloud
+    origem: docs/courses/trilhacode/Conteudos/Fase_7/34.1_Base_de_cloud.md
+    titulo_original: 34.1 — Base de cloud
+    modulo:
+      id: '34'
+      nome: Fundamentos de cloud (AWS)
+    metadados_originais:
+      key: '34.1'
+      tipo: solo
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 180
+      tags:
+      - '#infra'
+      - '#seguranca'
+      status: rascunho
+    metadados_origem: lista Markdown sob H1; valores copiados sem alteração ao frontmatter do README
+    assuntos:
+    - 01_conta_iam_responsabilidade
+    - 02_vpc_subnets_rotas_security_groups
+    - 03_dns_tls_caminho_requisicao
+    - 04_custos_orcamento_laboratorio
+    detalhe_assuntos_propostos:
+    - slug: 01_conta_iam_responsabilidade
+      titulo: Conta, IAM e responsabilidade compartilhada
+      microtopicos:
+      - T01
+    - slug: 02_vpc_subnets_rotas_security_groups
+      titulo: VPC, subnets, rotas e security groups
+      microtopicos:
+      - T02
+    - slug: 03_dns_tls_caminho_requisicao
+      titulo: DNS, TLS e caminho da requisição
+      microtopicos:
+      - T03
+    - slug: 04_custos_orcamento_laboratorio
+      titulo: Custos, orçamento e encerramento do laboratório
+      microtopicos:
+      - T04
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f7-34-1-readme-md
+        origem: h1_and_original_metadata
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f7-34-1-00-objetivo-md
+        origem:
+          seletor: '## Objetivo'
+          linhas:
+            inicio: 11
+            fim: 13
+            linhas: 3
+      RES:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f7-34-1-01-resumo-md
+        origem:
+          seletor: '## Resumo'
+          linhas:
+            inicio: 50
+            fim: 57
+            linhas: 8
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f7-34-1-02-criterio-de-conclusao-md
+        origem:
+          seletor: '## Critério de conclusão'
+          linhas:
+            inicio: 131
+            fim: 133
+            linhas: 3
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f7-34-1-03-conexoes-md
+        origem:
+          seletor: '## Conexões'
+          linhas:
+            inicio: 134
+            fim: 136
+            linhas: 3
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f7-34-1-04-referencias-md
+        origem:
+          seletor: '## Referências'
+          linhas:
+            inicio: 137
+            fim: 146
+            linhas: 10
+      T01:
+        path: 01_conta_iam_responsabilidade/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-34-1-01-conta-iam-responsabilidade-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 1 — Conta, regiões e responsabilidade compartilhada'
+          linhas:
+            inicio: 16
+            fim: 23
+            linhas: 8
+        assunto: 01_conta_iam_responsabilidade
+      T02:
+        path: 02_vpc_subnets_rotas_security_groups/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-34-1-02-vpc-subnets-rotas-security-groups-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 2 — VPC, subnets, rotas e security groups'
+          linhas:
+            inicio: 24
+            fim: 31
+            linhas: 8
+        assunto: 02_vpc_subnets_rotas_security_groups
+      T03:
+        path: 03_dns_tls_caminho_requisicao/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-34-1-03-dns-tls-caminho-requisicao-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 3 — Identidade e caminho da requisição'
+          linhas:
+            inicio: 32
+            fim: 39
+            linhas: 8
+        assunto: 03_dns_tls_caminho_requisicao
+      T04:
+        path: 04_custos_orcamento_laboratorio/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-34-1-04-custos-orcamento-laboratorio-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 4 — Custo, orçamento e encerramento do laboratório'
+          linhas:
+            inicio: 40
+            fim: 49
+            linhas: 10
+        assunto: 04_custos_orcamento_laboratorio
+      Q01:
+        path: 02_vpc_subnets_rotas_security_groups/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f7-34-1-02-vpc-subnets-rotas-security-groups-q01-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 60
+            fim: 65
+            linhas: 6
+          segmento: enunciado
+        assunto: 02_vpc_subnets_rotas_security_groups
+        classificacao: exclusivo
+        ordem: 1
+        itens_origem:
+        - Q01
+      K01:
+        path: 02_vpc_subnets_rotas_security_groups/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-34-1-02-vpc-subnets-rotas-security-groups-k01-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 60
+            fim: 65
+            linhas: 6
+          segmento: resposta esperada inline existente
+        assunto: 02_vpc_subnets_rotas_security_groups
+        responde_a: Q01
+        separacao: marcador literal da fonte; não inferir resposta
+      Q02:
+        path: 01_conta_iam_responsabilidade/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f7-34-1-01-conta-iam-responsabilidade-q02-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 66
+            fim: 68
+            linhas: 3
+          segmento: enunciado
+        assunto: 01_conta_iam_responsabilidade
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - Q02
+      K02:
+        path: 01_conta_iam_responsabilidade/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-34-1-01-conta-iam-responsabilidade-k02-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 66
+            fim: 68
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 01_conta_iam_responsabilidade
+        responde_a: Q02
+        separacao: marcador literal da fonte; não inferir resposta
+      Q03:
+        path: 03_dns_tls_caminho_requisicao/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f7-34-1-03-dns-tls-caminho-requisicao-q03-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 69
+            fim: 71
+            linhas: 3
+          segmento: enunciado
+        assunto: 03_dns_tls_caminho_requisicao
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - Q03
+      K03:
+        path: 03_dns_tls_caminho_requisicao/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-34-1-03-dns-tls-caminho-requisicao-k03-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 69
+            fim: 71
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 03_dns_tls_caminho_requisicao
+        responde_a: Q03
+        separacao: marcador literal da fonte; não inferir resposta
+      Q04:
+        path: 04_custos_orcamento_laboratorio/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f7-34-1-04-custos-orcamento-laboratorio-q04-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 72
+            fim: 74
+            linhas: 3
+          segmento: enunciado
+        assunto: 04_custos_orcamento_laboratorio
+        classificacao: exclusivo
+        ordem: 4
+        itens_origem:
+        - Q04
+      K04:
+        path: 04_custos_orcamento_laboratorio/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-34-1-04-custos-orcamento-laboratorio-k04-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 72
+            fim: 74
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 04_custos_orcamento_laboratorio
+        responde_a: Q04
+        separacao: marcador literal da fonte; não inferir resposta
+      Q05:
+        path: 01_conta_iam_responsabilidade/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f7-34-1-01-conta-iam-responsabilidade-q05-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 75
+            fim: 77
+            linhas: 3
+          segmento: enunciado
+        assunto: 01_conta_iam_responsabilidade
+        classificacao: exclusivo
+        ordem: 5
+        itens_origem:
+        - Q05
+      K05:
+        path: 01_conta_iam_responsabilidade/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-34-1-01-conta-iam-responsabilidade-k05-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 75
+            fim: 77
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 01_conta_iam_responsabilidade
+        responde_a: Q05
+        separacao: marcador literal da fonte; não inferir resposta
+      P01:
+        path: 90_integracao/P01_pratica.md
+        tipo: practice
+        arquivo_id: f7-34-1-90-integracao-p01-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 1 — Desenhe a rede e rastreie uma requisição'
+          linhas:
+            inicio: 80
+            fim: 96
+            linhas: 17
+        assuntos:
+        - 02_vpc_subnets_rotas_security_groups
+        - 03_dns_tls_caminho_requisicao
+        classificacao: compartilhado
+        ordem: 1
+        itens_origem:
+        - P01
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P02:
+        path: 90_integracao/P02_pratica.md
+        tipo: practice
+        arquivo_id: f7-34-1-90-integracao-p02-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 2 — Defina acesso e responsabilidades'
+          linhas:
+            inicio: 97
+            fim: 113
+            linhas: 17
+        assuntos:
+        - 01_conta_iam_responsabilidade
+        - 02_vpc_subnets_rotas_security_groups
+        classificacao: compartilhado
+        ordem: 2
+        itens_origem:
+        - P02
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P03:
+        path: 04_custos_orcamento_laboratorio/P03_pratica.md
+        tipo: practice
+        arquivo_id: f7-34-1-04-custos-orcamento-laboratorio-p03-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 3 — Estime, monitore e encerre um laboratório'
+          linhas:
+            inicio: 114
+            fim: 130
+            linhas: 17
+        assunto: 04_custos_orcamento_laboratorio
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - P03
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+    cobertura:
+      01_conta_iam_responsabilidade:
+        quiz_exclusivos:
+        - Q02
+        - Q05
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P02
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_vpc_subnets_rotas_security_groups:
+        quiz_exclusivos:
+        - Q01
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        - P02
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      03_dns_tls_caminho_requisicao:
+        quiz_exclusivos:
+        - Q03
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      04_custos_orcamento_laboratorio:
+        quiz_exclusivos:
+        - Q04
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P03
+        praticas_compartilhadas: []
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    relacoes_curriculares_fonte: Revisita SSH em 2.3, containers em 10.1 e segurança em 20.2–20.3. Prepara serviços gerenciados/mensageria
+      em 35.1 e infraestrutura como código em 36.1.
+    pre_requisitos_declarados: []
+    referencias_bibliograficas: 9
+    classificacao: '[PROPOSTA] reconstruída de microtópicos e enunciados; não localizada decisão aprovada de Fase 7'
+  '35.1':
+    key: '35.1'
+    pasta: 35.1_Servicos_e_eventos
+    origem: docs/courses/trilhacode/Conteudos/Fase_7/35.1_Servicos_e_eventos.md
+    titulo_original: 35.1 — Serviços e eventos
+    modulo:
+      id: '35'
+      nome: 'AWS: serviços sob demanda e eventos'
+    metadados_originais:
+      key: '35.1'
+      tipo: solo
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 180
+      tags:
+      - '#infra'
+      status: rascunho
+    metadados_origem: lista Markdown sob H1; valores copiados sem alteração ao frontmatter do README
+    assuntos:
+    - 01_contrato_sincrono_assincrono
+    - 02_filas_pubsub_event_routing
+    - 03_confiabilidade_integracao_falhas
+    - 04_cache_isolamento_custos
+    detalhe_assuntos_propostos:
+    - slug: 01_contrato_sincrono_assincrono
+      titulo: Contrato síncrono e processamento assíncrono
+      microtopicos:
+      - T01
+    - slug: 02_filas_pubsub_event_routing
+      titulo: Filas, pub/sub e roteamento de eventos
+      microtopicos:
+      - T02
+    - slug: 03_confiabilidade_integracao_falhas
+      titulo: Confiabilidade da integração e fronteiras de falha
+      microtopicos:
+      - T03
+    - slug: 04_cache_isolamento_custos
+      titulo: Cache, isolamento de tenant e custos
+      microtopicos:
+      - T04
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f7-35-1-readme-md
+        origem: h1_and_original_metadata
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f7-35-1-00-objetivo-md
+        origem:
+          seletor: '## Objetivo'
+          linhas:
+            inicio: 11
+            fim: 13
+            linhas: 3
+      RES:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f7-35-1-01-resumo-md
+        origem:
+          seletor: '## Resumo'
+          linhas:
+            inicio: 50
+            fim: 57
+            linhas: 8
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f7-35-1-02-criterio-de-conclusao-md
+        origem:
+          seletor: '## Critério de conclusão'
+          linhas:
+            inicio: 133
+            fim: 135
+            linhas: 3
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f7-35-1-03-conexoes-md
+        origem:
+          seletor: '## Conexões'
+          linhas:
+            inicio: 136
+            fim: 138
+            linhas: 3
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f7-35-1-04-referencias-md
+        origem:
+          seletor: '## Referências'
+          linhas:
+            inicio: 139
+            fim: 145
+            linhas: 7
+      T01:
+        path: 01_contrato_sincrono_assincrono/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-35-1-01-contrato-sincrono-assincrono-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 1 — Requisição síncrona ou processamento assíncrono'
+          linhas:
+            inicio: 16
+            fim: 23
+            linhas: 8
+        assunto: 01_contrato_sincrono_assincrono
+      T02:
+        path: 02_filas_pubsub_event_routing/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-35-1-02-filas-pubsub-event-routing-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 2 — Escolha fila, pub/sub ou roteamento de evento'
+          linhas:
+            inicio: 24
+            fim: 33
+            linhas: 10
+        assunto: 02_filas_pubsub_event_routing
+      T03:
+        path: 03_confiabilidade_integracao_falhas/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-35-1-03-confiabilidade-integracao-falhas-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 3 — Confiabilidade da integração e fronteiras de falha'
+          linhas:
+            inicio: 34
+            fim: 41
+            linhas: 8
+        assunto: 03_confiabilidade_integracao_falhas
+      T04:
+        path: 04_cache_isolamento_custos/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-35-1-04-cache-isolamento-custos-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 4 — Cache gerenciado, limites e custo'
+          linhas:
+            inicio: 42
+            fim: 49
+            linhas: 8
+        assunto: 04_cache_isolamento_custos
+      Q01:
+        path: 02_filas_pubsub_event_routing/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f7-35-1-02-filas-pubsub-event-routing-q01-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 60
+            fim: 65
+            linhas: 6
+          segmento: enunciado
+        assunto: 02_filas_pubsub_event_routing
+        classificacao: exclusivo
+        ordem: 1
+        itens_origem:
+        - Q01
+      K01:
+        path: 02_filas_pubsub_event_routing/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-35-1-02-filas-pubsub-event-routing-k01-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 60
+            fim: 65
+            linhas: 6
+          segmento: resposta esperada inline existente
+        assunto: 02_filas_pubsub_event_routing
+        responde_a: Q01
+        separacao: marcador literal da fonte; não inferir resposta
+      Q02:
+        path: 01_contrato_sincrono_assincrono/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f7-35-1-01-contrato-sincrono-assincrono-q02-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 66
+            fim: 68
+            linhas: 3
+          segmento: enunciado
+        assunto: 01_contrato_sincrono_assincrono
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - Q02
+      K02:
+        path: 01_contrato_sincrono_assincrono/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-35-1-01-contrato-sincrono-assincrono-k02-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 66
+            fim: 68
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 01_contrato_sincrono_assincrono
+        responde_a: Q02
+        separacao: marcador literal da fonte; não inferir resposta
+      Q03:
+        path: 03_confiabilidade_integracao_falhas/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f7-35-1-03-confiabilidade-integracao-falhas-q03-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 69
+            fim: 71
+            linhas: 3
+          segmento: enunciado
+        assunto: 03_confiabilidade_integracao_falhas
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - Q03
+      K03:
+        path: 03_confiabilidade_integracao_falhas/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-35-1-03-confiabilidade-integracao-falhas-k03-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 69
+            fim: 71
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 03_confiabilidade_integracao_falhas
+        responde_a: Q03
+        separacao: marcador literal da fonte; não inferir resposta
+      Q04:
+        path: 02_filas_pubsub_event_routing/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f7-35-1-02-filas-pubsub-event-routing-q04-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 72
+            fim: 74
+            linhas: 3
+          segmento: enunciado
+        assunto: 02_filas_pubsub_event_routing
+        classificacao: exclusivo
+        ordem: 4
+        itens_origem:
+        - Q04
+      K04:
+        path: 02_filas_pubsub_event_routing/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-35-1-02-filas-pubsub-event-routing-k04-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 72
+            fim: 74
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 02_filas_pubsub_event_routing
+        responde_a: Q04
+        separacao: marcador literal da fonte; não inferir resposta
+      Q05:
+        path: 04_cache_isolamento_custos/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f7-35-1-04-cache-isolamento-custos-q05-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 75
+            fim: 77
+            linhas: 3
+          segmento: enunciado
+        assunto: 04_cache_isolamento_custos
+        classificacao: exclusivo
+        ordem: 5
+        itens_origem:
+        - Q05
+      K05:
+        path: 04_cache_isolamento_custos/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-35-1-04-cache-isolamento-custos-k05-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 75
+            fim: 77
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 04_cache_isolamento_custos
+        responde_a: Q05
+        separacao: marcador literal da fonte; não inferir resposta
+      P01:
+        path: 90_integracao/P01_pratica.md
+        tipo: practice
+        arquivo_id: f7-35-1-90-integracao-p01-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 1 — Compare serviços por requisito'
+          linhas:
+            inicio: 80
+            fim: 98
+            linhas: 19
+        assuntos:
+        - 01_contrato_sincrono_assincrono
+        - 02_filas_pubsub_event_routing
+        classificacao: compartilhado
+        ordem: 1
+        itens_origem:
+        - P01
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P02:
+        path: 90_integracao/P02_pratica.md
+        tipo: practice
+        arquivo_id: f7-35-1-90-integracao-p02-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 2 — Projete o fluxo com falhas e redrive'
+          linhas:
+            inicio: 99
+            fim: 115
+            linhas: 17
+        assuntos:
+        - 02_filas_pubsub_event_routing
+        - 03_confiabilidade_integracao_falhas
+        classificacao: compartilhado
+        ordem: 2
+        itens_origem:
+        - P02
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P03:
+        path: 04_cache_isolamento_custos/P03_pratica.md
+        tipo: practice
+        arquivo_id: f7-35-1-04-cache-isolamento-custos-p03-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 3 — Decida se precisa de cache'
+          linhas:
+            inicio: 116
+            fim: 132
+            linhas: 17
+        assunto: 04_cache_isolamento_custos
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - P03
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+    cobertura:
+      01_contrato_sincrono_assincrono:
+        quiz_exclusivos:
+        - Q02
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_filas_pubsub_event_routing:
+        quiz_exclusivos:
+        - Q01
+        - Q04
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P01
+        - P02
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      03_confiabilidade_integracao_falhas:
+        quiz_exclusivos:
+        - Q03
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P02
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      04_cache_isolamento_custos:
+        quiz_exclusivos:
+        - Q05
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P03
+        praticas_compartilhadas: []
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    relacoes_curriculares_fonte: Reutiliza os fundamentos de mensageria, duplicação e DLQ de 33.1, além da rede e IAM de 34.1.
+      Retoma cache em 15.1; prepara arquitetura como código em 36.1 e filas/RabbitMQ em 40.1.
+    pre_requisitos_declarados: []
+    referencias_bibliograficas: 6
+    classificacao: '[PROPOSTA] reconstruída de microtópicos e enunciados; não localizada decisão aprovada de Fase 7'
+  '36.1':
+    key: '36.1'
+    pasta: 36.1_Infra_como_codigo
+    origem: docs/courses/trilhacode/Conteudos/Fase_7/36.1_Infra_como_codigo.md
+    titulo_original: 36.1 — Infra como código
+    modulo:
+      id: '36'
+      nome: Infraestrutura como código
+    metadados_originais:
+      key: '36.1'
+      tipo: solo
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 180
+      tags:
+      - '#infra'
+      status: rascunho
+    metadados_origem: lista Markdown sob H1; valores copiados sem alteração ao frontmatter do README
+    assuntos:
+    - 01_configuracao_providers_modulos
+    - 02_state_drift_colaboracao
+    - 03_plano_segredos_aprovacao
+    detalhe_assuntos_propostos:
+    - slug: 01_configuracao_providers_modulos
+      titulo: Configuração, providers e módulos
+      microtopicos:
+      - T01
+      - T02
+    - slug: 02_state_drift_colaboracao
+      titulo: State, drift e colaboração
+      microtopicos:
+      - T03
+    - slug: 03_plano_segredos_aprovacao
+      titulo: Plano, segredos e aprovação de mudanças
+      microtopicos:
+      - T04
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f7-36-1-readme-md
+        origem: h1_and_original_metadata
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f7-36-1-00-objetivo-md
+        origem:
+          seletor: '## Objetivo'
+          linhas:
+            inicio: 11
+            fim: 13
+            linhas: 3
+      RES:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f7-36-1-01-resumo-md
+        origem:
+          seletor: '## Resumo'
+          linhas:
+            inicio: 48
+            fim: 55
+            linhas: 8
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f7-36-1-02-criterio-de-conclusao-md
+        origem:
+          seletor: '## Critério de conclusão'
+          linhas:
+            inicio: 129
+            fim: 131
+            linhas: 3
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f7-36-1-03-conexoes-md
+        origem:
+          seletor: '## Conexões'
+          linhas:
+            inicio: 132
+            fim: 134
+            linhas: 3
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f7-36-1-04-referencias-md
+        origem:
+          seletor: '## Referências'
+          linhas:
+            inicio: 135
+            fim: 141
+            linhas: 7
+      T01:
+        path: 01_configuracao_providers_modulos/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-36-1-01-configuracao-providers-modulos-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 1 — Configuração declarativa e ciclo de trabalho'
+          linhas:
+            inicio: 16
+            fim: 23
+            linhas: 8
+        - seletor: '### Microtópico 2 — Providers, módulos e entradas/saídas'
+          linhas:
+            inicio: 24
+            fim: 31
+            linhas: 8
+        assunto: 01_configuracao_providers_modulos
+      T02:
+        path: 02_state_drift_colaboracao/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-36-1-02-state-drift-colaboracao-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 3 — State, drift e colaboração'
+          linhas:
+            inicio: 32
+            fim: 39
+            linhas: 8
+        assunto: 02_state_drift_colaboracao
+      T03:
+        path: 03_plano_segredos_aprovacao/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-36-1-03-plano-segredos-aprovacao-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 4 — Plano, segredo e aprovação de mudança'
+          linhas:
+            inicio: 40
+            fim: 47
+            linhas: 8
+        assunto: 03_plano_segredos_aprovacao
+      Q01:
+        path: 90_integracao/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-1-90-integracao-q01-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 58
+            fim: 60
+            linhas: 3
+          segmento: enunciado
+        assuntos: &id001
+        - 01_configuracao_providers_modulos
+        - 02_state_drift_colaboracao
+        classificacao: compartilhado
+        ordem: 1
+        itens_origem:
+        - Q01
+      K01:
+        path: 90_integracao/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-1-90-integracao-k01-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 58
+            fim: 60
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assuntos: *id001
+        responde_a: Q01
+        separacao: marcador literal da fonte; não inferir resposta
+      Q02:
+        path: 03_plano_segredos_aprovacao/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-1-03-plano-segredos-aprovacao-q02-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 61
+            fim: 66
+            linhas: 6
+          segmento: enunciado
+        assunto: 03_plano_segredos_aprovacao
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - Q02
+      K02:
+        path: 03_plano_segredos_aprovacao/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-1-03-plano-segredos-aprovacao-k02-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 61
+            fim: 66
+            linhas: 6
+          segmento: resposta esperada inline existente
+        assunto: 03_plano_segredos_aprovacao
+        responde_a: Q02
+        separacao: marcador literal da fonte; não inferir resposta
+      Q03:
+        path: 02_state_drift_colaboracao/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-1-02-state-drift-colaboracao-q03-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 67
+            fim: 69
+            linhas: 3
+          segmento: enunciado
+        assunto: 02_state_drift_colaboracao
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - Q03
+      K03:
+        path: 02_state_drift_colaboracao/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-1-02-state-drift-colaboracao-k03-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 67
+            fim: 69
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 02_state_drift_colaboracao
+        responde_a: Q03
+        separacao: marcador literal da fonte; não inferir resposta
+      Q04:
+        path: 02_state_drift_colaboracao/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-1-02-state-drift-colaboracao-q04-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 70
+            fim: 72
+            linhas: 3
+          segmento: enunciado
+        assunto: 02_state_drift_colaboracao
+        classificacao: exclusivo
+        ordem: 4
+        itens_origem:
+        - Q04
+      K04:
+        path: 02_state_drift_colaboracao/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-1-02-state-drift-colaboracao-k04-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 70
+            fim: 72
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 02_state_drift_colaboracao
+        responde_a: Q04
+        separacao: marcador literal da fonte; não inferir resposta
+      Q05:
+        path: 01_configuracao_providers_modulos/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-1-01-configuracao-providers-modulos-q05-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 73
+            fim: 75
+            linhas: 3
+          segmento: enunciado
+        assunto: 01_configuracao_providers_modulos
+        classificacao: exclusivo
+        ordem: 5
+        itens_origem:
+        - Q05
+      K05:
+        path: 01_configuracao_providers_modulos/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-1-01-configuracao-providers-modulos-k05-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 73
+            fim: 75
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 01_configuracao_providers_modulos
+        responde_a: Q05
+        separacao: marcador literal da fonte; não inferir resposta
+      P01:
+        path: 01_configuracao_providers_modulos/P01_pratica.md
+        tipo: practice
+        arquivo_id: f7-36-1-01-configuracao-providers-modulos-p01-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 1 — Crie uma configuração pequena e rastreável'
+          linhas:
+            inicio: 78
+            fim: 94
+            linhas: 17
+        assunto: 01_configuracao_providers_modulos
+        classificacao: exclusivo
+        ordem: 1
+        itens_origem:
+        - P01
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P02:
+        path: 03_plano_segredos_aprovacao/P02_pratica.md
+        tipo: practice
+        arquivo_id: f7-36-1-03-plano-segredos-aprovacao-p02-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 2 — Leia e aprove um plano de mudança'
+          linhas:
+            inicio: 95
+            fim: 111
+            linhas: 17
+        assunto: 03_plano_segredos_aprovacao
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - P02
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P03:
+        path: 02_state_drift_colaboracao/P03_pratica.md
+        tipo: practice
+        arquivo_id: f7-36-1-02-state-drift-colaboracao-p03-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 3 — Proteja state e prepare colaboração/limpeza'
+          linhas:
+            inicio: 112
+            fim: 128
+            linhas: 17
+        assunto: 02_state_drift_colaboracao
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - P03
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+    cobertura:
+      01_configuracao_providers_modulos:
+        quiz_exclusivos:
+        - Q05
+        quiz_compartilhados:
+        - Q01
+        praticas_exclusivas:
+        - P01
+        praticas_compartilhadas: []
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_state_drift_colaboracao:
+        quiz_exclusivos:
+        - Q03
+        - Q04
+        quiz_compartilhados:
+        - Q01
+        praticas_exclusivas:
+        - P03
+        praticas_compartilhadas: []
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      03_plano_segredos_aprovacao:
+        quiz_exclusivos:
+        - Q02
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P02
+        praticas_compartilhadas: []
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    relacoes_curriculares_fonte: Revisita versionamento em 3.1; depende de terminal em 2.1 e dos fundamentos de AWS/IAM/rede
+      em 34.1. Prepara gestão de ambientes em 36.2 e configuração de cloud para deploys posteriores.
+    pre_requisitos_declarados:
+    - '2.1'
+    - '34.1'
+    referencias_bibliograficas: 6
+    classificacao: '[PROPOSTA] reconstruída de microtópicos e enunciados; não localizada decisão aprovada de Fase 7'
+  '36.2':
+    key: '36.2'
+    pasta: 36.2_Ambientes
+    origem: docs/courses/trilhacode/Conteudos/Fase_7/36.2_Ambientes.md
+    titulo_original: 36.2 — Ambientes
+    modulo:
+      id: '36'
+      nome: Infraestrutura como código
+    metadados_originais:
+      key: '36.2'
+      tipo: solo
+      carater: obrigatorio
+      profundidade: media
+      estimativa_minutos: 180
+      tags:
+      - '#infra'
+      status: rascunho
+    metadados_origem: lista Markdown sob H1; valores copiados sem alteração ao frontmatter do README
+    assuntos:
+    - 01_ambientes_state_isolamento
+    - 02_pipeline_identidade_gates
+    - 03_custo_recuperacao_encerramento
+    detalhe_assuntos_propostos:
+    - slug: 01_ambientes_state_isolamento
+      titulo: Ambientes, state e isolamento
+      microtopicos:
+      - T01
+      - T02
+    - slug: 02_pipeline_identidade_gates
+      titulo: Pipeline, identidade e gates
+      microtopicos:
+      - T03
+    - slug: 03_custo_recuperacao_encerramento
+      titulo: Custo, recuperação e encerramento
+      microtopicos:
+      - T04
+    arquivos:
+      IDX:
+        path: README.md
+        tipo: topic_index
+        arquivo_id: f7-36-2-readme-md
+        origem: h1_and_original_metadata
+      OBJ:
+        path: 00_objetivo.md
+        tipo: objetivo
+        arquivo_id: f7-36-2-00-objetivo-md
+        origem:
+          seletor: '## Objetivo'
+          linhas:
+            inicio: 11
+            fim: 13
+            linhas: 3
+      RES:
+        path: 01_resumo.md
+        tipo: resumo
+        arquivo_id: f7-36-2-01-resumo-md
+        origem:
+          seletor: '## Resumo'
+          linhas:
+            inicio: 62
+            fim: 69
+            linhas: 8
+      CRI:
+        path: 02_criterio_de_conclusao.md
+        tipo: criterio
+        arquivo_id: f7-36-2-02-criterio-de-conclusao-md
+        origem:
+          seletor: '## Critério de conclusão'
+          linhas:
+            inicio: 145
+            fim: 147
+            linhas: 3
+      CON:
+        path: 03_conexoes.md
+        tipo: conexoes
+        arquivo_id: f7-36-2-03-conexoes-md
+        origem:
+          seletor: '## Conexões'
+          linhas:
+            inicio: 148
+            fim: 150
+            linhas: 3
+      REF:
+        path: 04_referencias.md
+        tipo: referencias
+        arquivo_id: f7-36-2-04-referencias-md
+        origem:
+          seletor: '## Referências'
+          linhas:
+            inicio: 151
+            fim: 157
+            linhas: 7
+      T01:
+        path: 01_ambientes_state_isolamento/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-36-2-01-ambientes-state-isolamento-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 1 — Defina o que muda e o que fica isolado'
+          linhas:
+            inicio: 16
+            fim: 23
+            linhas: 8
+        - seletor: '### Microtópico 2 — Separe configuração, state e permissões Terraform'
+          linhas:
+            inicio: 24
+            fim: 43
+            linhas: 20
+        assunto: 01_ambientes_state_isolamento
+      T02:
+        path: 02_pipeline_identidade_gates/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-36-2-02-pipeline-identidade-gates-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 3 — Promova mudanças com identidade e gates'
+          linhas:
+            inicio: 44
+            fim: 53
+            linhas: 10
+        assunto: 02_pipeline_identidade_gates
+      T03:
+        path: 03_custo_recuperacao_encerramento/01_teoria.md
+        tipo: theory
+        arquivo_id: f7-36-2-03-custo-recuperacao-encerramento-01-teoria-md
+        origem:
+        - seletor: '### Microtópico 4 — Custo, recuperação e encerramento do ciclo'
+          linhas:
+            inicio: 54
+            fim: 61
+            linhas: 8
+        assunto: 03_custo_recuperacao_encerramento
+      Q01:
+        path: 01_ambientes_state_isolamento/Q01_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-2-01-ambientes-state-isolamento-q01-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 72
+            fim: 74
+            linhas: 3
+          segmento: enunciado
+        assunto: 01_ambientes_state_isolamento
+        classificacao: exclusivo
+        ordem: 1
+        itens_origem:
+        - Q01
+      K01:
+        path: 01_ambientes_state_isolamento/K01_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-2-01-ambientes-state-isolamento-k01-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 1'
+          linhas:
+            inicio: 72
+            fim: 74
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 01_ambientes_state_isolamento
+        responde_a: Q01
+        separacao: marcador literal da fonte; não inferir resposta
+      Q02:
+        path: 01_ambientes_state_isolamento/Q02_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-2-01-ambientes-state-isolamento-q02-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 75
+            fim: 80
+            linhas: 6
+          segmento: enunciado
+        assunto: 01_ambientes_state_isolamento
+        classificacao: exclusivo
+        ordem: 2
+        itens_origem:
+        - Q02
+      K02:
+        path: 01_ambientes_state_isolamento/K02_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-2-01-ambientes-state-isolamento-k02-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 2'
+          linhas:
+            inicio: 75
+            fim: 80
+            linhas: 6
+          segmento: resposta esperada inline existente
+        assunto: 01_ambientes_state_isolamento
+        responde_a: Q02
+        separacao: marcador literal da fonte; não inferir resposta
+      Q03:
+        path: 02_pipeline_identidade_gates/Q03_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-2-02-pipeline-identidade-gates-q03-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 81
+            fim: 83
+            linhas: 3
+          segmento: enunciado
+        assunto: 02_pipeline_identidade_gates
+        classificacao: exclusivo
+        ordem: 3
+        itens_origem:
+        - Q03
+      K03:
+        path: 02_pipeline_identidade_gates/K03_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-2-02-pipeline-identidade-gates-k03-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 3'
+          linhas:
+            inicio: 81
+            fim: 83
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 02_pipeline_identidade_gates
+        responde_a: Q03
+        separacao: marcador literal da fonte; não inferir resposta
+      Q04:
+        path: 02_pipeline_identidade_gates/Q04_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-2-02-pipeline-identidade-gates-q04-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 84
+            fim: 86
+            linhas: 3
+          segmento: enunciado
+        assunto: 02_pipeline_identidade_gates
+        classificacao: exclusivo
+        ordem: 4
+        itens_origem:
+        - Q04
+      K04:
+        path: 02_pipeline_identidade_gates/K04_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-2-02-pipeline-identidade-gates-k04-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 4'
+          linhas:
+            inicio: 84
+            fim: 86
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 02_pipeline_identidade_gates
+        responde_a: Q04
+        separacao: marcador literal da fonte; não inferir resposta
+      Q05:
+        path: 03_custo_recuperacao_encerramento/Q05_quiz.md
+        tipo: quiz
+        arquivo_id: f7-36-2-03-custo-recuperacao-encerramento-q05-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 87
+            fim: 89
+            linhas: 3
+          segmento: enunciado
+        assunto: 03_custo_recuperacao_encerramento
+        classificacao: exclusivo
+        ordem: 5
+        itens_origem:
+        - Q05
+      K05:
+        path: 03_custo_recuperacao_encerramento/K05_gabarito_quiz.md
+        tipo: answer_key
+        arquivo_id: f7-36-2-03-custo-recuperacao-encerramento-k05-gabarito-quiz-md
+        origem:
+          seletor: '## Quiz > item 5'
+          linhas:
+            inicio: 87
+            fim: 89
+            linhas: 3
+          segmento: resposta esperada inline existente
+        assunto: 03_custo_recuperacao_encerramento
+        responde_a: Q05
+        separacao: marcador literal da fonte; não inferir resposta
+      P01:
+        path: 01_ambientes_state_isolamento/P01_pratica.md
+        tipo: practice
+        arquivo_id: f7-36-2-01-ambientes-state-isolamento-p01-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 1 — Modele ambientes e limites de state'
+          linhas:
+            inicio: 92
+            fim: 108
+            linhas: 17
+        assunto: 01_ambientes_state_isolamento
+        classificacao: exclusivo
+        ordem: 1
+        itens_origem:
+        - P01
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P02:
+        path: 90_integracao/P02_pratica.md
+        tipo: practice
+        arquivo_id: f7-36-2-90-integracao-p02-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 2 — Construa pipeline Terraform + deploy para staging'
+          linhas:
+            inicio: 109
+            fim: 126
+            linhas: 18
+        assuntos:
+        - 01_ambientes_state_isolamento
+        - 02_pipeline_identidade_gates
+        classificacao: compartilhado
+        ordem: 2
+        itens_origem:
+        - P02
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+      P03:
+        path: 90_integracao/P03_pratica.md
+        tipo: practice
+        arquivo_id: f7-36-2-90-integracao-p03-pratica-md
+        origem:
+          seletor: '## Atividades práticas > Atividade 3 — Faça rollback controlado e encerre o laboratório'
+          linhas:
+            inicio: 127
+            fim: 144
+            linhas: 18
+        assuntos:
+        - 02_pipeline_identidade_gates
+        - 03_custo_recuperacao_encerramento
+        classificacao: compartilhado
+        ordem: 3
+        itens_origem:
+        - P03
+        solucao_existente: false
+        rubrica_independente: false
+        aceite_embutido: true
+    cobertura:
+      01_ambientes_state_isolamento:
+        quiz_exclusivos:
+        - Q01
+        - Q02
+        quiz_compartilhados: []
+        praticas_exclusivas:
+        - P01
+        praticas_compartilhadas:
+        - P02
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      02_pipeline_identidade_gates:
+        quiz_exclusivos:
+        - Q03
+        - Q04
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P02
+        - P03
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+      03_custo_recuperacao_encerramento:
+        quiz_exclusivos:
+        - Q05
+        quiz_compartilhados: []
+        praticas_exclusivas: []
+        praticas_compartilhadas:
+        - P03
+        flashcards_exclusivos: []
+        flashcards_compartilhados: []
+    relacoes_curriculares_fonte: Complementa Terraform e state de 36.1; entrega em staging aplica conceitos de pipeline de
+      32.1–32.2 e de IAM/rede/custos de 34.1. Terragrunt permanece repertório quando o número de stacks justifica coordenação
+      adicional.
+    pre_requisitos_declarados: []
+    referencias_bibliograficas: 6
+    classificacao: '[PROPOSTA] reconstruída de microtópicos e enunciados; não localizada decisão aprovada de Fase 7'
+pre_requisitos_fase:
+- Fase 1 (terminal, SSH e Git)
+- Fase 4 (dados e containers)
+- Fase 5 (API e testes)
+lacunas_cobertura: []
+propostas_pedagogicas:
+- estado: pendente
+  tipo: decisao_de_organizacao_de_fontes
+  unidades:
+  - '37.1'
+  - '37.2'
+  nota: Cópias sob Conteudos/Fase_7 não são listadas pela página F7; referências F8 apontam para versões repertório. Sem marca
+    de aposentadoria, não migrar nem remover; decidir destino editorial separadamente.
+- estado: pendente
+  tipo: revalidacao_de_referencias
+  unidades:
+  - '32.1'
+  - '32.2'
+  - '34.1'
+  - '35.1'
+  - '36.1'
+  - '36.2'
+  nota: Revalidar APIs/releases, preços/planos AWS, disponibilidade regional e versões Terraform antes de publicação futura;
+    conservar consultado_em por referência.
