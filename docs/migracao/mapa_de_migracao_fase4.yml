@@ -1,0 +1,3059 @@
+versao_esquema: 1
+status_manifesto: "aprovado_para_execucao"
+fase: "Fase_4"
+base_commit: "1598dc47eefcb30e40a033870f164eebd79deb93"
+id_prefix: "f4"
+destino_raiz: "docs/courses/trilhacode/Conteudos_migrado/Fase_4"
+ordem_unidades: ["9.1", "9.2", "9.3", "10.1", "10.2", "11.3", "11.1", "11.2", "12.1", "12.2", "12.3", "13.1", "14.1", "15.1", "16.1", "16.2", "16.3"]
+ordem_de_estudo_fonte: "11.3 → 11.1 → 11.2 (explícita na página da Fase 4)"
+prefixos_arquivo_id:
+  IDX: "topic_index"
+  T: "theory"
+  Q: "quiz_or_project_review"
+  K: "answer_key_quiz_or_project_review"
+  P: "practice_or_repertory_activity"
+  KP: "answer_key_pratica"
+  R: "rubric"
+  C: "checklist_or_acceptance_criteria"
+  M: "milestone"
+  SCP: "project_scope"
+  FC: "flashcards (prefixo contextual aditivo da Fase 4)"
+arquivo_id: "f4-<key-unidade-com-hifens>-<caminho-relativo-sem-extensao-com-hifens>"
+paths:
+  unidade_pasta: "relativa_a_destino_raiz"
+  arquivos_unidade: "relativos_a_pasta_da_unidade"
+  origem: "relativa_a_raiz_do_repositorio"
+  links_markdown: "relativos_ao_arquivo_de_destino"
+  sem_absolutos: true
+normalizacoes_estruturais_autorizadas:
+  "16.3_SCP":
+    unidade: "16.3"
+    alias: "SCP"
+    secao: "Escolha do tipo"
+    caminho_original: "../../Guia_Projetos_e_Rotacao_de_Tipos.md"
+    caminho_migrado: "../../../../Guia_Projetos_e_Rotacao_de_Tipos.md"
+    destino_recurso: "docs/courses/trilhacode/Guia_Projetos_e_Rotacao_de_Tipos.md"
+    ocorrencias: 1
+    justificativa: "Ajustar a referência relativa ao guia a partir da localização migrada; preservar texto visível e conteúdo do enunciado."
+  "16.3_REF":
+    unidade: "16.3"
+    alias: "REF"
+    secao: "Referências"
+    caminho_original: "../../Guia_Projetos_e_Rotacao_de_Tipos.md"
+    caminho_migrado: "../../../Guia_Projetos_e_Rotacao_de_Tipos.md"
+    destino_recurso: "docs/courses/trilhacode/Guia_Projetos_e_Rotacao_de_Tipos.md"
+    ocorrencias: 1
+    justificativa: "Ajustar a referência relativa ao guia a partir da localização migrada; preservar texto visível e conteúdo da referência."
+arquivos_comuns:
+  IDX:
+    path: "README.md"
+    tipo: "topic_index"
+    origem: ["titulo_original", "metadados_originais"]
+    uso: "índice do tópico e frontmatter original"
+  OBJ:
+    path: "00_objetivo.md"
+    tipo: "objetivo"
+    origem: "## Objetivo"
+  RES:
+    path: "01_resumo.md"
+    tipo: "resumo"
+    origem: "## Resumo"
+    aplicabilidade: "quando a seção existir"
+  CRI:
+    path: "02_criterio_de_conclusao.md"
+    tipo: "criterio"
+    origem: "## Critério de conclusão"
+  CON:
+    path: "03_conexoes.md"
+    tipo: "conexoes"
+    origem: "## Conexões"
+  REF:
+    path: "04_referencias.md"
+    tipo: "referencias"
+    origem: "## Referências"
+frontmatter:
+  indice_unidade:
+    obrigatorios: ["arquivo_id", "tipo_arquivo"]
+    preservar_sem_alterar: ["title", "key", "tipo", "carater", "profundidade", "estimativa_minutos", "tags", "status"]
+    tipo_arquivo: "topic_index"
+  arquivo_unidade:
+    obrigatorios: ["arquivo_id", "parent_key", "tipo_arquivo", "ordem", "itens_origem"]
+    contextuais:
+      assunto: "arquivo exclusivo"
+      assuntos: "arquivo compartilhado"
+      escala_rubrica: "rubrica existente"
+    omitir: ["key", "estimativa_minutos", "tags", "status"]
+  arquivo_marco:
+    obrigatorios: ["arquivo_id", "parent_key", "tipo_arquivo", "ordem", "itens_origem", "titulo_marco"]
+    tipo_arquivo: "milestone"
+  arquivo_checklist_marco:
+    obrigatorios: ["arquivo_id", "parent_key", "tipo_arquivo", "ordem", "itens_origem", "titulo_marco"]
+    tipo_arquivo: "checklist"
+fontes_decisao:
+  encontrados: ["docs/migracao/DECISOES_APROVADAS_FASE1.md (escopo F1)", "docs/migracao/REGRAS_MIGRACAO_FASE1.md (escopo F1)", "Fase_4_Dados_e_Bancos.md", "Conteudos/Fase_4/*.md"]
+  ausentes: ["docs/migracao/00_decisoes_aprovadas.md", "docs/migracao/02_fases_1_a_4.md", "mapa aprovado específico da Fase 4"]
+  reconstrucoes: "agrupamentos e slugs por unidade são [PROPOSTA], salvo decisões explicitadas no histórico do usuário e ordem observável na página da fase"
+json: "intocado; sem geração ou importação nesta etapa"
+regras:
+  estrutural_apenas: true
+  criar_conteudo_educacional: false
+  preservar_texto_origem: true
+  blocos_compartilhados: "um destino físico em 90_integracao; relações ficam na cobertura"
+  dividir_por_regex_generica: false
+  conexoes: "preservar o texto da fonte no arquivo CON; manifesto descreve as relações"
+  transacoes:
+    fonte_canonica: "12.2"
+    unidade_11_3: "preservar literalmente a teoria introdutória T4, Q5, P3 e os exemplos de confirmação/reversão; não mover, reescrever ou duplicar blocos"
+    unidade_12_2: "fonte canônica de teoria sobre transações, isolamento, concorrência, locking e conflitos; não duplicar blocos existentes"
+  mongo_14_1: "preservar carater: obrigatorio; a obrigatoriedade é aprender e avaliar adoção, sem exigir MongoDB em todo projeto"
+  repertorio_13_1_16_1: "preservar atividades e flashcards existentes; não criar quiz, gabarito ou exercício"
+  projetos_16_2_16_3: "preservar quatro marcos, aceites, checklists finais e revisão existente; 16.2 tem três respostas; 16.3 tem cinco perguntas sem gabarito; nenhuma rubrica numérica"
+  ordem_modulo_11: "11.3 → 11.1 → 11.2; aplicar nos índices migrados sem alterar a página original nem o JSON"
+  "13.1": "repertório; seção Atividades, sem quiz convencional"
+  "16.1": "repertório curto; flashcards mantêm pergunta e resposta no mesmo cartão"
+  "16.2_16.3": "projetos; marcos e critérios existentes; nenhuma rubrica numérica na fonte"
+fronteiras_curriculares:
+  modelagem_relacional:
+    fonte: "9.1"
+    aplicacao: "9.2"
+    integridade_e_constraints: "9.3"
+    caso_comercial: "12.3"
+  containers:
+    fundamentos: "10.1"
+    compose_e_servicos: "10.2"
+  consultas:
+    select_where_null_order_limit: "11.1"
+    joins_agregacoes_subqueries: "11.2"
+    caso_de_vendas: "12.3"
+  transacoes:
+    fonte_canonica: "12.2"
+    uso_operacional_em: "11.3"
+    fronteira_exata: "preservar em 11.3 todos os blocos existentes, inclusive T4/Q5/P3 e exemplos de confirmação/reversão; 12.2 é fonte canônica sem receber cópias ou blocos movidos"
+  performance_e_cache:
+    planos_e_indices: "12.1"
+    cache_aside: "15.1"
+    repertorio_comparativo: "16.1"
+  armazenamento_documental:
+    mongo_principal: "14.1"
+    repertorio_complementar: "16.1"
+propostas_pedagogicas:
+  - {unidade: "11.3", status: "[PROPOSTA]", tema: "fronteira com 12.2", acao: "aprovar o tratamento do uso de BEGIN/COMMIT/ROLLBACK e da Q5 como operação segura de DML, sem duplicar a teoria canônica de transações"}
+  - {unidade: "13.1", status: "[PROPOSTA]", tema: "verificação de repertório", acao: "manter as duas atividades existentes como verificação; não adicionar quiz na migração"}
+  - {unidade: "14.1", status: "[PROPOSTA]", tema: "caráter obrigatório", acao: "esclarecer em revisão curricular se obrigatório significa estudar e justificar a escolha, inclusive rejeitando MongoDB quando não houver caso, sem exigir adoção tecnológica"}
+  - {unidade: "16.1", status: "[PROPOSTA]", tema: "repertório curto", acao: "preservar flashcards e práticas existentes; não criar quiz"}
+  - {unidade: "16.2", status: "[PROPOSTA]", tema: "projeto integrado", acao: "manter escopo condicional de Redis/MongoDB já descrito; não criar rubrica geral"}
+  - {unidade: "16.3", status: "[PROPOSTA]", tema: "projeto Trilho B", acao: "preservar tipos, marcos e aceites; não criar rubrica nem dependências adicionais"}
+estimativa_blocos:
+  microtopicos_teoria: 68
+  questoes_quiz: 65
+  praticas_e_atividades: 43
+  flashcards: 3
+  revisoes_de_projeto: 8
+  marcos_de_projeto: 8
+estimativa_por_unidade:
+  "9.1": 29
+  "9.2": 24
+  "9.3": 24
+  "10.1": 24
+  "10.2": 24
+  "11.3": 27
+  "11.1": 27
+  "11.2": 24
+  "12.1": 24
+  "12.2": 27
+  "12.3": 27
+  "13.1": 14
+  "14.1": 27
+  "15.1": 24
+  "16.1": 16
+  "16.2": 17
+  "16.3": 16
+estimativa_arquivos:
+  topic_index: 17
+  objective: 17
+  summary: 15
+  criterion: 17
+  connections: 17
+  references: 17
+  theory: 49
+  quiz_file: 46
+  quiz_answer_key: 46
+  practice: 43
+  practice_answer_key: 43
+  rubric: 42
+  checklist_acceptance: 11
+  flashcard_file: 2
+  project_scope: 2
+  milestone: 8
+  review_questions: 2
+  answer_key_review: 1
+  total: 395
+unidades:
+  "9.1":
+    pasta: "9.1_Conceitos"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/9.1_Conceitos.md"
+    modulo:
+      id: "9"
+      nome: "Fundamentos de bancos de dados e modelagem relacional"
+    metadados_originais:
+      key: "9.1"
+      tipo: "solo"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 180
+      tags: ["#dados", "#fundamentos"]
+      status: "rascunho"
+    assuntos: ["01_modelo_relacional_esquema_json", "02_chaves_primarias_identificacao", "03_chaves_estrangeiras_integridade_referencial", "04_cardinalidades_associacoes"]
+    titulo_assuntos:
+      "01_modelo_relacional_esquema_json": "modelo relacional esquema json"
+      "02_chaves_primarias_identificacao": "chaves primarias identificacao"
+      "03_chaves_estrangeiras_integridade_referencial": "chaves estrangeiras integridade referencial"
+      "04_cardinalidades_associacoes": "cardinalidades associacoes"
+    checklists:
+      C01:
+        tipo: "acceptance_criteria"
+        origem: "## Práticas > 1. Guiada — pessoas e telefones > Aceite"
+    rubricas:
+      R01:
+        escala_rubrica: "0–2 por critério; 5 critérios; total 10; mínimo 8/10"
+        origem: "## Práticas > 2. Independente — estudantes e turmas > Rubrica"
+      R02:
+        escala_rubrica: "0–2 por critério; 5 critérios; total 10; mínimo 8/10"
+        origem: "## Práticas > 3. Integrada — normalize o esboço de pedidos > Rubrica"
+    arquivos:
+      Q01: "01_modelo_relacional_esquema_json/02_quiz.md"
+      K01: "01_modelo_relacional_esquema_json/03_gabarito_quiz.md"
+      Q02: "90_integracao/Q02_quiz_compartilhado.md"
+      K02: "90_integracao/K02_gabarito_quiz_compartilhado.md"
+      Q03: "04_cardinalidades_associacoes/02_quiz.md"
+      K03: "04_cardinalidades_associacoes/03_gabarito_quiz.md"
+      Q04: "02_chaves_primarias_identificacao/02_quiz.md"
+      K04: "02_chaves_primarias_identificacao/03_gabarito_quiz.md"
+      Q05: "03_chaves_estrangeiras_integridade_referencial/02_quiz.md"
+      K05: "03_chaves_estrangeiras_integridade_referencial/03_gabarito_quiz.md"
+      T01: "01_modelo_relacional_esquema_json/01_teoria.md"
+      T02: "02_chaves_primarias_identificacao/01_teoria.md"
+      T03: "03_chaves_estrangeiras_integridade_referencial/01_teoria.md"
+      T04: "04_cardinalidades_associacoes/01_teoria.md"
+      P01: "90_integracao/P01_pratica.md"
+      KP01: "90_integracao/KP01_gabarito_pratica.md"
+      C01: "90_integracao/C01_criterios_aceite.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R01: "90_integracao/R01_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Tabelas, linhas, colunas e esquema": "T01"
+        "5. Modelo relacional e representação JSON": "T01"
+        "2. Chave primária e identificação": "T02"
+        "3. Chave estrangeira e integridade referencial": "T03"
+        "4. Cardinalidades: 1:1, 1:N e N:N": "T04"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_modelo_relacional_esquema_json"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Justificativa:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assuntos: ["03_chaves_estrangeiras_integridade_referencial", "04_cardinalidades_associacoes"]
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Justificativa:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "04_cardinalidades_associacoes"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Justificativa:**"]
+            feedback_justificativa_destino: "K03"
+        Q4:
+          arquivo: "Q04"
+          resposta: "K04"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_chaves_primarias_identificacao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K04"
+            feedback_justificativa_inicio: ["**Justificativa:**"]
+            feedback_justificativa_destino: "K04"
+        Q5:
+          arquivo: "Q05"
+          resposta: "K05"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_chaves_estrangeiras_integridade_referencial"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K05"
+            feedback_justificativa_inicio: ["**Justificativa:**"]
+            feedback_justificativa_destino: "K05"
+      pratica:
+        P1:
+          titulo: "1. Guiada — pessoas e telefones"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > 1. Guiada — pessoas e telefones"
+          assuntos: ["01_modelo_relacional_esquema_json", "02_chaves_primarias_identificacao", "03_chaves_estrangeiras_integridade_referencial", "04_cardinalidades_associacoes"]
+          checklist: "C01"
+          separacao_inline_literal:
+            enunciado_inicio: "### 1. Guiada — pessoas e telefones"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            aceite_inicio: "**Aceite:**"
+            aceite_destino: "C01"
+        P2:
+          titulo: "2. Independente — estudantes e turmas"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > 2. Independente — estudantes e turmas"
+          assuntos: ["02_chaves_primarias_identificacao", "03_chaves_estrangeiras_integridade_referencial", "04_cardinalidades_associacoes"]
+          rubrica: "R01"
+          escala_rubrica: "0–2 por critério; 5 critérios; total 10; mínimo 8/10"
+          separacao_inline_literal:
+            enunciado_inicio: "### 2. Independente — estudantes e turmas"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–2 cada):**"
+            rubrica_destino: "R01"
+        P3:
+          titulo: "3. Integrada — normalize o esboço de pedidos"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > 3. Integrada — normalize o esboço de pedidos"
+          assuntos: ["01_modelo_relacional_esquema_json", "02_chaves_primarias_identificacao", "03_chaves_estrangeiras_integridade_referencial", "04_cardinalidades_associacoes"]
+          rubrica: "R02"
+          escala_rubrica: "0–2 por critério; 5 critérios; total 10; mínimo 8/10"
+          separacao_inline_literal:
+            enunciado_inicio: "### 3. Integrada — normalize o esboço de pedidos"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–2 cada):**"
+            rubrica_destino: "R02"
+    cobertura:
+      exclusivos:
+        "01_modelo_relacional_esquema_json": ["Q1"]
+        "02_chaves_primarias_identificacao": ["Q4"]
+        "03_chaves_estrangeiras_integridade_referencial": ["Q5"]
+        "04_cardinalidades_associacoes": ["Q3"]
+      compartilhados:
+        Q2: ["03_chaves_estrangeiras_integridade_referencial", "04_cardinalidades_associacoes"]
+        P1: ["01_modelo_relacional_esquema_json", "02_chaves_primarias_identificacao", "03_chaves_estrangeiras_integridade_referencial", "04_cardinalidades_associacoes"]
+        P2: ["02_chaves_primarias_identificacao", "03_chaves_estrangeiras_integridade_referencial", "04_cardinalidades_associacoes"]
+        P3: ["01_modelo_relacional_esquema_json", "02_chaves_primarias_identificacao", "03_chaves_estrangeiras_integridade_referencial", "04_cardinalidades_associacoes"]
+    conexoes:
+      - {tipo: "complementar", destino: "9.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "pre_requisito", destino: "11.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "9.1 — Conceitos"
+  "9.2":
+    pasta: "9.2_Modelagem"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/9.2_Modelagem.md"
+    modulo:
+      id: "9"
+      nome: "Fundamentos de bancos de dados e modelagem relacional"
+    metadados_originais:
+      key: "9.2"
+      tipo: "integrado"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 180
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_regras_dominio_entidades_chaves", "02_cardinalidade_opcionalidade", "03_normalizacao_esquema_revisao"]
+    titulo_assuntos:
+      "01_regras_dominio_entidades_chaves": "regras dominio entidades chaves"
+      "02_cardinalidade_opcionalidade": "cardinalidade opcionalidade"
+      "03_normalizacao_esquema_revisao": "normalizacao esquema revisao"
+    rubricas:
+      R01:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 1 — Diagnóstico guiado de cadastro > Rubrica"
+      R02:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 2 — Modelo de biblioteca > Rubrica"
+      R03:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 3 — Normalização de pedidos > Rubrica"
+    arquivos:
+      Q01: "01_regras_dominio_entidades_chaves/02_quiz.md"
+      K01: "01_regras_dominio_entidades_chaves/03_gabarito_quiz.md"
+      Q02: "03_normalizacao_esquema_revisao/02_quiz.md"
+      K02: "03_normalizacao_esquema_revisao/03_gabarito_quiz.md"
+      Q03: "02_cardinalidade_opcionalidade/02_quiz.md"
+      K03: "02_cardinalidade_opcionalidade/03_gabarito_quiz.md"
+      T01: "01_regras_dominio_entidades_chaves/01_teoria.md"
+      T02: "02_cardinalidade_opcionalidade/01_teoria.md"
+      T03: "03_normalizacao_esquema_revisao/01_teoria.md"
+      P01: "90_integracao/P01_pratica.md"
+      KP01: "90_integracao/KP01_gabarito_pratica.md"
+      R01: "90_integracao/R01_rubrica.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Comece pelas regras e perguntas do domínio": "T01"
+        "2. Identifique identidade, atributos e chaves": "T01"
+        "3. Descreva cardinalidade e opcionalidade": "T02"
+        "4. Normalize para reduzir anomalias": "T03"
+        "5. Passe do modelo conceitual ao esquema e revise": "T03"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_regras_dominio_entidades_chaves"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_normalizacao_esquema_revisao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_cardinalidade_opcionalidade"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q4:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_cardinalidade_opcionalidade"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q5:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_normalizacao_esquema_revisao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Diagnóstico guiado de cadastro"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Diagnóstico guiado de cadastro"
+          assuntos: ["01_regras_dominio_entidades_chaves", "02_cardinalidade_opcionalidade"]
+          rubrica: "R01"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Diagnóstico guiado de cadastro"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Modelo de biblioteca"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Modelo de biblioteca"
+          assuntos: ["01_regras_dominio_entidades_chaves", "02_cardinalidade_opcionalidade"]
+          rubrica: "R02"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Modelo de biblioteca"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Normalização de pedidos"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Normalização de pedidos"
+          assuntos: ["01_regras_dominio_entidades_chaves", "02_cardinalidade_opcionalidade", "03_normalizacao_esquema_revisao"]
+          rubrica: "R03"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Normalização de pedidos"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_regras_dominio_entidades_chaves": ["Q1"]
+        "02_cardinalidade_opcionalidade": ["Q3", "Q4"]
+        "03_normalizacao_esquema_revisao": ["Q2", "Q5"]
+      compartilhados:
+        P1: ["01_regras_dominio_entidades_chaves", "02_cardinalidade_opcionalidade"]
+        P2: ["01_regras_dominio_entidades_chaves", "02_cardinalidade_opcionalidade"]
+        P3: ["01_regras_dominio_entidades_chaves", "02_cardinalidade_opcionalidade", "03_normalizacao_esquema_revisao"]
+    conexoes:
+      - {tipo: "revisita", destino: "6.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "pre_requisito", destino: "9.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "9.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "12.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "9.2 — Modelagem"
+  "9.3":
+    pasta: "9.3_Integridade"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/9.3_Integridade.md"
+    modulo:
+      id: "9"
+      nome: "Fundamentos de bancos de dados e modelagem relacional"
+    metadados_originais:
+      key: "9.3"
+      tipo: "solo"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 180
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_constraints_de_coluna", "02_integridade_referencial_e_exclusao", "03_limites_constraints_e_evolucao_segura"]
+    titulo_assuntos:
+      "01_constraints_de_coluna": "constraints de coluna"
+      "02_integridade_referencial_e_exclusao": "integridade referencial e exclusao"
+      "03_limites_constraints_e_evolucao_segura": "limites constraints e evolucao segura"
+    rubricas:
+      R01:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 1 — Complete a proteção de uma tabela > Rubrica"
+      R02:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 2 — Integridade de pedidos e exclusão > Rubrica"
+      R03:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 3 — Investigue uma regra entre linhas > Rubrica"
+    arquivos:
+      Q01: "01_constraints_de_coluna/02_quiz.md"
+      K01: "01_constraints_de_coluna/03_gabarito_quiz.md"
+      Q02: "02_integridade_referencial_e_exclusao/02_quiz.md"
+      K02: "02_integridade_referencial_e_exclusao/03_gabarito_quiz.md"
+      Q03: "03_limites_constraints_e_evolucao_segura/02_quiz.md"
+      K03: "03_limites_constraints_e_evolucao_segura/03_gabarito_quiz.md"
+      T01: "01_constraints_de_coluna/01_teoria.md"
+      T02: "02_integridade_referencial_e_exclusao/01_teoria.md"
+      T03: "03_limites_constraints_e_evolucao_segura/01_teoria.md"
+      P01: "01_constraints_de_coluna/P01_pratica.md"
+      KP01: "01_constraints_de_coluna/KP01_gabarito_pratica.md"
+      R01: "01_constraints_de_coluna/R01_rubrica.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Trate o banco como guardião das regras compartilhadas": "T01"
+        "2. Identifique cada tipo de constraint": "T01"
+        "3. Proteja relações e escolha o efeito de exclusão": "T02"
+        "4. Saiba onde a regra deve ser aplicada": "T03"
+        "5. Verifique falhas e evolua o esquema com segurança": "T03"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_constraints_de_coluna"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_constraints_de_coluna"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q3:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_integridade_referencial_e_exclusao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q4:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_integridade_referencial_e_exclusao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q5:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_limites_constraints_e_evolucao_segura"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Complete a proteção de uma tabela"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Complete a proteção de uma tabela"
+          assunto: "01_constraints_de_coluna"
+          rubrica: "R01"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Complete a proteção de uma tabela"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Integridade de pedidos e exclusão"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Integridade de pedidos e exclusão"
+          assuntos: ["01_constraints_de_coluna", "02_integridade_referencial_e_exclusao"]
+          rubrica: "R02"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Integridade de pedidos e exclusão"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Investigue uma regra entre linhas"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Investigue uma regra entre linhas"
+          assuntos: ["02_integridade_referencial_e_exclusao", "03_limites_constraints_e_evolucao_segura"]
+          rubrica: "R03"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Investigue uma regra entre linhas"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_constraints_de_coluna": ["Q1", "Q2", "P1"]
+        "02_integridade_referencial_e_exclusao": ["Q3", "Q4"]
+        "03_limites_constraints_e_evolucao_segura": ["Q5"]
+      compartilhados:
+        P2: ["01_constraints_de_coluna", "02_integridade_referencial_e_exclusao"]
+        P3: ["02_integridade_referencial_e_exclusao", "03_limites_constraints_e_evolucao_segura"]
+    conexoes:
+      - {tipo: "complementar", destino: "9.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "12.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "9.3 — Integridade"
+  "10.1":
+    pasta: "10.1_Containerizacao"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/10.1_Containerizacao.md"
+    modulo:
+      id: "10"
+      nome: "Containers com Docker (antecipado da Fase 7)"
+    metadados_originais:
+      key: "10.1"
+      tipo: "solo"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 180
+      tags: ["#infra", "#ferramentas"]
+      status: "rascunho"
+    assuntos: ["01_imagens_contexto_build", "02_ciclo_vida_portas_armazenamento", "03_redes_de_containers"]
+    titulo_assuntos:
+      "01_imagens_contexto_build": "imagens contexto build"
+      "02_ciclo_vida_portas_armazenamento": "ciclo vida portas armazenamento"
+      "03_redes_de_containers": "redes de containers"
+    rubricas:
+      R01:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 1 — Leia e corrija um Dockerfile > Rubrica"
+      R02:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 2 — Persista e investigue um PostgreSQL > Rubrica"
+      R03:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 3 — Conecte aplicação e banco em rede > Rubrica"
+    arquivos:
+      Q01: "02_ciclo_vida_portas_armazenamento/02_quiz.md"
+      K01: "02_ciclo_vida_portas_armazenamento/03_gabarito_quiz.md"
+      Q02: "01_imagens_contexto_build/02_quiz.md"
+      K02: "01_imagens_contexto_build/03_gabarito_quiz.md"
+      Q03: "03_redes_de_containers/02_quiz.md"
+      K03: "03_redes_de_containers/03_gabarito_quiz.md"
+      T01: "01_imagens_contexto_build/01_teoria.md"
+      T02: "02_ciclo_vida_portas_armazenamento/01_teoria.md"
+      T03: "03_redes_de_containers/01_teoria.md"
+      P01: "01_imagens_contexto_build/P01_pratica.md"
+      KP01: "01_imagens_contexto_build/KP01_gabarito_pratica.md"
+      R01: "01_imagens_contexto_build/R01_rubrica.md"
+      P02: "02_ciclo_vida_portas_armazenamento/P02_pratica.md"
+      KP02: "02_ciclo_vida_portas_armazenamento/KP02_gabarito_pratica.md"
+      R02: "02_ciclo_vida_portas_armazenamento/R02_rubrica.md"
+      P03: "03_redes_de_containers/P03_pratica.md"
+      KP03: "03_redes_de_containers/KP03_gabarito_pratica.md"
+      R03: "03_redes_de_containers/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Diferencie imagem, container e processo": "T01"
+        "2. Construa imagens com contexto controlado": "T01"
+        "3. Execute e inspecione o ciclo de vida": "T02"
+        "4. Publique portas e escolha armazenamento": "T02"
+        "5. Conecte containers por uma rede": "T03"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_ciclo_vida_portas_armazenamento"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_imagens_contexto_build"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_ciclo_vida_portas_armazenamento"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q4:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_redes_de_containers"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q5:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_ciclo_vida_portas_armazenamento"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Leia e corrija um Dockerfile"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Leia e corrija um Dockerfile"
+          assunto: "01_imagens_contexto_build"
+          rubrica: "R01"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Leia e corrija um Dockerfile"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Persista e investigue um PostgreSQL"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Persista e investigue um PostgreSQL"
+          assunto: "02_ciclo_vida_portas_armazenamento"
+          rubrica: "R02"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Persista e investigue um PostgreSQL"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Conecte aplicação e banco em rede"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Conecte aplicação e banco em rede"
+          assunto: "03_redes_de_containers"
+          rubrica: "R03"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Conecte aplicação e banco em rede"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_imagens_contexto_build": ["Q2", "P1"]
+        "02_ciclo_vida_portas_armazenamento": ["Q1", "Q3", "Q5", "P2"]
+        "03_redes_de_containers": ["Q4", "P3"]
+      compartilhados: {}
+    conexoes:
+      - {tipo: "relacionado", destino: "2.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "9.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "9.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "9.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "10.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "revisita", destino: "32.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "10.1 — Containerização"
+  "10.2":
+    pasta: "10.2_Orquestracao_local"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/10.2_Orquestracao_local.md"
+    modulo:
+      id: "10"
+      nome: "Containers com Docker (antecipado da Fase 7)"
+    metadados_originais:
+      key: "10.2"
+      tipo: "pratica"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 210
+      tags: ["#infra", "#ferramentas"]
+      status: "rascunho"
+    assuntos: ["01_servicos_rede_portas", "02_dados_volumes_configuracao_segura", "03_prontidao_operacao_diagnostico"]
+    titulo_assuntos:
+      "01_servicos_rede_portas": "servicos rede portas"
+      "02_dados_volumes_configuracao_segura": "dados volumes configuracao segura"
+      "03_prontidao_operacao_diagnostico": "prontidao operacao diagnostico"
+    rubricas:
+      R01:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 1 — Monte o ambiente mínimo > Rubrica"
+      R02:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 2 — Acrescente um serviço documental opcional > Rubrica"
+      R03:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 3 — Faça API esperar pelo banco e investigue falhas > Rubrica"
+    arquivos:
+      Q01: "01_servicos_rede_portas/02_quiz.md"
+      K01: "01_servicos_rede_portas/03_gabarito_quiz.md"
+      Q02: "02_dados_volumes_configuracao_segura/02_quiz.md"
+      K02: "02_dados_volumes_configuracao_segura/03_gabarito_quiz.md"
+      Q03: "03_prontidao_operacao_diagnostico/02_quiz.md"
+      K03: "03_prontidao_operacao_diagnostico/03_gabarito_quiz.md"
+      T01: "01_servicos_rede_portas/01_teoria.md"
+      T02: "02_dados_volumes_configuracao_segura/01_teoria.md"
+      T03: "03_prontidao_operacao_diagnostico/01_teoria.md"
+      P01: "90_integracao/P01_pratica.md"
+      KP01: "90_integracao/KP01_gabarito_pratica.md"
+      R01: "90_integracao/R01_rubrica.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Descreva a aplicação como serviços": "T01"
+        "2. Configure portas, rede e descoberta de serviços": "T01"
+        "3. Preserve dados e trate configurações com cuidado": "T02"
+        "4. Separe ordem de inicialização e prontidão": "T03"
+        "5. Opere e diagnostique o projeto": "T03"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_servicos_rede_portas"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_dados_volumes_configuracao_segura"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_prontidao_operacao_diagnostico"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q4:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_servicos_rede_portas"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q5:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_dados_volumes_configuracao_segura"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Monte o ambiente mínimo"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Monte o ambiente mínimo"
+          assuntos: ["01_servicos_rede_portas", "02_dados_volumes_configuracao_segura", "03_prontidao_operacao_diagnostico"]
+          rubrica: "R01"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Monte o ambiente mínimo"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Acrescente um serviço documental opcional"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Acrescente um serviço documental opcional"
+          assuntos: ["01_servicos_rede_portas", "02_dados_volumes_configuracao_segura"]
+          rubrica: "R02"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Acrescente um serviço documental opcional"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Faça API esperar pelo banco e investigue falhas"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Faça API esperar pelo banco e investigue falhas"
+          assuntos: ["01_servicos_rede_portas", "02_dados_volumes_configuracao_segura", "03_prontidao_operacao_diagnostico"]
+          rubrica: "R03"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Faça API esperar pelo banco e investigue falhas"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_servicos_rede_portas": ["Q1", "Q4"]
+        "02_dados_volumes_configuracao_segura": ["Q2", "Q5"]
+        "03_prontidao_operacao_diagnostico": ["Q3"]
+      compartilhados:
+        P1: ["01_servicos_rede_portas", "02_dados_volumes_configuracao_segura", "03_prontidao_operacao_diagnostico"]
+        P2: ["01_servicos_rede_portas", "02_dados_volumes_configuracao_segura"]
+        P3: ["01_servicos_rede_portas", "02_dados_volumes_configuracao_segura", "03_prontidao_operacao_diagnostico"]
+    conexoes:
+      - {tipo: "complementar", destino: "10.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "apoia", destino: "16.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "10.2 — Orquestração local"
+  "11.3":
+    pasta: "11.3_Ambiente_PostgreSQL"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/11.3_Ambiente_PostgreSQL.md"
+    modulo:
+      id: "11"
+      nome: "SQL e PostgreSQL"
+    metadados_originais:
+      key: "11.3"
+      tipo: "pratica"
+      carater: "obrigatorio"
+      profundidade: "media"
+      estimativa_minutos: 120
+      tags: ["#dados", "#ferramentas"]
+      status: "rascunho"
+    assuntos: ["01_conexao_servidor_banco", "02_psql_scripts_metacomandos", "03_ddl_dml_com_cuidado", "04_confirmacao_reversao_dml"]
+    titulo_assuntos:
+      "01_conexao_servidor_banco": "conexao servidor banco"
+      "02_psql_scripts_metacomandos": "psql scripts metacomandos"
+      "03_ddl_dml_com_cuidado": "ddl dml com cuidado"
+      "04_confirmacao_reversao_dml": "confirmacao reversao dml"
+    rubricas:
+      R01:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 1 — Conecte e reconheça o ambiente > Rubrica"
+      R02:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 2 — Recrie esquema e dados de demonstração > Rubrica"
+      R03:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 3 — Atualize com confirmação e reversão > Rubrica"
+    arquivos:
+      Q01: "01_conexao_servidor_banco/02_quiz.md"
+      K01: "01_conexao_servidor_banco/03_gabarito_quiz.md"
+      Q02: "02_psql_scripts_metacomandos/02_quiz.md"
+      K02: "02_psql_scripts_metacomandos/03_gabarito_quiz.md"
+      Q03: "03_ddl_dml_com_cuidado/02_quiz.md"
+      K03: "03_ddl_dml_com_cuidado/03_gabarito_quiz.md"
+      Q04: "04_confirmacao_reversao_dml/02_quiz.md"
+      K04: "04_confirmacao_reversao_dml/03_gabarito_quiz.md"
+      T01: "01_conexao_servidor_banco/01_teoria.md"
+      T02: "02_psql_scripts_metacomandos/01_teoria.md"
+      T03: "03_ddl_dml_com_cuidado/01_teoria.md"
+      T04: "04_confirmacao_reversao_dml/01_teoria.md"
+      P01: "90_integracao/P01_pratica.md"
+      KP01: "90_integracao/KP01_gabarito_pratica.md"
+      R01: "90_integracao/R01_rubrica.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Entenda servidor, banco, schema e conexão": "T01"
+        "2. Use psql para explorar e executar scripts": "T02"
+        "3. Crie tabelas e altere dados com cuidado": "T03"
+        "4. Use transações para operações que precisam ficar juntas": "T04"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_conexao_servidor_banco"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_psql_scripts_metacomandos"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_conexao_servidor_banco"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q4:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_ddl_dml_com_cuidado"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q5:
+          arquivo: "Q04"
+          resposta: "K04"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "04_confirmacao_reversao_dml"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K04"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K04"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Conecte e reconheça o ambiente"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Conecte e reconheça o ambiente"
+          assuntos: ["01_conexao_servidor_banco", "02_psql_scripts_metacomandos"]
+          rubrica: "R01"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Conecte e reconheça o ambiente"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Recrie esquema e dados de demonstração"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Recrie esquema e dados de demonstração"
+          assuntos: ["02_psql_scripts_metacomandos", "03_ddl_dml_com_cuidado"]
+          rubrica: "R02"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Recrie esquema e dados de demonstração"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Atualize com confirmação e reversão"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Atualize com confirmação e reversão"
+          assuntos: ["03_ddl_dml_com_cuidado", "04_confirmacao_reversao_dml"]
+          rubrica: "R03"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Atualize com confirmação e reversão"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_conexao_servidor_banco": ["Q1", "Q3"]
+        "02_psql_scripts_metacomandos": ["Q2"]
+        "03_ddl_dml_com_cuidado": ["Q4"]
+        "04_confirmacao_reversao_dml": ["Q5"]
+      compartilhados:
+        P1: ["01_conexao_servidor_banco", "02_psql_scripts_metacomandos"]
+        P2: ["02_psql_scripts_metacomandos", "03_ddl_dml_com_cuidado"]
+        P3: ["03_ddl_dml_com_cuidado", "04_confirmacao_reversao_dml"]
+    conexoes:
+      - {tipo: "pre_requisito", destino: "10.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "pre_requisito", destino: "10.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "11.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "11.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "Fase 5 ORM", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    fronteira_transacoes:
+      status: "[PROPOSTA] explicitar fronteira de conteúdo canônico"
+      destino_canonico: "12.2"
+      "11.3": "manter apenas a aplicação operacional de BEGIN/COMMIT/ROLLBACK associada a DDL/DML e apontar para 12.2; não repetir teoria de isolamento/concorrência"
+    titulo_original: "11.3 — Ambiente PostgreSQL"
+  "11.1":
+    pasta: "11.1_Consulta_de_dados"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/11.1_Consulta_de_dados.md"
+    modulo:
+      id: "11"
+      nome: "SQL e PostgreSQL"
+    metadados_originais:
+      key: "11.1"
+      tipo: "pratica"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 210
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_projecao_alias", "02_filtros_logica_booleana", "03_null_logica_trivalente", "04_ordenacao_limite_previsibilidade"]
+    titulo_assuntos:
+      "01_projecao_alias": "projecao alias"
+      "02_filtros_logica_booleana": "filtros logica booleana"
+      "03_null_logica_trivalente": "null logica trivalente"
+      "04_ordenacao_limite_previsibilidade": "ordenacao limite previsibilidade"
+    rubricas:
+      R01:
+        escala_rubrica: "0–3; 3 critérios"
+        origem: "## Práticas > Atividade 1 — Projete e filtre resultados > Rubrica"
+      R02:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 2 — Interprete NULL e lógica booleana > Rubrica"
+      R03:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 3 — Encontre os dez maiores pedidos > Rubrica"
+    arquivos:
+      Q01: "01_projecao_alias/02_quiz.md"
+      K01: "01_projecao_alias/03_gabarito_quiz.md"
+      Q02: "03_null_logica_trivalente/02_quiz.md"
+      K02: "03_null_logica_trivalente/03_gabarito_quiz.md"
+      Q03: "02_filtros_logica_booleana/02_quiz.md"
+      K03: "02_filtros_logica_booleana/03_gabarito_quiz.md"
+      Q04: "04_ordenacao_limite_previsibilidade/02_quiz.md"
+      K04: "04_ordenacao_limite_previsibilidade/03_gabarito_quiz.md"
+      T01: "01_projecao_alias/01_teoria.md"
+      T02: "02_filtros_logica_booleana/01_teoria.md"
+      T03: "03_null_logica_trivalente/01_teoria.md"
+      T04: "04_ordenacao_limite_previsibilidade/01_teoria.md"
+      P01: "90_integracao/P01_pratica.md"
+      KP01: "90_integracao/KP01_gabarito_pratica.md"
+      R01: "90_integracao/R01_rubrica.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Defina a forma do resultado": "T01"
+        "2. Filtre linhas com WHERE": "T02"
+        "3. Trate NULL como ausência de valor conhecido": "T03"
+        "4. Ordene antes de limitar o resultado": "T04"
+        "5. Leia consultas com segurança e previsibilidade": "T04"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_projecao_alias"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_null_logica_trivalente"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_filtros_logica_booleana"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q4:
+          arquivo: "Q04"
+          resposta: "K04"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "04_ordenacao_limite_previsibilidade"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K04"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K04"
+        Q5:
+          arquivo: "Q04"
+          resposta: "K04"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "04_ordenacao_limite_previsibilidade"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K04"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K04"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Projete e filtre resultados"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Projete e filtre resultados"
+          assuntos: ["01_projecao_alias", "02_filtros_logica_booleana"]
+          rubrica: "R01"
+          escala_rubrica: "0–3; 3 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Projete e filtre resultados"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–3):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Interprete NULL e lógica booleana"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Interprete NULL e lógica booleana"
+          assuntos: ["02_filtros_logica_booleana", "03_null_logica_trivalente"]
+          rubrica: "R02"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Interprete NULL e lógica booleana"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Encontre os dez maiores pedidos"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Encontre os dez maiores pedidos"
+          assuntos: ["03_null_logica_trivalente", "04_ordenacao_limite_previsibilidade"]
+          rubrica: "R03"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Encontre os dez maiores pedidos"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_projecao_alias": ["Q1"]
+        "02_filtros_logica_booleana": ["Q3"]
+        "03_null_logica_trivalente": ["Q2"]
+        "04_ordenacao_limite_previsibilidade": ["Q4", "Q5"]
+      compartilhados:
+        P1: ["01_projecao_alias", "02_filtros_logica_booleana"]
+        P2: ["02_filtros_logica_booleana", "03_null_logica_trivalente"]
+        P3: ["03_null_logica_trivalente", "04_ordenacao_limite_previsibilidade"]
+    conexoes:
+      - {tipo: "pre_requisito", destino: "11.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "11.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "27.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "11.1 — Consulta de dados"
+  "11.2":
+    pasta: "11.2_Relacoes"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/11.2_Relacoes.md"
+    modulo:
+      id: "11"
+      nome: "SQL e PostgreSQL"
+    metadados_originais:
+      key: "11.2"
+      tipo: "pratica"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 210
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_joins_chaves_preservacao_linhas", "02_cardinalidade_agregacoes", "03_subconsultas_existencia"]
+    titulo_assuntos:
+      "01_joins_chaves_preservacao_linhas": "joins chaves preservacao linhas"
+      "02_cardinalidade_agregacoes": "cardinalidade agregacoes"
+      "03_subconsultas_existencia": "subconsultas existencia"
+    rubricas:
+      R01:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 1 — Encontre clientes sem pedidos > Rubrica"
+      R02:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 2 — Calcule gasto sem multiplicar valores > Rubrica"
+      R03:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 3 — Compare existência com junção > Rubrica"
+    arquivos:
+      Q01: "02_cardinalidade_agregacoes/02_quiz.md"
+      K01: "02_cardinalidade_agregacoes/03_gabarito_quiz.md"
+      Q02: "01_joins_chaves_preservacao_linhas/02_quiz.md"
+      K02: "01_joins_chaves_preservacao_linhas/03_gabarito_quiz.md"
+      Q03: "03_subconsultas_existencia/02_quiz.md"
+      K03: "03_subconsultas_existencia/03_gabarito_quiz.md"
+      T01: "01_joins_chaves_preservacao_linhas/01_teoria.md"
+      T02: "02_cardinalidade_agregacoes/01_teoria.md"
+      T03: "03_subconsultas_existencia/01_teoria.md"
+      P01: "90_integracao/P01_pratica.md"
+      KP01: "90_integracao/KP01_gabarito_pratica.md"
+      R01: "90_integracao/R01_rubrica.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Relacione linhas pela chave correta": "T01"
+        "2. Preserve linhas com LEFT JOIN e posicione condições": "T01"
+        "3. Entenda o efeito da cardinalidade nas agregações": "T02"
+        "4. Separe WHERE, GROUP BY e HAVING": "T02"
+        "5. Use subqueries quando expressam melhor a pergunta": "T03"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_cardinalidade_agregacoes"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_joins_chaves_preservacao_linhas"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_cardinalidade_agregacoes"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q4:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_cardinalidade_agregacoes"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q5:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_subconsultas_existencia"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Encontre clientes sem pedidos"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Encontre clientes sem pedidos"
+          assuntos: ["01_joins_chaves_preservacao_linhas", "03_subconsultas_existencia"]
+          rubrica: "R01"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Encontre clientes sem pedidos"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Calcule gasto sem multiplicar valores"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Calcule gasto sem multiplicar valores"
+          assuntos: ["01_joins_chaves_preservacao_linhas", "02_cardinalidade_agregacoes"]
+          rubrica: "R02"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Calcule gasto sem multiplicar valores"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Compare existência com junção"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Compare existência com junção"
+          assuntos: ["01_joins_chaves_preservacao_linhas", "03_subconsultas_existencia"]
+          rubrica: "R03"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Compare existência com junção"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_joins_chaves_preservacao_linhas": ["Q2"]
+        "02_cardinalidade_agregacoes": ["Q1", "Q3", "Q4"]
+        "03_subconsultas_existencia": ["Q5"]
+      compartilhados:
+        P1: ["01_joins_chaves_preservacao_linhas", "03_subconsultas_existencia"]
+        P2: ["01_joins_chaves_preservacao_linhas", "02_cardinalidade_agregacoes"]
+        P3: ["01_joins_chaves_preservacao_linhas", "03_subconsultas_existencia"]
+    conexoes:
+      - {tipo: "revisita", destino: "9.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "pre_requisito", destino: "11.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "pre_requisito", destino: "11.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "12.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "12.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "12.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "11.2 — Relações"
+  "12.1":
+    pasta: "12.1_Performance_e_leitura"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/12.1_Performance_e_leitura.md"
+    modulo:
+      id: "12"
+      nome: "Performance, integridade e modelagem aplicada"
+    metadados_originais:
+      key: "12.1"
+      tipo: "solo"
+      carater: "obrigatorio"
+      profundidade: "media"
+      estimativa_minutos: 90
+      tags: ["#dados", "#qualidade"]
+      status: "rascunho"
+    assuntos: ["01_hipoteses_planos_explain_medicao", "02_indices_custo_escrita", "03_busca_textual_aproximada"]
+    titulo_assuntos:
+      "01_hipoteses_planos_explain_medicao": "hipoteses planos explain medicao"
+      "02_indices_custo_escrita": "indices custo escrita"
+      "03_busca_textual_aproximada": "busca textual aproximada"
+    rubricas:
+      R01:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 1 — Compare plano estimado e execução > Rubrica"
+      R02:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 2 — Teste uma hipótese de índice > Rubrica"
+      R03:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 3 — Compare busca por termos e busca aproximada > Rubrica"
+    arquivos:
+      Q01: "01_hipoteses_planos_explain_medicao/02_quiz.md"
+      K01: "01_hipoteses_planos_explain_medicao/03_gabarito_quiz.md"
+      Q02: "03_busca_textual_aproximada/02_quiz.md"
+      K02: "03_busca_textual_aproximada/03_gabarito_quiz.md"
+      Q03: "02_indices_custo_escrita/02_quiz.md"
+      K03: "02_indices_custo_escrita/03_gabarito_quiz.md"
+      T01: "01_hipoteses_planos_explain_medicao/01_teoria.md"
+      T02: "02_indices_custo_escrita/01_teoria.md"
+      T03: "03_busca_textual_aproximada/01_teoria.md"
+      P01: "01_hipoteses_planos_explain_medicao/P01_pratica.md"
+      KP01: "01_hipoteses_planos_explain_medicao/KP01_gabarito_pratica.md"
+      R01: "01_hipoteses_planos_explain_medicao/R01_rubrica.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Comece por uma consulta e uma hipótese": "T01"
+        "2. Leia o plano com EXPLAIN": "T01"
+        "5. Compare evidências e comunique limites": "T01"
+        "3. Escolha índices conforme filtros e escrita": "T02"
+        "4. Escolha a busca pelo tipo de correspondência": "T03"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_hipoteses_planos_explain_medicao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_hipoteses_planos_explain_medicao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q3:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_hipoteses_planos_explain_medicao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q4:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_busca_textual_aproximada"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q5:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_indices_custo_escrita"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Compare plano estimado e execução"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Compare plano estimado e execução"
+          assunto: "01_hipoteses_planos_explain_medicao"
+          rubrica: "R01"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Compare plano estimado e execução"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Teste uma hipótese de índice"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Teste uma hipótese de índice"
+          assuntos: ["01_hipoteses_planos_explain_medicao", "02_indices_custo_escrita"]
+          rubrica: "R02"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Teste uma hipótese de índice"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Compare busca por termos e busca aproximada"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Compare busca por termos e busca aproximada"
+          assuntos: ["01_hipoteses_planos_explain_medicao", "03_busca_textual_aproximada"]
+          rubrica: "R03"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Compare busca por termos e busca aproximada"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_hipoteses_planos_explain_medicao": ["Q1", "Q2", "Q3", "P1"]
+        "02_indices_custo_escrita": ["Q5"]
+        "03_busca_textual_aproximada": ["Q4"]
+      compartilhados:
+        P2: ["01_hipoteses_planos_explain_medicao", "02_indices_custo_escrita"]
+        P3: ["01_hipoteses_planos_explain_medicao", "03_busca_textual_aproximada"]
+    conexoes:
+      - {tipo: "pre_requisito", destino: "11.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "pre_requisito", destino: "11.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "38.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "30.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "complementar", destino: "15.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "12.1 — Performance e leitura"
+  "12.2":
+    pasta: "12.2_Integridade_e_operacao"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/12.2_Integridade_e_operacao.md"
+    modulo:
+      id: "12"
+      nome: "Performance, integridade e modelagem aplicada"
+    metadados_originais:
+      key: "12.2"
+      tipo: "solo"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 180
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_transacoes_isolamento_concorrencia", "02_locks_conflitos_otimistas_pessimistas", "03_migrations_rollout", "04_backup_restore"]
+    titulo_assuntos:
+      "01_transacoes_isolamento_concorrencia": "transacoes isolamento concorrencia"
+      "02_locks_conflitos_otimistas_pessimistas": "locks conflitos otimistas pessimistas"
+      "03_migrations_rollout": "migrations rollout"
+      "04_backup_restore": "backup restore"
+    rubricas:
+      R01:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 1 — Impeça saldo negativo sob concorrência > Rubrica"
+      R02:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 2 — Detecte conflito com versão > Rubrica"
+      R03:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 3 — Planeje uma migration e comprove recuperação > Rubrica"
+    arquivos:
+      Q01: "01_transacoes_isolamento_concorrencia/02_quiz.md"
+      K01: "01_transacoes_isolamento_concorrencia/03_gabarito_quiz.md"
+      Q02: "02_locks_conflitos_otimistas_pessimistas/02_quiz.md"
+      K02: "02_locks_conflitos_otimistas_pessimistas/03_gabarito_quiz.md"
+      Q03: "03_migrations_rollout/02_quiz.md"
+      K03: "03_migrations_rollout/03_gabarito_quiz.md"
+      Q04: "04_backup_restore/02_quiz.md"
+      K04: "04_backup_restore/03_gabarito_quiz.md"
+      T01: "01_transacoes_isolamento_concorrencia/01_teoria.md"
+      T02: "02_locks_conflitos_otimistas_pessimistas/01_teoria.md"
+      T03: "03_migrations_rollout/01_teoria.md"
+      T04: "04_backup_restore/01_teoria.md"
+      P01: "90_integracao/P01_pratica.md"
+      KP01: "90_integracao/KP01_gabarito_pratica.md"
+      R01: "90_integracao/R01_rubrica.md"
+      P02: "02_locks_conflitos_otimistas_pessimistas/P02_pratica.md"
+      KP02: "02_locks_conflitos_otimistas_pessimistas/KP02_gabarito_pratica.md"
+      R02: "02_locks_conflitos_otimistas_pessimistas/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Delimite transações e entenda isolamento": "T01"
+        "2. Faça operações concorrentes de forma atômica": "T01"
+        "3. Escolha locking pessimista ou otimista e trate conflitos": "T02"
+        "4. Evolua schema com migrations planejadas": "T03"
+        "5. Diferencie migration de backup e ensaie restore": "T04"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_transacoes_isolamento_concorrencia"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_locks_conflitos_otimistas_pessimistas"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_locks_conflitos_otimistas_pessimistas"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q4:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_migrations_rollout"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q5:
+          arquivo: "Q04"
+          resposta: "K04"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "04_backup_restore"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K04"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K04"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Impeça saldo negativo sob concorrência"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Impeça saldo negativo sob concorrência"
+          assuntos: ["01_transacoes_isolamento_concorrencia", "02_locks_conflitos_otimistas_pessimistas"]
+          rubrica: "R01"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Impeça saldo negativo sob concorrência"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Detecte conflito com versão"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Detecte conflito com versão"
+          assunto: "02_locks_conflitos_otimistas_pessimistas"
+          rubrica: "R02"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Detecte conflito com versão"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Planeje uma migration e comprove recuperação"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Planeje uma migration e comprove recuperação"
+          assuntos: ["03_migrations_rollout", "04_backup_restore"]
+          rubrica: "R03"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Planeje uma migration e comprove recuperação"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_transacoes_isolamento_concorrencia": ["Q1"]
+        "02_locks_conflitos_otimistas_pessimistas": ["Q2", "Q3", "P2"]
+        "03_migrations_rollout": ["Q4"]
+        "04_backup_restore": ["Q5"]
+      compartilhados:
+        P1: ["01_transacoes_isolamento_concorrencia", "02_locks_conflitos_otimistas_pessimistas"]
+        P3: ["03_migrations_rollout", "04_backup_restore"]
+    conexoes:
+      - {tipo: "complementar", destino: "9.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "pre_requisito", destino: "11.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "prepara", destino: "Fase 5 ORM", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "32.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    papel_canonico:
+      conteudo: "transações, isolamento, concorrência e locks"
+      decisao: "fonte canônica registrada pelo usuário"
+    titulo_original: "12.2 — Integridade e operação"
+  "12.3":
+    pasta: "12.3_Modelagem_aplicada"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/12.3_Modelagem_aplicada.md"
+    modulo:
+      id: "12"
+      nome: "Performance, integridade e modelagem aplicada"
+    metadados_originais:
+      key: "12.3"
+      tipo: "integrado"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 180
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_modelo_vendas_historico", "02_invariantes_constraints_transacoes", "03_pagamentos_idempotencia", "04_consultas_sem_multiplicacao"]
+    titulo_assuntos:
+      "01_modelo_vendas_historico": "modelo vendas historico"
+      "02_invariantes_constraints_transacoes": "invariantes constraints transacoes"
+      "03_pagamentos_idempotencia": "pagamentos idempotencia"
+      "04_consultas_sem_multiplicacao": "consultas sem multiplicacao"
+    rubricas:
+      R01:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 1 — Derive um modelo a partir das regras > Rubrica"
+      R02:
+        escala_rubrica: "0–5; 5 critérios"
+        origem: "## Práticas > Atividade 2 — Complete o esquema de itens e pagamento > Rubrica"
+      R03:
+        escala_rubrica: "0–6; 6 critérios"
+        origem: "## Práticas > Atividade 3 — Integre estoque e relatório sem duplicação > Rubrica"
+    arquivos:
+      Q01: "01_modelo_vendas_historico/02_quiz.md"
+      K01: "01_modelo_vendas_historico/03_gabarito_quiz.md"
+      Q02: "03_pagamentos_idempotencia/02_quiz.md"
+      K02: "03_pagamentos_idempotencia/03_gabarito_quiz.md"
+      Q03: "04_consultas_sem_multiplicacao/02_quiz.md"
+      K03: "04_consultas_sem_multiplicacao/03_gabarito_quiz.md"
+      Q04: "02_invariantes_constraints_transacoes/02_quiz.md"
+      K04: "02_invariantes_constraints_transacoes/03_gabarito_quiz.md"
+      T01: "01_modelo_vendas_historico/01_teoria.md"
+      T02: "02_invariantes_constraints_transacoes/01_teoria.md"
+      T03: "03_pagamentos_idempotencia/01_teoria.md"
+      T04: "04_consultas_sem_multiplicacao/01_teoria.md"
+      P01: "90_integracao/P01_pratica.md"
+      KP01: "90_integracao/KP01_gabarito_pratica.md"
+      R01: "90_integracao/R01_rubrica.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Transforme regras de venda em entidades e relações": "T01"
+        "2. Preserve o histórico comercial e defina chaves": "T01"
+        "3. Expresse invariantes com constraints e transações": "T02"
+        "4. Separe ciclo do pagamento, estado do pedido e integração externa": "T03"
+        "5. Consulte sem multiplicar valores": "T04"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_modelo_vendas_historico"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_modelo_vendas_historico"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q3:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_pagamentos_idempotencia"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q4:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "04_consultas_sem_multiplicacao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q5:
+          arquivo: "Q04"
+          resposta: "K04"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_invariantes_constraints_transacoes"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K04"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K04"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Derive um modelo a partir das regras"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Derive um modelo a partir das regras"
+          assuntos: ["01_modelo_vendas_historico", "02_invariantes_constraints_transacoes"]
+          rubrica: "R01"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Derive um modelo a partir das regras"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Complete o esquema de itens e pagamento"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Complete o esquema de itens e pagamento"
+          assuntos: ["01_modelo_vendas_historico", "03_pagamentos_idempotencia"]
+          rubrica: "R02"
+          escala_rubrica: "0–5; 5 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Complete o esquema de itens e pagamento"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–5):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Integre estoque e relatório sem duplicação"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Integre estoque e relatório sem duplicação"
+          assuntos: ["02_invariantes_constraints_transacoes", "03_pagamentos_idempotencia", "04_consultas_sem_multiplicacao"]
+          rubrica: "R03"
+          escala_rubrica: "0–6; 6 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Integre estoque e relatório sem duplicação"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–6):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_modelo_vendas_historico": ["Q1", "Q2"]
+        "02_invariantes_constraints_transacoes": ["Q5"]
+        "03_pagamentos_idempotencia": ["Q3"]
+        "04_consultas_sem_multiplicacao": ["Q4"]
+      compartilhados:
+        P1: ["01_modelo_vendas_historico", "02_invariantes_constraints_transacoes"]
+        P2: ["01_modelo_vendas_historico", "03_pagamentos_idempotencia"]
+        P3: ["02_invariantes_constraints_transacoes", "03_pagamentos_idempotencia", "04_consultas_sem_multiplicacao"]
+    conexoes:
+      - {tipo: "revisita", destino: "9.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "revisita", destino: "9.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "pre_requisito", destino: "11.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "pre_requisito", destino: "12.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "habilita", destino: "16.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "habilita", destino: "16.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "12.3 — Modelagem aplicada"
+  "13.1":
+    pasta: "13.1_Outros_bancos_relacionais"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/13.1_Outros_bancos_relacionais.md"
+    modulo:
+      id: "13"
+      nome: "Outros bancos relacionais"
+    metadados_originais:
+      key: "13.1"
+      tipo: "solo"
+      carater: "repertorio"
+      profundidade: "repertorio"
+      estimativa_minutos: 45
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_dialetos_consultas_paginadas", "02_compatibilidade_migracao_evidencias"]
+    titulo_assuntos:
+      "01_dialetos_consultas_paginadas": "dialetos consultas paginadas"
+      "02_compatibilidade_migracao_evidencias": "compatibilidade migracao evidencias"
+    rubricas:
+      R01:
+        escala_rubrica: "0–3; 3 critérios"
+        origem: "## Atividades > Atividade 1 — Compare uma consulta de paginação > Rubrica"
+      R02:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Atividades > Atividade 2 — Revise uma proposta de migração > Rubrica"
+    arquivos:
+      T01: "01_dialetos_consultas_paginadas/01_teoria.md"
+      T02: "02_compatibilidade_migracao_evidencias/01_teoria.md"
+      P01: "01_dialetos_consultas_paginadas/P01_pratica.md"
+      KP01: "01_dialetos_consultas_paginadas/KP01_gabarito_pratica.md"
+      R01: "01_dialetos_consultas_paginadas/R01_rubrica.md"
+      P02: "02_compatibilidade_migracao_evidencias/P02_pratica.md"
+      KP02: "02_compatibilidade_migracao_evidencias/KP02_gabarito_pratica.md"
+      R02: "02_compatibilidade_migracao_evidencias/R02_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Separe conceitos relacionais de detalhes do produto": "T01"
+        "2. Compare o dialeto em um caso concreto": "T01"
+        "3. Planeje migração com evidências": "T02"
+      quiz: {}
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Compare uma consulta de paginação"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Atividades > Atividade 1 — Compare uma consulta de paginação"
+          assunto: "01_dialetos_consultas_paginadas"
+          rubrica: "R01"
+          escala_rubrica: "0–3; 3 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Compare uma consulta de paginação"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–3):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Revise uma proposta de migração"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Atividades > Atividade 2 — Revise uma proposta de migração"
+          assunto: "02_compatibilidade_migracao_evidencias"
+          rubrica: "R02"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Revise uma proposta de migração"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R02"
+    cobertura:
+      exclusivos:
+        "01_dialetos_consultas_paginadas": ["P1"]
+        "02_compatibilidade_migracao_evidencias": ["P2"]
+      compartilhados: {}
+    conexoes:
+      - {tipo: "relacionado", destino: "11.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "13.1 — Outros bancos relacionais"
+  "14.1":
+    pasta: "14.1_MongoDB"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/14.1_MongoDB.md"
+    modulo:
+      id: "14"
+      nome: "MongoDB e modelagem orientada a documentos"
+    metadados_originais:
+      key: "14.1"
+      tipo: "solo"
+      carater: "obrigatorio"
+      profundidade: "media"
+      estimativa_minutos: 90
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_documentos_colecoes_flexibilidade", "02_consultas_filtros_projecoes_arrays", "03_embutir_referenciar", "04_integridade_referencial_validacao"]
+    titulo_assuntos:
+      "01_documentos_colecoes_flexibilidade": "documentos colecoes flexibilidade"
+      "02_consultas_filtros_projecoes_arrays": "consultas filtros projecoes arrays"
+      "03_embutir_referenciar": "embutir referenciar"
+      "04_integridade_referencial_validacao": "integridade referencial validacao"
+    rubricas:
+      R01:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 1 — Consulte um catálogo flexível > Rubrica"
+      R02:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 2 — Decida como representar avaliações > Rubrica"
+      R03:
+        escala_rubrica: "0–4; 4 critérios"
+        origem: "## Práticas > Atividade 3 — Defina validação para uma coleção de produtos > Rubrica"
+    arquivos:
+      Q01: "01_documentos_colecoes_flexibilidade/02_quiz.md"
+      K01: "01_documentos_colecoes_flexibilidade/03_gabarito_quiz.md"
+      Q02: "02_consultas_filtros_projecoes_arrays/02_quiz.md"
+      K02: "02_consultas_filtros_projecoes_arrays/03_gabarito_quiz.md"
+      Q03: "03_embutir_referenciar/02_quiz.md"
+      K03: "03_embutir_referenciar/03_gabarito_quiz.md"
+      Q04: "04_integridade_referencial_validacao/02_quiz.md"
+      K04: "04_integridade_referencial_validacao/03_gabarito_quiz.md"
+      T01: "01_documentos_colecoes_flexibilidade/01_teoria.md"
+      T02: "02_consultas_filtros_projecoes_arrays/01_teoria.md"
+      T03: "03_embutir_referenciar/01_teoria.md"
+      T04: "04_integridade_referencial_validacao/01_teoria.md"
+      P01: "02_consultas_filtros_projecoes_arrays/P01_pratica.md"
+      KP01: "02_consultas_filtros_projecoes_arrays/KP01_gabarito_pratica.md"
+      R01: "02_consultas_filtros_projecoes_arrays/R01_rubrica.md"
+      P02: "03_embutir_referenciar/P02_pratica.md"
+      KP02: "03_embutir_referenciar/KP02_gabarito_pratica.md"
+      R02: "03_embutir_referenciar/R02_rubrica.md"
+      P03: "90_integracao/P03_pratica.md"
+      KP03: "90_integracao/KP03_gabarito_pratica.md"
+      R03: "90_integracao/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Entenda documentos, coleções e estrutura flexível": "T01"
+        "2. Consulte com filtros, projeção e arrays": "T02"
+        "3. Escolha entre embutir e referenciar": "T03"
+        "4. Combine flexibilidade com integridade e escolha de tecnologia": "T04"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_documentos_colecoes_flexibilidade"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_consultas_filtros_projecoes_arrays"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_embutir_referenciar"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q4:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_consultas_filtros_projecoes_arrays"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q5:
+          arquivo: "Q04"
+          resposta: "K04"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "04_integridade_referencial_validacao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K04"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K04"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Consulte um catálogo flexível"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Consulte um catálogo flexível"
+          assunto: "02_consultas_filtros_projecoes_arrays"
+          rubrica: "R01"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Consulte um catálogo flexível"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Decida como representar avaliações"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Decida como representar avaliações"
+          assunto: "03_embutir_referenciar"
+          rubrica: "R02"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Decida como representar avaliações"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Defina validação para uma coleção de produtos"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Defina validação para uma coleção de produtos"
+          assuntos: ["01_documentos_colecoes_flexibilidade", "04_integridade_referencial_validacao"]
+          rubrica: "R03"
+          escala_rubrica: "0–4; 4 critérios"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Defina validação para uma coleção de produtos"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica (0–4):**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_documentos_colecoes_flexibilidade": ["Q1"]
+        "02_consultas_filtros_projecoes_arrays": ["Q2", "Q4", "P1"]
+        "03_embutir_referenciar": ["Q3", "P2"]
+        "04_integridade_referencial_validacao": ["Q5"]
+      compartilhados:
+        P3: ["01_documentos_colecoes_flexibilidade", "04_integridade_referencial_validacao"]
+    conexoes:
+      - {tipo: "relacionado", destino: "9.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "11.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "10.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "14.1 — MongoDB"
+  "15.1":
+    pasta: "15.1_Redis"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/15.1_Redis.md"
+    modulo:
+      id: "15"
+      nome: "Redis, cache e filas simples"
+    metadados_originais:
+      key: "15.1"
+      tipo: "solo"
+      carater: "obrigatorio"
+      profundidade: "media"
+      estimativa_minutos: 90
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_cache_aside_chaves", "02_consistencia_atualizacao_invalidacao", "03_memoria_metricas_filas"]
+    titulo_assuntos:
+      "01_cache_aside_chaves": "cache aside chaves"
+      "02_consistencia_atualizacao_invalidacao": "consistencia atualizacao invalidacao"
+      "03_memoria_metricas_filas": "memoria metricas filas"
+    rubricas:
+      R01:
+        escala_rubrica: "qualitativa; sem escala numérica"
+        origem: "## Práticas > Atividade 1 — Implementar o fluxo cache-aside > Rubrica"
+      R02:
+        escala_rubrica: "qualitativa; sem escala numérica"
+        origem: "## Práticas > Atividade 2 — Planejar invalidação e janela de desatualização > Rubrica"
+      R03:
+        escala_rubrica: "qualitativa; sem escala numérica"
+        origem: "## Práticas > Atividade 3 — Avaliar benefício, limite de memória e uso como fila > Rubrica"
+    arquivos:
+      Q01: "01_cache_aside_chaves/02_quiz.md"
+      K01: "01_cache_aside_chaves/03_gabarito_quiz.md"
+      Q02: "02_consistencia_atualizacao_invalidacao/02_quiz.md"
+      K02: "02_consistencia_atualizacao_invalidacao/03_gabarito_quiz.md"
+      Q03: "03_memoria_metricas_filas/02_quiz.md"
+      K03: "03_memoria_metricas_filas/03_gabarito_quiz.md"
+      T01: "01_cache_aside_chaves/01_teoria.md"
+      T02: "02_consistencia_atualizacao_invalidacao/01_teoria.md"
+      T03: "03_memoria_metricas_filas/01_teoria.md"
+      P01: "01_cache_aside_chaves/P01_pratica.md"
+      KP01: "01_cache_aside_chaves/KP01_gabarito_pratica.md"
+      R01: "01_cache_aside_chaves/R01_rubrica.md"
+      P02: "02_consistencia_atualizacao_invalidacao/P02_pratica.md"
+      KP02: "02_consistencia_atualizacao_invalidacao/KP02_gabarito_pratica.md"
+      R02: "02_consistencia_atualizacao_invalidacao/R02_rubrica.md"
+      P03: "03_memoria_metricas_filas/P03_pratica.md"
+      KP03: "03_memoria_metricas_filas/KP03_gabarito_pratica.md"
+      R03: "03_memoria_metricas_filas/R03_rubrica.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Estruturas de dados e formato de acesso": "T01"
+        "2. Cache-aside: consulta, falta e preenchimento": "T01"
+        "3. Atualização, consistência e concorrência": "T02"
+        "4. Memória, métricas e filas": "T03"
+      quiz:
+        Q1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 1, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_cache_aside_chaves"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 1 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q2:
+          arquivo: "Q02"
+          resposta: "K02"
+          limite_origem: "## Quiz > item 2, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "02_consistencia_atualizacao_invalidacao"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 2 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K02"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K02"
+        Q3:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Quiz > item 3, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "01_cache_aside_chaves"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 3 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K01"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K01"
+        Q4:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 4, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_memoria_metricas_filas"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 4 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+        Q5:
+          arquivo: "Q03"
+          resposta: "K03"
+          limite_origem: "## Quiz > item 5, incluindo marcadores de resposta e feedback/justificativa existentes"
+          assunto: "03_memoria_metricas_filas"
+          separacao_inline_literal:
+            enunciado_inicio: "item numerado 5 dentro de ## Quiz"
+            resposta_inicio: "**Resposta:**"
+            resposta_destino: "K03"
+            feedback_justificativa_inicio: ["**Feedback:**"]
+            feedback_justificativa_destino: "K03"
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Implementar o fluxo cache-aside"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Implementar o fluxo cache-aside"
+          assunto: "01_cache_aside_chaves"
+          rubrica: "R01"
+          escala_rubrica: "qualitativa; sem escala numérica"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Implementar o fluxo cache-aside"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica:**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Planejar invalidação e janela de desatualização"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Planejar invalidação e janela de desatualização"
+          assunto: "02_consistencia_atualizacao_invalidacao"
+          rubrica: "R02"
+          escala_rubrica: "qualitativa; sem escala numérica"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Planejar invalidação e janela de desatualização"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica:**"
+            rubrica_destino: "R02"
+        P3:
+          titulo: "Atividade 3 — Avaliar benefício, limite de memória e uso como fila"
+          arquivo: "P03"
+          resposta: "KP03"
+          origem_secao: "## Práticas > Atividade 3 — Avaliar benefício, limite de memória e uso como fila"
+          assunto: "03_memoria_metricas_filas"
+          rubrica: "R03"
+          escala_rubrica: "qualitativa; sem escala numérica"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 3 — Avaliar benefício, limite de memória e uso como fila"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP03"
+            rubrica_inicio: "**Rubrica:**"
+            rubrica_destino: "R03"
+    cobertura:
+      exclusivos:
+        "01_cache_aside_chaves": ["Q1", "Q3", "P1"]
+        "02_consistencia_atualizacao_invalidacao": ["Q2", "P2"]
+        "03_memoria_metricas_filas": ["Q4", "Q5", "P3"]
+      compartilhados: {}
+    conexoes:
+      - {tipo: "relacionado", destino: "28.2", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "11.3", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "33.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "15.1 — Redis"
+  "16.1":
+    pasta: "16.1_Nocoes_complementares"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/16.1_Nocoes_complementares.md"
+    modulo:
+      id: "16"
+      nome: "Noções complementares e projeto de dados"
+    metadados_originais:
+      key: "16.1"
+      tipo: "solo"
+      carater: "repertorio"
+      profundidade: "repertorio"
+      estimativa_minutos: 45
+      tags: ["#dados"]
+      status: "rascunho"
+    assuntos: ["01_modelos_chave_valor_documentos", "02_busca_distribuida_e_selecao"]
+    titulo_assuntos:
+      "01_modelos_chave_valor_documentos": "modelos chave valor documentos"
+      "02_busca_distribuida_e_selecao": "busca distribuida e selecao"
+    rubricas:
+      R01:
+        escala_rubrica: "qualitativa; sem escala numérica"
+        origem: "## Práticas > Atividade 1 — Associar cenário e limitação > Rubrica"
+      R02:
+        escala_rubrica: "qualitativa; sem escala numérica"
+        origem: "## Práticas > Atividade 2 — Montar uma matriz de decisão > Rubrica"
+    arquivos:
+      T01: "01_modelos_chave_valor_documentos/01_teoria.md"
+      T02: "02_busca_distribuida_e_selecao/01_teoria.md"
+      P01: "90_integracao/P01_pratica.md"
+      KP01: "90_integracao/KP01_gabarito_pratica.md"
+      R01: "90_integracao/R01_rubrica.md"
+      P02: "90_integracao/P02_pratica.md"
+      KP02: "90_integracao/KP02_gabarito_pratica.md"
+      R02: "90_integracao/R02_rubrica.md"
+      FC01: "01_modelos_chave_valor_documentos/02_flashcards.md"
+      FC02: "02_busca_distribuida_e_selecao/02_flashcards.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        resumo: "RES"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      teoria:
+        "1. Modelo de dados e acesso": "T01"
+        "2. Busca e análise": "T02"
+        "3. Como comparar sem escolher por rótulo": "T02"
+      quiz: {}
+      pratica:
+        P1:
+          titulo: "Atividade 1 — Associar cenário e limitação"
+          arquivo: "P01"
+          resposta: "KP01"
+          origem_secao: "## Práticas > Atividade 1 — Associar cenário e limitação"
+          assuntos: ["01_modelos_chave_valor_documentos", "02_busca_distribuida_e_selecao"]
+          rubrica: "R01"
+          escala_rubrica: "qualitativa; sem escala numérica"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 1 — Associar cenário e limitação"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP01"
+            rubrica_inicio: "**Rubrica:**"
+            rubrica_destino: "R01"
+        P2:
+          titulo: "Atividade 2 — Montar uma matriz de decisão"
+          arquivo: "P02"
+          resposta: "KP02"
+          origem_secao: "## Práticas > Atividade 2 — Montar uma matriz de decisão"
+          assuntos: ["01_modelos_chave_valor_documentos", "02_busca_distribuida_e_selecao"]
+          rubrica: "R02"
+          escala_rubrica: "qualitativa; sem escala numérica"
+          separacao_inline_literal:
+            enunciado_inicio: "### Atividade 2 — Montar uma matriz de decisão"
+            solucao_inicio: "**Solução de referência:**"
+            solucao_destino: "KP02"
+            rubrica_inicio: "**Rubrica:**"
+            rubrica_destino: "R02"
+      flashcards:
+        secao: "Flashcards"
+        marcador_cartao: "- **Pergunta:**"
+        F1:
+          arquivo: "FC01"
+          assunto: "01_modelos_chave_valor_documentos"
+          resposta_no_mesmo_cartao: true
+        F2:
+          arquivo: "FC01"
+          assunto: "01_modelos_chave_valor_documentos"
+          resposta_no_mesmo_cartao: true
+        F3:
+          arquivo: "FC02"
+          assunto: "02_busca_distribuida_e_selecao"
+          resposta_no_mesmo_cartao: true
+    cobertura:
+      exclusivos:
+        "01_modelos_chave_valor_documentos": ["F1", "F2"]
+        "02_busca_distribuida_e_selecao": ["F3"]
+      compartilhados:
+        P1: ["01_modelos_chave_valor_documentos", "02_busca_distribuida_e_selecao"]
+        P2: ["01_modelos_chave_valor_documentos", "02_busca_distribuida_e_selecao"]
+    conexoes:
+      - {tipo: "relacionado", destino: "12.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "relacionado", destino: "15.1", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+      - {tipo: "revisita", destino: "modelagem relacional anterior", origem: "interpretação da seção Conexões; texto-fonte permanece integral em CON"}
+    regras_destino:
+      teoria: "um arquivo por assunto conforme microtópicos agrupados"
+      quiz: "um arquivo por assunto; compartilhados em 90_integracao"
+      praticas: "um destino físico; compartilhadas em 90_integracao"
+      respostas: "separadas somente para respostas existentes"
+    titulo_original: "16.1 — Noções complementares"
+  "16.2":
+    pasta: "16.2_Projeto_incremental"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/16.2_Projeto_incremental.md"
+    modulo:
+      id: "16"
+      nome: "Noções complementares e projeto de dados"
+    metadados_originais:
+      key: "16.2"
+      tipo: "projeto"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 480
+      tags: ["#projeto", "#dados"]
+      status: "rascunho"
+    tipo_unidade: "projeto"
+    assuntos: ["01_projeto_incremental"]
+    titulo_assuntos:
+      "01_projeto_incremental": "Projeto incremental da fase"
+    secoes_projeto:
+      escopo: "Escopo e decisões"
+      marcos: "Plano de entregas"
+      checklist_final: "Checklist final"
+      rubrica: "ausente na fonte"
+    arquivos:
+      SCP: "01_projeto_incremental/00_escopo.md"
+      M01: "01_projeto_incremental/M01_marco_01.md"
+      C01: "01_projeto_incremental/C01_aceite_01.md"
+      M02: "01_projeto_incremental/M02_marco_02.md"
+      C02: "01_projeto_incremental/C02_aceite_02.md"
+      M03: "01_projeto_incremental/M03_marco_03.md"
+      C03: "01_projeto_incremental/C03_aceite_03.md"
+      M04: "01_projeto_incremental/M04_marco_04.md"
+      C04: "01_projeto_incremental/C04_aceite_04.md"
+      C90: "01_projeto_incremental/C90_checklist_final.md"
+      Q01: "01_projeto_incremental/Q01_revisao_decisoes.md"
+      K01: "01_projeto_incremental/K01_respostas_revisao.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      escopo: "SCP"
+      marcos:
+        M1:
+          titulo_marco: "Marco 1 — Delimitar a fatia e reproduzir o ambiente"
+          arquivo: "M01"
+          aceite: "C01"
+          limite_aceite: "Aceite verificável"
+          separacao_literal:
+            marco_inicio: "### Marco 1 — Delimitar a fatia e reproduzir o ambiente"
+            aceite_inicio: "**Aceite verificável:**"
+            aceite_destino: "C01"
+            aceite_fim_antes: "**Evidências sugeridas:**"
+            evidencias_inicio: "**Evidências sugeridas:**"
+            evidencias_destino: "M01"
+        M2:
+          titulo_marco: "Marco 2 — Persistir a fatia em PostgreSQL"
+          arquivo: "M02"
+          aceite: "C02"
+          limite_aceite: "Aceite verificável"
+          separacao_literal:
+            marco_inicio: "### Marco 2 — Persistir a fatia em PostgreSQL"
+            aceite_inicio: "**Aceite verificável:**"
+            aceite_destino: "C02"
+            aceite_fim_antes: "**Evidências sugeridas:**"
+            evidencias_inicio: "**Evidências sugeridas:**"
+            evidencias_destino: "M02"
+        M3:
+          titulo_marco: "Marco 3 — Medir e adicionar cache Redis"
+          arquivo: "M03"
+          aceite: "C03"
+          limite_aceite: "Aceite verificável"
+          separacao_literal:
+            marco_inicio: "### Marco 3 — Medir e adicionar cache Redis"
+            aceite_inicio: "**Aceite verificável:**"
+            aceite_destino: "C03"
+            aceite_fim_antes: "**Evidências sugeridas:**"
+            evidencias_inicio: "**Evidências sugeridas:**"
+            evidencias_destino: "M03"
+        M4:
+          titulo_marco: "Marco 4 — Justificar MongoDB e fechar a integração"
+          arquivo: "M04"
+          aceite: "C04"
+          limite_aceite: "Aceite verificável"
+          separacao_literal:
+            marco_inicio: "### Marco 4 — Justificar MongoDB e fechar a integração"
+            aceite_inicio: "**Aceite verificável:**"
+            aceite_destino: "C04"
+            aceite_fim_antes: "**Evidências sugeridas:**"
+            evidencias_inicio: "**Evidências sugeridas:**"
+            evidencias_destino: "M04"
+      checklist_final: "C90"
+      revisao_decisoes:
+        secao: "Perguntas de revisão das decisões"
+        R1:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Revisão das decisões > item 1"
+          separacao_inline_literal:
+            pergunta_fim: "? **"
+            resposta_inicio: "**"
+            resposta_fim: "**"
+            resposta_destino: "K01"
+        R2:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Revisão das decisões > item 2"
+          separacao_inline_literal:
+            pergunta_fim: "? **"
+            resposta_inicio: "**"
+            resposta_fim: "**"
+            resposta_destino: "K01"
+        R3:
+          arquivo: "Q01"
+          resposta: "K01"
+          limite_origem: "## Revisão das decisões > item 3"
+          separacao_inline_literal:
+            pergunta_fim: "? **"
+            resposta_inicio: "**"
+            resposta_fim: "**"
+            resposta_destino: "K01"
+    cobertura_projeto:
+      sequencia_interna_inferida: ["M1", "M2", "M3", "M4"]
+      dependencias_explicitas: ["10.2", "12.3", "15.1", "continuação do Trilho A escolhido em 3.5 até 52.1"]
+      rubrica:
+        status: "ausente"
+        escala_rubrica: "nenhuma"
+    escala_rubrica: "nenhuma"
+    limites_origem_projeto:
+      escopo_inicio: "## Escopo e decisões"
+      marco_inicio: "### título literal"
+      aceite_separado: true
+      checklist_final_inicio: "## Checklist final"
+      checklist_final_destino: "C90"
+    titulo_original: "16.2 — Projeto incremental da fase"
+  "16.3":
+    pasta: "16.3_Projeto_de_fase_Trilho_B"
+    origem: "docs/courses/trilhacode/Conteudos/Fase_4/16.3_Projeto_de_fase_Trilho_B.md"
+    modulo:
+      id: "16"
+      nome: "Noções complementares e projeto de dados"
+    metadados_originais:
+      key: "16.3"
+      tipo: "projeto"
+      carater: "obrigatorio"
+      profundidade: "alta"
+      estimativa_minutos: 660
+      tags: ["#projeto", "#dados"]
+      status: "rascunho"
+    tipo_unidade: "projeto"
+    assuntos: ["01_projeto_trilho_b"]
+    titulo_assuntos:
+      "01_projeto_trilho_b": "Projeto de fase (Trilho B)"
+    secoes_projeto:
+      escopo: "Escolha do tipo"
+      marcos: "Plano de entregas"
+      checklist_final: "Checklist final (bloco dentro do Marco 4)"
+      rubrica: "ausente na fonte"
+    arquivos:
+      SCP: "01_projeto_trilho_b/00_escopo.md"
+      M01: "01_projeto_trilho_b/M01_marco_01.md"
+      C01: "01_projeto_trilho_b/C01_aceite_01.md"
+      M02: "01_projeto_trilho_b/M02_marco_02.md"
+      C02: "01_projeto_trilho_b/C02_aceite_02.md"
+      M03: "01_projeto_trilho_b/M03_marco_03.md"
+      C03: "01_projeto_trilho_b/C03_aceite_03.md"
+      M04: "01_projeto_trilho_b/M04_marco_04.md"
+      C04: "01_projeto_trilho_b/C04_aceite_04.md"
+      C90: "01_projeto_trilho_b/C90_checklist_final.md"
+      Q01: "01_projeto_trilho_b/Q01_revisao_decisoes.md"
+    blocos_origem:
+      comuns:
+        metadados: "IDX"
+        objetivo: "OBJ"
+        criterio_de_conclusao: "CRI"
+        conexoes: "CON"
+        referencias: "REF"
+      escopo: "SCP"
+      marcos:
+        M1:
+          titulo_marco: "Marco 1 — Escolher o problema e desenhar o modelo"
+          arquivo: "M01"
+          aceite: "C01"
+          limite_aceite: "Aceite verificável"
+          separacao_literal:
+            marco_inicio: "### Marco 1 — Escolher o problema e desenhar o modelo"
+            aceite_inicio: "**Aceite verificável:**"
+            aceite_destino: "C01"
+            aceite_fim_antes: "**Evidências sugeridas:**"
+            evidencias_inicio: "**Evidências sugeridas:**"
+            evidencias_destino: "M01"
+        M2:
+          titulo_marco: "Marco 2 — Criar schema, migrations e invariantes"
+          arquivo: "M02"
+          aceite: "C02"
+          limite_aceite: "Aceite verificável"
+          separacao_literal:
+            marco_inicio: "### Marco 2 — Criar schema, migrations e invariantes"
+            aceite_inicio: "**Aceite verificável:**"
+            aceite_destino: "C02"
+            aceite_fim_antes: "**Evidências sugeridas:**"
+            evidencias_inicio: "**Evidências sugeridas:**"
+            evidencias_destino: "M02"
+        M3:
+          titulo_marco: "Marco 3 — Produzir relatório e analisar a consulta"
+          arquivo: "M03"
+          aceite: "C03"
+          limite_aceite: "Aceite verificável"
+          separacao_literal:
+            marco_inicio: "### Marco 3 — Produzir relatório e analisar a consulta"
+            aceite_inicio: "**Aceite verificável:**"
+            aceite_destino: "C03"
+            aceite_fim_antes: "**Evidências sugeridas:**"
+            evidencias_inicio: "**Evidências sugeridas:**"
+            evidencias_destino: "M03"
+        M4:
+          titulo_marco: "Marco 4 — Provar a regra difícil e fechar a entrega"
+          arquivo: "M04"
+          aceite: "C04"
+          limite_aceite: "Aceite por tipo"
+          separacao_checklist_final:
+            marcador_literal: "**Checklist final:**"
+            destino: "C90"
+          separacao_literal:
+            marco_inicio: "### Marco 4 — Provar a regra difícil e fechar a entrega"
+            aceite_inicio: "**Aceite por tipo:**"
+            aceite_destino: "C04"
+            aceite_fim_antes: "**Checklist final:**"
+            checklist_destino: "C90"
+      checklist_final: "C90"
+      revisao_decisoes:
+        secao: "Revisão das decisões"
+        R1:
+          arquivo: "Q01"
+          limite_origem: "## Revisão das decisões > bullet 1"
+          tipo: "pergunta_aberta_sem_gabarito"
+          marcador_inicio: "- Qualquer pessoa consegue dizer qual tipo foi escolhido, qual regra o distingue e como a evidência prova essa regra?"
+        R2:
+          arquivo: "Q01"
+          limite_origem: "## Revisão das decisões > bullet 2"
+          tipo: "pergunta_aberta_sem_gabarito"
+          marcador_inicio: "- O índice foi proposto a partir da consulta e do plano, ou apenas adicionado por expectativa?"
+        R3:
+          arquivo: "Q01"
+          limite_origem: "## Revisão das decisões > bullet 3"
+          tipo: "pergunta_aberta_sem_gabarito"
+          marcador_inicio: "- Os dados de exemplo são suficientes para a pergunta e permitem conferir o relatório?"
+        R4:
+          arquivo: "Q01"
+          limite_origem: "## Revisão das decisões > bullet 4"
+          tipo: "pergunta_aberta_sem_gabarito"
+          marcador_inicio: "- As conclusões de desempenho estão limitadas às condições realmente medidas?"
+        R5:
+          arquivo: "Q01"
+          limite_origem: "## Revisão das decisões > bullet 5"
+          tipo: "pergunta_aberta_sem_gabarito"
+          marcador_inicio: "- O tipo só foi marcado na cobertura depois do aceite correspondente?"
+    cobertura_projeto:
+      sequencia_interna_inferida: ["M1", "M2", "M3", "M4"]
+      dependencias_explicitas:
+        complementa: ["16.2"]
+        usa_fundamentos: ["12.2", "12.3"]
+        referencia_escopo: "Guia_Projetos_e_Rotacao_de_Tipos"
+      rubrica:
+        status: "ausente"
+        escala_rubrica: "nenhuma"
+    escala_rubrica: "nenhuma"
+    limites_origem_projeto:
+      escopo_inicio: "## Escolha do tipo"
+      marco_inicio: "### título literal"
+      aceite_separado: true
+      checklist_final_inicio: "**Checklist final:**"
+      checklist_final_destino: "C90"
+    titulo_original: "16.3 — Projeto de fase (Trilho B)"
+validacao_antecipada:
+  unidades_ativas: 17
+  assuntos_conteudo: 49
+  contêineres_projeto: 2
+  registros_assuntos_manifesto: 51
+  microtopicos_teoria: 68
+  itens_quiz: 65
+  praticas_atividades: 43
+  respostas_de_quiz: 65
+  solucoes_de_pratica: 43
+  rubricas_numericas_ou_qualitativas: 42
+  checklists_de_aceite_e_projeto: 11
+  marcos_projeto: 8
+  perguntas_revisao_projeto: 8
+  unidade_8_4: "ausente; aposentada conforme decisão registrada"
