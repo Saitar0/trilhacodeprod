@@ -812,8 +812,7 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
     async def test_public_dto_redacts_known_answers_and_internal_control_fields(self):
         track_id = f"dto-{uuid4().hex}"
         await self._sealed_selected(track_id)
-        reader_store, _ = self._store()
-        public = await reader_store.read_active_public(track_id)
+        public = await self.reader_store.read_active_public(track_id)
         rendered = json.dumps(public, sort_keys=True)
         for forbidden in (
             "correct_option_id",
@@ -852,9 +851,9 @@ class EditorialGenerationsMongoDBTests(unittest.IsolatedAsyncioTestCase):
                 generation_id=second.generation_id,
                 operation_id=f"select-stale-{uuid4().hex}",
             )
-        reader_store, _ = self._store()
         self.assertEqual(
-            (await reader_store.read_active_public(track_id))["generation_id"], first.generation_id
+            (await self.reader_store.read_active_public(track_id))["generation_id"],
+            first.generation_id,
         )
 
 

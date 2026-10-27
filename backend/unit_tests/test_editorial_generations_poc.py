@@ -513,6 +513,37 @@ class EditorialGenerationPoCTests(unittest.TestCase):
         integration_case.fixture_db = self.database
         self.run_async(integration_case.test_public_reader_pins_generation_when_pointer_changes_mid_read())
 
+    def test_public_readback_scenarios_use_the_restricted_reader_route(self):
+        from integration_tests.test_editorial_generations_mongodb import (
+            EditorialGenerationsMongoDBTests,
+        )
+
+        class ReaderSpy:
+            def __init__(self, delegate):
+                self.delegate = delegate
+                self.calls = 0
+
+            async def read_active_public(self, track_id):
+                self.calls += 1
+                return await self.delegate.read_active_public(track_id)
+
+        integration_case = EditorialGenerationsMongoDBTests(
+            "test_public_dto_redacts_known_answers_and_internal_control_fields"
+        )
+        integration_case.clock = self.clock
+        integration_case.store = self.store
+        reader = ReaderSpy(self.store)
+        integration_case.reader_store = reader
+        integration_case._store = lambda: (self.store, (reader, self.store))
+
+        self.run_async(
+            integration_case.test_public_dto_redacts_known_answers_and_internal_control_fields()
+        )
+        self.run_async(
+            integration_case.test_selection_rejects_stale_candidate_and_preserves_previous_generation()
+        )
+        self.assertEqual(reader.calls, 2, "ambos os readbacks devem usar a rota reader")
+
     def test_public_projection_filters_drafts_and_private_quiz_fields(self):
         handle = self.begin("public-projection-01")
         self.prepare(handle)
