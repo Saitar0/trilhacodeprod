@@ -4,7 +4,7 @@ Este diretório é um template para um repositório GitHub separado, sem conexã
 
 ## Estado inicial seguro
 
-`config/bundle-lock.json` começa com `transport.enabled: false`, sem repositório executor configurado, SHA de origem placeholder e hash externo zerado. Assim, o workflow falha fechado antes de baixar ou executar qualquer pacote. Não habilite o transporte até publicar e revisar o pacote e autorizar a configuração remota separadamente.
+`config/bundle-lock.json` fixa o SHA de origem e o hash externo do ZIP gerado localmente, mas começa com `transport.enabled: false` e sem repositório executor configurado. Assim, o workflow falha fechado antes de baixar ou executar qualquer pacote. Não habilite o transporte até criar o repositório separado, publicar e revisar o asset e autorizar a configuração remota separadamente.
 
 ## Preparação depois de autorização de publicação
 

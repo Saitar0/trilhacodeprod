@@ -163,9 +163,10 @@ class BundleSecurityTests(unittest.TestCase):
                 bundle.extract_verified(self.archive, destination, expected_archive_sha256=self.sha, expected_source_sha=SOURCE_SHA)
 
     def test_lock_keeps_remote_transport_disabled_and_pins_versions(self):
-        default_lock = json.loads((TEMPLATE / "config" / "bundle-lock.json").read_text(encoding="utf-8"))
+        default_lock = prepare_bundle.load_lock(TEMPLATE / "config" / "bundle-lock.json")
         self.assertIs(default_lock["transport"]["enabled"], False)
-        self.assertEqual(default_lock["package"]["sha256"], "0" * 64)
+        self.assertRegex(default_lock["package"]["sha256"], r"[0-9a-f]{64}")
+        self.assertEqual(default_lock["package"]["source_sha"], "285c1ddaada3dd245ca335e266f1ce72ed803d1d")
         source_sha = "a" * 40
         lock_data = {
             "format_version": 1,
