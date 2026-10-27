@@ -1,0 +1,435 @@
+versao_esquema: 1
+fase: Fase_2
+base_commit: 7028682ab46dd6186c274f9655bd7dce3c2e3612
+id_prefix: f2
+destino_raiz: "docs/courses/trilhacode/Conteudos_migrado/Fase_2"
+ordem_unidades: ["4.1", "4.2", "4.3", "5.1", "5.2", "5.3", "5.4"]
+prefixos_arquivo_id: {IDX: topic_index, T: theory, Q: quiz, K: answer_key, P: practice, KP: answer_key_pratica, R: rubric, C: checklist, M: milestone}
+arquivo_id: "<id_prefix>-<key-unidade-com-hifens>-<caminho-relativo-sem-extensao-com-hifens>"
+arquivos_comuns:
+  IDX: {path: README.md, tipo: topic_index, origem: [frontmatter_original, titulo_original], uso: "índice; links relativos para arquivos comuns e de assunto"}
+  OBJ: {path: 00_objetivo.md, tipo: objetivo, origem: "## Objetivo"}
+  RES: {path: 01_resumo.md, tipo: resumo, origem: "## Resumo"}
+  CRI: {path: 02_criterio_de_conclusao.md, tipo: criterio, origem: "## Critério de conclusão"}
+  CON: {path: 03_conexoes.md, tipo: conexoes, origem: "## Conexões"}
+  REF: {path: 04_referencias.md, tipo: referencias, origem: "## Referências"}
+frontmatter:
+  indice_unidade:
+    obrigatorios: [arquivo_id, tipo_arquivo]
+    preservar_sem_alterar: [title, key, tipo, carater, profundidade, estimativa_minutos, tags, status]
+    tipo_arquivo: topic_index
+  arquivo_unidade:
+    obrigatorios: [arquivo_id, parent_key, tipo_arquivo, ordem, itens_origem]
+    contextuais: {assunto: "arquivo exclusivo", assuntos: "arquivo compartilhado fora de 90_integracao", escala_rubrica: "rubrica existente", titulo_marco: "marco existente"}
+    omitir: [key, estimativa_minutos, tags, status]
+  arquivo_integracao:
+    obrigatorios: [arquivo_id, parent_key, tipo_arquivo, ordem, itens_origem]
+    omitir: [assunto, assuntos]
+  indice_fase:
+    obrigatorios: [arquivo_id, tipo_arquivo]
+    omitir: [parent_key, assunto, assuntos, ordem]
+paths:
+  unidade_pasta: "relativa a destino_raiz"
+  arquivos_unidade: "relativos à pasta da unidade"
+  origem: "relativa à raiz do repositório"
+  arquivos_fase: "relativos a destino_raiz"
+  sem_absolutos: true
+links_obsidian:
+  README: "links Markdown relativos explícitos; não presumir alias automático do arquivo original"
+  conexoes: "preservar wikilinks originais para notas/âncoras de fase que permanecem intactas"
+  raiz_vault_obsidian: "confirmada externamente; fora do repositorio"
+json: "Não modificar, gerar ou importar nesta etapa."
+limitacao_answer_key: "Até extensão futura do importador/renderer, gabaritos seguem em theory_text no JSON."
+regras:
+  estrutural_apenas: true
+  criar_conteudo_educacional: false
+  preservar_texto_origem: true
+  compartilhados: "um destino físico sob 90_integracao; relações ficam no manifesto"
+  usar_regex_generica_para_dividir: false
+estimativa_arquivos:
+  comuns: 42
+  teoria: 17
+  quiz: 18
+  answer_key_quiz: 18
+  pratica: 21
+  answer_key_pratica: 8
+  rubric: 7
+  checklist: 12
+  indice_projeto: 1
+  total: 144
+
+unidades:
+  "4.1":
+    pasta: "4.1_Estrutura_de_documento"
+    origem: "Conteudos/Fase_2/4.1_Estrutura_de_documento.md"
+    assuntos: [01_estrutura_html_aninhamento_validacao, 02_links_imagens_tabelas, 03_formularios_controles]
+    arquivos:
+      T01: "01_estrutura_html_aninhamento_validacao/01_teoria.md"
+      Q01: "01_estrutura_html_aninhamento_validacao/02_quiz.md"
+      K01: "01_estrutura_html_aninhamento_validacao/03_gabarito_quiz.md"
+      T02: "02_links_imagens_tabelas/01_teoria.md"
+      Q02: "02_links_imagens_tabelas/02_quiz.md"
+      K02: "02_links_imagens_tabelas/03_gabarito_quiz.md"
+      T03: "03_formularios_controles/01_teoria.md"
+      Q03: "03_formularios_controles/02_quiz.md"
+      K03: "03_formularios_controles/03_gabarito_quiz.md"
+      P01: "90_integracao/01_pratica_guiada_repare_pagina.md"
+      KP01: "90_integracao/02_gabarito_pratica_guiada.md"
+      P02: "90_integracao/03_pratica_independente_pagina_recursos.md"
+      R02: "90_integracao/04_rubrica_pratica_independente.md"
+      P03: "90_integracao/05_pratica_transferencia_curriculo.md"
+      C03: "90_integracao/06_checklist_pratica_transferencia.md"
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "HTML descreve estrutura e significado": T01
+        "Aninhar e validar o documento": T01
+        "Links, imagens e tabelas": T02
+        "Formulários": T03
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_estrutura_html_aninhamento_validacao}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_links_imagens_tabelas}
+        Q3: {arquivo: Q02, resposta: K02, assunto: 02_links_imagens_tabelas}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_formularios_controles}
+        Q5: {arquivo: Q03, resposta: K03, assunto: 03_formularios_controles}
+      pratica:
+        P1: {titulo: "1. Guiada — repare uma página incompleta", arquivo: P01, resposta: KP01, assuntos: [01_estrutura_html_aninhamento_validacao, 02_links_imagens_tabelas, 03_formularios_controles]}
+        P2: {titulo: "2. Independente — produza uma página de recursos", arquivo: P02, rubrica: R02, escala_rubrica: "0–2 por critério; 5 critérios; total 10", assuntos: [01_estrutura_html_aninhamento_validacao, 02_links_imagens_tabelas, 03_formularios_controles]}
+        P3: {titulo: "3. Transferência — página de currículo", arquivo: P03, checklist: C03, assuntos: [01_estrutura_html_aninhamento_validacao, 02_links_imagens_tabelas, 03_formularios_controles]}
+    cobertura:
+      exclusivos:
+        01_estrutura_html_aninhamento_validacao: [Q1]
+        02_links_imagens_tabelas: [Q2, Q3]
+        03_formularios_controles: [Q4, Q5]
+      compartilhados:
+        P1: [01_estrutura_html_aninhamento_validacao, 02_links_imagens_tabelas, 03_formularios_controles]
+        P2: [01_estrutura_html_aninhamento_validacao, 02_links_imagens_tabelas, 03_formularios_controles]
+        P3: [01_estrutura_html_aninhamento_validacao, 02_links_imagens_tabelas, 03_formularios_controles]
+    conexoes:
+      - {tipo: pre_requisito, destino: "1.1"}
+      - {tipo: pre_requisito, destino: "1.2"}
+      - {tipo: relacionado, destino: "7.1"}
+
+  "4.2":
+    pasta: "4.2_HTML_semantico"
+    origem: "Conteudos/Fase_2/4.2_HTML_semantico.md"
+    assuntos: [01_elementos_semanticos_estruturais, 02_hierarquia_titulos_e_navegacao]
+    arquivos:
+      T01: "01_elementos_semanticos_estruturais/01_teoria.md"
+      Q01: "01_elementos_semanticos_estruturais/02_quiz.md"
+      K01: "01_elementos_semanticos_estruturais/03_gabarito_quiz.md"
+      T02: "02_hierarquia_titulos_e_navegacao/01_teoria.md"
+      Q02: "02_hierarquia_titulos_e_navegacao/02_quiz.md"
+      K02: "02_hierarquia_titulos_e_navegacao/03_gabarito_quiz.md"
+      P01: "90_integracao/01_pratica_guiada_mapeie_regioes.md"
+      KP01: "90_integracao/02_gabarito_pratica_guiada.md"
+      P02: "90_integracao/03_pratica_independente_portal_cursos.md"
+      R02: "90_integracao/04_rubrica_pratica_independente.md"
+      P03: "90_integracao/05_pratica_transferencia_reestruture_pagina.md"
+      C03: "90_integracao/06_checklist_pratica_transferencia.md"
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Significado além da aparência": T01
+        "Elementos estruturais comuns": T01
+        "Exemplo de estrutura": T01
+        "Títulos e regiões de navegação": T02
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_elementos_semanticos_estruturais}
+        Q2: {arquivo: Q01, resposta: K01, assunto: 01_elementos_semanticos_estruturais}
+        Q3: {arquivo: Q01, resposta: K01, assunto: 01_elementos_semanticos_estruturais}
+        Q4: {arquivo: Q02, resposta: K02, assunto: 02_hierarquia_titulos_e_navegacao}
+        Q5: {arquivo: Q01, resposta: K01, assunto: 01_elementos_semanticos_estruturais}
+      pratica:
+        P1: {titulo: "1. Guiada — mapeie o conteúdo para regiões", arquivo: P01, resposta: KP01, assuntos: [01_elementos_semanticos_estruturais, 02_hierarquia_titulos_e_navegacao]}
+        P2: {titulo: "2. Independente — desenhe a estrutura de um portal de cursos", arquivo: P02, rubrica: R02, escala_rubrica: "0–2 por critério; 5 critérios; total 10", assuntos: [01_elementos_semanticos_estruturais, 02_hierarquia_titulos_e_navegacao]}
+        P3: {titulo: "3. Transferência — reestruture uma página existente", arquivo: P03, checklist: C03, assuntos: [01_elementos_semanticos_estruturais, 02_hierarquia_titulos_e_navegacao]}
+    cobertura:
+      exclusivos:
+        01_elementos_semanticos_estruturais: [Q1, Q2, Q3, Q5]
+        02_hierarquia_titulos_e_navegacao: [Q4]
+      compartilhados:
+        P1: [01_elementos_semanticos_estruturais, 02_hierarquia_titulos_e_navegacao]
+        P2: [01_elementos_semanticos_estruturais, 02_hierarquia_titulos_e_navegacao]
+        P3: [01_elementos_semanticos_estruturais, 02_hierarquia_titulos_e_navegacao]
+    conexoes:
+      - {tipo: pre_requisito, destino: "4.1"}
+      - {tipo: complementar, destino: "4.3"}
+
+  "4.3":
+    pasta: "4.3_Acessibilidade_inicial"
+    origem: "Conteudos/Fase_2/4.3_Acessibilidade_inicial.md"
+    assuntos: [01_estrutura_e_labels, 02_texto_alternativo, 03_teclado_e_limites_de_teste]
+    arquivos:
+      T01: "01_estrutura_e_labels/01_teoria.md"
+      Q01: "01_estrutura_e_labels/02_quiz.md"
+      K01: "01_estrutura_e_labels/03_gabarito_quiz.md"
+      T02: "02_texto_alternativo/01_teoria.md"
+      Q02: "02_texto_alternativo/02_quiz.md"
+      K02: "02_texto_alternativo/03_gabarito_quiz.md"
+      T03: "03_teclado_e_limites_de_teste/01_teoria.md"
+      Q03: "03_teclado_e_limites_de_teste/02_quiz.md"
+      K03: "03_teclado_e_limites_de_teste/03_gabarito_quiz.md"
+      P01: "90_integracao/01_pratica_guiada_barreiras_formulario.md"
+      KP01: "90_integracao/02_gabarito_pratica_guiada.md"
+      P02: "90_integracao/03_pratica_independente_plano_teclado.md"
+      C02: "90_integracao/04_checklist_pratica_independente.md"
+      P03: "90_integracao/05_pratica_transferencia_auditoria_acessibilidade.md"
+      C03: "90_integracao/06_checklist_pratica_transferencia.md"
+      R03: "90_integracao/07_rubrica_pratica_transferencia.md"
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Acessibilidade começa na estrutura": T01
+        "Labels e controles": T01
+        "Texto alternativo de imagens": T02
+        "Navegação por teclado": T03
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_estrutura_e_labels}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_texto_alternativo}
+        Q3: {arquivo: Q03, resposta: K03, assunto: 03_teclado_e_limites_de_teste}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_teclado_e_limites_de_teste}
+        Q5: {arquivo: Q02, resposta: K02, assunto: 02_texto_alternativo}
+      pratica:
+        P1: {titulo: "1. Guiada — encontre barreiras em um formulário", arquivo: P01, resposta: KP01, assuntos: [01_estrutura_e_labels, 02_texto_alternativo, 03_teclado_e_limites_de_teste]}
+        P2: {titulo: "2. Independente — plano de teste de teclado", arquivo: P02, checklist: C02, assuntos: [01_estrutura_e_labels, 02_texto_alternativo, 03_teclado_e_limites_de_teste]}
+        P3: {titulo: "3. Transferência — auditoria e correção da própria página", arquivo: P03, checklist: C03, rubrica: R03, escala_rubrica: "0–2 por critério; 4 critérios; total 8", assuntos: [01_estrutura_e_labels, 02_texto_alternativo, 03_teclado_e_limites_de_teste]}
+    cobertura:
+      exclusivos:
+        01_estrutura_e_labels: [Q1]
+        02_texto_alternativo: [Q2, Q5]
+        03_teclado_e_limites_de_teste: [Q3, Q4]
+      compartilhados:
+        P1: [01_estrutura_e_labels, 02_texto_alternativo, 03_teclado_e_limites_de_teste]
+        P2: [01_estrutura_e_labels, 02_texto_alternativo, 03_teclado_e_limites_de_teste]
+        P3: [01_estrutura_e_labels, 02_texto_alternativo, 03_teclado_e_limites_de_teste]
+    conexoes:
+      - {tipo: pre_requisito, destino: "4.2"}
+      - {tipo: relacionado, destino: "29.1"}
+    ajustes_conexoes:
+      remover:
+        - {tipo: complementary, source_label: "Complementar", destino: "4.2", motivo: "duplicava o pré-requisito já registrado"}
+
+  "5.1":
+    pasta: "5.1_Base_visual"
+    origem: "Conteudos/Fase_2/5.1_Base_visual.md"
+    assuntos: [01_regras_seletores_cascata, 02_box_model, 03_display_position_linguagem_visual]
+    arquivos:
+      T01: "01_regras_seletores_cascata/01_teoria.md"
+      Q01: "01_regras_seletores_cascata/02_quiz.md"
+      K01: "01_regras_seletores_cascata/03_gabarito_quiz.md"
+      P01: "01_regras_seletores_cascata/04_pratica_guiada_cascata.md"
+      KP01: "01_regras_seletores_cascata/05_gabarito_pratica_guiada.md"
+      T02: "02_box_model/01_teoria.md"
+      Q02: "02_box_model/02_quiz.md"
+      K02: "02_box_model/03_gabarito_quiz.md"
+      T03: "03_display_position_linguagem_visual/01_teoria.md"
+      Q03: "03_display_position_linguagem_visual/02_quiz.md"
+      K03: "03_display_position_linguagem_visual/03_gabarito_quiz.md"
+      P02: "90_integracao/01_pratica_independente_box_model_escala.md"
+      KP02: "90_integracao/02_resposta_esperada_pratica_independente.md"
+      C02: "90_integracao/03_checklist_pratica_independente.md"
+      P03: "90_integracao/04_pratica_transferencia_estilize_pagina.md"
+      C03: "90_integracao/05_checklist_pratica_transferencia.md"
+      R03: "90_integracao/06_rubrica_pratica_transferencia.md"
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Regras e seletores": T01
+        "Cascata e especificidade": T01
+        "Box model": T02
+        "Display e position": T03
+        "Cor, tipografia e espaçamento": T03
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_regras_seletores_cascata}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_box_model}
+        Q3: {arquivo: Q02, resposta: K02, assunto: 02_box_model}
+        Q4: {arquivo: Q03, resposta: K03, assunto: 03_display_position_linguagem_visual}
+        Q5: {arquivo: Q03, resposta: K03, assunto: 03_display_position_linguagem_visual}
+      pratica:
+        P1: {titulo: "1. Guiada — preveja e corrija uma cascata", arquivo: P01, resposta: KP01, assunto: 01_regras_seletores_cascata}
+        P2: {titulo: "2. Independente — diagnóstico de box model e legibilidade", arquivo: P02, resposta: KP02, checklist: C02, assuntos: [02_box_model, 03_display_position_linguagem_visual]}
+        P3: {titulo: "3. Transferência — estilize e revise uma página", arquivo: P03, checklist: C03, rubrica: R03, escala_rubrica: "0–2 por critério; 4 critérios; total 8", assuntos: [01_regras_seletores_cascata, 02_box_model, 03_display_position_linguagem_visual]}
+    cobertura:
+      exclusivos:
+        01_regras_seletores_cascata: [Q1, P1]
+        02_box_model: [Q2, Q3]
+        03_display_position_linguagem_visual: [Q4, Q5]
+      compartilhados:
+        P2: [02_box_model, 03_display_position_linguagem_visual]
+        P3: [01_regras_seletores_cascata, 02_box_model, 03_display_position_linguagem_visual]
+    conexoes:
+      - {tipo: pre_requisito, destino: "4.1"}
+      - {tipo: complementar, destino: "5.2"}
+    separacao_literal:
+      P2:
+        marcador: "**Aceite e resposta esperada:**"
+        marcador_destino: checklist
+        sufixo_literal: "\n\n"
+        segmentos:
+          - {destino: checklist, texto: " as camadas aparecem na ordem conteúdo → padding → borda → margin;"}
+          - {destino: resposta, texto: " o cálculo explica se padding e borda somam à largura declarada;"}
+          - {destino: checklist, texto: " os valores da escala são reutilizados e têm função visível."}
+          - {destino: resposta, texto: " Os números dependem da página escolhida, então registre a evidência do DevTools em vez de usar um gabarito numérico fixo."}
+
+  "5.2":
+    pasta: "5.2_Layout_moderno"
+    origem: "Conteudos/Fase_2/5.2_Layout_moderno.md"
+    assuntos: [01_flexbox_eixos_alinhamento, 02_grid_faixas_conteudo_minimo]
+    arquivos:
+      T01: "01_flexbox_eixos_alinhamento/01_teoria.md"
+      Q01: "01_flexbox_eixos_alinhamento/02_quiz.md"
+      K01: "01_flexbox_eixos_alinhamento/03_gabarito_quiz.md"
+      T02: "02_grid_faixas_conteudo_minimo/01_teoria.md"
+      Q02: "02_grid_faixas_conteudo_minimo/02_quiz.md"
+      K02: "02_grid_faixas_conteudo_minimo/03_gabarito_quiz.md"
+      Q90: "90_integracao/01_quiz_integrador_combinacao_flexbox_grid.md"
+      K90: "90_integracao/02_gabarito_quiz_integrador.md"
+      P01: "90_integracao/03_pratica_guiada_composicao_overflow.md"
+      KP01: "90_integracao/04_gabarito_pratica_guiada.md"
+      P02: "90_integracao/05_pratica_independente_requisitos_conteineres.md"
+      C02: "90_integracao/06_checklist_pratica_independente.md"
+      P03: "90_integracao/07_pratica_transferencia_layout_referencia.md"
+      C03: "90_integracao/08_checklist_pratica_transferencia.md"
+      R03: "90_integracao/09_rubrica_pratica_transferencia.md"
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Eixo principal do layout": T01
+        "Alinhamento e distribuição": T01
+        "Linhas e colunas com Grid": T02
+        "Itens, faixas e conteúdo mínimo": T02
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_flexbox_eixos_alinhamento}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_grid_faixas_conteudo_minimo}
+        Q3: {arquivo: Q01, resposta: K01, assunto: 01_flexbox_eixos_alinhamento}
+        Q4: {arquivo: Q90, resposta: K90, assuntos: [01_flexbox_eixos_alinhamento, 02_grid_faixas_conteudo_minimo]}
+        Q5: {arquivo: Q02, resposta: K02, assunto: 02_grid_faixas_conteudo_minimo}
+      pratica:
+        P1: {titulo: "1. Guiada — diagnostique e corrija a composição", arquivo: P01, resposta: KP01, assuntos: [01_flexbox_eixos_alinhamento, 02_grid_faixas_conteudo_minimo]}
+        P2: {titulo: "2. Independente — mapeie requisitos para contêineres", arquivo: P02, checklist: C02, assuntos: [01_flexbox_eixos_alinhamento, 02_grid_faixas_conteudo_minimo]}
+        P3: {titulo: "3. Transferência — reproduza e revise um layout de referência", arquivo: P03, checklist: C03, rubrica: R03, escala_rubrica: "0–2 por critério; 4 critérios; total 8", assuntos: [01_flexbox_eixos_alinhamento, 02_grid_faixas_conteudo_minimo]}
+    cobertura:
+      exclusivos:
+        01_flexbox_eixos_alinhamento: [Q1, Q3]
+        02_grid_faixas_conteudo_minimo: [Q2, Q5]
+      compartilhados:
+        Q4: [01_flexbox_eixos_alinhamento, 02_grid_faixas_conteudo_minimo]
+        P1: [01_flexbox_eixos_alinhamento, 02_grid_faixas_conteudo_minimo]
+        P2: [01_flexbox_eixos_alinhamento, 02_grid_faixas_conteudo_minimo]
+        P3: [01_flexbox_eixos_alinhamento, 02_grid_faixas_conteudo_minimo]
+    conexoes:
+      - {tipo: pre_requisito, destino: "5.1"}
+      - {tipo: complementar, destino: "5.3"}
+
+  "5.3":
+    pasta: "5.3_Responsividade"
+    origem: "Conteudos/Fase_2/5.3_Responsividade.md"
+    assuntos: [01_layout_fluido_viewport, 02_breakpoints_estrategias_teste_conteudo]
+    arquivos:
+      T01: "01_layout_fluido_viewport/01_teoria.md"
+      Q01: "01_layout_fluido_viewport/02_quiz.md"
+      K01: "01_layout_fluido_viewport/03_gabarito_quiz.md"
+      P01: "01_layout_fluido_viewport/04_pratica_guiada_overflow_viewport.md"
+      KP01: "01_layout_fluido_viewport/05_gabarito_pratica_guiada.md"
+      T02: "02_breakpoints_estrategias_teste_conteudo/01_teoria.md"
+      Q02: "02_breakpoints_estrategias_teste_conteudo/02_quiz.md"
+      K02: "02_breakpoints_estrategias_teste_conteudo/03_gabarito_quiz.md"
+      P02: "90_integracao/01_pratica_independente_breakpoints_conteudo.md"
+      C02: "90_integracao/02_checklist_pratica_independente.md"
+      P03: "90_integracao/03_pratica_transferencia_tres_larguras.md"
+      C03: "90_integracao/04_checklist_pratica_transferencia.md"
+      R03: "90_integracao/05_rubrica_pratica_transferencia.md"
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Layout adaptável": T01
+        "Viewport e conteúdo fluido": T01
+        "Media queries e breakpoints": T02
+        "Mobile first e desktop first": T02
+        "Teste orientado pelo conteúdo": T02
+      quiz:
+        Q1: {arquivo: Q02, resposta: K02, assunto: 02_breakpoints_estrategias_teste_conteudo}
+        Q2: {arquivo: Q02, resposta: K02, assunto: 02_breakpoints_estrategias_teste_conteudo}
+        Q3: {arquivo: Q01, resposta: K01, assunto: 01_layout_fluido_viewport}
+        Q4: {arquivo: Q01, resposta: K01, assunto: 01_layout_fluido_viewport}
+        Q5: {arquivo: Q01, resposta: K01, assunto: 01_layout_fluido_viewport}
+      pratica:
+        P1: {titulo: "1. Guiada — investigue overflow e viewport", arquivo: P01, resposta: KP01, assunto: 01_layout_fluido_viewport}
+        P2: {titulo: "2. Independente — encontre o ponto de mudança pelo conteúdo", arquivo: P02, checklist: C02, assuntos: [01_layout_fluido_viewport, 02_breakpoints_estrategias_teste_conteudo]}
+        P3: {titulo: "3. Transferência — adapte uma referência em três larguras", arquivo: P03, checklist: C03, rubrica: R03, escala_rubrica: "0–2 por critério; 4 critérios; total 8", assuntos: [01_layout_fluido_viewport, 02_breakpoints_estrategias_teste_conteudo]}
+    cobertura:
+      exclusivos:
+        01_layout_fluido_viewport: [Q3, Q4, Q5, P1]
+        02_breakpoints_estrategias_teste_conteudo: [Q1, Q2]
+      compartilhados:
+        P2: [01_layout_fluido_viewport, 02_breakpoints_estrategias_teste_conteudo]
+        P3: [01_layout_fluido_viewport, 02_breakpoints_estrategias_teste_conteudo]
+    conexoes:
+      - {tipo: pre_requisito, destino: "5.2"}
+    ajustes_conexoes:
+      remover:
+        - {tipo: complementary, source_label: "Complementar", destino: "5.2", motivo: "duplicava o pré-requisito já registrado"}
+
+  "5.4":
+    pasta: "5.4_Organizacao_visual"
+    origem: "Conteudos/Fase_2/5.4_Organizacao_visual.md"
+    assuntos: [01_organizacao_manutencao_css, 02_repertorio_utility_first]
+    arquivos:
+      T01: "01_organizacao_manutencao_css/01_teoria.md"
+      Q01: "01_organizacao_manutencao_css/02_quiz.md"
+      K01: "01_organizacao_manutencao_css/03_gabarito_quiz.md"
+      P01: "01_organizacao_manutencao_css/04_pratica_guiada_escopo_regras.md"
+      KP01: "01_organizacao_manutencao_css/05_gabarito_pratica_guiada.md"
+      P02: "01_organizacao_manutencao_css/06_pratica_independente_convencao.md"
+      C02: "01_organizacao_manutencao_css/07_checklist_pratica_independente.md"
+      P03: "01_organizacao_manutencao_css/08_pratica_transferencia_reorganize_css.md"
+      C03: "01_organizacao_manutencao_css/09_checklist_pratica_transferencia.md"
+      R03: "01_organizacao_manutencao_css/10_rubrica_pratica_transferencia.md"
+      T02: "02_repertorio_utility_first/01_teoria.md"
+      Q02: "02_repertorio_utility_first/02_quiz.md"
+      K02: "02_repertorio_utility_first/03_gabarito_quiz.md"
+    blocos_origem:
+      comuns: {metadados: IDX, objetivo: OBJ, resumo: RES, criterio_de_conclusao: CRI, conexoes: CON, referencias: REF}
+      teoria:
+        "Organizar CSS para manutenção": T01
+        "Convenções de nomes e escopo": T01
+        "Responsabilidade e risco da alteração": T01
+        "Repertório: utility-first e Tailwind": T02
+      quiz:
+        Q1: {arquivo: Q01, resposta: K01, assunto: 01_organizacao_manutencao_css}
+        Q2: {arquivo: Q01, resposta: K01, assunto: 01_organizacao_manutencao_css}
+        Q3: {arquivo: Q02, resposta: K02, assunto: 02_repertorio_utility_first}
+        Q4: {arquivo: Q01, resposta: K01, assunto: 01_organizacao_manutencao_css}
+        Q5: {arquivo: Q01, resposta: K01, assunto: 01_organizacao_manutencao_css}
+      pratica:
+        P1: {titulo: "1. Guiada — localize o alcance de cada regra", arquivo: P01, resposta: KP01, assunto: 01_organizacao_manutencao_css}
+        P2: {titulo: "2. Independente — defina uma convenção pequena", arquivo: P02, checklist: C02, assunto: 01_organizacao_manutencao_css}
+        P3: {titulo: "3. Transferência — reorganize uma folha real", arquivo: P03, checklist: C03, rubrica: R03, escala_rubrica: "0–2 por critério; 4 critérios; total 8", assunto: 01_organizacao_manutencao_css, referencia_opcional: 02_repertorio_utility_first}
+    cobertura:
+      exclusivos:
+        01_organizacao_manutencao_css: [Q1, Q2, Q4, Q5, P1, P2, P3]
+        02_repertorio_utility_first: [Q3]
+      compartilhados: {}
+    conexoes:
+      - {tipo: pre_requisito, destino: "5.1"}
+      - {tipo: relacionado, destino: "26.2"}
+
+projeto_incremental:
+  representar_em: [markdown, manifesto]
+  incluir_no_json: false
+  escala_rubrica: nenhuma
+  indice_markdown:
+    path: "Projeto_incremental.md"
+    arquivo_id: "f2-fase-2-projeto-incremental"
+    tipo_arquivo: project_index
+    conteudo: "Somente título estrutural e links relativos às práticas P3, em ordem M1–M7."
+    itens_origem: []
+  marcos:
+    M1: {unidade: "4.1", atividade_origem: P3, titulo: "3. Transferência — página de currículo", path: "4.1_Estrutura_de_documento/90_integracao/05_pratica_transferencia_curriculo.md", dependencias: []}
+    M2: {unidade: "4.2", atividade_origem: P3, titulo: "3. Transferência — reestruture uma página existente", path: "4.2_HTML_semantico/90_integracao/05_pratica_transferencia_reestruture_pagina.md", dependencias_propostas: [M1], dependencia_explicita: false}
+    M3: {unidade: "4.3", atividade_origem: P3, titulo: "3. Transferência — auditoria e correção da própria página", path: "4.3_Acessibilidade_inicial/90_integracao/05_pratica_transferencia_auditoria_acessibilidade.md", dependencias: [M1, M2], dependencia_explicita: true}
+    M4: {unidade: "5.1", atividade_origem: P3, titulo: "3. Transferência — estilize e revise uma página", path: "5.1_Base_visual/90_integracao/04_pratica_transferencia_estilize_pagina.md", dependencias_propostas: [M1, M3]}
+    M5: {unidade: "5.2", atividade_origem: P3, titulo: "3. Transferência — reproduza e revise um layout de referência", path: "5.2_Layout_moderno/90_integracao/07_pratica_transferencia_layout_referencia.md", dependencias_propostas: [M4], continuidade_de_artefato_explicita: false}
+    M6: {unidade: "5.3", atividade_origem: P3, titulo: "3. Transferência — adapte uma referência em três larguras", path: "5.3_Responsividade/90_integracao/03_pratica_transferencia_tres_larguras.md", dependencias_propostas: [M5], continuidade_de_artefato_explicita: false}
+    M7: {unidade: "5.4", atividade_origem: P3, titulo: "3. Transferência — reorganize uma folha real", path: "5.4_Organizacao_visual/01_organizacao_manutencao_css/08_pratica_transferencia_reorganize_css.md", dependencias_propostas: [M6], continuidade_de_artefato_explicita: false}
