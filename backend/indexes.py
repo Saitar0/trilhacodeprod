@@ -6,6 +6,12 @@ from database import db
 # (collection, keys, options, duplicate-check fields)
 INDEXES = [
     ("users", [("email", 1)], {"unique": True}, ("email",)),
+    (
+        "auth_sessions",
+        [("expires_at", 1)],
+        {"expireAfterSeconds": 0, "name": "auth_session_expiry"},
+        None,
+    ),
     ("login_attempts", [("identifier", 1)], {}, None),
     ("login_attempts", [("last", 1)], {"expireAfterSeconds": 3600}, None),
     ("nodes", [("track_id", 1), ("parent_id", 1), ("order", 1)], {}, None),
