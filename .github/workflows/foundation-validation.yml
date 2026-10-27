@@ -1,0 +1,425 @@
+name: Trilha Code foundation validation (no deploy)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-validation-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI: "true"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  backend:
+    name: Backend and MongoDB 7
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      mongo:
+        image: mongo:7
+        env:
+          MONGO_INITDB_ROOT_USERNAME: foundation_ci
+          MONGO_INITDB_ROOT_PASSWORD: foundation_ci_only_password
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --username foundation_ci --password foundation_ci_only_password --authenticationDatabase admin --eval 'db.adminCommand({ ping: 1 }).ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      ENV: development
+      MONGO_URL_TEST: mongodb://foundation_ci:foundation_ci_only_password@127.0.0.1:27017/?authSource=admin&directConnection=true
+      JWT_SECRET: foundation-ci-only-secret-not-for-reuse
+    steps:
+      - name: Check out tested commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Install locked backend test dependencies
+        run: python -m pip install -r backend/requirements-dev.txt
+      - name: Verify runtime and disposable MongoDB version
+        run: |
+          set -euo pipefail
+          python --version
+          python - <<'PY'
+          import os
+          import sys
+          import pymongo
+          from pymongo import MongoClient
+
+          with MongoClient(os.environ["MONGO_URL_TEST"], serverSelectionTimeoutMS=5000) as client:
+              version = client.admin.command("buildInfo")["version"]
+          print(f"PyMongo={pymongo.version}; MongoDB={version}")
+          assert pymongo.version == "4.18.2", "Unexpected PyMongo version"
+          assert version.split(".", 1)[0] == "7", "Expected MongoDB major version 7"
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write(f"### Runtime versions\n- Python: {sys.version.split()[0]}\n- PyMongo: {pymongo.version}\n- MongoDB: {version}\n")
+          PY
+      - name: Run isolated backend unit tests
+        working-directory: backend
+        run: python -m pytest -ra --junitxml="$RUNNER_TEMP/backend-unit.xml" unit_tests
+      - name: Run complete backend integration suite
+        working-directory: backend
+        run: python -m pytest -ra --junitxml="$RUNNER_TEMP/backend-integration.xml"
+      - name: Run Ruff
+        run: python -m ruff check backend
+      - name: Compile Python sources
+        run: python -m compileall -q backend
+      - name: Record backend job result
+        if: always()
+        run: |
+          {
+            echo '## Backend and MongoDB 7'
+            echo "- Tested SHA: `$GITHUB_SHA`"
+            echo "- Python: $(python --version 2>&1 || echo unavailable)"
+            echo "- Job result: ${{ job.status }}"
+            echo '- Pytest logs include pass/fail/skip details via `-ra`; no test artifacts are uploaded.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os
+          from pathlib import Path
+          from xml.etree import ElementTree
+
+          runner_temp = Path(os.environ["RUNNER_TEMP"])
+          for report in (runner_temp / "backend-unit.xml", runner_temp / "backend-integration.xml"):
+              if not report.exists():
+                  print(f"- {report.name}: report not produced")
+                  continue
+              root = ElementTree.parse(report).getroot()
+              suites = [root] if root.tag == "testsuite" else root.findall(".//testsuite")
+              totals = {key: sum(int(suite.get(key, 0)) for suite in suites) for key in ("tests", "failures", "errors", "skipped")}
+              print(f"- {report.name}: tests={totals['tests']}, failures={totals['failures']}, errors={totals['errors']}, skipped={totals['skipped']}")
+          PY
+
+  frontend:
+    name: Frontend on Node 20
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out tested commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js 20
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Verify Node and npm versions
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          node -e 'if (process.versions.node.split(".")[0] !== "20") process.exit(1)'
+          {
+            echo '### Runtime versions'
+            echo "- Node: $(node --version)"
+            echo "- npm: $(npm --version)"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Install exact lockfile dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Typecheck
+        working-directory: frontend
+        run: npm run typecheck
+      - name: ESLint
+        working-directory: frontend
+        run: npm run lint
+      - name: Vitest
+        working-directory: frontend
+        run: npm test
+      - name: Production build
+        working-directory: frontend
+        run: npm run build
+      - name: Record frontend job result
+        if: always()
+        run: |
+          {
+            echo '## Frontend on Node 20'
+            echo "- Tested SHA: `$GITHUB_SHA`"
+            echo "- Node: $(node --version 2>&1 || echo unavailable)"
+            echo "- Job result: ${{ job.status }}"
+            echo '- npm uses `npm ci` and the committed `frontend/package-lock.json`.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  docker-g2:
+    name: Docker and G2 contracts (ephemeral runner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out tested commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Install backend test dependencies
+        run: python -m pip install -r backend/requirements-dev.txt
+      - name: Install POSIX test tools on this ephemeral runner
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes jq util-linux
+          command -v bash
+          command -v jq
+          command -v flock
+          command -v timeout
+      - name: Verify isolated Docker Engine and Compose
+        env:
+          DOCKER_CONFIG: ${{ runner.temp }}/foundation-docker-config-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$DOCKER_CONFIG"
+          echo "DOCKER_CONFIG=$DOCKER_CONFIG" >> "$GITHUB_ENV"
+          docker version --format 'Docker client={{.Client.Version}} server={{.Server.Version}}'
+          docker info --format 'Engine={{.Name}} OS={{.OSType}} Arch={{.Architecture}}'
+          docker compose version
+          docker context show
+          docker pull mongo:7
+          docker image inspect mongo:7 --format 'Disposable contract image={{.RepoTags}} id={{.Id}}'
+          {
+            echo '### Runtime versions'
+            docker version --format '- Docker client={{.Client.Version}}, server={{.Server.Version}}'
+            docker compose version | sed 's/^/- /'
+            docker image inspect mongo:7 --format '- MongoDB test image={{.RepoTags}}'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Run POSIX, synthetic preflight, Compose isolation, and Docker API contracts
+        working-directory: backend
+        env:
+          COMPOSE_PROJECT_NAME: foundation-validation-${{ github.run_id }}-${{ github.run_attempt }}
+        run: >-
+          python -m pytest -ra --junitxml="$RUNNER_TEMP/docker-g2.xml"
+          unit_tests/test_g2_runner.py
+          unit_tests/test_g2_preflight.py
+          unit_tests/test_g2_docker_api_contract.py
+          unit_tests/test_compose_qa_isolation.py
+          unit_tests/test_g2_workflow_contract.py
+      - name: Record Docker/G2 job result
+        if: always()
+        run: |
+          {
+            echo '## Docker and G2 contracts'
+            echo "- Tested SHA: `$GITHUB_SHA`"
+            echo "- Job result: ${{ job.status }}"
+            echo '- Docker resources are ephemeral and uniquely named by the existing contract test; cleanup targets only those generated names.'
+            echo '- No Compose services, persistent volumes, staging preflight, SSH, or global cleanup are run.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os
+          from pathlib import Path
+          from xml.etree import ElementTree
+
+          report = Path(os.environ["RUNNER_TEMP"]) / "docker-g2.xml"
+          if not report.exists():
+              print("- Pytest summary: report not produced")
+          else:
+              root = ElementTree.parse(report).getroot()
+              suites = [root] if root.tag == "testsuite" else root.findall(".//testsuite")
+              totals = {key: sum(int(suite.get(key, 0)) for suite in suites) for key in ("tests", "failures", "errors", "skipped")}
+              print(f"- Pytest: tests={totals['tests']}, failures={totals['failures']}, errors={totals['errors']}, skipped={totals['skipped']}")
+          PY
+
+  e2e:
+    name: Integrated E2E with synthetic data
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    services:
+      mongo:
+        image: mongo:7
+        env:
+          MONGO_INITDB_ROOT_USERNAME: foundation_ci
+          MONGO_INITDB_ROOT_PASSWORD: foundation_ci_only_password
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --username foundation_ci --password foundation_ci_only_password --authenticationDatabase admin --eval 'db.adminCommand({ ping: 1 }).ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      ENV: development
+      MONGO_URL: mongodb://foundation_ci:foundation_ci_only_password@127.0.0.1:27017/?authSource=admin&directConnection=true
+      MONGO_URL_TEST: mongodb://foundation_ci:foundation_ci_only_password@127.0.0.1:27017/?authSource=admin&directConnection=true
+      DB_NAME: trilhacode_e2e_${{ github.run_id }}_${{ github.run_attempt }}
+      JWT_SECRET: foundation-e2e-only-secret-not-for-reuse
+      EMAIL_TRANSPORT: local
+      FRONTEND_URL: http://127.0.0.1:5173
+      CORS_ORIGINS: http://127.0.0.1:5173
+      COOKIE_SAMESITE: lax
+      COOKIE_SECURE: "false"
+      ADMIN_EMAIL: foundation-admin@example.com
+      ADMIN_PASSWORD: synthetic-admin-password-only
+      EDITOR_EMAIL: foundation-editor@example.com
+      EDITOR_PASSWORD: synthetic-editor-password-only
+      STUDENT_EMAIL: foundation-student@example.com
+      STUDENT_PASSWORD: synthetic-student-password-only
+    steps:
+      - name: Check out tested commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Install backend test dependencies
+        run: python -m pip install -r backend/requirements-dev.txt
+      - name: Set disposable mail directory
+        run: |
+          set -euo pipefail
+          mail_dir="$RUNNER_TEMP/foundation-e2e-mail-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$mail_dir"
+          {
+            echo "LOCAL_EMAIL_DIR=$mail_dir"
+            echo "AUTH_TEST_MAIL_DIR=$mail_dir"
+          } >> "$GITHUB_ENV"
+      - name: Verify PyMongo 4.18.2 and MongoDB 7
+        run: |
+          set -euo pipefail
+          python --version
+          python - <<'PY'
+          import os
+          import sys
+          import pymongo
+          from pymongo import MongoClient
+
+          with MongoClient(os.environ["MONGO_URL"], serverSelectionTimeoutMS=5000) as client:
+              version = client.admin.command("buildInfo")["version"]
+          print(f"PyMongo={pymongo.version}; MongoDB={version}")
+          assert pymongo.version == "4.18.2", "Unexpected PyMongo version"
+          assert version.split(".", 1)[0] == "7", "Expected MongoDB major version 7"
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write(f"### Runtime versions\n- Python: {sys.version.split()[0]}\n- PyMongo: {pymongo.version}\n- MongoDB: {version}\n")
+          PY
+      - name: Initialize only the disposable E2E database
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          mkdir -p "$LOCAL_EMAIL_DIR"
+          python -m manage ensure-indexes
+          python -m manage migrate
+          python -m manage seed
+      - name: Set up Node.js 20
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Verify Node.js 20 and npm
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          node -e 'if (process.versions.node.split(".")[0] !== "20") process.exit(1)'
+          {
+            echo '### Runtime versions'
+            echo "- Node: $(node --version)"
+            echo "- npm: $(npm --version)"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Install exact frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Install pinned Playwright Chromium dependencies
+        working-directory: frontend
+        run: ./node_modules/.bin/playwright install --with-deps chromium
+      - name: Run existing integrated Playwright suite with scoped cleanup
+        working-directory: frontend
+        env:
+          E2E_STUDENT_EMAIL: foundation-student@example.com
+          E2E_STUDENT_PASSWORD: synthetic-student-password-only
+          E2E_ADMIN_EMAIL: foundation-admin@example.com
+          E2E_ADMIN_PASSWORD: synthetic-admin-password-only
+        run: |
+          set -euo pipefail
+          api_pid=''
+          frontend_pid=''
+          cleanup() {
+            [[ -z "$frontend_pid" ]] || kill "$frontend_pid" 2>/dev/null || true
+            [[ -z "$api_pid" ]] || kill "$api_pid" 2>/dev/null || true
+            [[ -z "$frontend_pid" ]] || wait "$frontend_pid" 2>/dev/null || true
+            [[ -z "$api_pid" ]] || wait "$api_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          (cd ../backend && exec python -m uvicorn server:app --host 127.0.0.1 --port 18000) \
+            > "$RUNNER_TEMP/foundation-api.log" 2>&1 &
+          api_pid=$!
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:18000/health >/dev/null; then break; fi
+            if [[ "$attempt" == 60 ]]; then cat "$RUNNER_TEMP/foundation-api.log"; exit 1; fi
+            sleep 2
+          done
+
+          ./node_modules/.bin/vite --host 127.0.0.1 --port 5173 \
+            > "$RUNNER_TEMP/foundation-frontend.log" 2>&1 &
+          frontend_pid=$!
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:5173/login >/dev/null; then break; fi
+            if [[ "$attempt" == 60 ]]; then cat "$RUNNER_TEMP/foundation-frontend.log"; exit 1; fi
+            sleep 2
+          done
+
+          npm run test:e2e -- --reporter=list
+      - name: Record E2E job result
+        if: always()
+        run: |
+          {
+            echo '## Integrated E2E'
+            echo "- Tested SHA: `$GITHUB_SHA`"
+            echo '- Runtime: Python 3.11, PyMongo 4.18.2, MongoDB 7, Node 20, local email sink.'
+            echo "- Job result: ${{ job.status }}"
+            echo '- Playwright logs remain in the job output; no traces or user data are uploaded as artifacts.'
+            echo '- This runs the Playwright coverage already present in `frontend/e2e`; backend tests separately cover API note conflicts and import recovery.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  summary:
+    name: Homologation summary
+    if: always()
+    needs: [backend, frontend, docker-g2, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Summarize all validation jobs
+        env:
+          BACKEND_RESULT: ${{ needs.backend.result }}
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+          DOCKER_G2_RESULT: ${{ needs['docker-g2'].result }}
+          E2E_RESULT: ${{ needs.e2e.result }}
+        run: |
+          set -euo pipefail
+          {
+            echo '## Trilha Code foundation validation — no deploy'
+            echo "- Tested SHA: `$GITHUB_SHA`"
+            echo "- Ref: `$GITHUB_REF`"
+            echo "- Backend: $BACKEND_RESULT"
+            echo "- Frontend: $FRONTEND_RESULT"
+            echo "- Docker/G2: $DOCKER_G2_RESULT"
+            echo "- Integrated E2E: $E2E_RESULT"
+            echo '- This workflow does not deploy, publish images, use SSH, or access repository secrets.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "$BACKEND_RESULT" = success
+          test "$FRONTEND_RESULT" = success
+          test "$DOCKER_G2_RESULT" = success
+          test "$E2E_RESULT" = success
