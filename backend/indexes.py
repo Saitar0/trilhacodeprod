@@ -60,11 +60,16 @@ INDEXES = [
 
 
 def _options(index: dict) -> dict:
-    return {key: index[key] for key in (
+    options = {key: index[key] for key in (
         "unique", "sparse", "expireAfterSeconds", "partialFilterExpression", "collation", "hidden",
         "wildcardProjection",
     )
             if key in index}
+    # MongoDB may return its implicit default collation in listIndexes even when
+    # the index was created without an explicit collation.
+    if options.get("collation") == {"locale": "simple"}:
+        options.pop("collation")
+    return options
 
 
 def _same_keys(index: dict, expected_keys: tuple) -> bool:
@@ -86,7 +91,9 @@ def _keys_match(index: dict, expected_keys: tuple) -> bool:
 
 async def _duplicates(collection, fields: tuple[str, ...], partial_filter: dict | None = None) -> list[dict]:
     # Unique indexes treat missing and null as the same key value.
-    group_id = {field: {"$ifNull": [f"${field}", None]} for field in fields}
+    # Keep the key as an array: MongoDB field names in a $group _id object cannot
+    # contain dots, while indexed paths such as "meta.import_ref" are valid inputs.
+    group_id = [{"$ifNull": [f"${field}", None]} for field in fields]
     pipeline = ([{"$match": partial_filter}] if partial_filter else []) + [
         {"$group": {"_id": group_id, "count": {"$sum": 1}, "sample_id": {"$first": "$_id"}}},
         {"$match": {"count": {"$gt": 1}}},
@@ -94,8 +101,8 @@ async def _duplicates(collection, fields: tuple[str, ...], partial_filter: dict 
     ]
     cursor = await collection.aggregate(pipeline)
     rows = await cursor.to_list(20)
-    return [{"values": row["_id"], "count": row["count"], "sample_id": str(row["sample_id"])}
-            for row in rows]
+    return [{"values": dict(zip(fields, row["_id"], strict=True)),
+             "count": row["count"], "sample_id": str(row["sample_id"])} for row in rows]
 
 
 async def preflight_indexes() -> list[str]:
