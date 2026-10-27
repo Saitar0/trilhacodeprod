@@ -83,6 +83,7 @@ export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nod
         <div className="space-y-5">
           {blocks.map((b) => (
             <BlockRenderer key={b.id} block={b} type={blockType(b.type)} progress={progress?.blocks[b.id]}
+              isStaff={staff} trackId={vm.track.id}
               onProgress={(s, d, attemptId) => setProgress.mutate({
                 node_id: nodeId, block_id: b.id, status: s, data: d, attempt_id: attemptId,
               })}

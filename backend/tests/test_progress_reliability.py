@@ -228,8 +228,8 @@ def test_block_attempts_are_distinct_from_request_idempotency(
             "track_id": track["id"], "kind": "topic", "title": "Quiz node",
         }).json()
         block = admin.post(f"{API}/blocks", json={
-            "node_id": node["id"], "type": "quiz", "title": "Quiz",
-            "data": {"question": "Q?", "options": ["A", "B"], "correct_index": 0},
+            "node_id": node["id"], "type": "exercise_objective", "title": "Exercício manual",
+            "data": {"prompt": "Envie sua resposta para revisão."},
             "status": "published",
         }).json()
         published = admin.post(f"{API}/tracks/{track['id']}/publish", json={})

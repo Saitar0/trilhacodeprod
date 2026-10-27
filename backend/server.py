@@ -41,6 +41,7 @@ if settings.sentry_dsn:
 from database import client, db  # noqa: E402
 from learning import router as learning_router  # noqa: E402
 from migrations import check_schema_version, current_version  # noqa: E402
+from routes_activities import router as activities_router  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
 from routes_content import router as content_router  # noqa: E402
 from routes_import import router as import_router  # noqa: E402
@@ -113,6 +114,9 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     # behind the established generic error envelope.
     if exc.status_code == 409 and isinstance(exc.detail, dict) and exc.detail.get("code") in {
         "note_version_conflict", "progress_version_conflict", "progress_idempotency_conflict",
+        "activity_idempotency_conflict", "activity_version_conflict", "activity_active_attempt",
+        "activity_attempt_limit", "activity_attempt_conflict", "activity_revision_conflict",
+        "activity_state_conflict",
     }:
         error["details"] = exc.detail
     return JSONResponse(status_code=exc.status_code, content={"error": error},
@@ -175,6 +179,7 @@ async def ready():
         raise HTTPException(status_code=503, detail="Banco sem as migrações esperadas")
     return {"ok": True, "migration_version": version}
 for r in (auth_router, taxonomy_router, content_router, progress_router, learning_router, submissions_router,
+          activities_router,
           versions_router, import_router):
     app.include_router(r)
 
@@ -189,6 +194,6 @@ app.add_middleware(
     allow_origins=settings.effective_cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
     expose_headers=["X-Request-ID"],
 )
