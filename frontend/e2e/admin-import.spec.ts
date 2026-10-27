@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import axe from "axe-core";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const API_BASE_URL = "http://127.0.0.1:18000";
 
