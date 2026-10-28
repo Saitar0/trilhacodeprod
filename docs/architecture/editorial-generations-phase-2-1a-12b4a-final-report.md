@@ -66,7 +66,7 @@ Documentos criados exclusivamente em `docs/architecture/`:
 - [adr008-review](editorial-generations-phase-2-1a-12b4a-adr008-review.md)
 - este relatório
 
-Operações remotas: consultas de leitura `git ls-remote`, GitHub Actions (jobs e metadados de artifact) e Coolify (aplicações, deployments, serviços e inventário de rollback). Escritas remotas: nenhuma. Ações de serviço: nenhuma. Localmente, foi criada uma worktree e serão versionados apenas estes documentos. Nenhum workflow foi iniciado.
+Operações remotas: consultas de leitura `git ls-remote`, GitHub Actions (jobs e metadados de artifact) e Coolify (aplicações, deployments, serviços e inventário de rollback). Escritas remotas: nenhuma. Ações de serviço: nenhuma. Localmente, foi criada uma worktree e foram versionados apenas estes documentos. Nenhum workflow foi iniciado.
 
 ## Y. Veredito
 
