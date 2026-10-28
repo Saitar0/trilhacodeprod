@@ -66,3 +66,114 @@ As verificações finais de documentação e commit estão reportadas na respost
 **Veredito:** **DECISÕES PREPARADAS — BASELINE IMPLANTADO PENDENTE**.
 
 **Próxima ação mínima:** obter evidência sanitizada de digest em execução e sua proveniência por ambiente, e aprovar ADR-008 antes de qualquer alteração de runtime.
+
+## Índice do relatório obrigatório A–Y
+
+### A. Resumo executivo
+
+Referências Git confirmadas; build de backend associado a um SHA encontrado; baseline implantado sem comprovação de nível 1. As oito decisões estão preparadas, não aprovadas.
+
+### B. Git e isolamento
+
+Worktree, branch, base, parent, remote e ausência de materialização dos caminhos protegidos constam em “Git e isolamento” acima. O commit documental B3 não alterou a árvore de código do snapshot.
+
+### C. Evidências de implantação
+
+Fontes públicas e versionadas, horários, runs, limites e níveis de confiança: [evidências de baseline](editorial-generations-phase-2-1a-12b4-baseline-evidence.md).
+
+### D. Baseline implantado
+
+Não comprovado para produção nem staging. Não há SHA/digest de API e frontend ligados a container efetivamente servido.
+
+### E. Lacunas de rastreabilidade
+
+Faltam digest em execução por aplicação/ambiente, proveniência digest→SHA, registro de deploy e confirmação de saúde/readiness. Evidência a solicitar sem tokens nem dados pessoais: [evidências de baseline](editorial-generations-phase-2-1a-12b4-baseline-evidence.md).
+
+### F. Compatibilidade de branches
+
+SHAs, merge-bases, commits exclusivos, diferenças por área e trade-offs: [compatibilidade](editorial-generations-phase-2-1a-12b4-branch-compatibility.md).
+
+### G. Baseline de implementação
+
+Recomendação condicional pela opção D: após o owner selecionar release baseline com evidência, criar linha de integração isolada e reconciliar mudanças escolhidas; usar e5 como referência de auditoria, não como origem automática de release.
+
+### H. ADR-008
+
+Decisão inicial bloqueante: identificar SHA/digest implantado e selecionar linha reconciliada. Ficha: [decision briefs](editorial-generations-phase-2-1a-12b4-decision-briefs.md#adr-008--baseline-e-compatibilidade).
+
+### I. ADR-001
+
+Proposta de revisão monotônica, snapshot coerente e conflito explícito; todos os escritores precisam respeitar o mecanismo. Ficha: [decision briefs](editorial-generations-phase-2-1a-12b4-decision-briefs.md#adr-001--revisao-e-concorrencia-editorial).
+
+### J. ADR-005
+
+Proposta de defesa em profundidade: storage/identidade segregados, reader mínimo e DTO allowlist. Grants do ambiente real não foram consultadas. Ficha: [decision briefs](editorial-generations-phase-2-1a-12b4-decision-briefs.md#adr-005--separacao-de-dados-publicos-e-privados).
+
+### K. ADR-003
+
+Classificação de campos que alteram sentido, apresentação, ordenação ou validação é pendente de produto/frontend; nenhuma taxonomia foi classificada como decisão aprovada. Ficha: [decision briefs](editorial-generations-phase-2-1a-12b4-decision-briefs.md#adr-003--taxonomias-e-metadados).
+
+### L. ADR-002
+
+Recomendação de geração fixada pelo servidor para sessão e definição original fixada por tentativa; expiração, conclusão tardia e revogação dependem de decisão de produto. Ficha: [decision briefs](editorial-generations-phase-2-1a-12b4-decision-briefs.md#adr-002--geracao-de-sessao-e-progresso).
+
+### M. ADR-004
+
+Retenção baseada em referências/obrigações é proposta; não foi fixado prazo. GC e exclusão definitiva permanecem bloqueados até política de produto, privacidade e inventário de referências. Ficha: [decision briefs](editorial-generations-phase-2-1a-12b4-decision-briefs.md#adr-004--retencao-e-exclusao).
+
+### N. ADR-006
+
+Proposta: construir, validar e selar antes de selecionar por CAS; leitores pinados; restore como nova geração; sem fallback live inseguro. Depende de ADR-001. Ficha: [decision briefs](editorial-generations-phase-2-1a-12b4-decision-briefs.md#adr-006--publicacao-e-restauracao-atomicas).
+
+### O. ADR-007
+
+Proposta de migração gradual com flags off, escritores antes de readers e zero bypass antes do cutover. Ficha: [decision briefs](editorial-generations-phase-2-1a-12b4-decision-briefs.md#adr-007--migracao-gradual-e-coexistencia).
+
+### P. Matriz de aprovação
+
+Oito linhas, todas PENDING_APPROVAL, com ordem de dependências e categoria: [matriz de aprovação](editorial-generations-phase-2-1a-12b4-approval-matrix.md).
+
+### Q. Perguntas humanas
+
+Produto/pedagogia: duração de sessão, tentativa antiga, restore, retirada urgente, progresso legado e histórico de nota. Segurança/privacidade: papéis para gabaritos, campos pessoais, exclusão e autoridade de retenção. Operação: ambiente inicial, linha oficial, evidência de runtime e procedimento de cutover. A lista objetiva está na matriz.
+
+### R. Gates de implementação
+
+Baseline, reconciliação, inventários, decisões, rollback, observabilidade e autorização específica estão pendentes/bloqueados: [gates](editorial-generations-phase-2-1a-12b4-implementation-gates.md).
+
+### S. Primeira fase executável proposta
+
+Após aprovação do ADR-008: reconciliação isolada do baseline e instrumentação passiva sanitizada. Sem alterar payload, autorização, ordem de escrita, persistência ou resposta pública; não é autorizada nesta fase.
+
+### T. Arquivos produzidos
+
+Seis documentos listados na seção [arquivos locais](#arquivos-locais).
+
+### U. Validações
+
+Validado: escopo dos seis Markdown, links relativos, oito ADRs ainda Proposed, oito linhas PENDING_APPROVAL, ausência de padrões de segredo, diff check e árvore de código. Não foram executados testes de aplicação, Docker, MongoDB ou Actions, conforme escopo.
+
+### V. Segurança
+
+Sem credenciais, segredos, URI autenticada ou dados de aluno nos novos documentos. Os caminhos editoriais protegidos não foram materializados. Nenhuma infraestrutura privada foi acessada.
+
+### W. Operações remotas
+
+Somente consultas públicas Git/GitHub de leitura. Nenhum push, PR, merge, rebase, workflow, deploy, acesso a Coolify, MongoDB ou Docker ocorreu.
+
+### X. Próxima autorização
+
+Obter via responsável de infraestrutura os metadados sanitizados de digest e SHA em execução, por ambiente; em seguida, aprovar ADR-008 e decidir a linha de desenvolvimento. Acesso privado necessita autorização separada.
+
+### Y. Veredito
+
+**DECISÕES PREPARADAS — BASELINE IMPLANTADO PENDENTE**.
+
+## Arquivos locais
+
+1. [Evidências de baseline](editorial-generations-phase-2-1a-12b4-baseline-evidence.md).
+2. [Compatibilidade entre branches](editorial-generations-phase-2-1a-12b4-branch-compatibility.md).
+3. [Matriz de aprovação](editorial-generations-phase-2-1a-12b4-approval-matrix.md).
+4. [Fichas resumidas dos ADRs](editorial-generations-phase-2-1a-12b4-decision-briefs.md).
+5. [Gates e fase futura](editorial-generations-phase-2-1a-12b4-implementation-gates.md).
+6. Este relatório.
