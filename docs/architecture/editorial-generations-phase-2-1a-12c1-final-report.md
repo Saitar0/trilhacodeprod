@@ -56,6 +56,7 @@ O lock local não representa coordenação distribuída; credenciais são apenas
 ## Q. Validações finais
 
 - `python -m unittest unit_tests.test_editorial_revision_protocol -v`: 18 testes aprovados, sem skips ou falhas.
+- Suíte unitária existente `python -m unittest unit_tests.test_editorial_generations_poc -v`: 24 testes passaram; 2 helpers terminaram em erro de importação antes do corpo porque `pymongo` não está instalado (`ModuleNotFoundError`). Não houve conexão a banco; nenhuma dependência foi instalada e a PoC não foi alterada.
 - `ast.parse` dos três arquivos Python novos: passou.
 - Busca por referências `curriculum_contract` nos demais arquivos Python do backend: nenhuma importação encontrada.
 - Ruff, mypy e flake8: não instalados no ambiente; não foram instalados nem houve alteração de dependências.
