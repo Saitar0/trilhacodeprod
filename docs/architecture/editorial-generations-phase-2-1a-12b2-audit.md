@@ -202,7 +202,7 @@ O progresso genérico não está associado à versão; tentativas de quiz estão
 
 ## 7. Escopo e limitações da evidência
 
-* Código principal examinado em `e5bf3147…`, que inclui a branch de integração de atividades pela merge-base `ce427990…`; o remoto `main` consultado continua no commit `22dca645…`. Portanto, partes presentes no snapshot auditado podem não estar em produção.
+* Código principal examinado em `e5bf3147…`, que inclui a branch de integração de atividades pela merge-base `ce427990…`; o remoto `main` consultado continua no commit `22dca645…`, ancestral desse snapshot. O objeto do `staging` consultado (`fff85218…`) não é ancestral de `e5bf3147…`; a comparação de árvores nas áreas técnicas identificou diferenças em `indexes.py`, `integrity.py`, `learning.py`, rotas de import/progresso/atividade, serviços de atividades/import/progresso/submissões/nodes/tracks/versions e componentes/hooks/types de frontend. A auditoria detalhada linha a linha usa `e5bf3147…`; não afirma que a divergência inteira do `staging` foi auditada ou que o snapshot esteja implantado.
 * `staging` remoto consultado = `fff85218…`; não foi feito checkout, merge, deploy ou chamada de aplicação.
 * API GitHub somente leitura confirmou que run `40686021030` está `completed/success`, `workflow_dispatch`, tentativa 1, SHA de executor `bf081932…`; histórico retornou 3 runs. A informação de 26 unitários/15 integrados/7 guardas/cleanup vem do resultado fornecido para esta fase; logs não foram reexecutados.
 * O executor remoto consultado estava no HEAD `701b314…`, lock com `transport.enabled:false`. Nenhuma escrita foi feita.
