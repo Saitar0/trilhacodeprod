@@ -488,6 +488,45 @@ class CleanupTests(unittest.TestCase):
 
 
 class StaticRuntimeContractTests(unittest.TestCase):
+    @staticmethod
+    def workflow_job_and_steps(source: str):
+        """Read the job/step fields from this intentionally simple YAML layout."""
+        lines = source.splitlines()
+        job_timeout = None
+        in_target_job = False
+        for line in lines:
+            if line == "  homologation:":
+                in_target_job = True
+                continue
+            if in_target_job and line.startswith("  ") and not line.startswith("    "):
+                break
+            if in_target_job and line.startswith("    timeout-minutes:"):
+                job_timeout = int(line.split(":", 1)[1].strip())
+                break
+
+        steps = []
+        current = None
+        in_steps = False
+        for line in lines:
+            if line == "    steps:":
+                in_steps = True
+                continue
+            if not in_steps:
+                continue
+            if line.startswith("    ") and not line.startswith("      "):
+                break
+            if line.startswith("      - name:"):
+                current = {"name": line.split(":", 1)[1].strip()}
+                steps.append(current)
+                continue
+            if current is not None and line.startswith("        ") and not line.startswith("          "):
+                key, separator, value = line.strip().partition(":")
+                if separator:
+                    current[key] = value.strip()
+        if job_timeout is None or not steps:
+            raise AssertionError("job/steps do workflow não puderam ser lidos")
+        return job_timeout, {step["name"]: step for step in steps}
+
     def test_all_integrated_cases_are_discovered_and_run_with_individual_deadlines(self):
         repository = OPS.parents[1]
         test_path = repository / "backend" / "integration_tests" / "test_editorial_generations_mongodb.py"
@@ -522,7 +561,58 @@ class StaticRuntimeContractTests(unittest.TestCase):
         self.assertIn('COMPOSE_TIMEOUT_SECONDS="32m"', run_ci)
         self.assertIn("timeout-minutes: 37", workflow)
         self.assertIn("timeout-minutes: 5", workflow)
-        self.assertIn("timeout-minutes: 45", workflow)
+
+    def test_workflow_reserves_cleanup_and_finalization_with_bounded_preparation(self):
+        workflow = (
+            OPS / "executor-template" / ".github" / "workflows" / "mongodb-homologation.yml"
+        ).read_text(encoding="utf-8")
+        job_timeout, steps = self.workflow_job_and_steps(workflow)
+
+        checkout = steps["Check out executor configuration without persisted credentials"]
+        setup = steps["Set up Python for package verification"]
+        verify = steps["Verify fixed release package and extract"]
+        execution = steps["Run verified package against disposable MongoDB 7"]
+        cleanup = steps["Clean only this run's resources and temporary package"]
+        preparation_budget = sum(
+            int(step["timeout-minutes"]) for step in (checkout, setup, verify)
+        )
+        execution_budget = int(execution["timeout-minutes"])
+        cleanup_budget = int(cleanup["timeout-minutes"])
+        finalization_reserve = 2
+
+        self.assertEqual(preparation_budget, 5)
+        self.assertEqual(execution_budget, 37)
+        self.assertEqual(cleanup_budget, 5)
+        self.assertEqual(job_timeout, 50)
+        self.assertEqual(cleanup.get("if"), "always()")
+        self.assertLess(
+            preparation_budget + execution_budget + cleanup_budget + finalization_reserve,
+            job_timeout,
+        )
+
+        compose = (OPS / "run-ci.sh").read_text(encoding="utf-8")
+        self.assertIn('COMPOSE_TIMEOUT_SECONDS="32m"', compose)
+        compose_hard_limit = 32 * 60 + 20 + 180
+        self.assertLess(compose_hard_limit, execution_budget * 60)
+        self.assertEqual(execution_budget * 60 - compose_hard_limit, 100)
+
+        external_cleanup = (
+            OPS / "executor-template" / "scripts" / "cleanup_executor.py"
+        ).read_text(encoding="utf-8")
+        tree = ast.parse(external_cleanup)
+        timeout_assignment = next(
+            node.value
+            for node in tree.body
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name)
+                and target.id == "COMPOSE_CLEANUP_TIMEOUT_SECONDS"
+                for target in node.targets
+            )
+        )
+        external_cleanup_seconds = ast.literal_eval(timeout_assignment)
+        self.assertEqual(external_cleanup_seconds, 240)
+        self.assertLess(external_cleanup_seconds, cleanup_budget * 60)
 
     def test_runtime_diagnostics_are_shipped_in_the_disposable_image(self):
         repository = OPS.parents[1]
