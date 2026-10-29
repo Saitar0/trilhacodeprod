@@ -263,7 +263,7 @@ export interface Submission {
   grading: null | {
     result: "approved" | "rejected" | "returned";
     feedback: string;
-    criteria: CriterionGrade[];
+    criteria?: CriterionGrade[];
     score?: number | null;
     graded_by_name: string;
     graded_at: string;
