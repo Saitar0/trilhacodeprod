@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import re
@@ -916,6 +917,69 @@ class EditorialBlockCommitProtocolTests(unittest.TestCase):
             self._prepare(operation_id="", title="synthetic-valid")
         self.assertEqual(self.adapter.current_revision(self.track_id), 0)
         self.assertEqual(self.database[f"{_NAMESPACE}_operations"].count_documents({}), 0)
+
+    # T44
+    def test_t44_async_tasks_with_independent_clients_share_one_cas_winner(self) -> None:
+        writers = [
+            self.adapter.provision_writer_credential(
+                self.track_id, "synthetic-async-writer-a"
+            ),
+            self.adapter.provision_writer_credential(
+                self.track_id, "synthetic-async-writer-b"
+            ),
+        ]
+        prepared = [
+            self._prepare(
+                credential=credential,
+                operation_id=f"synthetic-async-race-{index}",
+                title=f"synthetic-async-title-{index}",
+            )
+            for index, credential in enumerate(writers)
+        ]
+        barrier = threading.Barrier(2)
+
+        def commit_with_own_client(
+            credential: WriterCredential,
+            proposal: PreparedEditorialBlockUpdate,
+        ) -> tuple[str, int | None]:
+            client = MongoClient(
+                self.mongo_uri,
+                appname="trilhacode-12c8-async-race-test",
+                serverSelectionTimeoutMS=8000,
+                connectTimeoutMS=8000,
+            )
+            try:
+                database = client[self.database_name]
+                adapter = self._new_adapter(database)
+                barrier.wait(timeout=10)
+                try:
+                    receipt = commit_prepared_editorial_block_update(
+                        database, adapter, credential, proposal
+                    )
+                    return "committed", receipt.revision
+                except RevisionConflict:
+                    return "revision_conflict", None
+            finally:
+                client.close()
+
+        async def compete() -> list[tuple[str, int | None]]:
+            return list(
+                await asyncio.gather(
+                    *(
+                        asyncio.to_thread(commit_with_own_client, credential, proposal)
+                        for credential, proposal in zip(writers, prepared, strict=True)
+                    )
+                )
+            )
+
+        outcomes = asyncio.run(compete())
+        self.assertEqual(sum(result == "committed" for result, _ in outcomes), 1)
+        self.assertEqual(
+            sum(result == "revision_conflict" for result, _ in outcomes), 1
+        )
+        self.assertEqual(self.adapter.current_revision(self.track_id), 1)
+        self.assertEqual(len(self._audit_rows()), 1)
+        self.assertEqual(self.database[f"{_NAMESPACE}_history"].count_documents({}), 1)
 
 
 if __name__ == "__main__":
