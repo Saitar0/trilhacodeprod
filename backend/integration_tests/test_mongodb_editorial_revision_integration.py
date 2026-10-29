@@ -667,6 +667,9 @@ class MongoEditorialRevisionIntegrationTests(unittest.TestCase):
             "EDITORIAL_REVISION_TEST_URI": _TEST_URI,
             "EDITORIAL_REVISION_SUITE_REEXEC_CHILD": "1",
         }
+        python_path = os.environ.get("PYTHONPATH")
+        if python_path:
+            child_environment["PYTHONPATH"] = python_path
         if os.name == "nt":
             child_environment["SystemRoot"] = os.environ.get("SystemRoot", "")
         completed = subprocess.run(
@@ -674,7 +677,7 @@ class MongoEditorialRevisionIntegrationTests(unittest.TestCase):
                 sys.executable,
                 "-m",
                 "unittest",
-                "unit_tests.test_mongodb_editorial_revision_integration",
+                "integration_tests.test_mongodb_editorial_revision_integration",
             ],
             cwd=Path(__file__).resolve().parents[1],
             env=child_environment,
