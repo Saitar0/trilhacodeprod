@@ -21,6 +21,9 @@ from test_support.beta5_mongo_target import (
     require_explicit_opt_in,
 )
 from test_support.beta6_1_internal_target import connect_internal_verified_target
+from test_support.beta7_internal_target import (
+    connect_internal_verified_target as connect_beta7_internal_verified_target,
+)
 
 _TESTS_DIR = Path(__file__).resolve().parent
 _target: MongoTarget | None = None
@@ -60,15 +63,22 @@ def pytest_addoption(parser):
         default=False,
         help="opt into Beta 6 tests after the Beta 6.1 host gate proves an internal Docker network",
     )
+    parser.addoption(
+        "--beta7-isolated-mongo",
+        action="store_true",
+        default=False,
+        help="opt into Beta 7 tests after the host harness proves ownership of an internal Docker network",
+    )
 
 
 def _phase(config):
     beta5 = config.getoption("--beta5-isolated-mongo")
     beta6 = config.getoption("--beta6-isolated-mongo")
     beta6_1 = config.getoption("--beta6-1-isolated-mongo")
-    if sum((beta5, beta6, beta6_1)) > 1:
-        raise pytest.UsageError("Selecione somente um ambiente persistente: Beta 5, Beta 6 ou Beta 6.1.")
-    return "beta6" if beta6 or beta6_1 else "beta5" if beta5 else None
+    beta7 = config.getoption("--beta7-isolated-mongo")
+    if sum((beta5, beta6, beta6_1, beta7)) > 1:
+        raise pytest.UsageError("Selecione somente um ambiente persistente de uma única fase.")
+    return "beta7" if beta7 else "beta6" if beta6 or beta6_1 else "beta5" if beta5 else None
 
 
 def pytest_configure(config):
@@ -80,6 +90,9 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers", "beta6_1_isolated_mongo: test is running on the verified Beta 6.1 internal network",
+    )
+    config.addinivalue_line(
+        "markers", "beta7_isolated_mongo: test is running on the verified Beta 7 internal network",
     )
 
 
@@ -94,7 +107,7 @@ def pytest_collect_file(file_path, parent):
             raise pytest.UsageError(
                 "backend/tests collection blocked before module import: provision and verify a "
                 "phase-specific disposable MongoDB, then pass exactly one of "
-                "--beta5-isolated-mongo or --beta6-isolated-mongo."
+                "a supported phase-specific isolated Mongo option."
             ) from exc
 
 
@@ -111,7 +124,10 @@ def pytest_collection_modifyitems(config, items):
             "no MongoDB URI fallback is available."
         )
     for item in persistent_items:
-        marker = "beta6_1_isolated_mongo" if config.getoption("--beta6-1-isolated-mongo") else f"{phase}_isolated_mongo"
+        marker = (
+            "beta6_1_isolated_mongo" if config.getoption("--beta6-1-isolated-mongo")
+            else f"{phase}_isolated_mongo"
+        )
         item.add_marker(getattr(pytest.mark, marker))
 
 
@@ -126,6 +142,11 @@ def pytest_sessionstart(session):
 
     if session.config.getoption("--beta6-1-isolated-mongo"):
         _target, _ownership_client = connect_internal_verified_target(
+            os.environ,
+            lambda uri: MongoClient(uri, serverSelectionTimeoutMS=3000, connectTimeoutMS=2000),
+        )
+    elif session.config.getoption("--beta7-isolated-mongo"):
+        _target, _ownership_client = connect_beta7_internal_verified_target(
             os.environ,
             lambda uri: MongoClient(uri, serverSelectionTimeoutMS=3000, connectTimeoutMS=2000),
         )

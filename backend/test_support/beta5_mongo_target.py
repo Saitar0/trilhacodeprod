@@ -42,7 +42,7 @@ def _required(environ: Mapping[str, str], name: str) -> str:
 
 def require_explicit_opt_in(enabled: bool, phase: str | None = None) -> None:
     """Require a deliberate test-run switch before selecting persistent tests."""
-    if phase is not None and phase not in {"beta5", "beta6"}:
+    if phase is not None and phase not in {"beta5", "beta6", "beta7"}:
         raise MongoTargetError("Fase de isolamento persistente não autorizada")
     if not enabled:
         label = phase.upper() if phase else "BETA5 OU BETA6"

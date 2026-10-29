@@ -3,6 +3,17 @@
 !backend/**
 !frontend/
 !frontend/**
+!docs/
+!docs/beta/
+!docs/beta/**
+!docs/architecture/
+!docs/architecture/**
+!ops/
+!ops/g2/
+!ops/g2/**
+!.github/
+!.github/workflows/
+!.github/workflows/**
 **/.env
 **/.env.*
 **/.git

@@ -22,6 +22,10 @@ RUN npx playwright install --with-deps chromium
 WORKDIR /workspace
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
+COPY docs/beta/ ./docs/beta/
+COPY docs/architecture/ ./docs/architecture/
+COPY ops/g2/ ./ops/g2/
+COPY .github/workflows/ ./.github/workflows/
 
 ENV PYTHONPATH=/workspace/backend \
     VITE_BACKEND_URL=http://127.0.0.1:18000
