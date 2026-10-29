@@ -1,0 +1,120 @@
+{
+  "schema_version": "trilhacode.beta5.project-3.5-inventory/1.0",
+  "project_id": "3.5",
+  "phase_id": "1",
+  "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+  "source_sha256": "f2b7ab9454591d5ed02a1e5e70b5331e21aaf36efa5490c147ca693d6d20b877",
+  "source_status": "rascunho",
+  "inventory_basis": "Beta 4 manifest artifact IDs, kinds, paths, order and hashes; no bodies",
+  "artifact_count": 11,
+  "artifacts": [
+    {
+      "artifact_id": "f1-3-5-00-brief-projeto",
+      "kind": "project_brief",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/00_brief_projeto.md",
+      "content_sha256": "d381f5d17f0b4a5d1773348cbd9b87a068821ba434b6af280d86997137b3479c",
+      "order": 0,
+      "source_item_ids": []
+    },
+    {
+      "artifact_id": "f1-3-5-checklist-marco-01-aceite",
+      "kind": "checklist",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_marco_01_aceite.md",
+      "content_sha256": "f956838abee9af4e11228eec7b61103e8e97cf6b31477f9d2547944476f23401",
+      "order": 1,
+      "source_item_ids": [
+        "M01"
+      ]
+    },
+    {
+      "artifact_id": "f1-3-5-checklist-marco-02-aceite",
+      "kind": "checklist",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_marco_02_aceite.md",
+      "content_sha256": "93044f19dfc0f10e505a7b2460ee5fe6c5e4abef582c051d9fe14dd2bbd582f3",
+      "order": 2,
+      "source_item_ids": [
+        "M02"
+      ]
+    },
+    {
+      "artifact_id": "f1-3-5-checklist-marco-03-aceite",
+      "kind": "checklist",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_marco_03_aceite.md",
+      "content_sha256": "9523a19dedf6eb9865feae3102b956b15f75492eafab4f324bffa3cf47d575f7",
+      "order": 3,
+      "source_item_ids": [
+        "M03"
+      ]
+    },
+    {
+      "artifact_id": "f1-3-5-checklist-marco-04-aceite",
+      "kind": "checklist",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_marco_04_aceite.md",
+      "content_sha256": "71e0484831e537369d2ccc1892f754e7fa3bc1821e12e9555d39fd9a0f1e69c0",
+      "order": 4,
+      "source_item_ids": [
+        "M04"
+      ]
+    },
+    {
+      "artifact_id": "f1-3-5-checklist-revisao-final",
+      "kind": "checklist",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_revisao_final.md",
+      "content_sha256": "78022069a1a5b5bdcc49d0488d838b47b5701ef0c193dbafabed7fc57e5034a3",
+      "order": 0,
+      "source_item_ids": [
+        "revisao_final"
+      ]
+    },
+    {
+      "artifact_id": "f1-3-5-marco-01-escopo",
+      "kind": "milestone",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/marco_01_escopo.md",
+      "content_sha256": "2541ab7ef86bec2e02f065fceb3fe8a581f6135aa5e03722f1120ac124663c0d",
+      "order": 1,
+      "source_item_ids": [
+        "M01"
+      ]
+    },
+    {
+      "artifact_id": "f1-3-5-marco-02-repositorio-setup",
+      "kind": "milestone",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/marco_02_repositorio_setup.md",
+      "content_sha256": "69ed88657b0b19796058b8c8d6816f6800965abd17d860ca3b4fcd3a6e3ac5f9",
+      "order": 2,
+      "source_item_ids": [
+        "M02"
+      ]
+    },
+    {
+      "artifact_id": "f1-3-5-marco-03-historico-seguro",
+      "kind": "milestone",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/marco_03_historico_seguro.md",
+      "content_sha256": "2df7903a472803d96a5a357a5fef5b1497bdb6bc20e233d79edc7b1a5fb942d8",
+      "order": 3,
+      "source_item_ids": [
+        "M03"
+      ]
+    },
+    {
+      "artifact_id": "f1-3-5-marco-04-publicacao-remota",
+      "kind": "milestone",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/marco_04_publicacao_remota.md",
+      "content_sha256": "b922364218f2952c3c7785f70d53799ecd4d1267e302ef8cfac48e0613387e55",
+      "order": 4,
+      "source_item_ids": [
+        "M04"
+      ]
+    },
+    {
+      "artifact_id": "f1-3-5-rubrica-comum-marcos-0-4",
+      "kind": "rubric",
+      "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/rubrica_comum_marcos_0-4.md",
+      "content_sha256": "a1e1b7609fc7b12b56aebde687c2e858aea5d6c599567722ec10637c1c57fcd5",
+      "order": 0,
+      "source_item_ids": [
+        "rubrica_comum"
+      ]
+    }
+  ]
+}
