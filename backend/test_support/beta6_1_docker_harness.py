@@ -58,6 +58,10 @@ class Beta61DockerHarness:
         )
         self.jwt_secret = secrets.token_urlsafe(48)
         self.image_tag = f"tc-beta6-1-e2e:{self.suffix}"
+        # Test phases may opt into a replica set for transaction/race proofs.
+        # The default stays the historical standalone MongoDB command.
+        self.mongo_command: tuple[str, ...] = ()
+        self.mongo_environment: dict[str, str] = {}
         self.labels = {
             "io.trilhacode.phase": "beta6-1",
             "io.trilhacode.run-id": self.run_id,
@@ -187,7 +191,7 @@ class Beta61DockerHarness:
                 "network", "create", "--driver", "bridge", "--internal",
                 *self._label_args(), self.network_name,
             ])
-            self.mongo_id = self._docker([
+            mongo_arguments = [
                 "run", "--detach", "--name", self.mongo_name,
                 "--network", self.network_name,
                 "--tmpfs", "/data/db:rw,noexec,nosuid,size=768m",
@@ -195,8 +199,11 @@ class Beta61DockerHarness:
                 *self._label_args(),
                 "--env", f"MONGO_INITDB_ROOT_USERNAME={self.mongo_user}",
                 "--env", f"MONGO_INITDB_ROOT_PASSWORD={self.mongo_password}",
-                "mongo:7.0.43",
-            ], timeout=300)
+            ]
+            for key, value in self.mongo_environment.items():
+                mongo_arguments.extend(("--env", f"{key}={value}"))
+            mongo_arguments.extend(("mongo:7.0.43", *self.mongo_command))
+            self.mongo_id = self._docker(mongo_arguments, timeout=300)
             runner_env = {
                 "MONGO_URL": self.mongo_uri,
                 "DB_NAME": self.database,
@@ -279,6 +286,9 @@ class Beta61DockerHarness:
         mongo_config = mongo.get("Config") or {}
         if mongo_config.get("Image") != "mongo:7.0.43":
             raise Beta61HarnessError("Imagem do MongoDB diverge da versão descartável aprovada")
+        expected_mongo_command = list(self.mongo_command) or ["mongod"]
+        if list(mongo_config.get("Cmd") or []) != expected_mongo_command:
+            raise Beta61HarnessError("Comando MongoDB diverge da configuração descartável aprovada")
         expected_tmpfs = {"/data/db", "/data/configdb"}
         if set((mongo.get("HostConfig") or {}).get("Tmpfs") or {}) != expected_tmpfs:
             raise Beta61HarnessError("Armazenamento do MongoDB não é exclusivamente temporário")
@@ -288,6 +298,8 @@ class Beta61DockerHarness:
         if (f"MONGO_INITDB_ROOT_USERNAME={self.mongo_user}" not in configured
                 or f"MONGO_INITDB_ROOT_PASSWORD={self.mongo_password}" not in configured):
             raise Beta61HarnessError("Credenciais Mongo não correspondem às exclusivas da execução")
+        if any(f"{key}={value}" not in configured for key, value in self.mongo_environment.items()):
+            raise Beta61HarnessError("Configuração Mongo adicional diverge da execução descartável")
 
         runner_host = runner.get("HostConfig") or {}
         if set(runner_host.get("Tmpfs") or {}) != {"/tmp"}:

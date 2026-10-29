@@ -23,6 +23,12 @@ const AdminTracks = lazy(() => import("@/pages/admin/AdminTracks"));
 const TrackEditor = lazy(() => import("@/pages/admin/TrackEditor"));
 const Taxonomies = lazy(() => import("@/pages/admin/Taxonomies"));
 const Users = lazy(() => import("@/pages/admin/Users"));
+const Beta71CurriculumPreview = lazy(() => import("@/pages/beta/Beta71CurriculumPreview"));
+
+// Vite replaces MODE at build time. The real operational build does not
+// contain an active route to the experimental preview.
+const beta71PreviewEnabled = import.meta.env.MODE === "beta7-1-preview"
+  && Boolean(import.meta.env.VITE_BETA7_1_PREVIEW_BATCH_ID);
 
 export default function App() {
   return (
@@ -37,6 +43,7 @@ export default function App() {
             <Route path="/auth/confirm-email" element={<ConfirmEmail />} />
             <Route path="/recuperar-senha" element={<PasswordRecovery />} />
             <Route path="/auth/reset-password" element={<PasswordReset />} />
+            {beta71PreviewEnabled && <Route path="/beta7-1-preview" element={<Beta71CurriculumPreview />} />}
             <Route path="/" element={<ProtectedRoute><Catalog /></ProtectedRoute>} />
             <Route path="/estudos" element={<ProtectedRoute><MyStudy /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

@@ -53,6 +53,8 @@ export const test = base.extend({
       loginFormCount: document.querySelectorAll('[data-testid="login-form"]').length,
       confirmationButtonCount: [...document.querySelectorAll("button")]
         .filter((button) => button.textContent?.trim() === "Confirmar e-mail").length,
+      previewLoginCount: document.querySelectorAll('[data-testid="beta71-preview-login"]').length,
+      previewRootCount: document.querySelectorAll('[data-testid="beta71-preview"]').length,
     })).catch(() => ({ location: "unavailable", title: "unavailable", loginFormCount: 0, confirmationButtonCount: 0 }));
     const diagnosticsPath = testInfo.outputPath("browser-diagnostics.json");
     await mkdir(dirname(diagnosticsPath), { recursive: true });
