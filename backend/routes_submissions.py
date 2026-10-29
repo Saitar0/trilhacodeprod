@@ -82,5 +82,10 @@ async def claim(sub_id: str, user: dict = Depends(reviewer_submission_writer)):
 
 
 @router.post("/{sub_id}/grade", response_model=SubmissionOut, response_model_exclude_unset=True)
-async def grade(sub_id: str, body: GradeIn, user: dict = Depends(reviewer_submission_writer)):
-    return ser(await grade_submission(sub_id, body.model_dump(), user))
+async def grade(
+    sub_id: str,
+    body: GradeIn,
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key", min_length=8, max_length=128),
+    user: dict = Depends(reviewer_submission_writer),
+):
+    return ser(await grade_submission(sub_id, {**body.model_dump(), "operation_id": idempotency_key}, user))

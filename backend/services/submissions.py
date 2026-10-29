@@ -382,6 +382,12 @@ async def claim_submission(submission_id: str, user: dict) -> dict:
 
 
 async def grade_submission(submission_id: str, data: dict, user: dict) -> dict:
+    operation_id = data.pop("operation_id", None)
+    if operation_id is not None and not _SUBMISSION_OPERATION_KEY.fullmatch(operation_id):
+        raise HTTPException(status_code=422, detail="Idempotency-Key inválida")
+    request_fingerprint = sha256(json.dumps(
+        data, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+    ).encode("utf-8")).hexdigest()
     result_name = data["result"]
     if result_name not in ("approved", "rejected", "returned"):
         raise HTTPException(status_code=400, detail="Resultado inválido")
@@ -389,6 +395,14 @@ async def grade_submission(submission_id: str, data: dict, user: dict) -> dict:
     if not submission:
         raise HTTPException(status_code=404, detail="Submissão não encontrada")
     await require_track_scope(user, submission["track_id"], GRADE_SUBMISSIONS)
+    if operation_id is not None:
+        prior_operation = next((item for item in submission.get("grading_operations", [])
+                                if item.get("id") == operation_id), None)
+        if prior_operation:
+            if (prior_operation.get("reviewer_id") != user["id"]
+                    or prior_operation.get("fingerprint") != request_fingerprint):
+                raise HTTPException(status_code=409, detail="Chave de operação de correção reutilizada")
+            return _reviewer_submission(submission)
     if submission["status"] not in ("submitted", "in_review"):
         raise HTTPException(status_code=409, detail="Esta submissão não está aguardando correção")
     if result_name != "approved" and not data["feedback"].strip():
@@ -396,6 +410,18 @@ async def grade_submission(submission_id: str, data: dict, user: dict) -> dict:
     status = "returned" if result_name == "returned" else "graded"
     grading = {**data, "graded_by": user["id"], "graded_by_name": user.get("name", ""), "graded_at": now()}
     next_projection_revision = submission.get("progress_projection_revision", 0) + 1
+    push_update: dict[str, Any] = {"history": {**_hist(status, user), "result": result_name}}
+    if operation_id is not None:
+        push_update["grading_operations"] = {"$each": [{
+            "id": operation_id,
+            "reviewer_id": user["id"],
+            "fingerprint": request_fingerprint,
+            "at": now(),
+        }], "$slice": -128}
+    # Recheck the mutable track grant after loading the submission and immediately
+    # before the CAS write. This narrows the revocation window; it is not an
+    # atomic transaction with the grant store.
+    await require_track_scope(user, submission["track_id"], GRADE_SUBMISSIONS)
     update = await db.submissions.update_one(
         {
             "_id": submission["_id"], "status": {"$in": ["submitted", "in_review"]},
@@ -407,11 +433,20 @@ async def grade_submission(submission_id: str, data: dict, user: dict) -> dict:
                 "progress_projection_status": "pending",
                 "progress_projection_revision": next_projection_revision,
             },
-            "$push": {"history": {**_hist(status, user), "result": result_name}},
+            "$push": push_update,
             "$inc": {"revision": 1},
         },
     )
     if not update.modified_count:
+        if operation_id is not None:
+            saved_after_race = await db.submissions.find_one({"_id": submission["_id"]})
+            saved_operation = next((item for item in (saved_after_race or {}).get("grading_operations", [])
+                                    if item.get("id") == operation_id), None)
+            if saved_operation:
+                if (saved_operation.get("reviewer_id") == user["id"]
+                        and saved_operation.get("fingerprint") == request_fingerprint):
+                    return _reviewer_submission(saved_after_race)
+                raise HTTPException(status_code=409, detail="Chave de operação de correção reutilizada")
         raise HTTPException(status_code=409, detail="Outra pessoa corrigiu esta submissão ao mesmo tempo")
     saved = await db.submissions.find_one({"_id": submission["_id"]})
     if saved is None:

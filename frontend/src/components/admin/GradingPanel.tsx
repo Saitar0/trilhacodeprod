@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CheckCircle2, CornerUpLeft, Play, XCircle } from "lucide-react";
@@ -11,6 +11,7 @@ import { RESULT_META, SubmissionBadge } from "@/components/common/SubmissionBadg
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { createOperationId } from "@/lib/operationId";
 interface Detail { submission: Submission; block: ContentBlock | null; attempts: Submission[] }
 
 function RubricEditor({ criteria, setCriteria }: { criteria: CriterionGrade[]; setCriteria: (c: CriterionGrade[]) => void }) {
@@ -37,8 +38,10 @@ export function GradingPanel({ id, onDone }: { id: string; onDone: () => void })
   const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState("");
   const [criteria, setCriteria] = useState<CriterionGrade[]>([]);
+  const formEdited = useRef(false);
+  const gradingOperation = useRef<{ fingerprint: string; id: string } | null>(null);
   useEffect(() => {
-    if (!data) return;
+    if (!data || formEdited.current) return;
     const g = data.submission.grading;
     const names: string[] = (data.block?.data.criteria as string[]) || [];
     setFeedback(g?.feedback || "");
@@ -52,8 +55,21 @@ export function GradingPanel({ id, onDone }: { id: string; onDone: () => void })
   const act = async (fn: () => Promise<unknown>, msg: string) => {
     try { await fn(); refresh(); toast.success(msg); onDone(); } catch (e) { toast.error(apiError(e)); }
   };
-  const grade = (result: string) => act(() => api.post(`/submissions/${id}/grade`, { result, feedback, criteria, score: score === "" ? null : Number(score) }),
-    result === "approved" ? "Aprovado" : result === "rejected" ? "Reprovado" : "Devolvido para ajuste");
+  const updateCriteria = (next: CriterionGrade[]) => {
+    formEdited.current = true;
+    setCriteria(next);
+  };
+  const grade = (result: string) => {
+    const payload = { result, feedback, criteria, score: score === "" ? null : Number(score) };
+    const fingerprint = JSON.stringify({ id, payload });
+    if (gradingOperation.current?.fingerprint !== fingerprint) {
+      gradingOperation.current = { fingerprint, id: createOperationId() };
+    }
+    const idempotencyKey = gradingOperation.current.id;
+    return act(() => api.post(`/submissions/${id}/grade`, payload, {
+      headers: { "Idempotency-Key": idempotencyKey },
+    }), result === "approved" ? "Aprovado" : result === "rejected" ? "Reprovado" : "Devolvido para ajuste");
+  };
 
   return (
     <div className="space-y-6 fade-up" data-testid="grading-panel">
@@ -74,10 +90,10 @@ export function GradingPanel({ id, onDone }: { id: string; onDone: () => void })
       {s.status === "submitted" && <Button variant="outline" className="rounded-full" data-testid="grading-claim-button" onClick={() => act(() => api.post(`/submissions/${id}/claim`), "Correção iniciada — o aluno não pode mais editar")}><Play />Iniciar correção</Button>}
       {gradable ? (
         <div className="space-y-4">
-          {criteria.length > 0 ? <RubricEditor criteria={criteria} setCriteria={setCriteria} /> : <p className="text-xs text-slate-500">Este exercício não tem critérios de rubrica configurados.</p>}
+          {criteria.length > 0 ? <RubricEditor criteria={criteria} setCriteria={updateCriteria} /> : <p className="text-xs text-slate-500">Este exercício não tem critérios de rubrica configurados.</p>}
           <div className="grid gap-3 sm:grid-cols-[1fr_140px]">
-            <Textarea data-testid="grading-feedback-input" rows={4} placeholder="Feedback para o aluno (obrigatório ao reprovar ou devolver)" value={feedback} onChange={(e) => setFeedback(e.target.value)} />
-            <Input data-testid="grading-score-input" type="number" placeholder={`Nota${block?.data.max_score ? ` / ${block.data.max_score}` : ""}`} value={score} onChange={(e) => setScore(e.target.value)} />
+            <Textarea data-testid="grading-feedback-input" rows={4} placeholder="Feedback para o aluno (obrigatório ao reprovar ou devolver)" value={feedback} onChange={(e) => { formEdited.current = true; setFeedback(e.target.value); }} />
+            <Input data-testid="grading-score-input" type="number" placeholder={`Nota${block?.data.max_score ? ` / ${block.data.max_score}` : ""}`} value={score} onChange={(e) => { formEdited.current = true; setScore(e.target.value); }} />
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <Button variant="outline" data-testid="grading-return-button" onClick={() => grade("returned")}><CornerUpLeft />Devolver para ajuste</Button>
