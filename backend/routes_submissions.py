@@ -36,6 +36,11 @@ async def reviewer_submission_writer(request: Request, user: dict = Depends(requ
     return user
 
 
+async def reviewer_submission_reader(user: dict = Depends(require("submissions.grade"))):
+    """Authorize safe queue reads without requiring a mutation-only Origin header."""
+    return user
+
+
 @router.get("/mine", response_model=list[SubmissionOut], response_model_exclude_unset=True)
 async def my_submissions(node_id: Optional[str] = None, user: dict = Depends(current_user)):
     return ser(await my_submissions_service(node_id, user))
@@ -59,7 +64,7 @@ async def submit(
 async def list_submissions(track_id: Optional[str] = None, node_id: Optional[str] = None, user_id: Optional[str] = None,
                            block_type: Optional[str] = None, status: Optional[str] = None, q: Optional[str] = None,
                            limit: int = 500, skip: int = 0,
-                           user: dict = Depends(reviewer_submission_writer)):
+                           user: dict = Depends(reviewer_submission_reader)):
     result = await list_submissions_service(track_id, node_id, user_id, block_type, status, q, user, limit, skip)
     return {"items": ser(result["items"]), "counts": result["counts"]}
 

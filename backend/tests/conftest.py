@@ -20,6 +20,7 @@ from test_support.beta5_mongo_target import (
     connect_verified_target,
     require_explicit_opt_in,
 )
+from test_support.beta6_1_internal_target import connect_internal_verified_target
 
 _TESTS_DIR = Path(__file__).resolve().parent
 _target: MongoTarget | None = None
@@ -53,14 +54,21 @@ def pytest_addoption(parser):
         default=False,
         help="explicitly opt into backend/tests using a Docker-proven Beta 6 MongoDB container",
     )
+    parser.addoption(
+        "--beta6-1-isolated-mongo",
+        action="store_true",
+        default=False,
+        help="opt into Beta 6 tests after the Beta 6.1 host gate proves an internal Docker network",
+    )
 
 
 def _phase(config):
     beta5 = config.getoption("--beta5-isolated-mongo")
     beta6 = config.getoption("--beta6-isolated-mongo")
-    if beta5 and beta6:
-        raise pytest.UsageError("Selecione somente um ambiente persistente: Beta 5 ou Beta 6.")
-    return "beta6" if beta6 else "beta5" if beta5 else None
+    beta6_1 = config.getoption("--beta6-1-isolated-mongo")
+    if sum((beta5, beta6, beta6_1)) > 1:
+        raise pytest.UsageError("Selecione somente um ambiente persistente: Beta 5, Beta 6 ou Beta 6.1.")
+    return "beta6" if beta6 or beta6_1 else "beta5" if beta5 else None
 
 
 def pytest_configure(config):
@@ -69,6 +77,9 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers", "beta6_isolated_mongo: test is running against a verified disposable Beta 6 MongoDB",
+    )
+    config.addinivalue_line(
+        "markers", "beta6_1_isolated_mongo: test is running on the verified Beta 6.1 internal network",
     )
 
 
@@ -100,7 +111,8 @@ def pytest_collection_modifyitems(config, items):
             "no MongoDB URI fallback is available."
         )
     for item in persistent_items:
-        item.add_marker(getattr(pytest.mark, f"{phase}_isolated_mongo"))
+        marker = "beta6_1_isolated_mongo" if config.getoption("--beta6-1-isolated-mongo") else f"{phase}_isolated_mongo"
+        item.add_marker(getattr(pytest.mark, marker))
 
 
 def pytest_sessionstart(session):
@@ -112,11 +124,17 @@ def pytest_sessionstart(session):
     if phase is None:
         return
 
-    _target, _ownership_client = connect_verified_target(
-        os.environ,
-        lambda uri: MongoClient(uri, serverSelectionTimeoutMS=3000, connectTimeoutMS=2000),
-        phase=phase,
-    )
+    if session.config.getoption("--beta6-1-isolated-mongo"):
+        _target, _ownership_client = connect_internal_verified_target(
+            os.environ,
+            lambda uri: MongoClient(uri, serverSelectionTimeoutMS=3000, connectTimeoutMS=2000),
+        )
+    else:
+        _target, _ownership_client = connect_verified_target(
+            os.environ,
+            lambda uri: MongoClient(uri, serverSelectionTimeoutMS=3000, connectTimeoutMS=2000),
+            phase=phase,
+        )
     _db_name = _target.database
     _mongo_url = _target.uri
 
