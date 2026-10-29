@@ -1,8 +1,9 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header, Request
 
 from permissions import require
+from routes_activities import ensure_cookie_origin
 from schemas.submissions import (
     AnswerIn,
     GradeIn,
@@ -25,27 +26,41 @@ from services.submissions import save_draft as save_draft_service
 router = APIRouter(prefix="/api/submissions")
 
 
+async def student_submission_writer(request: Request, user: dict = Depends(require("progress.write"))):
+    ensure_cookie_origin(request)
+    return user
+
+
+async def reviewer_submission_writer(request: Request, user: dict = Depends(require("submissions.grade"))):
+    ensure_cookie_origin(request)
+    return user
+
+
 @router.get("/mine", response_model=list[SubmissionOut], response_model_exclude_unset=True)
 async def my_submissions(node_id: Optional[str] = None, user: dict = Depends(current_user)):
     return ser(await my_submissions_service(node_id, user))
 
 
 @router.put("/draft", response_model=SubmissionOut, response_model_exclude_unset=True)
-async def save_draft(body: AnswerIn, user: dict = Depends(require("progress.write"))):
+async def save_draft(body: AnswerIn, user: dict = Depends(student_submission_writer)):
     return ser(await save_draft_service(body.block_id, body.answer, user))
 
 
 @router.post("/submit", response_model=SubmissionOut, response_model_exclude_unset=True)
-async def submit(body: AnswerIn, user: dict = Depends(require("progress.write"))):
-    return ser(await submit_answer(body.block_id, body.answer, user))
+async def submit(
+    body: AnswerIn,
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key", min_length=8, max_length=128),
+    user: dict = Depends(student_submission_writer),
+):
+    return ser(await submit_answer(body.block_id, body.answer, user, idempotency_key))
 
 
 @router.get("", response_model=SubmissionListOut, response_model_exclude_unset=True)
 async def list_submissions(track_id: Optional[str] = None, node_id: Optional[str] = None, user_id: Optional[str] = None,
                            block_type: Optional[str] = None, status: Optional[str] = None, q: Optional[str] = None,
                            limit: int = 500, skip: int = 0,
-                           _: dict = Depends(require("submissions.grade"))):
-    result = await list_submissions_service(track_id, node_id, user_id, block_type, status, q, limit, skip)
+                           user: dict = Depends(reviewer_submission_writer)):
+    result = await list_submissions_service(track_id, node_id, user_id, block_type, status, q, user, limit, skip)
     return {"items": ser(result["items"]), "counts": result["counts"]}
 
 
@@ -57,10 +72,10 @@ async def get_submission(sub_id: str, user: dict = Depends(current_user)):
 
 
 @router.post("/{sub_id}/claim", response_model=SubmissionOut, response_model_exclude_unset=True)
-async def claim(sub_id: str, user: dict = Depends(require("submissions.grade"))):
+async def claim(sub_id: str, user: dict = Depends(reviewer_submission_writer)):
     return ser(await claim_submission(sub_id, user))
 
 
 @router.post("/{sub_id}/grade", response_model=SubmissionOut, response_model_exclude_unset=True)
-async def grade(sub_id: str, body: GradeIn, user: dict = Depends(require("submissions.grade"))):
+async def grade(sub_id: str, body: GradeIn, user: dict = Depends(reviewer_submission_writer)):
     return ser(await grade_submission(sub_id, body.model_dump(), user))

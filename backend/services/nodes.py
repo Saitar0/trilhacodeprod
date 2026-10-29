@@ -21,23 +21,31 @@ from services.common import (
 )
 
 _ASSESSMENT_BLOCK_TYPES = {"exercise_objective", "exercise_open", "practical_challenge", "quiz"}
-_STUDENT_HIDDEN_BLOCK_FIELDS = {"answer", "correct_index", "correct_option_id", "explanation", "feedback"}
+_STUDENT_ASSESSMENT_FIELDS = {
+    "prompt", "question", "options", "instructions", "starter_code", "language",
+    "acceptance", "grading", "allow_resubmit", "activity_schema_version",
+}
 
 
 def _student_block(block: dict) -> dict:
-    """Remove assessment solutions from content returned to students."""
+    """Project assessment blocks through a closed public-field allowlist."""
     if block.get("type") not in _ASSESSMENT_BLOCK_TYPES:
         return block
     data = block.get("data")
     if not isinstance(data, dict):
-        return block
+        return {key: block[key] for key in ("_id", "node_id", "type", "title", "order", "status")
+                if key in block}
     if block.get("type") == "quiz":
         # Keep only rendering inputs for an unpublished/legacy static quiz.
         safe_data = {key: value for key, value in data.items()
                      if key in {"question", "prompt", "options", "activity_schema_version"}}
     else:
-        safe_data = {key: value for key, value in data.items() if key not in _STUDENT_HIDDEN_BLOCK_FIELDS}
-    return {**block, "data": safe_data}
+        safe_data = {key: value for key, value in data.items() if key in _STUDENT_ASSESSMENT_FIELDS}
+    public = {key: block[key] for key in (
+        "_id", "node_id", "type", "title", "order", "status", "schema_version",
+    ) if key in block}
+    public["data"] = safe_data
+    return public
 
 
 async def validate_parent(track: dict, kind: str, parent_id: str | None, node_id: str | None = None) -> None:

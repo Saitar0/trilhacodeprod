@@ -40,15 +40,21 @@ async def activity_writer(request: Request, user: dict = Depends(require("progre
     Bearer clients are not ambient-cookie clients and may omit Origin. Browser
     clients using the access cookie must supply an allowed Origin or Referer.
     """
-    if request.cookies.get("access_token"):
-        source = request.headers.get("origin")
-        if not source:
-            source = _origin(request.headers.get("referer"))
-        supplied = _origin(source)
-        allowed = {origin.rstrip("/").lower() for origin in settings.effective_cors_origins}
-        if not supplied or supplied not in allowed:
-            raise HTTPException(status_code=403, detail="Origem da requisição não autorizada")
+    ensure_cookie_origin(request)
     return user
+
+
+def ensure_cookie_origin(request: Request) -> None:
+    """Reject cross-site mutations authenticated by ambient browser cookies."""
+    if not request.cookies.get("access_token"):
+        return
+    source = request.headers.get("origin")
+    if not source:
+        source = _origin(request.headers.get("referer"))
+    supplied = _origin(source)
+    allowed = {origin.rstrip("/").lower() for origin in settings.effective_cors_origins}
+    if not supplied or supplied not in allowed:
+        raise HTTPException(status_code=403, detail="Origem da requisição não autorizada")
 
 
 @router.post("/{activity_id}/attempts", response_model=AttemptOut, status_code=status.HTTP_201_CREATED)
