@@ -126,6 +126,7 @@ export function ExerciseBlock({ block }: BlockProps) {
   return (
     <div className="space-y-3">
       <Markdown>{block.data.prompt}</Markdown>
+      {block.data.instructions && <Markdown className="text-sm text-slate-300">{block.data.instructions}</Markdown>}
       {options.length > 0 && (
         <ol className="list-[upper-alpha] space-y-1 pl-6 text-sm text-slate-300">{options.map((o, i) => <li key={i}>{o}</li>)}</ol>
       )}
