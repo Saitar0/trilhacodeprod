@@ -9,7 +9,7 @@ Foi implementado um pacote isolado de eventos tipados e observação passiva, co
 - Branch: `codex/fase2-1a-12c5-isolated-editorial-observability`
 - Worktree: `C:\Users\Joao\.codex\worktrees\trilhacode-fase2-1a-12c5-isolated-editorial-observability\trilhacodeprod`
 - Base: `0bad7f569089e75817127d732e23380226af6ee3`
-- Commit final: a registrar após validação local.
+- Commit de implementação, testes e documentação: `5631cac7` (o SHA completo e o commit de fechamento documental constam na resposta final).
 - Nenhum push, PR, merge, rebase ou operação remota.
 
 ## C. Arquitetura e privacidade
