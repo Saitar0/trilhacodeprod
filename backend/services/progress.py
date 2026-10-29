@@ -159,10 +159,15 @@ async def set_progress(body: dict, user: dict) -> dict:
     block_id = body.get("block_id")
     attempt_id = body.get("attempt_id")
     server_assessed = False
+    manual_submission = False
     if block_id is not None:
         block = await db.content_blocks.find_one({"_id": oid(block_id), "node_id": body["node_id"]})
         if block is None:
             raise HTTPException(status_code=404, detail="Bloco não encontrado")
+        block_type = await db.block_types.find_one({"key": block.get("type")}, {"capabilities": 1})
+        manual_submission = bool(
+            block_type and "submission" in (block_type.get("capabilities") or [])
+        )
         if block.get("type") == "quiz" and status == "completed":
             has_versioned_definition = await db.activity_publications.find_one(
                 {"activity_id": block_id}, {"_id": 1},
@@ -188,6 +193,16 @@ async def set_progress(body: dict, user: dict) -> dict:
                     }
                 else:
                     raise HTTPException(status_code=403, detail="A conclusão desta atividade exige uma tentativa avaliada")
+        if manual_submission and status == "completed":
+            latest_submission = await db.submissions.find_one(
+                {"user_id": user["id"], "block_id": block_id}, sort=[("attempt", -1)],
+            )
+            if not latest_submission or latest_submission.get("status") != "graded" or \
+                    (latest_submission.get("grading") or {}).get("result") != "approved":
+                raise HTTPException(
+                    status_code=403,
+                    detail="A conclusão deste exercício exige aprovação de um avaliador autorizado",
+                )
 
     key = {"user_id": user["id"], "node_id": body["node_id"], "block_id": block_id}
     data = body.get("data", {})
@@ -209,6 +224,10 @@ async def set_progress(body: dict, user: dict) -> dict:
             if current is None and expected_revision not in (None, 0):
                 _progress_conflict(None)
             if current is not None:
+                if manual_submission and current.get("status") == "completed" and status != "completed":
+                    # Completion from an approved review is monotonic. A stale
+                    # submission projection or client request cannot undo it.
+                    return _public_progress(current)
                 if attempt_id:
                     prior_attempt = next((
                         item for item in current.get("_recent_attempts", [])
@@ -334,6 +353,8 @@ async def set_progress(body: dict, user: dict) -> dict:
                 fields["_pending_event"] = event
 
             cas_filter = {**key, "_pending_event": None}
+            if manual_submission and status != "completed":
+                cas_filter["status"] = {"$ne": "completed"}
             if current is not None and "revision" in current:
                 cas_filter["revision"] = current_revision
             else:

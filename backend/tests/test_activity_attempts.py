@@ -260,8 +260,8 @@ def test_published_activity_cannot_be_completed_through_generic_progress_endpoin
     assert activity_id not in record["blocks"]
 
 
-def test_client_cannot_forge_server_assessed_evidence_on_other_blocks(
-    admin, fresh_student, seeded_track, event_loop,
+def test_client_cannot_self_complete_manual_submission_block(
+    admin, fresh_student, seeded_track,
 ):
     _activity_id, node_id, _activity_view = _activity(admin, fresh_student, seeded_track)
     created = admin.post(f"{API}/blocks", json={
@@ -280,12 +280,9 @@ def test_client_cannot_forge_server_assessed_evidence_on_other_blocks(
         "data": {"activity_attempt_id": "forged", "is_correct": True},
         "operation_id": uuid.uuid4().hex,
     })
-    assert response.status_code == 200
-    user_id = fresh_student.get(f"{API}/auth/me").json()["id"]
-    event = event_loop.run_until_complete(db.learning_events.find_one({
-        "user_id": user_id, "node_id": node_id, "block_id": block_id,
-    }))
-    assert event["evidence_kind"] == "self_reported"
+    assert response.status_code == 403
+    record = fresh_student.get(f"{API}/progress/tracks/{seeded_track['id']}").json()
+    assert block_id not in record["blocks"]
 
 
 def test_concurrent_submit_replay_creates_one_attempt_event(admin, fresh_student, seeded_track, event_loop):
