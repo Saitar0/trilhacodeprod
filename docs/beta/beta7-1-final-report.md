@@ -8,7 +8,7 @@ A prévia isolada consumiu as dez unidades revisadas com frontend React, API Fas
 
 ## B. Git e isolamento
 
-Base exata `e671375effee9b957b281559a7310481ef82534b`; branch `codex/beta7-1-real-curriculum-preview`; worktree `C:\Users\Joao\.codex\worktrees\trilhacode-beta7-1-curriculum-preview\trilhacodeprod`. A execução integrada final usou o run `8dad34026a7d4e7ea210301c5754fd08`. O commit local final será registrado após sua criação. O ambiente descartável foi limpo; os filtros da fase não mostraram containers ou redes residuais. Checkout original e worktree curricular permaneceram intocados.
+Base exata `e671375effee9b957b281559a7310481ef82534b`; branch `codex/beta7-1-real-curriculum-preview`; worktree `C:\Users\Joao\.codex\worktrees\trilhacode-beta7-1-curriculum-preview\trilhacodeprod`. A execução integrada final usou o run `8dad34026a7d4e7ea210301c5754fd08`. O ambiente descartável foi limpo; os filtros da fase não mostraram containers ou redes residuais. Checkout original e worktree curricular permaneceram intocados.
 
 ## C. Fonte e currículo
 
@@ -46,7 +46,7 @@ Resultados da execução Beta 7.1:
 * Revogação versus CAS em MongoDB replica set: aprovado (`PERSISTENCE_VERIFIED`).
 * Vitest: 29 testes aprovados em 9 arquivos.
 * TypeScript typecheck, ESLint e build Vite: aprovados.
-* Build emite aviso de bundle principal de aproximadamente 506 kB (acima do limiar atual de 500 kB); não bloqueou a execução.
+* Build emite aviso de bundle principal de aproximadamente 506 kB (acima do limiar atual de 500 kB); não bloqueou a execução. O servidor Vite também registrou aviso do plugin PostCSS sobre a opção `from`; a prévia e o browser concluíram normalmente.
 
 Suites históricas completas Beta 2–7 não foram reexecutadas nesta validação. O relatório não as declara aprovadas. Execução e ambiente são isolados pelo harness Beta 7.1; Mongo 7.0.43, WiredTiger, replica set, rede interna, sem porta publicada, sem volume persistente, sem credenciais operacionais. Cleanup só remove recursos que carregam os IDs e ownership marker do run.
 
