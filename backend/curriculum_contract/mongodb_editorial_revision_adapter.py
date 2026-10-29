@@ -34,6 +34,7 @@ from .editorial_revision_protocol import (
 
 JsonValue = Any
 ProposalValidator = Callable[[Mapping[str, JsonValue]], bool | None]
+TransactionParticipant = Callable[[Any, RevisionReceipt], None]
 
 _TEST_DATABASE_RE = re.compile(r"^editorial_revision_test_[a-zA-Z0-9_-]{8,64}$")
 _NAMESPACE_RE = re.compile(r"^[a-z][a-z0-9_]{0,31}$")
@@ -553,8 +554,24 @@ class MongoDBEditorialRevisionAdapter:
             )
 
     def commit(
-        self, prepared: PreparedRevision, credential: WriterCredential
+        self,
+        prepared: PreparedRevision,
+        credential: WriterCredential,
+        *,
+        _transaction_participant: TransactionParticipant | None = None,
     ) -> RevisionReceipt:
+        """Commit a prepared revision, optionally joining an isolated participant.
+
+        The private participant hook exists only for experimental composition.
+        It runs inside the same MongoDB transaction as revision CAS, immutable
+        history and the operation receipt. Because ``with_transaction`` may
+        rerun its callback, participants must only perform deterministic,
+        session-bound MongoDB work and must not cause external side effects.
+        Existing callers that omit the hook retain the original contract.
+        """
+
+        if _transaction_participant is not None and not callable(_transaction_participant):
+            raise TypeError("transaction participant must be callable")
         self._validate_prepared_identity(prepared)
         self._authenticate_writer(prepared.track_id, credential)
         if credential.writer_id != prepared.writer_id:
@@ -695,6 +712,8 @@ class MongoDBEditorialRevisionAdapter:
                 payload_sha256=prepared.payload_sha256,
                 fingerprint=prepared.fingerprint,
             )
+            if _transaction_participant is not None:
+                _transaction_participant(session, receipt)
             self._history.insert_one(
                 {
                     "_id": _compound_id(prepared.track_id, str(next_revision)),
