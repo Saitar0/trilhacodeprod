@@ -8,7 +8,7 @@ A jornada Beta 6 foi validada com HTTP, persistência MongoDB e Chromium em infr
 
 ## B. Git e isolamento
 
-Base exata `e31486ad6ba22909afb50a8faea6c05e7b144fb5`, na sequência confirmada da Beta 6 (`6fae4dfd`, `f962f05f`, `d0a68adb`, `e31486ad`). Branch `codex/beta6-1-http-e2e-validation`; worktree `C:\Users\Joao\.codex\worktrees\trilhacode-beta6-1-http-e2e\trilhacodeprod`. O checkout original e as demais worktrees não foram modificados. O commit local está listado no fechamento da execução.
+Base exata `e31486ad6ba22909afb50a8faea6c05e7b144fb5`, na sequência confirmada da Beta 6 (`6fae4dfd`, `f962f05f`, `d0a68adb`, `e31486ad`). A branch sugerida `codex/beta6-1-http-e2e-validation` já existia na base Beta 6 e foi preservada sem alteração; esta execução usa a branch isolada `codex/beta6-1-http-e2e-validation-isolated`. Worktree: `C:\Users\Joao\.codex\worktrees\trilhacode-beta6-1-http-e2e\trilhacodeprod`. O checkout original e as demais worktrees não foram modificados. O commit local de implementação é `c1aed5b1c38897bdefb309f1e1838f892799324b`; a documentação final também foi commitada localmente.
 
 ## C. Diagnóstico Docker
 
