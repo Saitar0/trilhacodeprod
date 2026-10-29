@@ -2,7 +2,7 @@
 
 ## Proveniência
 
-Fonte: worktree de migração, revisão `migration@147dc68:tracked-clean-first-phase-files`. Os arquivos curriculares selecionados estavam rastreados e limpos na inspeção somente leitura. A execução copiou a fonte para o workspace temporário do runner e confirmou hashes antes da conversão. Classificação: `APPROVED_FOR_ISOLATED_EXPERIMENT`; o rascunho não está aprovado para publicação ou importação operacional.
+Fonte: worktree de migração, revisão `migration@147dc68:tracked-clean-first-phase-files`. Os arquivos curriculares selecionados estavam rastreados e limpos na inspeção somente leitura. Havia mudanças locais preexistentes em outros arquivos de documentação/conversão naquela worktree; foram preservadas e não entraram na cópia ou nos commits Beta 7.1. A execução copiou somente a fonte selecionada para o workspace temporário do runner e confirmou hashes antes da conversão. Classificação: `APPROVED_FOR_ISOLATED_EXPERIMENT`; o rascunho não está aprovado para publicação ou importação operacional.
 
 Manifesto Beta 4: `docs/beta/beta4-first-phase-manifest.json`, SHA-256 do arquivo `6e820ce44d6d23141d6cdc57e323e9a42e23c36e14b9741f030952d3772ffb42`. Manifesto de staging Beta 5: `docs/beta/beta5-first-phase-manifest.json`, SHA-256 do arquivo `4e1145798574bce58a72afdbe3150977d3025225b04f962aa46be811eb7077db`. O payload curricular do manifesto Beta 5 tem SHA-256 `dce89cbc9beb1040a5cb993494026ac07a5c0d8d80e19479349e088f225eb6e4`.
 

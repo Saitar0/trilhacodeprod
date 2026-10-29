@@ -12,7 +12,7 @@ Base exata `e671375effee9b957b281559a7310481ef82534b`; branch `codex/beta7-1-rea
 
 ## C. Fonte e currículo
 
-Fonte lida somente da worktree Beta 4 em `migration@147dc68:tracked-clean-first-phase-files`, marcada `rascunho` e `APPROVED_FOR_ISOLATED_EXPERIMENT`. Manifesto Beta 4 SHA-256 `6e820ce44d6d23141d6cdc57e323e9a42e23c36e14b9741f030952d3772ffb42`; manifesto de staging Beta 5 SHA-256 `4e1145798574bce58a72afdbe3150977d3025225b04f962aa46be811eb7077db`. Payload curricular Beta 5 `dce89cbc9beb1040a5cb993494026ac07a5c0d8d80e19479349e088f225eb6e4`. Hashes individuais foram revalidados durante a conversão; veja matriz de cobertura.
+Fonte lida somente da worktree Beta 4 em `migration@147dc68:tracked-clean-first-phase-files`, marcada `rascunho` e `APPROVED_FOR_ISOLATED_EXPERIMENT`. Os arquivos da primeira fase selecionados estavam rastreados e limpos; outras mudanças locais de documentação/conversão estavam presentes nessa worktree e foram preservadas fora desta branch. Manifesto Beta 4 SHA-256 `6e820ce44d6d23141d6cdc57e323e9a42e23c36e14b9741f030952d3772ffb42`; manifesto de staging Beta 5 SHA-256 `4e1145798574bce58a72afdbe3150977d3025225b04f962aa46be811eb7077db`. Payload curricular Beta 5 `dce89cbc9beb1040a5cb993494026ac07a5c0d8d80e19479349e088f225eb6e4`. Hashes individuais foram revalidados durante a conversão; veja matriz de cobertura.
 
 Inventário: 3 módulos, 10 unidades, 30 tópicos, 42 segmentos, 44 questões, 26 exercícios, 39 referências, 30 relações, 11 artefatos de projeto e 161 blocos. Nenhum conteúdo-fonte foi alterado. As dez unidades foram acessadas no browser; quiz por HTTP/browser exercitado em 1.1 e 2.1; exercício HTTP/browser em 1.1; outros elementos foram validados estruturalmente. Isso não é execução funcional de todos os itens.
 
