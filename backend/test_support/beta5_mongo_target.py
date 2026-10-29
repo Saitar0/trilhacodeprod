@@ -30,6 +30,7 @@ class MongoTarget:
     username: str
     password: str
     host_port: int
+    phase: str = "beta5"
 
 
 def _required(environ: Mapping[str, str], name: str) -> str:
@@ -39,10 +40,13 @@ def _required(environ: Mapping[str, str], name: str) -> str:
     return value
 
 
-def require_explicit_opt_in(enabled: bool) -> None:
+def require_explicit_opt_in(enabled: bool, phase: str | None = None) -> None:
     """Require a deliberate test-run switch before selecting persistent tests."""
+    if phase is not None and phase not in {"beta5", "beta6"}:
+        raise MongoTargetError("Fase de isolamento persistente não autorizada")
     if not enabled:
-        raise MongoTargetError("Testes persistentes exigem opt-in explícito de isolamento Beta 5")
+        label = phase.upper() if phase else "BETA5 OU BETA6"
+        raise MongoTargetError(f"Testes persistentes exigem opt-in explícito de isolamento {label}")
 
 
 def _docker_json(command: list[str]) -> Any:
@@ -71,20 +75,24 @@ def inspect_network(network_id: str) -> Mapping[str, Any]:
 def validate_target(
     environ: Mapping[str, str],
     *,
+    phase: str = "beta5",
     container_inspector: Callable[[str], Mapping[str, Any]] = inspect_container,
     network_inspector: Callable[[str], Mapping[str, Any]] = inspect_network,
 ) -> MongoTarget:
     """Validate all out-of-band isolation evidence without opening a socket."""
-    uri = _required(environ, "BETA5_TEST_MONGO_URI")
-    database = _required(environ, "BETA5_TEST_MONGO_DATABASE")
-    run_id = _required(environ, "BETA5_TEST_RUN_ID")
-    owner_token = _required(environ, "BETA5_TEST_OWNER_TOKEN")
-    container_id = _required(environ, "BETA5_TEST_CONTAINER_ID").lower()
-    network_id = _required(environ, "BETA5_TEST_NETWORK_ID").lower()
+    if phase not in {"beta5", "beta6"}:
+        raise MongoTargetError("Fase de isolamento não autorizada")
+    prefix = phase.upper()
+    uri = _required(environ, f"{prefix}_TEST_MONGO_URI")
+    database = _required(environ, f"{prefix}_TEST_MONGO_DATABASE")
+    run_id = _required(environ, f"{prefix}_TEST_RUN_ID")
+    owner_token = _required(environ, f"{prefix}_TEST_OWNER_TOKEN")
+    container_id = _required(environ, f"{prefix}_TEST_CONTAINER_ID").lower()
+    network_id = _required(environ, f"{prefix}_TEST_NETWORK_ID").lower()
 
     if not re.fullmatch(r"[0-9a-f]{32}", run_id):
         raise MongoTargetError("Identificador exclusivo da execução inválido")
-    if not re.fullmatch(rf"beta5_{run_id}", database):
+    if not re.fullmatch(rf"{phase}_{run_id}", database):
         raise MongoTargetError("Banco não corresponde ao identificador exclusivo da execução")
     if not re.fullmatch(r"[0-9a-f]{64}", container_id):
         raise MongoTargetError("ID do container não é uma identidade Docker completa")
@@ -109,7 +117,7 @@ def validate_target(
         raise MongoTargetError("URI não aponta para a porta loopback exclusiva Beta 5")
     if uri_database != database or not username or not password:
         raise MongoTargetError("URI não identifica o banco e as credenciais exclusivos Beta 5")
-    if username != f"beta5_{run_id[:10]}" or len(password) < 40:
+    if username != f"{phase}_{run_id[:10]}" or len(password) < 40:
         raise MongoTargetError("Credenciais não correspondem ao padrão exclusivo desta execução")
     if set(query) != {"authSource", "directConnection"} or any(len(values) != 1 for values in query.values()):
         raise MongoTargetError("URI contém opções não aprovadas ou parâmetros ambíguos")
@@ -125,7 +133,7 @@ def validate_target(
     if container.get("Id", "").lower() != container_id or network.get("Id", "").lower() != network_id:
         raise MongoTargetError("Recurso Docker não corresponde ao ID provisionado")
     expected_labels = {
-        "io.trilhacode.phase": "beta5",
+        "io.trilhacode.phase": phase,
         "io.trilhacode.run-id": run_id,
         "io.trilhacode.owner-token": owner_token,
     }
@@ -137,8 +145,10 @@ def validate_target(
         raise MongoTargetError("Imagem do MongoDB não corresponde à versão descartável aprovada")
     if not (container.get("State") or {}).get("Running"):
         raise MongoTargetError("Container MongoDB Beta 5 não está em execução")
-    if network.get("Driver") != "bridge" or network.get("Name") != f"tc-beta5-{run_id[:12]}":
-        raise MongoTargetError("Rede do MongoDB Beta 5 não é uma bridge exclusiva da execução")
+    if network.get("Driver") != "bridge" or network.get("Name") != f"tc-{phase}-{run_id[:12]}":
+        raise MongoTargetError(f"Rede do MongoDB {phase} não é uma bridge exclusiva da execução")
+    if phase == "beta6" and network.get("Internal") is not True:
+        raise MongoTargetError("A rede Beta 6 deve bloquear destinos externos")
 
     configured_env = set((container.get("Config") or {}).get("Env") or [])
     if f"MONGO_INITDB_ROOT_USERNAME={username}" not in configured_env or \
@@ -182,6 +192,7 @@ def validate_target(
         username=username,
         password=password,
         host_port=port,
+        phase=phase,
     )
 
 
@@ -202,7 +213,7 @@ def verify_server_and_claim_database(client: Any, target: MongoTarget) -> None:
         raise MongoTargetError("Topologia do servidor difere do container standalone Beta 5")
 
     database = client[target.database]
-    owner_collection = database["_beta5_test_owner"]
+    owner_collection = database[f"_{target.phase}_test_owner"]
     expected = {
         "_id": "owner",
         "run_id": target.run_id,
@@ -225,12 +236,14 @@ def connect_verified_target(
     environ: Mapping[str, str],
     client_factory: Callable[[str], Any],
     *,
+    phase: str = "beta5",
     container_inspector: Callable[[str], Mapping[str, Any]] = inspect_container,
     network_inspector: Callable[[str], Mapping[str, Any]] = inspect_network,
 ) -> tuple[MongoTarget, Any]:
     """Create a client only after all non-network Docker/URI checks pass."""
     target = validate_target(
         environ,
+        phase=phase,
         container_inspector=container_inspector,
         network_inspector=network_inspector,
     )
@@ -254,6 +267,6 @@ def assert_database_owned(client: Any, target: MongoTarget) -> None:
         "network_id": target.network_id,
         "database": target.database,
     }
-    marker = client[target.database]["_beta5_test_owner"].find_one({"_id": "owner"})
+    marker = client[target.database][f"_{target.phase}_test_owner"].find_one({"_id": "owner"})
     if not marker or any(marker.get(key) != value for key, value in expected.items()):
         raise MongoTargetError("Recusando operação: propriedade do banco não comprovada")

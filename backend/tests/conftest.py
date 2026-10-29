@@ -1,8 +1,9 @@
-"""API fixtures requiring an explicitly provisioned Beta 5 MongoDB target."""
+"""API fixtures requiring an explicitly provisioned phase-owned MongoDB target."""
 
 import asyncio
 import os
 import re
+import secrets
 import shutil
 import tempfile
 import uuid
@@ -46,11 +47,28 @@ def pytest_addoption(parser):
         default=False,
         help="explicitly opt into backend/tests using a Docker-proven Beta 5 MongoDB container",
     )
+    parser.addoption(
+        "--beta6-isolated-mongo",
+        action="store_true",
+        default=False,
+        help="explicitly opt into backend/tests using a Docker-proven Beta 6 MongoDB container",
+    )
+
+
+def _phase(config):
+    beta5 = config.getoption("--beta5-isolated-mongo")
+    beta6 = config.getoption("--beta6-isolated-mongo")
+    if beta5 and beta6:
+        raise pytest.UsageError("Selecione somente um ambiente persistente: Beta 5 ou Beta 6.")
+    return "beta6" if beta6 else "beta5" if beta5 else None
 
 
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "beta5_isolated_mongo: test is running against a verified disposable Beta 5 MongoDB",
+    )
+    config.addinivalue_line(
+        "markers", "beta6_isolated_mongo: test is running against a verified disposable Beta 6 MongoDB",
     )
 
 
@@ -59,11 +77,13 @@ def pytest_collect_file(file_path, parent):
     path = Path(str(file_path)).resolve()
     if path.parent == _TESTS_DIR and path.name.startswith("test_") and path.suffix == ".py":
         try:
-            require_explicit_opt_in(parent.config.getoption("--beta5-isolated-mongo"))
+            phase = _phase(parent.config)
+            require_explicit_opt_in(phase is not None, phase)
         except RuntimeError as exc:
             raise pytest.UsageError(
                 "backend/tests collection blocked before module import: provision and verify a "
-                "Beta 5 disposable MongoDB, then pass --beta5-isolated-mongo."
+                "phase-specific disposable MongoDB, then pass exactly one of "
+                "--beta5-isolated-mongo or --beta6-isolated-mongo."
             ) from exc
 
 
@@ -72,14 +92,15 @@ def pytest_collection_modifyitems(config, items):
         item for item in items
         if Path(str(item.path)).resolve().is_relative_to(_TESTS_DIR)
     ]
-    if persistent_items and not config.getoption("--beta5-isolated-mongo"):
+    phase = _phase(config)
+    if persistent_items and phase is None:
         raise pytest.UsageError(
             "backend/tests contains persistent API tests and is disabled by default. "
-            "Provision a Beta 5 disposable MongoDB and pass --beta5-isolated-mongo; "
+            "Provision a phase-owned disposable MongoDB and pass exactly one matching opt-in; "
             "no MongoDB URI fallback is available."
         )
     for item in persistent_items:
-        item.add_marker(pytest.mark.beta5_isolated_mongo)
+        item.add_marker(getattr(pytest.mark, f"{phase}_isolated_mongo"))
 
 
 def pytest_sessionstart(session):
@@ -87,24 +108,26 @@ def pytest_sessionstart(session):
     global _target, _ownership_client, _db_name, _mongo_url, _mailbox
     global mongo_client, db, app, ensure_indexes, migrate, hash_password
     global BLOCK_TYPES, SUBMITTABLE, TAXONOMIES
-    if not session.config.getoption("--beta5-isolated-mongo"):
+    phase = _phase(session.config)
+    if phase is None:
         return
 
     _target, _ownership_client = connect_verified_target(
         os.environ,
         lambda uri: MongoClient(uri, serverSelectionTimeoutMS=3000, connectTimeoutMS=2000),
+        phase=phase,
     )
     _db_name = _target.database
     _mongo_url = _target.uri
 
     # Application settings are changed only after the disposable target has
     # been proven. Importing the application can no longer select a fallback.
-    _mailbox = tempfile.mkdtemp(prefix=f"trilhacode-beta5-{_target.run_id}-mail-")
+    _mailbox = tempfile.mkdtemp(prefix=f"trilhacode-{phase}-{_target.run_id}-mail-")
     os.environ.update({
         "MONGO_URL": _mongo_url,
         "DB_NAME": _db_name,
         "ENV": "development",
-        "JWT_SECRET": "beta5-isolated-tests-only-secret-key-32-bytes",
+        "JWT_SECRET": secrets.token_urlsafe(48),
         "EMAIL_TRANSPORT": "local",
         "LOCAL_EMAIL_DIR": _mailbox,
     })
@@ -151,6 +174,11 @@ class TestSession:
         self.cookies = async_client.cookies
 
     def request(self, method, url, **kwargs):
+        if method.upper() not in {"GET", "HEAD", "OPTIONS"}:
+            headers = dict(kwargs.get("headers") or {})
+            if not any(key.lower() == "origin" for key in headers):
+                headers["Origin"] = "http://localhost:3000"
+            kwargs["headers"] = headers
         async def send():
             return await self._client.request(method, url, **kwargs)
         return self._event_loop.run_until_complete(send())
@@ -222,7 +250,7 @@ def disposable_database(session_factory, event_loop):
             try:
                 assert_database_owned(_ownership_client, _target)
                 for collection_name in _ownership_client[_db_name].list_collection_names():
-                    if collection_name != "_beta5_test_owner":
+                    if collection_name != f"_{_target.phase}_test_owner":
                         _ownership_client[_db_name].drop_collection(collection_name)
             finally:
                 _ownership_client.close()
@@ -308,6 +336,28 @@ def login(session_factory, disposable_database):
         email = aliases.get(role_or_email, role_or_email)
         return _login(session_factory, email, password)
     return log_in
+
+
+@pytest.fixture(scope="session")
+def grant_track_review(event_loop):
+    """Provision an explicit synthetic per-track reviewer scope in the test DB."""
+    def grant(session, track_id: str, operations=None):
+        actor = session.get("/api/auth/me")
+        assert actor.status_code == 200, actor.text
+        user_id = actor.json()["id"]
+        scope = {
+            "_id": f"{user_id}:{track_id}",
+            "user_id": user_id,
+            "track_id": track_id,
+            "operations": operations or ["submissions.read", "submissions.grade"],
+            "state": "active",
+            "source": "synthetic_test_fixture",
+        }
+        event_loop.run_until_complete(db.learning_review_scopes.replace_one(
+            {"_id": scope["_id"]}, scope, upsert=True,
+        ))
+        return scope
+    return grant
 
 
 @pytest.fixture
