@@ -17,7 +17,7 @@ O inventário estático identificou 17 linhas: **6 A** (adaptar), **8 B** (bloqu
 * Worktree: `C:\Users\Joao\.codex\worktrees\trilhacode-fase2-1a-12c13-editorial-governance-writers\trilhacodeprod`.
 * Checkout original e outras worktrees não foram alterados; somente commits locais serão criados. Sem push, PR, merge, rebase ou deploy.
 * Sparse checkout foi configurado antes de materializar `backend`, `docs/architecture` e `scripts`. `docs/courses/trilhacode/` e `docs/migracao/` permaneceram ausentes.
-* Hash(es) do commit local: registrados no histórico final da branch após o commit; sem alterações pendentes ao encerrar.
+* Commit local de documentação, matriz e testes: `1138c1cf821923e739d5bbe419d0fe6120fde902`. O fechamento deste relatório é um commit documental local subsequente; o hash final da branch é apresentado no handoff. Worktree limpa ao encerrar.
 
 ## C. IAM, grants e papéis
 
