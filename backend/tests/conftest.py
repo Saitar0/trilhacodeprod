@@ -1,4 +1,5 @@
-"""Isolated API fixtures backed by a disposable MongoDB database."""
+"""API fixtures requiring an explicitly provisioned Beta 5 MongoDB target."""
+
 import asyncio
 import os
 import re
@@ -6,36 +7,126 @@ import shutil
 import tempfile
 import uuid
 from itertools import count
+from pathlib import Path
 
 import httpx
 import pytest
 from pymongo import MongoClient
 
-from test_support.mongo_target import make_disposable_mongo_url
+from test_support.beta5_mongo_target import (
+    MongoTarget,
+    assert_database_owned,
+    connect_verified_target,
+    require_explicit_opt_in,
+)
 
-MONGO_URL = os.environ.get("MONGO_URL_TEST", "mongodb://localhost:27017")
-_db_name = f"test_{uuid.uuid4().hex}"
-_mongo_url = make_disposable_mongo_url(MONGO_URL, _db_name)
-_mailbox = tempfile.mkdtemp(prefix="trilhacode-test-mail-")
-
-# server/core read settings at import time. Point them at this run's disposable DB.
-os.environ["MONGO_URL"] = _mongo_url
-os.environ["DB_NAME"] = _db_name
-os.environ["ENV"] = "development"
-os.environ["JWT_SECRET"] = "isolated-tests-only-secret-key-32-bytes"
-os.environ["EMAIL_TRANSPORT"] = "local"
-os.environ["LOCAL_EMAIL_DIR"] = _mailbox
-
-from database import client as mongo_client
-from database import db
-from indexes import ensure_indexes
-from migrations import migrate
-from security import hash_password
-from seed import BLOCK_TYPES, SUBMITTABLE, TAXONOMIES
-from server import app
-
+_TESTS_DIR = Path(__file__).resolve().parent
+_target: MongoTarget | None = None
+_ownership_client = None
+_db_name = None
+_mongo_url = None
+_mailbox = None
+mongo_client = None
+db = None
+app = None
+ensure_indexes = None
+migrate = None
+hash_password = None
+BLOCK_TYPES = None
+SUBMITTABLE = None
+TAXONOMIES = None
 _client_ids = count(1)
 _active_test_ip = None
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--beta5-isolated-mongo",
+        action="store_true",
+        default=False,
+        help="explicitly opt into backend/tests using a Docker-proven Beta 5 MongoDB container",
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "beta5_isolated_mongo: test is running against a verified disposable Beta 5 MongoDB",
+    )
+
+
+def pytest_collect_file(file_path, parent):
+    """Reject persistent API modules before importing any application code."""
+    path = Path(str(file_path)).resolve()
+    if path.parent == _TESTS_DIR and path.name.startswith("test_") and path.suffix == ".py":
+        try:
+            require_explicit_opt_in(parent.config.getoption("--beta5-isolated-mongo"))
+        except RuntimeError as exc:
+            raise pytest.UsageError(
+                "backend/tests collection blocked before module import: provision and verify a "
+                "Beta 5 disposable MongoDB, then pass --beta5-isolated-mongo."
+            ) from exc
+
+
+def pytest_collection_modifyitems(config, items):
+    persistent_items = [
+        item for item in items
+        if Path(str(item.path)).resolve().is_relative_to(_TESTS_DIR)
+    ]
+    if persistent_items and not config.getoption("--beta5-isolated-mongo"):
+        raise pytest.UsageError(
+            "backend/tests contains persistent API tests and is disabled by default. "
+            "Provision a Beta 5 disposable MongoDB and pass --beta5-isolated-mongo; "
+            "no MongoDB URI fallback is available."
+        )
+    for item in persistent_items:
+        item.add_marker(pytest.mark.beta5_isolated_mongo)
+
+
+def pytest_sessionstart(session):
+    """Prove Docker ownership and server identity before importing the app."""
+    global _target, _ownership_client, _db_name, _mongo_url, _mailbox
+    global mongo_client, db, app, ensure_indexes, migrate, hash_password
+    global BLOCK_TYPES, SUBMITTABLE, TAXONOMIES
+    if not session.config.getoption("--beta5-isolated-mongo"):
+        return
+
+    _target, _ownership_client = connect_verified_target(
+        os.environ,
+        lambda uri: MongoClient(uri, serverSelectionTimeoutMS=3000, connectTimeoutMS=2000),
+    )
+    _db_name = _target.database
+    _mongo_url = _target.uri
+
+    # Application settings are changed only after the disposable target has
+    # been proven. Importing the application can no longer select a fallback.
+    _mailbox = tempfile.mkdtemp(prefix=f"trilhacode-beta5-{_target.run_id}-mail-")
+    os.environ.update({
+        "MONGO_URL": _mongo_url,
+        "DB_NAME": _db_name,
+        "ENV": "development",
+        "JWT_SECRET": "beta5-isolated-tests-only-secret-key-32-bytes",
+        "EMAIL_TRANSPORT": "local",
+        "LOCAL_EMAIL_DIR": _mailbox,
+    })
+    from database import client as async_mongo_client
+    from database import db as application_db
+    from indexes import ensure_indexes as ensure
+    from migrations import migrate as run_migrations
+    from security import hash_password as hash_pw
+    from seed import BLOCK_TYPES as block_types
+    from seed import SUBMITTABLE as submittable
+    from seed import TAXONOMIES as taxonomies
+    from server import app as application
+
+    mongo_client = async_mongo_client
+    db = application_db
+    app = application
+    ensure_indexes = ensure
+    migrate = run_migrations
+    hash_password = hash_pw
+    BLOCK_TYPES = block_types
+    SUBMITTABLE = submittable
+    TAXONOMIES = taxonomies
 
 
 def _test_transport():
@@ -128,12 +219,15 @@ def disposable_database(session_factory, event_loop):
             session_factory.close_all()
         finally:
             event_loop.run_until_complete(mongo_client.close())
-            if not _db_name.startswith("test_"):
-                raise RuntimeError(f"Refusing to drop unsafe database: {_db_name!r}")
-            with MongoClient(_mongo_url) as cleanup_client:
-                cleanup_client.drop_database(_db_name)
-            if os.path.commonpath([tempfile.gettempdir(), _mailbox]) == tempfile.gettempdir():
-                shutil.rmtree(_mailbox, ignore_errors=True)
+            try:
+                assert_database_owned(_ownership_client, _target)
+                for collection_name in _ownership_client[_db_name].list_collection_names():
+                    if collection_name != "_beta5_test_owner":
+                        _ownership_client[_db_name].drop_collection(collection_name)
+            finally:
+                _ownership_client.close()
+                if _mailbox and os.path.commonpath([tempfile.gettempdir(), _mailbox]) == tempfile.gettempdir():
+                    shutil.rmtree(_mailbox, ignore_errors=True)
 
 
 @pytest.fixture(scope="session")

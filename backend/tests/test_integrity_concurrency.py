@@ -12,7 +12,23 @@ from services.taxonomy import create_block_type, create_tag, create_taxonomy
 
 
 def test_preflight_compound_and_text_index_key_matching():
-    assert len(INDEXES) == 38
+    indexes_by_name = {
+        options.get("name"): (collection, keys, options, duplicate_fields)
+        for collection, keys, options, duplicate_fields in INDEXES
+        if options.get("name")
+    }
+    operation_index = indexes_by_name["one_track_publication_operation"]
+    assert operation_index[0] == "track_publications"
+    assert operation_index[1] == [("track_id", 1), ("operation_id", 1)]
+    assert operation_index[2]["unique"] is True
+    assert operation_index[3] == ("track_id", "operation_id")
+
+    recovery_index = indexes_by_name["track_publication_recovery_lookup"]
+    assert recovery_index[0] == "track_publications"
+    assert recovery_index[1] == [("state", 1), ("lease_until", 1)]
+    assert recovery_index[2].get("unique", False) is False
+    assert recovery_index[3] is None
+
     assert _keys_match(
         {"key": {"user_id": 1, "at": -1}},
         (("user_id", 1), ("at", -1)),
