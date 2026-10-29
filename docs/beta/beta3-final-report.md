@@ -15,7 +15,7 @@ O serviço real versionado `run_import` persistiu o piloto em MongoDB 7 descart�
 - Worktree exclusiva: `C:\Users\Joao\.codex\worktrees\trilhacode-beta3-fidelity-recovery\trilhacodeprod`.
 - Sparse checkout: backend, documentos Beta/arquitetura e, para regressões estáticas, apenas `.github/workflows` e `ops/g2`. `docs/courses` e `docs/migracao` não foram materializados.
 - Nenhuma referência foi atualizada; sem merge, push, PR, deploy, acesso a ambientes operacionais ou alteração de outra worktree.
-- O commit local de entrega será criado somente após as verificações finais; seu identificador será registrado no relatório entregue.
+- Commit local criado após as verificações finais; o identificador completo está no resumo de entrega da fase.
 
 ## C. Fonte e unidade piloto
 
@@ -68,7 +68,7 @@ Não demonstrado: rota e frontend; resposta do aluno em uma publicação; ACL op
 
 ## X. Limpeza
 
-Cada banco aleatório foi removido pelo harness após validar marcador da fase. O container e a rede exclusivos foram removidos após verificar IDs, labels e ausência de mounts/bancos. Nenhum recurso anterior ou de terceiros foi removido. A worktree ficará limpa após o commit local.
+Cada banco aleatório foi removido pelo harness após validar marcador da fase. O container e a rede exclusivos foram removidos após verificar IDs, labels e ausência de mounts/bancos. Nenhum recurso anterior ou de terceiros foi removido. A worktree terminou limpa após o commit local.
 
 ## Y. Arquivos entregues
 
