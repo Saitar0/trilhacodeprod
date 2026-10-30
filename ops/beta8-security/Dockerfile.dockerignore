@@ -1,0 +1,14 @@
+**
+!backend/
+!backend/curriculum_contract/
+!backend/services/
+!backend/services/__init__.py
+!backend/services/beta8_editorial_enforcement.py
+!backend/services/beta8_curriculum_promotion.py
+!backend/integration_tests/
+!backend/integration_tests/beta8_security_persistence.py
+!ops/
+!ops/beta8-security/
+!ops/beta8-security/Dockerfile
+!ops/beta8-security/Dockerfile.dockerignore
+!ops/beta8-security/requirements.lock

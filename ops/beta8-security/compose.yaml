@@ -1,0 +1,75 @@
+services:
+  mongo:
+    image: mongo:7.0.43
+    entrypoint: ["/bin/bash", "-ec"]
+    command:
+      - |
+        umask 077
+        cp /run/secrets/beta8-mongo-keyfile /run/mongo/keyfile
+        chown mongodb:mongodb /run/mongo /run/mongo/keyfile
+        chmod 0400 /run/mongo/keyfile
+        exec /usr/local/bin/docker-entrypoint.sh mongod --replSet rsB8 --bind_ip_all --keyFile /run/mongo/keyfile
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${BETA8_ROOT_USERNAME:?ephemeral root username required}
+      MONGO_INITDB_ROOT_PASSWORD: ${BETA8_ROOT_PASSWORD:?ephemeral root password required}
+    secrets:
+      - source: beta8_mongo_keyfile
+        target: beta8-mongo-keyfile
+    tmpfs:
+      - /data/db
+      - /data/configdb
+      - /run/mongo:rw,noexec,nosuid,size=64k,mode=0700
+    networks:
+      - beta8_private
+    labels:
+      io.trilhacode.phase: beta8
+      io.trilhacode.run: ${BETA8_RUN_ID:?unique run id required}
+      io.trilhacode.role: mongo
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mongosh --quiet --username "$${MONGO_INITDB_ROOT_USERNAME}" --password "$${MONGO_INITDB_ROOT_PASSWORD}" --authenticationDatabase admin --eval 'db.adminCommand({ping:1}).ok' | grep 1
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
+    restart: "no"
+
+  harness:
+    build:
+      context: ../..
+      dockerfile: ops/beta8-security/Dockerfile
+      args:
+        BETA8_RUN_ID: ${BETA8_RUN_ID:?unique run id required}
+    environment:
+      BETA8_DISPOSABLE: "1"
+      BETA8_RUN_ID: ${BETA8_RUN_ID:?unique run id required}
+      BETA8_DOCKER_PRECHECKED: ${BETA8_DOCKER_PRECHECKED:-false}
+      BETA8_DOCKER_CONTAINER_ID: ${BETA8_DOCKER_CONTAINER_ID:-}
+      BETA8_DOCKER_NETWORK_ID: ${BETA8_DOCKER_NETWORK_ID:-}
+      BETA8_MONGO_HOST: mongo
+      BETA8_MONGO_PORT: "27017"
+      BETA8_ROOT_USERNAME: ${BETA8_ROOT_USERNAME:?ephemeral root username required}
+      BETA8_ROOT_PASSWORD: ${BETA8_ROOT_PASSWORD:?ephemeral root password required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - beta8_private
+    labels:
+      io.trilhacode.phase: beta8
+      io.trilhacode.run: ${BETA8_RUN_ID:?unique run id required}
+      io.trilhacode.role: harness
+    restart: "no"
+
+networks:
+  beta8_private:
+    name: beta8-${BETA8_RUN_ID:?unique run id required}-net
+    internal: true
+    labels:
+      io.trilhacode.phase: beta8
+      io.trilhacode.run: ${BETA8_RUN_ID:?unique run id required}
+
+secrets:
+  beta8_mongo_keyfile:
+    file: ${BETA8_MONGO_KEYFILE:?temporary replica set key file required}
