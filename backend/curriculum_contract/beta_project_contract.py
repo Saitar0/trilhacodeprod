@@ -141,11 +141,42 @@ class ProjectPackage(_StrictModel):
         ):
             raise ValueError("Artefato associado a outro projeto ou fase")
         known = set(ids)
+        artifacts_by_id = {artifact.artifact_id: artifact for artifact in self.artifacts}
+        step_ids = [step.step_id for step in self.steps]
+        if len(step_ids) != len(set(step_ids)):
+            raise ValueError("IDs de etapa de projeto duplicados")
         for step in self.steps:
-            if step.instruction_artifact_id not in known:
+            instruction = artifacts_by_id.get(step.instruction_artifact_id)
+            if instruction is None:
                 raise ValueError("Etapa referencia instrução inexistente")
-            if step.acceptance_artifact_id and step.acceptance_artifact_id not in known:
+            if instruction.kind not in {
+                ProjectArtifactKind.PROJECT_BRIEF,
+                ProjectArtifactKind.MILESTONE,
+                ProjectArtifactKind.THEORY,
+            }:
+                raise ValueError("Etapa referencia artefato que não é instrução")
+            acceptance = (
+                artifacts_by_id.get(step.acceptance_artifact_id)
+                if step.acceptance_artifact_id
+                else None
+            )
+            if step.acceptance_artifact_id and acceptance is None:
                 raise ValueError("Etapa referencia checklist inexistente")
+            if acceptance is not None and acceptance.kind != ProjectArtifactKind.CHECKLIST:
+                raise ValueError("Etapa referencia artefato que não é checklist")
+        for rubric in self.rubrics:
+            artifact = artifacts_by_id.get(rubric.artifact_id)
+            if artifact is None:
+                raise ValueError("Rubrica referencia artefato inexistente")
+            if artifact.kind != ProjectArtifactKind.RUBRIC:
+                raise ValueError("Rubrica referencia artefato incompatível")
+        for rule in self.completion_rules:
+            artifact = artifacts_by_id.get(rule.source_artifact_id)
+            if artifact is None:
+                raise ValueError("Regra de conclusão referencia artefato inexistente")
+        for deliverable in self.deliverables:
+            if deliverable.source_artifact_id and deliverable.source_artifact_id not in known:
+                raise ValueError("Entregável referencia artefato inexistente")
         if [step.order for step in self.steps] != list(range(1, len(self.steps) + 1)):
             raise ValueError("Ordem das etapas do projeto deve ser contínua")
         return self
