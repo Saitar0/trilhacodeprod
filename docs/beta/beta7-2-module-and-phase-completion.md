@@ -1,0 +1,7 @@
+# Beta 7.2 — conclusão de unidades, módulos e fase
+
+`backend/curriculum_contract/beta7_2_completion.py` produz uma projeção determinística a partir de requisitos rastreados e resultados associados à versão da atividade. Estados não aprovados, ausentes ou versionados contra uma versão anterior ficam pendentes. Critérios ambíguos, propostos, não verificados ou sem obrigatoriedade definida bloqueiam conclusão. Uma política vazia também bloqueia, nunca significa 100%.
+
+`project_curriculum_completion` agrega os requisitos-fonte das unidades por unidade e módulo e exige também um requisito separado, derivado do artefato de rubrica do projeto 3.5. A projeção recusa uma fase sem a unidade 3.5 ou sem sua rubrica de origem. A fonte tem um critério textual por unidade, incluindo 3.5, mas não um protocolo estruturado de evidência/decisão. Portanto, esses requisitos reais ficam `SOURCE_DEFINED_BUT_AMBIGUOUS`; o requisito de aprovação pela rubrica fica com obrigatoriedade ainda indefinida. Os estados corretos permanecem bloqueados até decisão pedagógica. Abrir aula, responder quiz ou enviar projeto não altera isso.
+
+Uma prova de conclusão técnica pode usar uma política sintética totalmente definida e resultados sintéticos versionados. O teste confirma a mecânica do cálculo e idempotência, não a conclusão pedagógica da primeira fase real. Não há certificado, recompensa definitiva ou mutação do progresso operacional nesta entrega.
