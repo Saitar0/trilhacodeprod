@@ -57,7 +57,7 @@ Marcadores persistentes `HTTP_W07_PUT`, `HTTP_W07_POST` e `HTTP_W05_PUT` passara
 
 ## Q–U. Revogação, CAS, idempotência, auditoria e falhas
 
-Foram exercitados grant ausente/revogado, recurso fora do escopo, usuário admin sem grant, sessão expirada/revogada/deslogada, identidade adulterada no corpo e revisão obsoleta. A checagem de sessão/grant ocorre na autoridade, e o guard de IAM participa da transação da decisão C8, ordenando a revogação testada com a mutação. Na corrida persistente de duas atualizações HTTP, uma venceu (`200`) e outra recebeu conflito (`412`); não houve sobrescrita silenciosa.
+Foram exercitados grant ausente/revogado **antes da chamada**, recurso fora do escopo, usuário admin sem grant, sessão expirada/revogada/deslogada, identidade adulterada no corpo e revisão obsoleta. A checagem de sessão/grant ocorre na autoridade; o guard de IAM participa da transação da decisão C8. Porém, esta execução não colocou uma revogação de grant em barreira concorrente com o commit pela nova fronteira HTTP entre processos. A corrida persistente exercitada nesta composição foi CAS de duas atualizações HTTP: uma venceu (`200`) e outra recebeu conflito (`412`), sem sobrescrita silenciosa. A ordem revogação/commit especificamente no caminho RPC continua pendente.
 
 Retries do mesmo operation ID/payload retornam recibo idempotente; payload divergente é conflito. A resposta é autenticada. Se a resposta estiver ausente/invalidada, o cliente levanta outcome desconhecido com operation ID para reconciliação e não tenta escrita direta. Auditoria persistiu ator, recurso/track, operação e decisão. O teste de resposta perdida representa retry após resultado durável; não simula queda real da conexão exatamente após commit.
 
@@ -67,7 +67,7 @@ Falha ou ausência da autoridade nunca ativa o boundary local ou credencial priv
 
 **TRÊS OPERAÇÕES EDITORIAIS VALIDADAS ATRAVÉS DA AUTORIDADE SEPARADA**
 
-O harness executou `CurriculumStagingService` Beta 5 para preparar lote sintético com identidade stager. A autoridade, com usuário de leitura do staging, verificou marcador/owner, manifesto, checkpoints e conteúdo persistido, e então chamou o bridge Beta 8.1/Beta 8.2 e `Beta8ExperimentalPromoter` para transição sintética. O guard de sessão/usuário participa da transação experimental. Nenhuma rota/coleção operacional de publicação foi chamada.
+O harness executou `CurriculumStagingService` Beta 5 para preparar lote sintético com identidade stager. A autoridade, com usuário de leitura do staging, verificou marcador/owner, manifesto, checkpoints e conteúdo persistido, e então chamou o bridge Beta 8.1/Beta 8.2 e `Beta8ExperimentalPromoter` para transição sintética. O guard de sessão/usuário participa da transação experimental. Nenhuma rota/coleção operacional de publicação foi chamada. Esta execução não forçou revogação concorrente do grant durante a transição; por isso a recuperação após esse interleaving não é declarada comprovada aqui.
 
 **STAGING VALIDADO COM AUTORIDADE SEPARADA NO ESCOPO EXPERIMENTAL**
 
@@ -112,9 +112,9 @@ Arquivos desta entrega: `backend/routes_content.py`; `backend/services/beta8_1_s
 
 **A — AUTORIDADE EDITORIAL ISOLADA POR PROCESSO E CREDENCIAIS EM AMBIENTE DESCARTÁVEL**
 
-**B — TRÊS OPERAÇÕES EDITORIAIS VALIDADAS ATRAVÉS DA AUTORIDADE SEPARADA**
+**B — INTEGRAÇÃO ENTRE PROCESSOS PARCIALMENTE VALIDADA — COMANDOS OU GARANTIAS PENDENTES**
 
-**C — STAGING VALIDADO COM AUTORIDADE SEPARADA NO ESCOPO EXPERIMENTAL**
+**C — STAGING PARCIALMENTE VALIDADO — RECUPERAÇÃO OU CONCORRÊNCIA PENDENTES**
 
 **D — REGRESSÕES PARCIALMENTE VALIDADAS — COBERTURA PENDENTE**
 
