@@ -172,7 +172,7 @@ class Settings(BaseSettings):
     def validate_runtime(self) -> None:
         if self.env == "staging" and self.cookie_secure is False:
             raise RuntimeError("Configuração inválida: COOKIE_SECURE deve ser true em staging.")
-        if self.env == "staging" and self.email_transport != "local":
+        if self.env == "staging":
             email_problems = self._email_configuration_problems()
             if email_problems:
                 raise RuntimeError("Configuração inválida para staging: " + "; ".join(email_problems) + ".")
