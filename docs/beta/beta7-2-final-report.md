@@ -8,7 +8,7 @@ Foram entregues contratos versionados de rubrica, registro imutável de avaliaç
 
 ## B–C. Git, isolamento e fonte
 
-Base exata `2202905adf5e3d274a960fd4284b1c7d4964a707`; worktree e branch Beta 7.2 isoladas; nenhuma outra worktree ou checkout foi alterado. Fonte: worktree de migração, revisão `147dc68b81169f66b0ba3802fa2f26e5130923a3`, arquivos curriculares do escopo limpos, estado editorial `rascunho`. Os hashes do manifesto Beta 4 foram conferidos antes da cópia de leitura; o conversor confirmou a fonte-piloto 1.1 e o manifesto canônico. O material original não foi modificado.
+Base exata `2202905adf5e3d274a960fd4284b1c7d4964a707`; branch `codex/beta7-2-versioned-project-assessment`; worktree `C:\Users\Joao\.codex\worktrees\trilhacode-beta7-2-assessment\trilhacodeprod`. Commits locais: `7e5e77a5` (implementação/testes) e `3ac8260` (documentação inicial); a atualização deste relatório após o rerun final também foi commitada localmente. A worktree terminou limpa; nenhuma outra worktree ou checkout foi alterado. Fonte: worktree de migração, revisão `147dc68b81169f66b0ba3802fa2f26e5130923a3`, arquivos curriculares do escopo limpos, estado editorial `rascunho`. Os hashes do manifesto Beta 4 foram conferidos antes da cópia de leitura; o conversor confirmou a fonte-piloto 1.1 e o manifesto canônico. O material original não foi modificado.
 
 ## D–G. Projeto, critérios e decisões pedagógicas
 
