@@ -2,14 +2,14 @@
 
 ## A. Resumo executivo
 
-A fundação foi validada no commit `7aa01383e9b36b67d9109ab5060cec051a2133dc`, sem deploy, produção ou infraestrutura operacional. O PR #38 permanece aberto para integração manual.
+A fundação foi validada no commit `bd8cd204857bbc581d5d6137ab6325d4022e13d7`, sem deploy, produção ou infraestrutura operacional. O PR #38 permanece aberto para integração manual.
 
 ## B. Git
 
 - Base: `main` em `22dca64556338a8fa9aaa89ce627a4f4af72317d`.
 - Branch: `codex/foundation-ci-e2e-recovery`.
 - PR: https://github.com/Saitar0/trilhacodeprod/pull/38
-- Commit validado: `7aa01383e9b36b67d9109ab5060cec051a2133dc`.
+- Commit validado: `bd8cd204857bbc581d5d6137ab6325d4022e13d7`.
 
 ## C. Coordenação
 
@@ -29,9 +29,9 @@ Foram usados somente MongoDB 7, usuários e senhas sintéticos, diretório de e-
 
 ## I–J. Testes e GitHub Actions
 
-Run final: https://github.com/Saitar0/trilhacodeprod/actions/runs/41079604265
+Run final: https://github.com/Saitar0/trilhacodeprod/actions/runs/41080651996
 
-Backend/MongoDB, Frontend/Node 20, Docker/G2, Playwright E2E e resumo de homologação concluíram com `success`. O PyMongo foi atualizado para `4.18.3` para eliminar a vulnerabilidade reportada no CI anterior. Deploys staging e produção permaneceram `skipped`.
+Backend/MongoDB, Frontend/Node 20, Docker/G2, Playwright E2E e resumo de homologação concluíram com `success`. Uma execução imediatamente anterior falhou de forma flutuante no encerramento do teste de lock do G2; a repetição do mesmo SHA passou com 74/74 testes. O PyMongo foi atualizado para `4.18.3` para eliminar a vulnerabilidade reportada no CI anterior. Deploys staging e produção permaneceram `skipped`.
 
 ## K. Regressões
 

@@ -2,8 +2,8 @@
 
 ## Atualização — recuperação da fundação concluída
 
-- A branch `codex/foundation-ci-e2e-recovery` foi validada no commit `7aa01383e9b36b67d9109ab5060cec051a2133dc`.
-- O workflow isolado `41079604265` passou Backend/MongoDB, Frontend, Docker/G2, Playwright E2E e resumo de homologação; deploys foram pulados.
+- A branch `codex/foundation-ci-e2e-recovery` foi validada no commit `bd8cd204857bbc581d5d6137ab6325d4022e13d7`.
+- O workflow isolado `41080651996` passou Backend/MongoDB, Frontend, Docker/G2, Playwright E2E e resumo de homologação; deploys foram pulados.
 - O PR #38 permanece aberto para revisão e merge manual.
 - Beta 1–9, migração curricular, C14–C16, writers editoriais e ADR-008 continuam fora da integração e bloqueados conforme os gates existentes.
 - Relatório: `docs/ai-team/foundation-validation-recovery-report.md`.
