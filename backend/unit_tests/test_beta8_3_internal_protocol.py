@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import hashlib
 import asyncio
+import hashlib
 import os
 import subprocess
 import sys
@@ -9,19 +9,22 @@ from pathlib import Path
 
 import httpx
 import pytest
-from pydantic import ValidationError
 from bson import ObjectId
+from pydantic import ValidationError
 
-from services.beta8_3_internal_protocol import (
-    EditorialMutationCommand,
-    response_signature,
-    request_signature,
-    verify_response_signature,
-    verify_request_signature,
-)
 from curriculum_contract.mongodb_editorial_revision_adapter import CommitOutcomeUnknown
 from services.beta8_1_runtime_iam import AuthenticatedEditorialIdentity
 from services.beta8_3_editorial_rpc import Beta8_3EditorialBoundaryFactory
+from services.beta8_3_internal_protocol import (
+    API_SERVICE_AUDIENCE,
+    EDITORIAL_AUTHORITY_AUDIENCE,
+    STAGER_SERVICE_AUDIENCE,
+    EditorialMutationCommand,
+    request_signature,
+    response_signature,
+    verify_request_signature,
+    verify_response_signature,
+)
 
 _SECRET = b"beta8.3 unit test key with enough entropy!!"
 _ACTOR = {"actor_id": "0123456789abcdef01234567", "session_id": "s" * 43,
@@ -91,6 +94,7 @@ def test_create_id_is_bound_to_operation_identity_and_draft_state() -> None:
 def test_signature_binds_service_method_path_timestamp_nonce_and_body() -> None:
     kwargs = {
         "service_id": "trilhacode-api", "method": "POST",
+        "audience": EDITORIAL_AUTHORITY_AUDIENCE,
         "path": "/internal/v1/editorial/mutations", "timestamp": "1800000000",
         "nonce": "a" * 48, "body": b'{"operation":"block.update"}',
     }
@@ -98,6 +102,7 @@ def test_signature_binds_service_method_path_timestamp_nonce_and_body() -> None:
     assert verify_request_signature(_SECRET, signature, **kwargs)
     for changed in (
         {**kwargs, "service_id": "other-service"},
+        {**kwargs, "audience": STAGER_SERVICE_AUDIENCE},
         {**kwargs, "method": "PUT"},
         {**kwargs, "path": "/internal/v1/other"},
         {**kwargs, "timestamp": "1800000001"},
@@ -109,12 +114,13 @@ def test_signature_binds_service_method_path_timestamp_nonce_and_body() -> None:
 
 def test_signature_requires_high_entropy_key_length() -> None:
     with pytest.raises(ValueError):
-        request_signature(b"too short", service_id="s", method="POST", path="/p",
+        request_signature(b"too short", service_id="s", audience="a", method="POST", path="/p",
                           timestamp="1", nonce="n", body=b"")
 
 
 def test_authority_response_signature_is_bound_to_request_nonce_and_result() -> None:
     kwargs = {
+        "audience": API_SERVICE_AUDIENCE,
         "request_nonce": "c" * 48,
         "status_code": 200,
         "body": b'{"revision":5}',
@@ -129,6 +135,9 @@ def test_authority_response_signature_is_bound_to_request_nonce_and_result() -> 
     )
     assert not verify_response_signature(
         _SECRET, signature, **{**kwargs, "status_code": 403},
+    )
+    assert not verify_response_signature(
+        _SECRET, signature, **{**kwargs, "audience": STAGER_SERVICE_AUDIENCE},
     )
 
 

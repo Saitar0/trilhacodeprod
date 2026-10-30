@@ -13,11 +13,9 @@ import os
 import re
 import secrets
 import sys
-import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
 
 import httpx
 import jwt
@@ -141,6 +139,11 @@ async def _provision() -> None:
             "auth_sessions": ["find", "update"],
         }.items():
             authority_privileges.append(_privilege(db_name, collection, actions))
+        if os.environ.get("BETA8_4_TEST_BARRIERS") == "1":
+            # Test-only persistent interlock; only the authority can poll it.
+            authority_privileges.append(_privilege(
+                db_name, "_beta8_4_test_barriers", ["find", "update"],
+            ))
         await _create_role(database, "beta8_3_authority", authority_privileges)
         await _create_role(database, "beta8_3_api", [
             _privilege(db_name, "users", ["find"]),
@@ -256,7 +259,6 @@ async def _provision_c12(root_db: Any, actor_id: str, session_id: str, *, grant_
     from curriculum_contract.experimental_editorial_grants import EditorialTrackGrant
     from curriculum_contract.experimental_editorial_iam_authority import MongoEditorialIAMAuthority
 
-    client = root_db.client
     iam = MongoEditorialIAMAuthority(root_db, capability_key=secrets.token_bytes(32))
     await iam.provision_principal(actor_id=actor_id, role="editor")
     session_doc = await root_db.auth_sessions.find_one({"_id": _session_digest(session_id)})
@@ -403,7 +405,7 @@ async def _verify() -> None:
     no_grant_email = _env("BETA8_3_NO_GRANT_EMAIL")
     api_secret = bytes.fromhex(_env("BETA8_3_SERVICE_SECRET_HEX"))
     stager_secret = bytes.fromhex(_env("BETA8_3_STAGER_SECRET_HEX"))
-    operation_key = bytes.fromhex(_env("BETA8_3_OPERATION_KEY_HEX"))
+    bytes.fromhex(_env("BETA8_3_OPERATION_KEY_HEX"))  # Validate the synthetic key before use.
     node_id = _env("BETA8_3_NODE_ID")
     block_id = _env("BETA8_3_BLOCK_ID")
     stage_id = _env("BETA8_3_STAGE_RUN_ID")
@@ -499,6 +501,9 @@ async def _verify() -> None:
             # A signed internal request is accepted once and its exact nonce
             # replay is rejected, independently of the public HTTP idempotency.
             from services.beta8_3_internal_protocol import (
+                API_SERVICE_AUDIENCE,
+                EDITORIAL_AUTHORITY_AUDIENCE,
+                STAGER_SERVICE_AUDIENCE,
                 EditorialMutationCommand,
                 request_signature,
                 verify_response_signature,
@@ -520,6 +525,7 @@ async def _verify() -> None:
             path = "/internal/v1/editorial/mutations"
             signature = request_signature(
                 api_secret, service_id="trilhacode-api", method="POST", path=path,
+                audience=EDITORIAL_AUTHORITY_AUDIENCE,
                 timestamp=timestamp, nonce=nonce, body=body,
             )
             internal_headers = {
@@ -539,6 +545,7 @@ async def _verify() -> None:
                 assert verify_response_signature(
                     api_secret,
                     first.headers.get("X-Beta8-Response-Signature", ""),
+                    audience=API_SERVICE_AUDIENCE,
                     request_nonce=nonce,
                     status_code=first.status_code,
                     body=first.content,
@@ -551,8 +558,11 @@ async def _verify() -> None:
             # independently verifies its persisted records/checkpoints through
             # a read-only account, and commits only a synthetic generation.
             from curriculum_contract.beta_staging_contract import StagingPackage
+            from services.beta8_3_internal_protocol import (
+                StagingTransitionCommand,
+                verify_response_signature,
+            )
             from services.beta_curriculum_staging import CurriculumStagingService
-            from services.beta8_3_internal_protocol import StagingTransitionCommand, verify_response_signature
 
             stage_package = _stage_package()
             stage_db = stage_writer[f"beta5_{stage_id}"]
@@ -587,6 +597,7 @@ async def _verify() -> None:
                     "X-Beta8-Nonce": request_nonce,
                     "X-Beta8-Signature": request_signature(
                         stager_secret, service_id="trilhacode-stager", method="POST",
+                        audience=EDITORIAL_AUTHORITY_AUDIENCE,
                         path=stage_path, timestamp=issued, nonce=request_nonce, body=body,
                     ),
                 }
@@ -609,6 +620,7 @@ async def _verify() -> None:
                 assert verify_response_signature(
                     stager_secret,
                     replay_response.headers["X-Beta8-Response-Signature"],
+                    audience=STAGER_SERVICE_AUDIENCE,
                     request_nonce=retry_nonce,
                     status_code=replay_response.status_code,
                     body=replay_response.content,
@@ -647,6 +659,7 @@ async def _verify() -> None:
                     assert verify_response_signature(
                         stager_secret,
                         response.headers.get("X-Beta8-Response-Signature", ""),
+                        audience=STAGER_SERVICE_AUDIENCE,
                         request_nonce=nonce_header,
                         status_code=response.status_code,
                         body=response.content,
@@ -725,7 +738,9 @@ async def _verify() -> None:
                 f"payload não pode substituir identidade; esperado conflito CAS, obtido HTTP {forged.status_code}"
             )
 
-            from curriculum_contract.experimental_editorial_iam_authority import MongoEditorialIAMAuthority
+            from curriculum_contract.experimental_editorial_iam_authority import (
+                MongoEditorialIAMAuthority,
+            )
 
             iam = MongoEditorialIAMAuthority(root_db, capability_key=secrets.token_bytes(32))
             assert await iam.revoke_grant(

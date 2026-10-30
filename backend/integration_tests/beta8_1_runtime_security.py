@@ -259,8 +259,8 @@ async def run_beta8_1_runtime_proof() -> None:
         from routes_auth import login as real_login_route
         from routes_auth import logout as real_logout_route
         from routes_content import create_block as real_create_block_route
-        from routes_content import update_node as real_update_node_route
         from routes_content import update_block as real_update_block_route
+        from routes_content import update_node as real_update_node_route
         from schemas.content import BlockOut, NodeOut
         from services.beta8_1_runtime_iam import (
             Beta8_1EditorialRuntime,
@@ -859,7 +859,9 @@ async def run_beta8_1_runtime_proof() -> None:
         losers = [result for result in concurrent_results if isinstance(result, Exception)]
         assert len(winners) == 1 and len(losers) == 1, concurrent_results
         current_head = await authority_db["_beta8_experimental_heads"].find_one({"_id": TRACK_ID})
-        assert current_head and current_head["revision"] == 7
+        # Generation-pointer CAS has its own revision sequence. The editorial
+        # track revision remains 7 after the four confirmed generation changes.
+        assert current_head and current_head["revision"] == 4
         assert await authority_db["_beta8_experimental_generations"].count_documents({}) == 4
         assert await root_db["_beta8_promotion_audit"].count_documents({}) == 4
 
