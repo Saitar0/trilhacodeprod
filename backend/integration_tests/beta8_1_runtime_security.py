@@ -63,7 +63,7 @@ def _uri(username: str, password: str, database: str) -> str:
     )
 
 
-def _stage_package() -> StagingPackage:
+def _stage_package(*, unit_title: str = "Synthetic staged unit") -> StagingPackage:
     from curriculum_contract.beta_staging_contract import (
         StagedRecord,
         StagedRecordKind,
@@ -74,7 +74,7 @@ def _stage_package() -> StagingPackage:
     records = (StagedRecord(
         record_id="synthetic-unit-1",
         kind=StagedRecordKind.UNIT,
-        student_public={"unit_id": "synthetic-unit-1", "title": "Synthetic staged unit"},
+        student_public={"unit_id": "synthetic-unit-1", "title": unit_title},
         system_internal={
             "source_revision": "synthetic:beta8-1:revision-1",
             "source_path": "synthetic://beta8-1/unit",
@@ -174,10 +174,20 @@ async def run_beta8_1_runtime_proof() -> None:
             "marker": marker, "purpose": "runtime-iam-and-staging-proof",
         })
         authority_marker_written = True
+        node_id = ObjectId()
+        await root_db.nodes.insert_one({
+            "_id": node_id,
+            "track_id": TRACK_ID,
+            "kind": "lesson",
+            "title": "Synthetic draft unit",
+            "status": "draft",
+            "editorial_state": "draft",
+        })
+        await root_db.block_types.insert_one({"key": "text", "label": "Texto"})
         await root_db.content_blocks.insert_one({
             "_id": ObjectId(),
             "track_id": TRACK_ID,
-            "node_id": ObjectId(),
+            "node_id": str(node_id),
             "editorial_state": "draft",
             "title": "Synthetic original title",
             "data": {"text": "Synthetic original body"},
@@ -197,7 +207,8 @@ async def run_beta8_1_runtime_proof() -> None:
             "c12_iam_principals": ["find", "insert", "update"],
             "c12_iam_sessions": ["find", "insert", "update"],
             "c12_track_grants": ["find", "insert", "update"],
-            "content_blocks": ["find", "update"],
+            "nodes": ["find", "update"],
+            "content_blocks": ["find", "insert", "update"],
             "edit_history": ["insert"],
             "_beta8_editorial_audit": ["insert"],
             "_beta8_authorization_audit": ["insert"],
@@ -214,6 +225,8 @@ async def run_beta8_1_runtime_proof() -> None:
             _privilege(db_name, "auth_sessions", ["find", "insert", "update"]),
             _privilege(db_name, "login_attempts", ["find", "insert", "update", "remove"]),
             _privilege(db_name, "content_blocks", ["find"]),
+            _privilege(db_name, "nodes", ["find"]),
+            _privilege(db_name, "block_types", ["find"]),
         ])
         authority_password = await _create_user(root_db, "beta8-1-authority", "beta8_1_authority")
         runtime_password = await _create_user(root_db, "beta8-1-runtime", "beta8_1_runtime")
@@ -245,15 +258,20 @@ async def run_beta8_1_runtime_proof() -> None:
         import services.sessions as sessions_service
         from routes_auth import login as real_login_route
         from routes_auth import logout as real_logout_route
+        from routes_content import create_block as real_create_block_route
+        from routes_content import update_node as real_update_node_route
         from routes_content import update_block as real_update_block_route
-        from schemas.content import BlockOut
+        from schemas.content import BlockOut, NodeOut
         from services.beta8_1_runtime_iam import (
             Beta8_1EditorialRuntime,
             Beta8_1RuntimeIAMBridge,
         )
         from services.beta8_1_staging_authority import Beta8_1StagingAuthorityBridge
         from services.beta8_curriculum_promotion import Beta8ExperimentalPromoter
-        from services.beta8_editorial_enforcement import Beta8EditorialMutationBoundary
+        from services.beta8_editorial_enforcement import (
+            Beta8EditorialMutationBoundary,
+            EditorialMutationDenied,
+        )
         from services.beta_curriculum_staging import CurriculumStagingService
 
         settings = app_settings
@@ -290,7 +308,19 @@ async def run_beta8_1_runtime_proof() -> None:
         await _expect_operation_denied(runtime_db.content_blocks.update_one(
             {"_id": block["_id"]}, {"$set": {"title": "direct runtime bypass"}},
         ))
+        await _expect_operation_denied(runtime_db.content_blocks.insert_one({
+            "_id": ObjectId(), "track_id": TRACK_ID, "node_id": str(node_id),
+            "status": "draft", "title": "direct create bypass",
+        }))
+        await _expect_operation_denied(runtime_db.content_blocks.delete_one({"_id": block["_id"]}))
         await _expect_operation_denied(runtime_db.track_publications.insert_one({"_id": "denied"}))
+        await _expect_operation_denied(runtime_db.nodes.update_one(
+            {"_id": node_id}, {"$set": {"title": "direct runtime node bypass"}},
+        ))
+        await _expect_operation_denied(runtime_db.nodes.insert_one({
+            "track_id": TRACK_ID, "title": "direct runtime node create bypass", "status": "draft",
+        }))
+        await _expect_operation_denied(runtime_db.nodes.delete_one({"_id": node_id}))
 
         await root_db.content_blocks.create_index("track_id")
         adapter = AsyncEditorialRevisionAdapter(authority_db, namespace="c8_beta8_1")
@@ -324,11 +354,19 @@ async def run_beta8_1_runtime_proof() -> None:
         app.add_api_route("/api/auth/login", real_login_route, methods=["POST"])
         app.add_api_route("/api/auth/logout", real_logout_route, methods=["POST"])
         app.add_api_route(
+            "/api/blocks", real_create_block_route, methods=["POST"],
+            response_model=BlockOut, response_model_exclude_unset=True,
+        )
+        app.add_api_route(
             "/api/blocks/{block_id}",
             real_update_block_route,
             methods=["PUT"],
             response_model=BlockOut,
             response_model_exclude_unset=True,
+        )
+        app.add_api_route(
+            "/api/nodes/{node_id}", real_update_node_route, methods=["PUT"],
+            response_model=NodeOut, response_model_exclude_unset=True,
         )
 
         def make_boundary() -> Beta8EditorialMutationBoundary:
@@ -386,7 +424,9 @@ async def run_beta8_1_runtime_proof() -> None:
                 )
                 assert expired.status_code == 401
             inactive_app = FastAPI()
+            inactive_app.add_api_route("/api/blocks", real_create_block_route, methods=["POST"])
             inactive_app.add_api_route("/api/blocks/{block_id}", real_update_block_route, methods=["PUT"])
+            inactive_app.add_api_route("/api/nodes/{node_id}", real_update_node_route, methods=["PUT"])
             async with httpx.AsyncClient(
                 transport=httpx.ASGITransport(app=inactive_app),
                 base_url="https://beta8-1.test",
@@ -399,6 +439,20 @@ async def run_beta8_1_runtime_proof() -> None:
                 )
                 assert unavailable.status_code == 503
                 assert (await root_db.content_blocks.find_one({"_id": block["_id"]}))["title"] == "Synthetic original title"
+                create_unavailable = await inactive_http.post(
+                    "/api/blocks",
+                    json={
+                        "node_id": str(node_id), "type": "text", "title": "disabled create",
+                        "data": {"body": "must not persist"}, "status": "draft",
+                    },
+                )
+                assert create_unavailable.status_code == 503
+                node_unavailable = await inactive_http.put(
+                    f"/api/nodes/{node_id}", json={"title": "disabled node update"},
+                )
+                assert node_unavailable.status_code == 503
+                assert await root_db.content_blocks.count_documents({"track_id": TRACK_ID}) == 1
+                assert (await root_db.nodes.find_one({"_id": node_id}))["title"] == "Synthetic draft unit"
             active_session = await runtime_db.auth_sessions.find_one({
                 "_id": hashlib.sha256(session_id.encode()).hexdigest(), "user_id": actor_id,
             })
@@ -419,10 +473,24 @@ async def run_beta8_1_runtime_proof() -> None:
             )
             assert no_grant.status_code == 403
             assert "track" not in no_grant.text.lower()
+            no_create_grant = await student_http.post(
+                "/api/blocks",
+                json={
+                    "node_id": str(node_id), "type": "text", "title": "Denied draft",
+                    "data": {"body": "must not persist"}, "status": "draft",
+                },
+                headers={"If-Match": '"editorial-rev-0"', "Idempotency-Key": "b82-create-denied-0001"},
+            )
+            assert no_create_grant.status_code == 403
+            no_node_grant = await student_http.put(
+                f"/api/nodes/{node_id}", json={"title": "must be denied without node grant"},
+                headers={"If-Match": '"editorial-rev-0"', "Idempotency-Key": "b82-node-denied-0001"},
+            )
+            assert no_node_grant.status_code == 403
             await iam.provision_grant(EditorialTrackGrant(
                 actor_id=actor_id,
                 track_id="beta8-track-synthetic-other",
-                allowed_operations=("block.update",),
+                allowed_operations=("block.update", "node.update"),
                 granted_by="beta8-1-synthetic-authorizer",
                 granted_at=datetime.now(UTC),
             ))
@@ -432,12 +500,17 @@ async def run_beta8_1_runtime_proof() -> None:
                 headers={"If-Match": '"editorial-rev-0"', "Idempotency-Key": "b81-runtime-wrong-scope-0001"},
             )
             assert wrong_scope.status_code == 403
+            wrong_node_scope = await student_http.put(
+                f"/api/nodes/{node_id}", json={"title": "wrong node scope must be denied"},
+                headers={"If-Match": '"editorial-rev-0"', "Idempotency-Key": "b82-node-wrong-scope-0001"},
+            )
+            assert wrong_node_scope.status_code == 403
             assert (await root_db.content_blocks.find_one({"_id": block["_id"]}))["title"] == "Synthetic original title"
 
             await iam.provision_grant(EditorialTrackGrant(
                 actor_id=actor_id,
                 track_id=TRACK_ID,
-                allowed_operations=("block.update", "content.publish"),
+                allowed_operations=("block.create", "block.update", "content.publish", "node.update"),
                 granted_by="beta8-1-synthetic-authorizer",
                 granted_at=datetime.now(UTC),
             ))
@@ -508,6 +581,45 @@ async def run_beta8_1_runtime_proof() -> None:
             state = await authority_db["c8_beta8_1_tracks"].find_one({"_id": TRACK_ID})
             assert state["revision"] == 1
             await race_http.aclose()
+
+            create_headers = {
+                "If-Match": '"editorial-rev-1"',
+                "Idempotency-Key": "b82-create-draft-block-0001",
+            }
+            create_body = {
+                "node_id": str(node_id), "type": "text", "title": "Authorized draft block",
+                "data": {"body": "created through C12 and C8"}, "status": "draft",
+            }
+            created = await student_http.post("/api/blocks", json=create_body, headers=create_headers)
+            assert created.status_code == 200, created.text
+            assert created.headers["etag"] == '"editorial-rev-2"'
+            assert created.headers["idempotency-replayed"] == "false"
+            created_replay = await student_http.post("/api/blocks", json=create_body, headers=create_headers)
+            assert created_replay.status_code == 200, created_replay.text
+            assert created_replay.headers["idempotency-replayed"] == "true"
+            assert created_replay.json()["id"] == created.json()["id"]
+            assert await root_db.content_blocks.count_documents({"track_id": TRACK_ID}) == 2
+            node_headers = {
+                "If-Match": '"editorial-rev-2"',
+                "Idempotency-Key": "b82-update-draft-node-0001",
+            }
+            node_update = await student_http.put(
+                f"/api/nodes/{node_id}", json={"title": "Updated synthetic draft unit"}, headers=node_headers,
+            )
+            assert node_update.status_code == 200, node_update.text
+            assert node_update.headers["etag"] == '"editorial-rev-3"'
+            assert node_update.headers["idempotency-replayed"] == "false"
+            assert node_update.json()["title"] == "Updated synthetic draft unit"
+            node_replay = await student_http.put(
+                f"/api/nodes/{node_id}", json={"title": "Updated synthetic draft unit"}, headers=node_headers,
+            )
+            assert node_replay.status_code == 200
+            assert node_replay.headers["idempotency-replayed"] == "true"
+            assert await root_db.nodes.count_documents({
+                "_id": node_id, "title": "Updated synthetic draft unit",
+            }) == 1
+            assert await root_db["_beta8_editorial_audit"].count_documents({}) == 3
+            assert await root_db["c8_beta8_1_history"].count_documents({}) == 3
 
         # A separately authenticated admin still needs the explicit resource grant.
         admin_id = await _provision_user(
@@ -598,7 +710,7 @@ async def run_beta8_1_runtime_proof() -> None:
             track_id=TRACK_ID,
             generation_id="beta8-generation-synthetic-stage-1",
             operation_id="beta8-op-stage-promote-0001",
-            expected_revision=1,
+            expected_revision=3,
             fencing_token=fence,
             candidate_state=ExperimentalCandidateState.VALIDATED,
             approval=ExperimentalApproval.SYNTHETIC_FIXTURE_APPROVED,
@@ -607,7 +719,7 @@ async def run_beta8_1_runtime_proof() -> None:
         promoted = await stage_bridge.prepare_and_promote(
             package, intent, actor_id=actor_id, session_id=session_id,
         )
-        assert promoted.revision == 2
+        assert promoted.revision == 4
         staged = await stage_db["_beta5_staging_batches"].find_one({"_id": package.manifest.batch_id})
         generation = await authority_db["_beta8_experimental_generations"].find_one(
             {"_id": intent.generation_id},
@@ -617,6 +729,169 @@ async def run_beta8_1_runtime_proof() -> None:
         assert await root_db["_beta8_promotion_audit"].count_documents({}) == 1
         # The preparation principal has no access to the promotion namespace.
         await _expect_operation_denied(stage_db["_beta8_experimental_heads"].insert_one({"_id": "bypass"}))
+
+        replayed = await stage_bridge.prepare_and_promote(
+            package, intent, actor_id=actor_id, session_id=session_id,
+        )
+        assert replayed.revision == promoted.revision and replayed.replayed is True
+        assert await authority_db["_beta8_experimental_generations"].count_documents({}) == 1
+        assert await root_db["_beta8_promotion_audit"].count_documents({}) == 1
+
+        recovery_package = _stage_package(unit_title="Synthetic stage recovery unit")
+        recovery_candidate = stage_bridge.candidate_for(recovery_package)
+        recovery_intent = intent.model_copy(update={
+            "batch_id": recovery_candidate.batch_id,
+            "payload_sha256": recovery_candidate.payload_sha256,
+            "generation_id": "beta8-generation-synthetic-stage-recovered",
+            "operation_id": "beta8-op-stage-recovery-retry",
+            "expected_revision": 4,
+        })
+
+        async def fail_after_first_staged_record(point: str, index: int, _record_id: str | None) -> None:
+            if point == "after_document_before_checkpoint" and index == 1:
+                raise RuntimeError("injected staging interruption after document")
+
+        try:
+            await stage_bridge.prepare_and_promote(
+                recovery_package,
+                recovery_intent,
+                actor_id=actor_id,
+                session_id=session_id,
+                expected_previous_generation=intent.generation_id,
+                staging_fault_hook=fail_after_first_staged_record,
+            )
+        except RuntimeError as exc:
+            assert "injected staging interruption" in str(exc)
+        else:
+            raise AssertionError("interrupção durante staging não foi exercitada")
+        partial_stage = await stage_db["_beta5_staging_batches"].find_one(
+            {"_id": recovery_package.manifest.batch_id},
+        )
+        assert partial_stage and partial_stage["status"] == "RECOVERABLE"
+        assert await stage_db["_beta5_staging_records"].count_documents(
+            {"batch_id": recovery_package.manifest.batch_id},
+        ) == 1
+        assert await stage_db["_beta5_staging_checkpoints"].count_documents(
+            {"batch_id": recovery_package.manifest.batch_id},
+        ) == 0
+        recovered_stage_receipt = await stage_bridge.prepare_and_promote(
+            recovery_package,
+            recovery_intent,
+            actor_id=actor_id,
+            session_id=session_id,
+            expected_previous_generation=intent.generation_id,
+        )
+        assert recovered_stage_receipt.revision == 5
+        assert (await stage_db["_beta5_staging_batches"].find_one(
+            {"_id": recovery_package.manifest.batch_id},
+        ))["status"] == "PREPARED"
+
+        lost_response_intent = recovery_intent.model_copy(update={
+            "generation_id": "beta8-generation-synthetic-stage-lost-response",
+            "operation_id": "beta8-op-stage-lost-response",
+            "expected_revision": 5,
+        })
+
+        async def lose_response_after_commit() -> None:
+            raise RuntimeError("injected response loss after durable commit")
+
+        try:
+            await stage_bridge.prepare_and_promote(
+                recovery_package,
+                lost_response_intent,
+                actor_id=actor_id,
+                session_id=session_id,
+                expected_previous_generation=recovery_intent.generation_id,
+                after_commit=lose_response_after_commit,
+            )
+        except RuntimeError as exc:
+            assert "injected response loss" in str(exc)
+        else:
+            raise AssertionError("perda sintética da resposta após commit não foi exercitada")
+        recovered_receipt = await stage_bridge.prepare_and_promote(
+            recovery_package,
+            lost_response_intent,
+            actor_id=actor_id,
+            session_id=session_id,
+            expected_previous_generation=recovery_intent.generation_id,
+        )
+        assert recovered_receipt.revision == 6 and recovered_receipt.replayed is True
+        assert await authority_db["_beta8_experimental_generations"].count_documents({}) == 3
+        assert await root_db["_beta8_promotion_audit"].count_documents({}) == 3
+        assert await authority_db["_beta8_experimental_generations"].find_one(
+            {"_id": intent.generation_id},
+        ) is not None
+
+        entered_transitions = 0
+        both_entered = asyncio.Event()
+        release_transitions = asyncio.Event()
+
+        async def transition_barrier() -> None:
+            nonlocal entered_transitions
+            entered_transitions += 1
+            if entered_transitions == 2:
+                both_entered.set()
+            await release_transitions.wait()
+
+        concurrent_intents = [
+            recovery_intent.model_copy(update={
+                "generation_id": f"beta8-generation-synthetic-race-{suffix}",
+                "operation_id": f"beta8-op-stage-race-{suffix}",
+                "expected_revision": 6,
+            })
+            for suffix in ("a", "b")
+        ]
+        concurrent_tasks = [
+            asyncio.create_task(stage_bridge.prepare_and_promote(
+                recovery_package,
+                concurrent_intent,
+                actor_id=actor_id,
+                session_id=session_id,
+                expected_previous_generation=lost_response_intent.generation_id,
+                before_commit=transition_barrier,
+            ))
+            for concurrent_intent in concurrent_intents
+        ]
+        await asyncio.wait_for(both_entered.wait(), timeout=10)
+        release_transitions.set()
+        concurrent_results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
+        winners = [result for result in concurrent_results if not isinstance(result, Exception)]
+        losers = [result for result in concurrent_results if isinstance(result, Exception)]
+        assert len(winners) == 1 and len(losers) == 1, concurrent_results
+        current_head = await authority_db["_beta8_experimental_heads"].find_one({"_id": TRACK_ID})
+        assert current_head and current_head["revision"] == 7
+        assert await authority_db["_beta8_experimental_generations"].count_documents({}) == 4
+        assert await root_db["_beta8_promotion_audit"].count_documents({}) == 4
+
+        revocation_entered = asyncio.Event()
+        release_revocation = asyncio.Event()
+
+        async def pause_before_revocable_commit() -> None:
+            revocation_entered.set()
+            await release_revocation.wait()
+
+        revocation_intent = recovery_intent.model_copy(update={
+            "generation_id": "beta8-generation-synthetic-revoked",
+            "operation_id": "beta8-op-stage-revoked",
+            "expected_revision": 7,
+        })
+        revocation_task = asyncio.create_task(stage_bridge.prepare_and_promote(
+            recovery_package,
+            revocation_intent,
+            actor_id=actor_id,
+            session_id=session_id,
+            expected_previous_generation=current_head["generation_id"],
+            before_commit=pause_before_revocable_commit,
+        ))
+        await asyncio.wait_for(revocation_entered.wait(), timeout=10)
+        assert await iam.revoke_grant(
+            actor_id=actor_id, track_id=TRACK_ID, revoked_by="beta8-2-synthetic-revoker",
+        )
+        release_revocation.set()
+        revoked_transition = await asyncio.gather(revocation_task, return_exceptions=True)
+        assert isinstance(revoked_transition[0], EditorialMutationDenied), revoked_transition
+        assert await authority_db["_beta8_experimental_heads"].find_one({"_id": TRACK_ID}) == current_head
+        assert await authority_db["_beta8_experimental_generations"].count_documents({}) == 4
 
         async with httpx.AsyncClient(
             transport=httpx.ASGITransport(app=app), base_url="https://beta8-1.test",
@@ -643,8 +918,16 @@ async def run_beta8_1_runtime_proof() -> None:
         print("BETA8_1_AUTH_NEGATIVES: PASS (anonymous, expired, revoked session, disabled user, missing/wrong scope, admin without grant)")
         print("BETA8_1_REVOKED_GRANT_RACE: PASS")
         print("BETA8_1_SELECTED_WRITER: PASS (existing PUT /api/blocks/{id} service path)")
+        print("BETA8_2_W07_CREATE: PASS (authenticated POST, grant, C8 CAS, replay and audit)")
+        print("BETA8_2_W05_UPDATE: PASS (authenticated PUT, track grant, node CAS, replay and audit)")
+        print("BETA8_2_DEFAULT_STARTUP_DENY: PASS (selected create/update paths disabled without explicit authority composition)")
+        print("BETA8_2_W07_DIRECT_CREATE_DELETE_DENIAL: PASS (runtime MongoDB role)")
         print("BETA8_1_DEFAULT_STARTUP_FAIL_CLOSED: PASS")
         print("BETA8_1_REAL_STAGING_TO_EXPERIMENTAL_AUTHORITY: PASS")
+        print("BETA8_2_STAGING_PARTIAL_RECOVERY: PASS (Beta 5 checkpoint resumed through bridge)")
+        print("BETA8_2_STAGING_COMMIT_REPLAY: PASS (lost response reconciled by same operation ID)")
+        print("BETA8_2_STAGING_CONCURRENT_TRANSITIONS: PASS (one CAS winner, one conflict)")
+        print("BETA8_2_STAGING_REVOCATION_RACE: PASS (revocation before commit prevents transition)")
         print("BETA8_1_PREPARER_PROMOTION_DENIAL: PASS")
     finally:
         for name, value in old_env.items():

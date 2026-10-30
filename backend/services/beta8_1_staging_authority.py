@@ -6,6 +6,8 @@ by application startup and cannot target operational publication collections.
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
+
 from curriculum_contract.beta8_promotion_contract import (
     ExperimentalCandidateState,
     ExperimentalPromotionCandidate,
@@ -71,9 +73,12 @@ class Beta8_1StagingAuthorityBridge:
         actor_id: str,
         session_id: str,
         expected_previous_generation: str | None = None,
+        staging_fault_hook=None,
+        before_commit: Callable[[], Awaitable[None]] | None = None,
+        after_commit: Callable[[], Awaitable[None]] | None = None,
     ) -> RevisionReceipt:
         candidate = self.candidate_for(package)
-        outcome = await self._staging.prepare(package)
+        outcome = await self._staging.prepare(package, fault_hook=staging_fault_hook)
         staged = await self._staging.inspect_batch(package.manifest.batch_id)
         if (
             outcome.state.value != "PREPARED"
@@ -91,10 +96,16 @@ class Beta8_1StagingAuthorityBridge:
             or intent.candidate_state is not ExperimentalCandidateState.VALIDATED
         ):
             raise StagingAuthorityError("Intenção não está vinculada ao pacote preparado")
-        return await self._promoter.promote(
+        receipt = await self._promoter.promote(
             candidate,
             intent,
             actor_id=actor_id,
             session_id=session_id,
             expected_previous_generation=expected_previous_generation,
+            before_commit=before_commit,
         )
+        # A caller may lose the response after the transaction has committed.
+        # The operation ID and C8 receipt make an identical retry recoverable.
+        if after_commit is not None:
+            await after_commit()
+        return receipt

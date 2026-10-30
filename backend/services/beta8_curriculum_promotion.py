@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from pymongo.errors import DuplicateKeyError
@@ -50,6 +51,7 @@ class Beta8ExperimentalPromoter:
         actor_id: str,
         session_id: str,
         expected_previous_generation: str | None = None,
+        before_commit: Callable[[], Awaitable[None]] | None = None,
     ) -> RevisionReceipt:
         if not isinstance(candidate, ExperimentalPromotionCandidate) or not isinstance(
             intent, ExperimentalPromotionIntent
@@ -182,6 +184,8 @@ class Beta8ExperimentalPromoter:
             decision.capability, promotion_participant
         )
         try:
+            if before_commit is not None:
+                await before_commit()
             return await self._adapter.commit(
                 prepared,
                 self._writer_credential,
