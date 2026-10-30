@@ -413,7 +413,7 @@ jobs:
           {
             echo '## Trilha Code foundation validation — no deploy'
             echo "- Tested SHA: \`$GITHUB_SHA\`"
-            echo "- Ref: `$GITHUB_REF`"
+            echo "- Ref: \`$GITHUB_REF\`"
             echo "- Backend: $BACKEND_RESULT"
             echo "- Frontend: $FRONTEND_RESULT"
             echo "- Docker/G2: $DOCKER_G2_RESULT"
