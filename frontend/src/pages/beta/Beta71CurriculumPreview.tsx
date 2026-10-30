@@ -16,13 +16,15 @@ type Unit = {
   quizzes: Question[]; exercises: Exercise[]; criterion: { source_text: string | null; state: string };
 };
 type Progress = {
-  units: { unit_id: string; quizzes_answered: number; quizzes_total: number; exercises_submitted: number; exercises_total: number; awaiting_review: number; criterion_state: string; unit_completion: string; mastery: string }[];
-  modules: { module_id: string; units: number; quizzes_answered: number; quizzes_total: number; exercises_submitted: number; exercises_total: number; awaiting_review: number; completion: string }[];
+  units: { unit_id: string; quizzes_answered: number; quizzes_total: number; exercises_submitted: number; exercises_total: number; awaiting_review: number; revision_required: number; project_state: string; project_approved: number; criterion_state: string; unit_completion: string; mastery: string }[];
+  modules: { module_id: string; units: number; quizzes_answered: number; quizzes_total: number; exercises_submitted: number; exercises_total: number; awaiting_review: number; revision_required: number; project_approved: number; completion: string }[];
   phase: { units: number; completion: string; mastery: string; project_3_5_required_review: boolean };
 };
 type Project = { id: string; title: string; version: string; completion: string; artifacts: { id: string; kind: string; order: number; title: string; visibility: string; content: string | null }[] };
-type Submission = { id: string; unit_id: string; activity_id: string; state: string; feedback: string | null; revision: number };
-type ProjectQueueItem = { id: string; unit_id: string; project_id: string; answer: string; state: string; revision: number };
+type Submission = { id: string; unit_id: string; activity_id: string; state: string; feedback: string | null; review_revision: number; attempt: number; previous_submission_id?: string | null };
+type ProjectQueueItem = { id: string; unit_id: string; project_id: string; answer: string; state: string; revision: number; source_sha256: string };
+type ReviewerRubric = { rubric_id: string; version: string; state: string; criteria: { criterion_id: string; description: string; required: boolean | null }[] };
+type AssessmentHistory = { assessment_id: string; submission_id: string; outcome: string; feedback: string; resulting_state: string; decided_at: string };
 
 const batchId = import.meta.env.VITE_BETA7_1_PREVIEW_BATCH_ID as string;
 
@@ -41,6 +43,8 @@ export default function Beta71CurriculumPreview() {
   const [project, setProject] = useState<Project | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [queue, setQueue] = useState<ProjectQueueItem[]>([]);
+  const [reviewerRubric, setReviewerRubric] = useState<ReviewerRubric | null>(null);
+  const [assessmentHistory, setAssessmentHistory] = useState<AssessmentHistory[]>([]);
   const [selected, setSelected] = useState<Record<string, string>>({});
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [delivery, setDelivery] = useState("");
@@ -49,12 +53,14 @@ export default function Beta71CurriculumPreview() {
   const allUnits = useMemo(() => tree?.modules.flatMap((module) => module.units) ?? [], [tree]);
 
   const refreshProgress = useCallback(async () => {
-    const [progressResponse, submissionsResponse] = await Promise.all([
+    const [progressResponse, submissionsResponse, historyResponse] = await Promise.all([
       api.get<Progress>(`/beta7-1/preview/batches/${batchId}/progress`),
       api.get<{ exercises: Submission[]; projects: Submission[] }>(`/beta7-1/preview/batches/${batchId}/submissions/mine`),
+      api.get<AssessmentHistory[]>(`/beta7-2/assessment/batches/${batchId}/project/assessment-history/mine`),
     ]);
     setProgress(progressResponse.data);
     setSubmissions([...submissionsResponse.data.exercises, ...submissionsResponse.data.projects]);
+    setAssessmentHistory(historyResponse.data);
   }, []);
 
   const loadUnit = useCallback(async (unitId: string) => {
@@ -80,16 +86,25 @@ export default function Beta71CurriculumPreview() {
       api.get<PhaseTree>(`/beta7-1/preview/batches/${batchId}`),
       api.get<Progress>(`/beta7-1/preview/batches/${batchId}/progress`),
       api.get<{ exercises: Submission[]; projects: Submission[] }>(`/beta7-1/preview/batches/${batchId}/submissions/mine`),
-    ]).then(([treeResponse, progressResponse, submissionResponse]) => {
+      api.get<AssessmentHistory[]>(`/beta7-2/assessment/batches/${batchId}/project/assessment-history/mine`),
+    ]).then(([treeResponse, progressResponse, submissionResponse, historyResponse]) => {
       if (!active) return;
       setTree(treeResponse.data);
       setProgress(progressResponse.data);
       setSubmissions([...submissionResponse.data.exercises, ...submissionResponse.data.projects]);
+      setAssessmentHistory(historyResponse.data);
       const first = treeResponse.data.modules[0]?.units[0];
       if (first) void loadUnit(first.id);
       if (user.permissions.includes("submissions.grade")) {
-        void api.get<ProjectQueueItem[]>(`/beta7-1/preview/batches/${batchId}/project/review-queue`)
-          .then((response) => active && setQueue(response.data))
+        void Promise.all([
+          api.get<ProjectQueueItem[]>(`/beta7-1/preview/batches/${batchId}/project/review-queue`),
+          api.get<ReviewerRubric>(`/beta7-2/assessment/batches/${batchId}/project/rubric`),
+        ])
+          .then(([queueResponse, rubricResponse]) => {
+            if (!active) return;
+            setQueue(queueResponse.data);
+            setReviewerRubric(rubricResponse.data);
+          })
           .catch(() => active && setQueue([]));
       }
     }).catch((cause: unknown) => {
@@ -150,12 +165,16 @@ export default function Beta71CurriculumPreview() {
   };
 
   const reviewProject = async (item: ProjectQueueItem) => {
+    if (!reviewerRubric) return;
     setError("");
     try {
-      await api.post(`/beta7-1/preview/batches/${batchId}/project/submissions/${item.id}/review`, {
+      await api.post(`/beta7-2/assessment/batches/${batchId}/project/submissions/${item.id}/assess`, {
+        project_version: item.source_sha256,
+        rubric_id: reviewerRubric.rubric_id,
+        rubric_version: reviewerRubric.version,
         expected_revision: item.revision,
-        outcome: "needs_revision",
-        feedback: "Entrega recebida para revisão. Os critérios pedagógicos finais permanecem pendentes de validação.",
+        outcome: "NEEDS_REVISION",
+        feedback: "Entrega recebida para revisão. A aprovação do projeto permanece bloqueada até decisão pedagógica sobre a rubrica.",
       }, { headers: { "Idempotency-Key": operationKey() } });
       const response = await api.get<ProjectQueueItem[]>(`/beta7-1/preview/batches/${batchId}/project/review-queue`);
       setQueue(response.data);
@@ -286,8 +305,20 @@ export default function Beta71CurriculumPreview() {
           </article>)}</div>
           <label className="mt-5 block">Entrega textual<textarea className="mt-1 block min-h-32 w-full rounded border p-2 text-slate-900" value={delivery} onChange={(event) => setDelivery(event.target.value)} data-testid="preview-project-delivery" /></label>
           <button className="mt-2 rounded bg-emerald-700 px-3 py-1" type="button" disabled={!delivery.trim()} onClick={() => void submitDelivery()} data-testid="preview-project-submit">Enviar entrega</button>
-          {submissions.filter((item) => item.unit_id === "3.5").map((item) => <p key={item.id} className="mt-2 text-sm" data-testid={`preview-project-submission-state-${item.id}`}>{item.state}{item.feedback && ` — ${item.feedback}`}</p>)}
-          {user.permissions.includes("submissions.grade") && <div className="mt-6" data-testid="preview-review-queue"><h4 className="font-semibold">Entregas para avaliação</h4>{queue.map((item) => <article className="mt-3 rounded border border-slate-700 p-3" key={item.id} data-testid={`preview-review-item-${item.id}`}><p>{item.answer}</p><p className="text-xs text-slate-400">{item.state} · revisão {item.revision}</p><button className="mt-2 rounded bg-amber-700 px-3 py-1" onClick={() => void reviewProject(item)} type="button">Solicitar revisão com feedback</button></article>)}</div>}
+          {submissions.filter((item) => item.unit_id === "3.5").map((item) => <p key={item.id} className="mt-2 text-sm" data-testid={`preview-project-submission-state-${item.id}`}>Tentativa {item.attempt}: {item.state}{item.previous_submission_id && " · vinculada à tentativa anterior"}{item.feedback && ` — ${item.feedback}`}</p>)}
+          {user.permissions.includes("submissions.grade") && <div className="mt-6" data-testid="preview-review-queue">
+            <h4 className="font-semibold">Entregas para avaliação</h4>
+            {reviewerRubric && <div className="my-3 rounded border border-amber-700 p-3" data-testid="project-rubric-status">
+              <p>Rubrica {reviewerRubric.version}: {reviewerRubric.state}</p>
+              <p className="text-sm">Aprovação indisponível enquanto a decisão pedagógica estiver pendente.</p>
+              <button type="button" disabled className="mt-2 cursor-not-allowed rounded bg-slate-700 px-3 py-1" data-testid="project-approve-disabled">Aprovar — bloqueado</button>
+            </div>}
+            {queue.map((item) => <article className="mt-3 rounded border border-slate-700 p-3" key={item.id} data-testid={`preview-review-item-${item.id}`}>
+              <p>{item.answer}</p><p className="text-xs text-slate-400">{item.state} · revisão {item.revision}</p>
+              <button className="mt-2 rounded bg-amber-700 px-3 py-1" onClick={() => void reviewProject(item)} type="button">Registrar feedback e solicitar revisão</button>
+            </article>)}
+          </div>}
+          {assessmentHistory.filter((item) => submissions.some((submission) => submission.id === item.submission_id)).map((item) => <p key={item.assessment_id} className="mt-2 text-sm" data-testid={`project-assessment-${item.assessment_id}`}>{item.resulting_state} — {item.feedback}</p>)}
         </section>}
       </section>
     </main>

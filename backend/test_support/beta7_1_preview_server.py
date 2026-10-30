@@ -28,6 +28,7 @@ _ownership_client.close()
 from routes_auth import router as _auth_router  # noqa: E402
 from routes_content import router as _content_router  # noqa: E402
 from test_support.beta7_1_preview_router import router as _preview_router  # noqa: E402
+from test_support.beta7_2_assessment_router import router as _assessment_router  # noqa: E402
 
 app = FastAPI(title="Trilha Code Beta 7.1 isolated preview", docs_url=None, openapi_url=None)
 app.state.beta7_1_preview_run_id = _target.run_id
@@ -94,6 +95,9 @@ for _path in ("/api/tracks/{track_id}/tree", "/api/nodes/{node_id}"):
     _copy_selected_route(_content_router, _path, "GET")
 
 app.include_router(_preview_router)
+# Beta 7.2 assessment handlers are reachable only from this Docker-attested,
+# test-support ASGI composition; the operational server never imports them.
+app.include_router(_assessment_router)
 
 
 @app.get("/health", include_in_schema=False)

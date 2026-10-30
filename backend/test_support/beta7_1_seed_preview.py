@@ -36,19 +36,20 @@ def _validate_source_and_batch(source_root: Path):
         raise RuntimeError("Lote curricular contém bloqueios ou identidades duplicadas")
     if len(batch.units) != 10 or manifest["module_count"] != 3 or manifest["counts"] != EXPECTED_COUNTS:
         raise RuntimeError("Manifesto curricular difere do inventário autorizado")
-    project = project_package_from_converted_unit(next(
+    project_unit = next(
         item for item in batch.units if item.provenance.source_id == "3.5"
-    ))
+    )
+    project = project_package_from_converted_unit(project_unit)
     if len(project.artifacts) != 11 or len(project.rubrics) != 1 or len(project.steps) != 4:
         raise RuntimeError("Projeto 3.5 não corresponde ao contrato de 11 artefatos")
-    return batch, manifest, project
+    return batch, manifest, project, project_unit
 
 
 async def _prepare(source_root: Path, run_id: str, owner_token: str, container_id: str, network_id: str,
                    passwords: dict[str, str]) -> dict[str, Any]:
     # Parsing, source validation, duplicate checks, contract validation and
     # project classification are completed before curriculum persistence.
-    batch, manifest, project = _validate_source_and_batch(source_root)
+    batch, manifest, project, project_unit = _validate_source_and_batch(source_root)
     batch_id = f"phase1-{manifest['canonical_manifest_sha256']}"
     from database import db
     from indexes import ensure_indexes
@@ -140,11 +141,24 @@ async def _prepare(source_root: Path, run_id: str, owner_token: str, container_i
     finally:
         owner_client.close()
 
+    from curriculum_contract.beta7_2_assessment import proposed_rubric_from_project
     from services.beta7_1_preview import preview_db
+
+    rubric = proposed_rubric_from_project(
+        project,
+        source_revision=project_unit.provenance.source_revision,
+        source_state=project_unit.provenance.source_status,
+    )
 
     await preview_db.preview_units.create_index([("batch_id", 1), ("unit_id", 1)], unique=True)
     await preview_db.preview_grants.create_index([("batch_id", 1), ("user_id", 1)], unique=True)
     await preview_db.preview_project_submissions.create_index([("batch_id", 1), ("user_id", 1), ("created_at", 1)])
+    await preview_db.beta7_2_rubrics.create_index(
+        [("batch_id", 1), ("rubric_id", 1), ("version", 1)], unique=True,
+    )
+    await preview_db.beta7_2_assessments.create_index(
+        [("batch_id", 1), ("submission_id", 1), ("decided_at", 1)],
+    )
     if await preview_db.preview_batches.find_one({"_id": batch_id}):
         raise RuntimeError("Identidade da prévia já existe; não será reutilizada")
     for unit in batch.units:
@@ -171,6 +185,11 @@ async def _prepare(source_root: Path, run_id: str, owner_token: str, container_i
         "state": "PREPARED",
         "private_payload": True,
         "created_at": __import__("datetime").datetime.now(__import__("datetime").UTC),
+    })
+    await preview_db.beta7_2_rubrics.insert_one({
+        "_id": f"{batch_id}:{rubric.rubric_id}:{rubric.version}",
+        "batch_id": batch_id,
+        **rubric.model_dump(mode="python"),
     })
     student_id = str(inserted["student"]["_id"])
     reviewer_id = str(inserted["reviewer"]["_id"])

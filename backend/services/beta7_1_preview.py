@@ -196,7 +196,10 @@ async def progress_view(batch_id: str, user: dict[str, Any]) -> dict[str, Any]:
 
     unit_rows: list[dict[str, Any]] = []
     module_rows: dict[str, dict[str, Any]] = {}
-    totals = {"quizzes_answered": 0, "exercises_submitted": 0, "awaiting_review": 0, "approved": 0}
+    totals = {
+        "quizzes_answered": 0, "exercises_submitted": 0, "awaiting_review": 0,
+        "revision_required": 0, "project_approved": 0, "approved": 0,
+    }
     for document in units:
         unit = _json_unit(document)
         unit_quizzes = quiz_by_unit.get(unit.provenance.source_id, [])
@@ -211,7 +214,11 @@ async def progress_view(batch_id: str, user: dict[str, Any]) -> dict[str, Any]:
         exercise_done = len(latest_exercises)
         pending = sum(row["state"] == "AWAITING_REVIEW" for row in latest_exercises.values())
         approved = sum(row["state"] == "APPROVED" for row in latest_exercises.values())
-        project_pending = sum(row["state"] == "AWAITING_REVIEW" for row in unit_projects)
+        latest_project = max(unit_projects, key=lambda row: row["created_at"], default=None)
+        project_state = latest_project["state"] if latest_project else "NOT_SUBMITTED"
+        project_pending = int(project_state == "AWAITING_REVIEW")
+        project_revision_required = int(project_state == "NEEDS_REVISION")
+        project_approved = int(project_state == "APPROVED")
         row = {
             "unit_id": unit.provenance.source_id,
             "module_id": unit.module_id,
@@ -220,6 +227,9 @@ async def progress_view(batch_id: str, user: dict[str, Any]) -> dict[str, Any]:
             "exercises_submitted": exercise_done,
             "exercises_total": len(unit.manual_exercises),
             "awaiting_review": pending + project_pending,
+            "revision_required": project_revision_required,
+            "project_state": project_state,
+            "project_approved": project_approved,
             "approved": approved,
             "criterion_state": "REQUIRES_PEDAGOGICAL_DECISION" if unit.completion_criterion else "SOURCE_ABSENT",
             "unit_completion": "NOT_CONCLUDED",
@@ -234,11 +244,16 @@ async def progress_view(batch_id: str, user: dict[str, Any]) -> dict[str, Any]:
             "exercises_submitted": 0,
             "exercises_total": 0,
             "awaiting_review": 0,
+            "revision_required": 0,
+            "project_approved": 0,
             "approved": 0,
             "completion": "NOT_CONCLUDED",
         })
         aggregate["units"] += 1
-        for key in ("quizzes_answered", "quizzes_total", "exercises_submitted", "exercises_total", "awaiting_review", "approved"):
+        for key in (
+            "quizzes_answered", "quizzes_total", "exercises_submitted", "exercises_total",
+            "awaiting_review", "revision_required", "project_approved", "approved",
+        ):
             aggregate[key] += row[key]
         for key in totals:
             totals[key] += row[key]
@@ -334,6 +349,7 @@ def _student_submission(document: dict[str, Any]) -> dict[str, Any]:
         "activity_id": document.get("activity_id", document.get("project_id")),
         "source_sha256": document["source_sha256"],
         "attempt": document["attempt"],
+        "previous_submission_id": document.get("previous_submission_id"),
         "state": document["state"],
         "feedback": document.get("feedback"),
         "created_at": document["created_at"].isoformat(),
@@ -452,6 +468,11 @@ async def submit_project(
         if prior["fingerprint"] != fingerprint:
             raise HTTPException(status_code=409, detail="Chave de operação reutilizada com outros dados")
         return _student_submission(prior)
+    previous = await preview_db.preview_project_submissions.find_one({
+        "batch_id": batch_id, "unit_id": "3.5", "user_id": user["id"],
+    }, sort=[("attempt", -1)])
+    if previous and previous.get("state") not in {"NEEDS_REVISION", "REVIEWED_FEEDBACK_ONLY"}:
+        raise HTTPException(status_code=409, detail="A entrega anterior precisa de avaliação antes de novo envio")
     attempt = await preview_db.preview_project_submissions.count_documents({
         "batch_id": batch_id, "unit_id": "3.5", "user_id": user["id"],
     }) + 1
@@ -459,10 +480,30 @@ async def submit_project(
         "_id": record_id, "batch_id": batch_id, "unit_id": "3.5", "project_id": "3.5",
         "source_sha256": source_sha256, "user_id": user["id"], "delivery_text": delivery_text,
         "attempt": attempt, "state": "AWAITING_REVIEW", "feedback": None, "revision": 0,
+        "previous_submission_id": previous["_id"] if previous else None,
         "operation_key": key, "fingerprint": fingerprint, "history": [], "created_at": _utcnow(),
     }
     try:
-        await preview_db.preview_project_submissions.insert_one(document)
+        async with client.start_session() as session:
+            async with await session.start_transaction():
+                if previous is not None:
+                    superseded = await preview_db.preview_project_submissions.update_one({
+                        "_id": previous["_id"], "batch_id": batch_id,
+                        "revision": previous.get("revision", 0),
+                        "state": previous["state"],
+                    }, {
+                        "$set": {"state": "SUPERSEDED_BY_RESUBMISSION", "updated_at": _utcnow()},
+                        "$inc": {"revision": 1},
+                        "$push": {"history": {
+                            "event_id": _canonical_hash({"new_submission_id": record_id, "previous": previous["_id"]}),
+                            "state": "SUPERSEDED_BY_RESUBMISSION",
+                            "superseded_by": record_id,
+                            "at": _utcnow(),
+                        }},
+                    }, session=session)
+                    if superseded.matched_count != 1:
+                        raise HTTPException(status_code=409, detail="A tentativa anterior mudou; recarregue o histórico")
+                await preview_db.preview_project_submissions.insert_one(document, session=session)
     except DuplicateKeyError:
         prior = await preview_db.preview_project_submissions.find_one({"_id": record_id})
         if not prior or prior["fingerprint"] != fingerprint:
@@ -488,6 +529,7 @@ async def reviewer_project_queue(batch_id: str, user: dict[str, Any]) -> list[di
         "id": row["_id"], "unit_id": row["unit_id"], "project_id": row["project_id"],
         "learner_id": row["user_id"], "answer": row["delivery_text"], "state": row["state"],
         "revision": row["revision"], "attempt": row["attempt"],
+        "source_sha256": row["source_sha256"],
     } for row in records]
 
 

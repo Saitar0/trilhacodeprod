@@ -222,6 +222,18 @@ class Beta71DockerHarness(Beta7DockerHarness):
             workdir="/workspace/backend",
         )
 
+    def run_beta7_2_persistence_validation(
+        self, fixture: dict[str, object],
+    ) -> subprocess.CompletedProcess[str]:
+        if not self.gate_passed:
+            raise Beta61HarnessError("Avaliação persistente bloqueada antes do gate Beta 7.1")
+        return self._exec(
+            ["python", "test_support/beta7_2_persistence_validation.py"],
+            timeout=180,
+            environment={**self._run_env(), "BETA7_1_E2E_BATCH_ID": str(fixture["batch_id"])},
+            workdir="/workspace/backend",
+        )
+
     def seed_real_curriculum(self, curriculum_root: str) -> dict[str, object]:
         if not self.gate_passed:
             raise Beta61HarnessError("Preparação curricular bloqueada antes do gate Beta 7.1")
