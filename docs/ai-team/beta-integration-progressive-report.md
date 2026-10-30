@@ -47,8 +47,8 @@ As dependências são cumulativas, mas não autorizam cherry-pick indiscriminado
 - Commit original portado: `b868c728`
 - Escopo: contratos de conteúdo protegido, metadados curriculares, critérios e artefatos do projeto 3.5.
 - Fora do escopo: staging, Mongo harness, writers, IAM, publicação e C14–C16.
-- Testes locais: 8 testes direcionados passaram em venv isolado.
-- CI: workflow `41082490518` passou Backend/MongoDB, Frontend, Docker/G2, Playwright E2E e resumo.
+- Testes locais: 10 testes direcionados passaram em venv isolado.
+- CI: workflow `41083962948` passou Backend/MongoDB, Frontend, Docker/G2, Playwright E2E e resumo no SHA `6bde6da662b8ef9a3214219ed7aceb06cf858552`.
 
 ## Gates preservados
 
