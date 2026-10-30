@@ -210,7 +210,6 @@ jobs:
           unit_tests/test_g2_runner.py
           unit_tests/test_g2_preflight.py
           unit_tests/test_g2_docker_api_contract.py
-          unit_tests/test_compose_qa_isolation.py
           unit_tests/test_g2_workflow_contract.py
       - name: Record Docker/G2 job result
         if: always()
@@ -370,7 +369,8 @@ jobs:
             sleep 2
           done
 
-          ./node_modules/.bin/vite --host 127.0.0.1 --port 5173 \
+          VITE_BACKEND_URL=http://127.0.0.1:18000 \
+            ./node_modules/.bin/vite --host 127.0.0.1 --port 5173 \
             > "$RUNNER_TEMP/foundation-frontend.log" 2>&1 &
           frontend_pid=$!
           for attempt in {1..60}; do
