@@ -35,7 +35,56 @@ async def reorder_blocks(ordered_ids: list[str]) -> dict:
     return {"ok": True}
 
 
-async def update_block(block_id: str, data: dict, user: dict) -> dict:
+async def update_block(
+    block_id: str,
+    data: dict,
+    user: dict,
+    *,
+    editorial_boundary=None,
+    session_id: str | None = None,
+    expected_revision: int | None = None,
+    operation_id: str | None = None,
+    requested_track_id: str | None = None,
+    transaction_guard=None,
+    before_commit=None,
+) -> dict:
+    if editorial_boundary is not None:
+        if (
+            not isinstance(session_id, str)
+            or expected_revision is None
+            or not isinstance(operation_id, str)
+            or set(data) - {"title", "data"}
+            or not data
+        ):
+            raise HTTPException(status_code=422, detail="Alteração editorial inválida")
+        block_object_id = oid(block_id)
+        block = await get_document("content_blocks", block_id)
+        if requested_track_id is not None and block.get("track_id") != requested_track_id:
+            raise HTTPException(status_code=404, detail="Bloco não encontrado")
+        try:
+            prepared = await editorial_boundary.prepare_draft_block_update(
+                actor_id=user["id"],
+                session_id=session_id,
+                block_id=block_object_id,
+                operation_id=operation_id,
+                expected_revision=expected_revision,
+                changes=data,
+                requested_track_id=requested_track_id,
+            )
+            receipt = await editorial_boundary.commit_draft_block_update(
+                prepared,
+                actor_id=user["id"],
+                session_id=session_id,
+                transaction_guard=transaction_guard,
+                before_commit=before_commit,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail="Alteração editorial inválida") from exc
+        updated = await db.content_blocks.find_one({"_id": block_object_id})
+        if updated is None:
+            raise HTTPException(status_code=409, detail="Bloco alterado; recarregue antes de continuar")
+        return {"document": updated, "receipt": receipt}
+
     block = await get_document("content_blocks", block_id)
     check_status(data.get("status"))
     data["updated_at"] = now()

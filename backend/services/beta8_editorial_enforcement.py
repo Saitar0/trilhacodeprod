@@ -1,11 +1,13 @@
-"""Disconnected Beta 8 proof for one grant-protected draft block mutation.
+"""Experimental grant-protected draft block mutation boundary.
 
 The service composes C12 authorization with the existing C8/C10 revision
-authority. It is intentionally not imported by application routes or startup.
+authority. The normal application startup does not construct or inject it;
+Beta 8.1 exercises it through an explicitly composed test-only HTTP app.
 """
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -34,8 +36,12 @@ class PreparedDraftBlockUpdate:
     track_id: str
     block_id: Any
     operation_id: str
-    changes: dict[str, str]
+    changes: dict[str, Any]
     preparation: PreparedRevision
+
+
+TransactionGuard = Callable[[Any, RevisionReceipt], Awaitable[None]]
+BeforeCommit = Callable[[], Awaitable[None]]
 
 
 class Beta8EditorialMutationBoundary:
@@ -63,7 +69,8 @@ class Beta8EditorialMutationBoundary:
         block_id: Any,
         operation_id: str,
         expected_revision: int,
-        changes: dict[str, str],
+        changes: dict[str, Any],
+        requested_track_id: str | None = None,
     ) -> PreparedDraftBlockUpdate:
         patch = _validated_changes(changes)
         block = await self._database.content_blocks.find_one(
@@ -78,6 +85,7 @@ class Beta8EditorialMutationBoundary:
             session_id=session_id,
             resolved_track_id=track_id,
             operation="block.update",
+            requested_track_id=requested_track_id,
         )
         if not decision.allowed:
             await self._audit_denial(
@@ -120,6 +128,8 @@ class Beta8EditorialMutationBoundary:
         *,
         actor_id: str,
         session_id: str,
+        transaction_guard: TransactionGuard | None = None,
+        before_commit: BeforeCommit | None = None,
     ) -> RevisionReceipt:
         if (
             not isinstance(prepared, PreparedDraftBlockUpdate)
@@ -175,8 +185,16 @@ class Beta8EditorialMutationBoundary:
                 session=session,
             )
 
-        guarded = self._authority.transaction_participant(decision.capability, mutate)
+        authority_guard = self._authority.transaction_participant(decision.capability, mutate)
+
+        async def guarded(session: Any, receipt: Any) -> None:
+            if transaction_guard is not None:
+                await transaction_guard(session, receipt)
+            await authority_guard(session, receipt)
+
         try:
+            if before_commit is not None:
+                await before_commit()
             return await self._adapter.commit(
                 prepared.preparation,
                 self._writer_credential,
@@ -215,9 +233,23 @@ class Beta8EditorialMutationBoundary:
             return
 
 
-def _validated_changes(changes: object) -> dict[str, str]:
-    if not isinstance(changes, dict) or not changes or set(changes) - {"title", "body"}:
+def _validated_changes(changes: object) -> dict[str, Any]:
+    if not isinstance(changes, dict) or not changes or set(changes) - {"title", "body", "data"}:
         raise ValueError("patch de rascunho inválido")
-    if any(not isinstance(value, str) or len(value) > 100_000 for value in changes.values()):
-        raise ValueError("patch de rascunho inválido")
+    for field_name, value in changes.items():
+        if field_name in {"title", "body"} and (
+            not isinstance(value, str) or len(value.encode("utf-8")) > 100_000
+        ):
+            raise ValueError("patch de rascunho inválido")
+        if field_name == "data":
+            if not isinstance(value, dict):
+                raise ValueError("patch de rascunho inválido")
+            try:
+                import json
+
+                encoded = json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+            except (TypeError, ValueError, UnicodeEncodeError) as exc:
+                raise ValueError("patch de rascunho inválido") from exc
+            if len(encoded.encode("utf-8")) > 100_000:
+                raise ValueError("patch de rascunho inválido")
     return dict(changes)

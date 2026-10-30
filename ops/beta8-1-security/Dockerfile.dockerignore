@@ -1,0 +1,8 @@
+**
+!backend/
+!backend/**
+!ops/
+!ops/beta8-1-security/
+!ops/beta8-1-security/**
+/backend/.env
+/backend/.env.*

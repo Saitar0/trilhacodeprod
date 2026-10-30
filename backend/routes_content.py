@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 from permissions import require
 from schemas.content import (
@@ -164,8 +164,68 @@ async def reorder_blocks(body: ReorderIn, _: dict = Depends(require("content.wri
 
 
 @router.put("/blocks/{block_id}", response_model=BlockOut, response_model_exclude_unset=True)
-async def update_block(block_id: str, body: BlockUpdate, user: dict = Depends(require("content.write"))):
-    return ser(await update_block_service(block_id, body.model_dump(exclude_unset=True), user))
+async def update_block(
+    block_id: str,
+    body: BlockUpdate,
+    request: Request,
+    response: Response,
+    user: dict = Depends(require("content.write")),
+):
+    experimental = getattr(request.app.state, "beta8_1_editorial_runtime", None)
+    if experimental is None:
+        raise HTTPException(status_code=503, detail="Edição protegida indisponível")
+
+    # This composition is injected only by the isolated Beta 8.1 harness.
+    # The ordinary server startup does not set this app-state capability.
+    from curriculum_contract.experimental_editorial_api_contract import (
+        derive_operation_id,
+        map_protocol_error,
+        parse_expected_revision,
+        validate_idempotency_key,
+    )
+    from services.beta8_1_runtime_iam import identity_from_authenticated_request
+    from services.beta8_editorial_enforcement import DraftBlockNotFound, EditorialMutationDenied
+
+    identity = identity_from_authenticated_request(request, user)
+    await experimental.iam_bridge.require_matching_projection(
+        identity, user, required_permission="content.write",
+    )
+    expected_revision = parse_expected_revision(request.headers.get("If-Match"))
+    idempotency_key = validate_idempotency_key(request.headers.get("Idempotency-Key"))
+    operation_id = derive_operation_id(
+        actor_id=identity.actor_id,
+        track_id=f"block:{block_id}",
+        operation_kind="block.update",
+        idempotency_key=idempotency_key,
+        key=experimental.operation_hmac_key,
+    )
+    changes = body.model_dump(exclude_unset=True)
+    try:
+        result = await update_block_service(
+            block_id,
+            changes,
+            user,
+            editorial_boundary=experimental.boundary,
+            session_id=identity.session_id,
+            expected_revision=expected_revision,
+            operation_id=operation_id,
+            transaction_guard=experimental.iam_bridge.transaction_guard(identity),
+            before_commit=experimental.before_commit,
+        )
+    except HTTPException:
+        raise
+    except EditorialMutationDenied:
+        raise HTTPException(status_code=403, detail="Operação editorial não autorizada") from None
+    except DraftBlockNotFound:
+        raise HTTPException(status_code=404, detail="Bloco não encontrado") from None
+    except Exception as exc:
+        raise map_protocol_error(exc) from None
+    receipt = result.get("receipt")
+    if receipt is None:
+        raise HTTPException(status_code=503, detail="Confirmação editorial indisponível")
+    response.headers["ETag"] = f'"editorial-rev-{receipt.revision}"'
+    response.headers["Idempotency-Replayed"] = "true" if receipt.replayed else "false"
+    return ser(result["document"])
 
 
 @router.delete("/blocks/{block_id}", response_model=OkOut)
