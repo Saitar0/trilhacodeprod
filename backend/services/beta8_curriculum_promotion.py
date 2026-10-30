@@ -145,22 +145,26 @@ class Beta8ExperimentalPromoter:
                         "_id": candidate.track_id,
                         "track_id": candidate.track_id,
                         "generation_id": intent.generation_id,
-                        "revision": receipt.revision,
+                        # The generation pointer has its own CAS sequence. It
+                        # must not reuse the editorial track revision: ordinary
+                        # draft edits can advance that revision between two
+                        # generation transitions.
+                        "revision": 1,
                         "schema_version": 1,
                     },
                     session=session,
                 )
             else:
+                head_revision = int(head.get("revision", 0))
                 updated = await self._database["_beta8_experimental_heads"].update_one(
                     {
                         "_id": candidate.track_id,
                         "generation_id": expected_previous_generation,
-                        "revision": receipt.parent_revision,
+                        "revision": head_revision,
                     },
                     {"$set": {
                         "generation_id": intent.generation_id,
-                        "revision": receipt.revision,
-                    }},
+                    }, "$inc": {"revision": 1}},
                     session=session,
                 )
                 if updated.matched_count != 1:

@@ -7,7 +7,6 @@ Beta 8.1 exercises it through an explicitly composed test-only HTTP app.
 
 from __future__ import annotations
 
-import hashlib
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
@@ -68,6 +67,7 @@ class PreparedDraftNodeUpdate:
 
 TransactionGuard = Callable[[Any, RevisionReceipt], Awaitable[None]]
 BeforeCommit = Callable[[], Awaitable[None]]
+BeforeTransactionCommit = Callable[[], Awaitable[None]]
 
 
 class Beta8EditorialMutationBoundary:
@@ -172,6 +172,7 @@ class Beta8EditorialMutationBoundary:
         session_id: str,
         transaction_guard: TransactionGuard | None = None,
         before_commit: BeforeCommit | None = None,
+        before_transaction_commit: BeforeTransactionCommit | None = None,
     ) -> RevisionReceipt:
         if (
             not isinstance(prepared, PreparedDraftBlockCreate)
@@ -232,6 +233,8 @@ class Beta8EditorialMutationBoundary:
             if transaction_guard is not None:
                 await transaction_guard(session, receipt)
             await authority_guard(session, receipt)
+            if before_transaction_commit is not None:
+                await before_transaction_commit()
 
         try:
             if before_commit is not None:
@@ -313,6 +316,7 @@ class Beta8EditorialMutationBoundary:
         session_id: str,
         transaction_guard: TransactionGuard | None = None,
         before_commit: BeforeCommit | None = None,
+        before_transaction_commit: BeforeTransactionCommit | None = None,
     ) -> RevisionReceipt:
         if (
             not isinstance(prepared, PreparedDraftBlockUpdate)
@@ -374,6 +378,8 @@ class Beta8EditorialMutationBoundary:
             if transaction_guard is not None:
                 await transaction_guard(session, receipt)
             await authority_guard(session, receipt)
+            if before_transaction_commit is not None:
+                await before_transaction_commit()
 
         try:
             if before_commit is not None:
@@ -463,6 +469,7 @@ class Beta8EditorialMutationBoundary:
         session_id: str,
         transaction_guard: TransactionGuard | None = None,
         before_commit: BeforeCommit | None = None,
+        before_transaction_commit: BeforeTransactionCommit | None = None,
     ) -> RevisionReceipt:
         if (
             not isinstance(prepared, PreparedDraftNodeUpdate)
@@ -526,6 +533,8 @@ class Beta8EditorialMutationBoundary:
             if transaction_guard is not None:
                 await transaction_guard(session, receipt)
             await authority_guard(session, receipt)
+            if before_transaction_commit is not None:
+                await before_transaction_commit()
 
         try:
             if before_commit is not None:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
 import re
 import time
@@ -81,35 +82,14 @@ def _preflight() -> tuple[str, bytes, bytes, str, str, str, str]:
  _stage_read_uri, _stage_run_id, _stage_owner_token) = _preflight()
 
 # Import application/database modules only after all fail-closed checks above.
-from constants import PERMISSIONS  # noqa: E402
-from database import client, db  # noqa: E402
 from pymongo import AsyncMongoClient  # noqa: E402
-from serialization import ser  # noqa: E402
-from services.beta8_1_runtime_iam import (  # noqa: E402
-    AuthenticatedEditorialIdentity,
-    Beta8_1RuntimeIAMBridge,
-)
-from services.beta8_editorial_enforcement import (  # noqa: E402
-    Beta8EditorialMutationBoundary,
-    DraftBlockNotFound,
-    EditorialMutationDenied,
-)
-from services.beta8_1_staging_authority import (  # noqa: E402
-    Beta8_1StagingAuthorityBridge,
-    StagingAuthorityError,
-)
-from services.beta8_curriculum_promotion import (  # noqa: E402
-    Beta8ExperimentalPromoter,
-    ExperimentalPromotionConflict,
-)
-from services.beta_curriculum_staging import (  # noqa: E402
-    CurriculumStagingService,
-)
-from services.beta8_3_internal_protocol import (  # noqa: E402
-    EditorialMutationCommand,
-    StagingTransitionCommand,
-    response_signature,
-    verify_request_signature,
+
+from constants import PERMISSIONS  # noqa: E402
+from curriculum_contract.beta8_promotion_contract import (  # noqa: E402
+    ExperimentalApproval,
+    ExperimentalCandidateState,
+    ExperimentalPromotionIntent,
+    PromotionContractError,
 )
 from curriculum_contract.editorial_revision_protocol import (  # noqa: E402
     FencingRejected,
@@ -119,23 +99,85 @@ from curriculum_contract.editorial_revision_protocol import (  # noqa: E402
 from curriculum_contract.experimental_async_editorial_adapter import (  # noqa: E402
     AsyncEditorialRevisionAdapter,
 )
-from curriculum_contract.mongodb_editorial_revision_adapter import CommitOutcomeUnknown  # noqa: E402
 from curriculum_contract.experimental_editorial_iam_authority import (  # noqa: E402
     MongoEditorialIAMAuthority,
 )
+from curriculum_contract.mongodb_editorial_revision_adapter import CommitOutcomeUnknown  # noqa: E402
+from database import client, db  # noqa: E402
 from security import account_is_active  # noqa: E402
-from services.sessions import session_id_digest  # noqa: E402
-from curriculum_contract.beta8_promotion_contract import (  # noqa: E402
-    ExperimentalApproval,
-    ExperimentalCandidateState,
-    ExperimentalPromotionIntent,
-    PromotionContractError,
+from serialization import ser  # noqa: E402
+from services.beta8_1_runtime_iam import (  # noqa: E402
+    AuthenticatedEditorialIdentity,
+    Beta8_1RuntimeIAMBridge,
 )
+from services.beta8_1_staging_authority import (  # noqa: E402
+    Beta8_1StagingAuthorityBridge,
+    StagingAuthorityError,
+)
+from services.beta8_3_internal_protocol import (  # noqa: E402
+    EDITORIAL_AUTHORITY_AUDIENCE,
+    EditorialMutationCommand,
+    StagingTransitionCommand,
+    response_signature,
+    verify_request_signature,
+)
+from services.beta8_curriculum_promotion import (  # noqa: E402
+    Beta8ExperimentalPromoter,
+    ExperimentalPromotionConflict,
+)
+from services.beta8_editorial_enforcement import (  # noqa: E402
+    Beta8EditorialMutationBoundary,
+    DraftBlockNotFound,
+    EditorialMutationDenied,
+)
+from services.beta_curriculum_staging import (  # noqa: E402
+    CurriculumStagingService,
+)
+from services.sessions import session_id_digest  # noqa: E402
 
 _MAX_CLOCK_SKEW_SECONDS = 60
 _MAX_BODY_BYTES = 120_000
 _NONCE = re.compile(r"^[0-9a-f]{48}$")
+_TEST_BARRIERS_ENABLED = os.environ.get("BETA8_4_TEST_BARRIERS") == "1"
 _stage_client = AsyncMongoClient(_stage_read_uri, appname="beta8-3-authority-stage-reader", tz_aware=True)
+
+
+async def _test_barrier(operation_id: str, phase: str) -> None:
+    """Persistent verifier-controlled barrier, absent from the operational app.
+
+    Only the disposable authority process can see this hook. The verifier owns
+    the barrier records through its root test credential; API and staging
+    identities have no access to the collection. A bounded persistent wait
+    makes cross-process interleavings deterministic without relying on sleeps.
+    """
+    if not _TEST_BARRIERS_ENABLED:
+        return
+    if phase not in {"before_commit", "before_transaction_commit", "after_commit"} or not re.fullmatch(
+        r"(?:http_[0-9a-f]{64}|beta8-op-[A-Za-z0-9._:-]{1,96})", operation_id,
+    ):
+        raise RuntimeError("barreira Beta 8.4 inválida")
+    collection = db["_beta8_4_test_barriers"]
+    barrier_id = f"{operation_id}:{phase}"
+    result = await collection.update_one(
+        {"_id": barrier_id, "state": "ARMED"},
+        {"$set": {"state": "PAUSED", "authority_pid": os.getpid(),
+                  "paused_at": datetime.now(UTC)}},
+    )
+    if result.matched_count != 1:
+        return
+    deadline = time.monotonic() + 90
+    while time.monotonic() < deadline:
+        state = await collection.find_one({"_id": barrier_id}, {"state": 1})
+        if state is None:
+            raise RuntimeError("barreira Beta 8.4 removida durante operação")
+        if state.get("state") in {"RELEASED", "RESTARTED"}:
+            await collection.update_one(
+                {"_id": barrier_id, "state": state["state"]},
+                {"$set": {"resumed_at": datetime.now(UTC)}},
+            )
+            return
+        await asyncio.sleep(0.05)
+    raise TimeoutError("barreira Beta 8.4 excedeu o limite; operação negada")
 
 
 class AuthorityRuntime:
@@ -203,7 +245,7 @@ async def _verify_service_request(
     *,
     expected_service: str,
     secret: bytes,
-) -> str:
+) -> tuple[str, str]:
     service_id = request.headers.get("X-Beta8-Service", "")
     timestamp = request.headers.get("X-Beta8-Timestamp", "")
     nonce = request.headers.get("X-Beta8-Nonce", "")
@@ -218,6 +260,7 @@ async def _verify_service_request(
         secret,
         signature,
         service_id=service_id,
+        audience=EDITORIAL_AUTHORITY_AUDIENCE,
         method=request.method,
         path=request.url.path,
         timestamp=timestamp,
@@ -237,7 +280,7 @@ async def _verify_service_request(
     except Exception:
         # A replay ledger outage is a hard denial, never an allow.
         raise HTTPException(status_code=503, detail="Autoridade temporariamente indisponível") from None
-    return nonce
+    return nonce, service_id
 
 
 async def _resolve_actor(
@@ -322,7 +365,7 @@ async def _health():
 
 @app.post("/internal/v1/editorial/mutations", dependencies=[])
 async def mutate_editorial(command: EditorialMutationCommand, request: Request):
-    nonce = await _verify_service_request(
+    nonce, caller_service = await _verify_service_request(
         request, expected_service="trilhacode-api", secret=_service_secret,
     )
     try:
@@ -341,6 +384,10 @@ async def mutate_editorial(command: EditorialMutationCommand, request: Request):
             receipt = await boundary.commit_draft_block_update(
                 prepared, actor_id=identity.actor_id, session_id=identity.session_id,
                 transaction_guard=guard,
+                before_commit=lambda: _test_barrier(command.operation_id, "before_commit"),
+                before_transaction_commit=lambda: _test_barrier(
+                    command.operation_id, "before_transaction_commit",
+                ),
             )
         elif command.operation == "block.create":
             now = datetime.now(UTC)
@@ -369,6 +416,10 @@ async def mutate_editorial(command: EditorialMutationCommand, request: Request):
             receipt = await boundary.commit_draft_block_create(
                 prepared, actor_id=identity.actor_id, session_id=identity.session_id,
                 transaction_guard=guard,
+                before_commit=lambda: _test_barrier(command.operation_id, "before_commit"),
+                before_transaction_commit=lambda: _test_barrier(
+                    command.operation_id, "before_transaction_commit",
+                ),
             )
         else:
             prepared = await boundary.prepare_draft_node_update(
@@ -382,7 +433,12 @@ async def mutate_editorial(command: EditorialMutationCommand, request: Request):
             receipt = await boundary.commit_draft_node_update(
                 prepared, actor_id=identity.actor_id, session_id=identity.session_id,
                 transaction_guard=guard,
+                before_commit=lambda: _test_barrier(command.operation_id, "before_commit"),
+                before_transaction_commit=lambda: _test_barrier(
+                    command.operation_id, "before_transaction_commit",
+                ),
             )
+        await _test_barrier(command.operation_id, "after_commit")
         result = {
             "track_id": receipt.track_id,
             "operation_id": receipt.operation_id,
@@ -399,6 +455,7 @@ async def mutate_editorial(command: EditorialMutationCommand, request: Request):
         response = _error_response(exc)
     response.headers["X-Beta8-Response-Signature"] = response_signature(
         _service_secret,
+        audience=caller_service,
         request_nonce=nonce,
         status_code=response.status_code,
         body=response.body,
@@ -408,7 +465,7 @@ async def mutate_editorial(command: EditorialMutationCommand, request: Request):
 
 @app.post("/internal/v1/staging/transitions", dependencies=[])
 async def promote_staged_package(command: StagingTransitionCommand, request: Request):
-    nonce = await _verify_service_request(
+    nonce, caller_service = await _verify_service_request(
         request, expected_service="trilhacode-stager", secret=_stager_secret,
     )
     try:
@@ -434,6 +491,8 @@ async def promote_staged_package(command: StagingTransitionCommand, request: Req
             session_id=identity.session_id,
             expected_previous_generation=command.expected_previous_generation,
             transaction_guard=app.state.authority_runtime.iam_bridge.transaction_guard(identity),
+            before_commit=lambda: _test_barrier(command.operation_id, "before_commit"),
+            after_commit=lambda: _test_barrier(command.operation_id, "after_commit"),
         )
         response = JSONResponse(status_code=200, content={
             "track_id": receipt.track_id,
@@ -447,6 +506,7 @@ async def promote_staged_package(command: StagingTransitionCommand, request: Req
         response = _error_response(exc)
     response.headers["X-Beta8-Response-Signature"] = response_signature(
         _stager_secret,
+        audience=caller_service,
         request_nonce=nonce,
         status_code=response.status_code,
         body=response.body,

@@ -24,13 +24,15 @@ from curriculum_contract.editorial_revision_protocol import (
     RevisionConflict,
 )
 from curriculum_contract.mongodb_editorial_revision_adapter import CommitOutcomeUnknown
-from services.beta8_editorial_enforcement import DraftBlockNotFound, EditorialMutationDenied
 from services.beta8_1_runtime_iam import AuthenticatedEditorialIdentity
 from services.beta8_3_internal_protocol import (
+    API_SERVICE_AUDIENCE,
+    EDITORIAL_AUTHORITY_AUDIENCE,
     EditorialMutationCommand,
     request_signature,
     verify_response_signature,
 )
+from services.beta8_editorial_enforcement import DraftBlockNotFound, EditorialMutationDenied
 
 _MUTATION_PATH = "/internal/v1/editorial/mutations"
 
@@ -245,6 +247,7 @@ class Beta8_3RemoteEditorialBoundary:
         signature = request_signature(
             self._factory.service_secret,
             service_id=service_id,
+            audience=EDITORIAL_AUTHORITY_AUDIENCE,
             method="POST",
             path=_MUTATION_PATH,
             timestamp=timestamp,
@@ -271,6 +274,7 @@ class Beta8_3RemoteEditorialBoundary:
         if not verify_response_signature(
             self._factory.service_secret,
             response.headers.get("X-Beta8-Response-Signature", ""),
+            audience=API_SERVICE_AUDIENCE,
             request_nonce=nonce,
             status_code=response.status_code,
             body=response.content,

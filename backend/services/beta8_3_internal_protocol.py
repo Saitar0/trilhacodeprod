@@ -24,6 +24,11 @@ _OPERATION_ID = re.compile(r"^http_[0-9a-f]{64}$")
 _SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{32,128}$")
 _ALLOWED_BLOCK_FIELDS = {"title", "data"}
 _ALLOWED_NODE_FIELDS = {"title", "summary", "description", "guidance"}
+_REQUEST_PROTOCOL_VERSION = "beta8-4-rpc-v2"
+_RESPONSE_PROTOCOL_VERSION = "beta8-4-response-v2"
+EDITORIAL_AUTHORITY_AUDIENCE = "trilhacode-editorial-authority"
+API_SERVICE_AUDIENCE = "trilhacode-api"
+STAGER_SERVICE_AUDIENCE = "trilhacode-stager"
 
 
 class ActorAssertion(BaseModel):
@@ -151,6 +156,7 @@ def request_signature(
     secret: bytes,
     *,
     service_id: str,
+    audience: str,
     method: str,
     path: str,
     timestamp: str,
@@ -162,8 +168,9 @@ def request_signature(
     if len(secret) < 32:
         raise ValueError("segredo interno deve conter ao menos 32 bytes")
     canonical = "\n".join((
-        "beta8-3-rpc-v1",
+        _REQUEST_PROTOCOL_VERSION,
         service_id,
+        audience,
         method.upper(),
         path,
         timestamp,
@@ -178,6 +185,7 @@ def verify_request_signature(
     supplied: str,
     *,
     service_id: str,
+    audience: str,
     method: str,
     path: str,
     timestamp: str,
@@ -189,6 +197,7 @@ def verify_request_signature(
     expected = request_signature(
         secret,
         service_id=service_id,
+        audience=audience,
         method=method,
         path=path,
         timestamp=timestamp,
@@ -201,6 +210,7 @@ def verify_request_signature(
 def response_signature(
     secret: bytes,
     *,
+    audience: str,
     request_nonce: str,
     status_code: int,
     body: bytes,
@@ -212,8 +222,9 @@ def response_signature(
     if type(status_code) is not int or not 100 <= status_code <= 599:
         raise ValueError("status da resposta interna inválido")
     canonical = "\n".join((
-        "beta8-3-response-v1",
+        _RESPONSE_PROTOCOL_VERSION,
         "trilhacode-editorial-authority",
+        audience,
         request_nonce,
         str(status_code),
         hashlib.sha256(body).hexdigest(),
@@ -225,6 +236,7 @@ def verify_response_signature(
     secret: bytes,
     supplied: str,
     *,
+    audience: str,
     request_nonce: str,
     status_code: int,
     body: bytes,
@@ -234,6 +246,7 @@ def verify_response_signature(
     try:
         expected = response_signature(
             secret,
+            audience=audience,
             request_nonce=request_nonce,
             status_code=status_code,
             body=body,
