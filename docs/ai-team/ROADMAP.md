@@ -1,4 +1,13 @@
 # Roadmap técnico
+
+## Atualização — recuperação da fundação concluída
+
+- A branch `codex/foundation-ci-e2e-recovery` foi validada no commit `bd8cd204857bbc581d5d6137ab6325d4022e13d7`.
+- O workflow isolado `41080651996` passou Backend/MongoDB, Frontend, Docker/G2, Playwright E2E e resumo de homologação; deploys foram pulados.
+- O PR #38 permanece aberto para revisão e merge manual.
+- Beta 1–9, migração curricular, C14–C16, writers editoriais e ADR-008 continuam fora da integração e bloqueados conforme os gates existentes.
+- Relatório: `docs/ai-team/foundation-validation-recovery-report.md`.
+
 Atualizado em 17/10/2026 a partir de main (`5e503aecccfb85bd764d7af8e120d70819c6af4f`) e evidências de CI, revisão estática e terminal administrativo somente leitura.
 
 ## 18/10/2026 — G2-FIX em revisão

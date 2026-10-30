@@ -13,6 +13,15 @@ def _render(project: str, api_port: str, frontend_port: str) -> dict:
     docker = shutil.which("docker")
     if not docker:
         pytest.skip("Docker Compose CLI is required for offline Compose rendering")
+    compose_version = subprocess.run(
+        [docker, "compose", "version"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    if compose_version.returncode != 0:
+        pytest.skip("Docker Compose CLI is required for offline Compose rendering")
 
     environment = os.environ.copy()
     environment.update({
