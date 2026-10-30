@@ -49,7 +49,7 @@ jobs:
           docker compose version
       - name: Run Beta 6.1 HTTP and Chromium journey
         working-directory: backend
-        run: python test_support/run_beta6_1_journey.py
+        run: PYTHONPATH=. python test_support/run_beta6_1_journey.py
       - name: Record Beta 6.1 result
         if: always()
         run: |
