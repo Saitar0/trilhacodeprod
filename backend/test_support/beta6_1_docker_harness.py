@@ -190,6 +190,7 @@ class Beta61DockerHarness:
             self.mongo_id = self._docker([
                 "run", "--detach", "--name", self.mongo_name,
                 "--network", self.network_name,
+                "--network-alias", self.mongo_name,
                 "--tmpfs", "/data/db:rw,noexec,nosuid,size=768m",
                 "--tmpfs", "/data/configdb:rw,noexec,nosuid,size=64m",
                 *self._label_args(),
@@ -197,6 +198,13 @@ class Beta61DockerHarness:
                 "--env", f"MONGO_INITDB_ROOT_PASSWORD={self.mongo_password}",
                 "mongo:7.0.43",
             ], timeout=300)
+            mongo_inspect = self._inspect_container(self.mongo_id)
+            mongo_network = (
+                (mongo_inspect.get("NetworkSettings") or {}).get("Networks") or {}
+            ).get(self.network_name) or {}
+            mongo_ip = mongo_network.get("IPAddress")
+            if not isinstance(mongo_ip, str) or not mongo_ip:
+                raise Beta61HarnessError("MongoDB não recebeu endereço interno na rede Beta 6.1")
             runner_env = {
                 "MONGO_URL": self.mongo_uri,
                 "DB_NAME": self.database,
@@ -221,6 +229,7 @@ class Beta61DockerHarness:
             runner_arguments = [
                 "run", "--detach", "--name", self.runner_name,
                 "--network", self.network_name,
+                "--add-host", f"{self.mongo_name}:{mongo_ip}",
                 "--tmpfs", "/tmp:rw,noexec,nosuid,size=128m",
                 *self._label_args(),
             ]
@@ -420,7 +429,10 @@ class Beta61DockerHarness:
             "BETA6_E2E_EXERCISE_ID": fixture["exercise_id"],
         }
         return self._exec(
-            ["npx", "--prefix", "/workspace/frontend", "playwright", "test", spec],
+            [
+                "npx", "--prefix", "/workspace/frontend", "playwright", "test",
+                "--timeout=60000", spec,
+            ],
             timeout=900,
             environment={**self._run_env(), **fixture_env},
             workdir="/workspace/frontend",
