@@ -1,0 +1,12 @@
+**
+!backend/
+!backend/**
+!frontend/
+!frontend/**
+!ops/
+!ops/beta9/
+!ops/beta9/**
+/frontend/node_modules
+/frontend/dist
+/backend/.env
+/backend/.env.*

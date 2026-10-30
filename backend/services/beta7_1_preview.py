@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from datetime import UTC, datetime
 from typing import Any, Awaitable, Callable
@@ -20,9 +21,33 @@ from curriculum_contract.experimental_beta_first_phase_converter import Converte
 from database import client
 from settings import settings
 
-preview_db = client[f"{settings.db_name}_beta7_1_preview"]
+
+def _preview_database_name() -> str:
+    """Use a short, run-scoped database only in the explicit Beta 9 harness."""
+    configured = os.environ.get("BETA7_1_PREVIEW_DB_NAME", "")
+    if configured:
+        if (
+            os.environ.get("BETA9_DISPOSABLE") != "1"
+            or not re.fullmatch(r"beta9p_[0-9a-f]{12}", configured)
+        ):
+            raise RuntimeError("Namespace da prévia Beta 7.1 fora da composição descartável")
+        return configured
+    return f"{settings.db_name}_beta7_1_preview"
+
+
+preview_db = client[_preview_database_name()]
 _IDEMPOTENCY_KEY = re.compile(r"[A-Za-z0-9._:-]{8,128}\Z")
 _REVIEW_OPERATION = "preview.project.review"
+
+
+def _preview_owner_run_id() -> str:
+    """Resolve the disposable preview owner without coupling it to DB naming."""
+    configured = os.environ.get("BETA7_1_PREVIEW_RUN_ID", "")
+    if configured:
+        if not re.fullmatch(r"[0-9a-f]{32}", configured):
+            raise RuntimeError("Identidade da prévia Beta 7.1 inválida")
+        return configured
+    return settings.db_name.removeprefix("beta7_1_")
 _READ_OPERATION = "preview.curriculum.read"
 
 
@@ -56,7 +81,7 @@ async def require_preview(batch_id: str, user: dict[str, Any], operation: str = 
     batch = await preview_db.preview_batches.find_one({
         "_id": batch_id,
         "state": "PREPARED",
-        "run_id": settings.db_name.removeprefix("beta7_1_"),
+        "run_id": _preview_owner_run_id(),
     })
     if batch is None:
         raise HTTPException(status_code=404, detail="Prévia não encontrada")

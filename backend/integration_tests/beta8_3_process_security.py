@@ -77,11 +77,18 @@ async def _create_role(database: Any, role: str, privileges: list[dict[str, Any]
     })
 
 
-async def _create_user(database: Any, username: str, password: str, role: str) -> None:
+async def _create_user(
+    database: Any,
+    username: str,
+    password: str,
+    role: str,
+    *,
+    extra_roles: list[dict[str, str]] | None = None,
+) -> None:
     await database.command({
         "createUser": username,
         "pwd": password,
-        "roles": [{"role": role, "db": database.name}],
+        "roles": [{"role": role, "db": database.name}, *(extra_roles or [])],
     })
 
 
@@ -107,7 +114,12 @@ async def _provision() -> None:
         if not str(server.get("version", "")).startswith("7.") or hello.get("setName") != "rsB83":
             raise RuntimeError("topologia MongoDB Beta 8.3 não corresponde ao contrato")
         existing = set(await root.list_database_names())
-        if db_name in existing or stage_name in existing:
+        preview_name = os.environ.get("BETA7_1_PREVIEW_DB_NAME", f"{db_name}_beta7_1_preview")
+        if os.environ.get("BETA9_FULLSTACK_PREVIEW") == "1" and not re.fullmatch(
+            r"beta9p_[0-9a-f]{12}", preview_name,
+        ):
+            raise RuntimeError("namespace de prévia Beta 9 inválido")
+        if db_name in existing or stage_name in existing or preview_name in existing:
             raise RuntimeError("banco descartável já existe; reutilização recusada")
 
         database = root[db_name]
@@ -145,7 +157,7 @@ async def _provision() -> None:
                 db_name, "_beta8_4_test_barriers", ["find", "update"],
             ))
         await _create_role(database, "beta8_3_authority", authority_privileges)
-        await _create_role(database, "beta8_3_api", [
+        api_privileges = [
             _privilege(db_name, "users", ["find"]),
             _privilege(db_name, "auth_sessions", ["find", "insert", "update"]),
             _privilege(db_name, "login_attempts", ["find", "insert", "update", "remove"]),
@@ -154,8 +166,32 @@ async def _provision() -> None:
             _privilege(db_name, "block_types", ["find"]),
             _privilege(db_name, "tracks", ["find"]),
             _privilege(db_name, "migrations", ["find"]),
-        ])
-        await _create_user(database, "beta8-3-api", api_password, "beta8_3_api")
+        ]
+        api_extra_roles: list[dict[str, str]] = []
+        if os.environ.get("BETA9_FULLSTACK_PREVIEW") == "1":
+            # A database-local API role cannot grant privileges to a second
+            # database. Keep preview activity rights in a separate database
+            # role and attach only that scoped role to the common API identity.
+            preview_database = root[preview_name]
+            await _create_role(preview_database, "beta9_preview_api", [
+                _privilege(preview_name, collection, actions)
+                for collection, actions in {
+                "preview_batches": ["find"],
+                "preview_units": ["find"],
+                "preview_grants": ["find", "update"],
+                "beta7_2_rubrics": ["find"],
+                "beta7_2_assessments": ["find", "insert"],
+                "preview_quiz_attempts": ["find", "insert"],
+                "preview_exercise_submissions": ["find", "insert"],
+                "preview_project_submissions": ["find", "insert", "update"],
+                "preview_project_reviews": ["find", "insert"],
+                }.items()
+            ])
+            api_extra_roles.append({"role": "beta9_preview_api", "db": preview_name})
+        await _create_role(database, "beta8_3_api", api_privileges)
+        await _create_user(
+            database, "beta8-3-api", api_password, "beta8_3_api", extra_roles=api_extra_roles,
+        )
         await _create_user(database, "beta8-3-authority", authority_password, "beta8_3_authority")
 
         await database.migrations.insert_many([

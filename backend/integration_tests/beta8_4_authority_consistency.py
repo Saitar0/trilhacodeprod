@@ -619,6 +619,7 @@ async def main() -> None:
         raise RuntimeError("Beta 8.4 exige barreiras explícitas no harness descartável")
     await _verify()
     await _verify_beta8_4()
+    print("BETA9_VERIFIER_COMPLETE", flush=True)
 
 
 if __name__ == "__main__":

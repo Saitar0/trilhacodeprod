@@ -97,8 +97,7 @@ class Beta7DockerHarness(Beta61DockerHarness):
             ).stdout.strip()
             status = subprocess.run(
                 ["git", "-C", str(source_root), "status", "--porcelain", "--",
-                 "docs/courses/trilhacode/Conteudos_migrado/Fase_1",
-                 "docs/courses/trilhacode/Conteudos/Fase_1/1.1_Computacao_e_software.md"],
+                 "docs/courses/trilhacode/Conteudos_migrado/Fase_1"],
                 check=True, capture_output=True, text=True, timeout=10,
             ).stdout
         except (OSError, subprocess.SubprocessError):
@@ -114,7 +113,7 @@ class Beta7DockerHarness(Beta61DockerHarness):
         if len(files) != 221:
             raise RuntimeError("Manifesto Beta 4 não contém exatamente as entradas esperadas")
         pilot_path = "docs/courses/trilhacode/Conteudos/Fase_1/1.1_Computacao_e_software.md"
-        files[pilot_path] = "db6e3ae5bcbdfa786caae171897f5140fc167249f591cb5ed9fcf9d1dd3aeec4"
+        pilot_hash = "db6e3ae5bcbdfa786caae171897f5140fc167249f591cb5ed9fcf9d1dd3aeec4"
 
         with tempfile.TemporaryDirectory(prefix=f"trilhacode-beta7-source-{self.run_id}-") as temp:
             destination_root = Path(temp)
@@ -132,6 +131,22 @@ class Beta7DockerHarness(Beta61DockerHarness):
                 shutil.copyfile(resolved, output)
                 if hashlib.sha256(output.read_bytes()).hexdigest() != expected_hash:
                     raise RuntimeError(f"Cópia curricular divergiu: {relative}")
+            # The legacy monolithic pilot is a converter compatibility anchor,
+            # not part of the reviewed segmented source at migration@147dc68.
+            # Keep it in the disposable runner only from its pinned test fixture.
+            pilot_fixture = (
+                self.repo_root / "backend/integration_tests/fixtures/beta2/"
+                "unit_1_1_computacao_e_software.source.md"
+            ).resolve(strict=True)
+            if not pilot_fixture.is_relative_to(self.repo_root):
+                raise RuntimeError("Fixture monolítica Beta 3 está fora da raiz aprovada")
+            if hashlib.sha256(pilot_fixture.read_bytes()).hexdigest() != pilot_hash:
+                raise RuntimeError("Fixture monolítica Beta 3 diverge do hash aprovado")
+            pilot_output = destination_root.joinpath(*PurePosixPath(pilot_path).parts)
+            pilot_output.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(pilot_fixture, pilot_output)
+            if hashlib.sha256(pilot_output.read_bytes()).hexdigest() != pilot_hash:
+                raise RuntimeError("Cópia da âncora monolítica Beta 3 divergiu")
             try:
                 subprocess.run(
                     ["docker", "exec", self.runner_id, "mkdir", "-p", "/workspace/beta7-source"],

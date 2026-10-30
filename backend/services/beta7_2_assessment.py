@@ -20,11 +20,13 @@ from curriculum_contract.beta7_2_assessment import (
     validate_assessment_decision,
 )
 from curriculum_contract.beta7_2_rubric import VersionedRubric
-from database import client
 from services import beta7_1_preview as preview
-from settings import settings
 
-assessment_db = client[f"{settings.db_name}_beta7_1_preview"]
+# Keep the assessment records inside the same isolated preview namespace as the
+# batch, grants, submissions and progress. In the Beta 9 disposable composition
+# that database name is run-scoped; deriving it independently from settings
+# would silently escape the namespace selected by the preview service.
+assessment_db = preview.preview_db
 _REVIEW_OPERATION = "preview.project.review"
 
 

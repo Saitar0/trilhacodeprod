@@ -36,6 +36,6 @@ def test_gated_test_composition_checks_ownership_before_mounting_assessment_rout
 
 def test_assessment_service_uses_only_disposable_preview_namespace() -> None:
     source = (BACKEND / "services" / "beta7_2_assessment.py").read_text(encoding="utf-8")
-    assert 'settings.db_name}_beta7_1_preview' in source
+    assert "assessment_db = preview.preview_db" in source
     forbidden = ("db.tracks", "db.nodes", "db.blocks", "track_publications", "student_progress")
     assert all(name not in source for name in forbidden)

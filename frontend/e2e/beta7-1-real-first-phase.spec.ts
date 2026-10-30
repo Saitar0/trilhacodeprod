@@ -4,6 +4,7 @@ import { request } from "@playwright/test";
 test.describe.configure({ retries: 0 });
 
 const BATCH_ID = process.env.BETA7_1_E2E_BATCH_ID || "";
+const PRIVATE_TRACK_ID = process.env.BETA9_PRIVATE_TRACK_ID || "";
 const STUDENT_EMAIL = process.env.E2E_STUDENT_EMAIL || "";
 const STUDENT_PASSWORD = process.env.E2E_STUDENT_PASSWORD || "";
 const REVIEWER_EMAIL = process.env.E2E_REVIEWER_EMAIL || "";
@@ -41,6 +42,13 @@ test("synthetic learner traverses the ten reviewed units and submits the project
   await page.route("https://**/*", (route) => route.abort());
 
   await login(page, STUDENT_EMAIL, STUDENT_PASSWORD);
+  if (PRIVATE_TRACK_ID) {
+    const privateReadStatus = await page.evaluate(async (trackId) => {
+      const response = await fetch(`/api/tracks/${trackId}/tree`, { credentials: "include" });
+      return response.status;
+    }, PRIVATE_TRACK_ID);
+    expect(privateReadStatus).toBe(404);
+  }
   await expect(page.getByTestId("preview-phase-progress")).toContainText("BLOCKED_BY_UNRESOLVED_PEDAGOGICAL_CRITERIA");
   for (const moduleId of ["1", "2", "3"]) {
     await expect(page.getByTestId(`preview-module-${moduleId}`)).toBeVisible();

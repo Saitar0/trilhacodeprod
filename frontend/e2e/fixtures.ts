@@ -18,10 +18,17 @@ export const test = base.extend({
       consoleErrors: [] as string[],
       failedRequests: [] as Array<{ method: string; location: string; error: string }>,
       apiResponses: [] as Array<{ location: string; status: number; contentType: string }>,
+      documentResponses: [] as Array<{ location: string; status: number; contentType: string }>,
     };
     page.on("pageerror", (error) => diagnostics.pageErrors.push(error.name || "Error"));
     page.on("console", (message) => {
-      if (message.type() === "error") diagnostics.consoleErrors.push(safeLocation(message.location().url));
+      if (message.type() === "error") {
+        const safeText = [process.env.E2E_STUDENT_PASSWORD, process.env.E2E_REVIEWER_PASSWORD,
+          process.env.E2E_UNSCOPED_PASSWORD].filter(Boolean).reduce(
+          (text, secret) => text.replaceAll(secret as string, "[synthetic-secret]"), message.text(),
+        ).slice(0, 160);
+        diagnostics.consoleErrors.push(`${safeLocation(message.location().url)} ${safeText}`);
+      }
     });
     page.on("requestfailed", (request) => {
       const errorText = request.failure()?.errorText || "";
@@ -34,6 +41,13 @@ export const test = base.extend({
     });
     page.on("response", (response) => {
       const url = new URL(response.url());
+      if (response.request().resourceType() === "document") {
+        diagnostics.documentResponses.push({
+          location: safeLocation(response.url()),
+          status: response.status(),
+          contentType: (response.headers()["content-type"] || "").split(";")[0],
+        });
+      }
       if (!url.pathname.startsWith("/api/")) return;
       const contentType = response.headers()["content-type"] || "";
       diagnostics.apiResponses.push({
@@ -55,7 +69,11 @@ export const test = base.extend({
         .filter((button) => button.textContent?.trim() === "Confirmar e-mail").length,
       previewLoginCount: document.querySelectorAll('[data-testid="beta71-preview-login"]').length,
       previewRootCount: document.querySelectorAll('[data-testid="beta71-preview"]').length,
+      rootChildCount: document.querySelector("#root")?.childElementCount ?? -1,
+      scriptCount: document.scripts.length,
+      viteErrorOverlay: Boolean(document.querySelector("vite-error-overlay")),
     })).catch(() => ({ location: "unavailable", title: "unavailable", loginFormCount: 0, confirmationButtonCount: 0 }));
+    console.log("BETA9_BROWSER_DIAGNOSTICS=" + JSON.stringify({ ...diagnostics, finalPage }));
     const diagnosticsPath = testInfo.outputPath("browser-diagnostics.json");
     await mkdir(dirname(diagnosticsPath), { recursive: true });
     await writeFile(diagnosticsPath, JSON.stringify({ ...diagnostics, finalPage }, null, 2), "utf8");
