@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Lock, ProgressRecord, Relation, Track, TreeNode, TreeResponse } from "@/types";
+import { Lock, PrerequisiteRequirementState, ProgressRecord, Relation, Track, TreeNode, TreeResponse } from "@/types";
 import { buildTree, flatten, isLearnable } from "@/lib/tree";
 
 export interface ViewModel {
@@ -13,13 +13,16 @@ export interface ViewModel {
   lastKind: string;
   statuses: Record<string, ProgressRecord>;
   locks: Record<string, Lock>;
+  prerequisiteStates: Record<string, PrerequisiteRequirementState[]>;
   label: (kind: string) => string;
 }
 
 const NO_LOCKS: Record<string, Lock> = {};
+const NO_REQUIREMENT_STATES: Record<string, PrerequisiteRequirementState[]> = {};
 
 export function useViewModel(data: TreeResponse | undefined, statuses: Record<string, ProgressRecord>, hideArchived: boolean,
-  locks: Record<string, Lock> = NO_LOCKS) {
+  locks: Record<string, Lock> = NO_LOCKS,
+  prerequisiteStates: Record<string, PrerequisiteRequirementState[]> = NO_REQUIREMENT_STATES) {
   return useMemo<ViewModel | null>(() => {
     if (!data) return null;
     const nodes = hideArchived ? data.nodes.filter((n) => n.status !== "archived") : data.nodes;
@@ -28,11 +31,12 @@ export function useViewModel(data: TreeResponse | undefined, statuses: Record<st
     const lastKind = data.track.hierarchy[data.track.hierarchy.length - 1];
     return {
       track: data.track, tree, flat, relations: data.relations, blockCounts: data.block_counts, lastKind, statuses, locks,
+      prerequisiteStates,
       learnables: flat.filter((n) => isLearnable(n, lastKind, data.block_counts)),
       byId: new Map(flat.map((n) => [n.id, n])),
       label: (k: string) => data.track.level_labels[k] || k,
     };
-  }, [data, statuses, hideArchived, locks]);
+  }, [data, statuses, hideArchived, locks, prerequisiteStates]);
 }
 
 export function nextLearnable(vm: ViewModel, afterId?: string) {

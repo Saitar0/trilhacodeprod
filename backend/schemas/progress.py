@@ -1,5 +1,7 @@
 # ruff: noqa: EXE002
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -19,11 +21,18 @@ class ProgressOut(BaseModel):
     id: str
 
 
+class PrerequisiteState(BaseModel):
+    target_id: str
+    prerequisite_kind: Literal["legacy", "content_completed", "quiz_passed", "unavailable"]
+    status: Literal["satisfied", "pending", "unavailable"]
+
+
 class TrackProgressOut(BaseModel):
     nodes: dict[str, ProgressOut]
     blocks: dict[str, ProgressOut]
     state: dict | None = None
     locks: dict = {}
+    prerequisite_states: dict[str, list[PrerequisiteState]] = {}
 
 
 class ProgressOverviewOut(BaseModel):

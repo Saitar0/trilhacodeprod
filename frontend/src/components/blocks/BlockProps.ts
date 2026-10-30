@@ -8,4 +8,5 @@ export interface BlockProps {
   onProgress?: (status: ProgressStatus, data: Record<string, unknown>) => void;
   footer?: React.ReactNode;
   actions?: React.ReactNode;
+  contentOverride?: React.ReactNode;
 }

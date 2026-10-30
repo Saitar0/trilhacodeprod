@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Check, Clock3, Compass, Lock, NotebookPen, RotateCcw } from "lucide-react";
@@ -12,12 +12,19 @@ import { TrackProgress } from "@/types";
 import { ViewModel } from "./viewModel";
 import { BlockNote, NoteEditor, ReviewMenu, useNodeNotes } from "./StudyTools";
 import { ExerciseSubmission } from "@/components/blocks/ExerciseSubmission";
+import { QuizApiSession, QuizUnavailable } from "@/components/blocks/QuizApiSession";
 import { Breadcrumbs, ChildrenList, LockedPanel } from "./NodeReaderParts";
 import { isLearnable } from "@/lib/tree";
+import { isQuizApiEnabled, quizBlockMode } from "@/lib/quizFeature";
+import { useAuth } from "@/context/AuthContext";
 export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nodeId: string; progress?: TrackProgress; staff: boolean }) {
+  const { user } = useAuth();
   const { data, isLoading } = useNodeDetail(nodeId);
   const { data: meta } = useMeta();
   const qc = useQueryClient();
+  const refreshPrerequisites = useCallback(() => {
+    void qc.invalidateQueries({ queryKey: ["progress", vm.track.id] });
+  }, [qc, vm.track.id]);
   const setProgress = useSetProgress(vm.track.id);
   const tn = vm.byId.get(nodeId);
   const learnable = tn ? isLearnable(tn, vm.lastKind, vm.blockCounts) : false;
@@ -32,6 +39,9 @@ export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nod
 
   if (isLoading || !data) return <Loader />;
   const { node, blocks, ancestors } = data;
+  const userScope = user ? user.id : "anonymous";
+  const quizApiEnabled = isQuizApiEnabled();
+  const apiQuizAnchorId = blocks.find((block) => block.type === "quiz")?.id || null;
   const status = vm.statuses[nodeId]?.status || "not_started";
   const idx = vm.learnables.findIndex((n) => n.id === nodeId);
   const prev = idx > 0 ? vm.learnables[idx - 1] : undefined;
@@ -71,15 +81,26 @@ export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nod
       )}
       {blocks.length > 0 && (
         <div className="space-y-5">
-          {blocks.map((b) => (
-            <BlockRenderer key={b.id} block={b} type={blockType(b.type)} progress={progress?.blocks[b.id]}
-              onProgress={(s, d) => setProgress.mutate({ node_id: nodeId, block_id: b.id, status: s, data: d })}
-              actions={<ReviewMenu nodeId={nodeId} blockId={b.id} compact />}
-              footer={<>
-                {blockType(b.type)?.capabilities?.includes("submission") && <ExerciseSubmission block={b} />}
-                <BlockNote nodeId={nodeId} blockId={b.id} initial={noteFor(b.id)} />
-              </>} />
-          ))}
+          {blocks.map((b) => {
+            const mode = quizBlockMode(b.type, b.id, quizApiEnabled, apiQuizAnchorId);
+            if (mode === "hidden") return null;
+            const apiQuiz = mode === "api";
+            const secureQuiz = apiQuiz || mode === "unavailable";
+            return (
+              <BlockRenderer key={apiQuiz ? "quiz-api-" + node.id : b.id} type={blockType(b.type)}
+                progress={secureQuiz ? undefined : progress?.blocks[b.id]}
+                onProgress={secureQuiz ? undefined : (s, d) => setProgress.mutate({ node_id: nodeId, block_id: b.id, status: s, data: d })}
+                block={secureQuiz ? { ...b, data: {} } : b}
+                contentOverride={apiQuiz ? <QuizApiSession quizId={node.id} userScope={userScope}
+                  onAuthoritativeResult={refreshPrerequisites} />
+                  : mode === "unavailable" ? <QuizUnavailable /> : undefined}
+                actions={<ReviewMenu nodeId={nodeId} blockId={b.id} compact />}
+                footer={<>
+                  {blockType(b.type)?.capabilities?.includes("submission") && <ExerciseSubmission block={b} />}
+                  <BlockNote nodeId={nodeId} blockId={b.id} initial={noteFor(b.id)} />
+                </>} />
+            );
+          })}
         </div>
       )}
       {tn && tn.children.length > 0 && <ChildrenList vm={vm} nodeId={nodeId} />}

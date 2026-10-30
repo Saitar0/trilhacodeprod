@@ -29,13 +29,22 @@ test("student can sign in, complete a topic, retain progress, and sign out", asy
     await expectNoHorizontalOverflow(page, width, "track overview");
   }
 
-  await page.getByTestId("track-start-button").click();
+  // The E2E database may retain the seeded learner's last activity across
+  // repeated local runs. Start a fresh track or resume that persisted state.
+  const start = page.getByTestId("track-start-button");
+  if (await start.count()) {
+    await start.click();
+  } else {
+    await page.getByTestId("track-resume-button").click();
+  }
 
   await expect(page.getByTestId("node-reader")).toBeVisible();
   for (const width of [360, 390]) {
     await expectNoHorizontalOverflow(page, width, "node reader");
   }
 
+  const reset = page.getByTestId("topic-reset-button");
+  if (await reset.count()) await reset.click();
   await page.getByTestId("topic-mark-completed-button").click();
   await expect(page.getByTestId("topic-reset-button")).toBeVisible();
 

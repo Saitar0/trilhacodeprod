@@ -9,6 +9,10 @@ import { ContextPanel } from "@/components/student/ContextPanel";
 import { NodeReader } from "@/components/student/NodeReader";
 import { TrackOverview } from "@/components/student/TrackOverview";
 import { useViewModel } from "@/components/student/viewModel";
+import {
+  PrerequisiteEvaluationGate,
+  requiresPrerequisiteEvaluationGate,
+} from "@/components/student/PrerequisiteEvaluationGate";
 
 const EMPTY = {};
 
@@ -18,10 +22,27 @@ export default function TrackViewer() {
   const staff = can("content.read");
   const tree = useTree(trackId);
   const progress = useTrackProgress(trackId);
-  const vm = useViewModel(tree.data, progress.data?.nodes || EMPTY, true, progress.data?.locks);
+  const vm = useViewModel(tree.data, progress.data?.nodes || EMPTY, true, progress.data?.locks,
+    progress.data?.prerequisite_states);
 
   if (tree.isLoading) return <Loader />;
   if (tree.isError || !vm) return <div className="p-10"><EmptyState icon="SearchX" title="Trilha não encontrada" /></div>;
+  if (requiresPrerequisiteEvaluationGate(
+    !!vm.track.settings.enforce_prerequisites,
+    staff,
+    progress.isLoading,
+    progress.isError,
+    !!progress.data?.prerequisite_states,
+  )) {
+    return <PrerequisiteEvaluationGate
+      enforced={!!vm.track.settings.enforce_prerequisites}
+      staff={staff}
+      loading={progress.isLoading}
+      failed={progress.isError}
+      hasEvaluation={!!progress.data?.prerequisite_states}
+      onRetry={() => void progress.refetch()}
+    />;
+  }
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col">

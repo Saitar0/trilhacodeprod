@@ -1,0 +1,248 @@
+{
+  "artifacts": [
+    {
+      "bytes": 792964,
+      "path": "diagnostics.json",
+      "sha256": "10d9240a635fbdd7e1990706feef48a3b08d2b5e0f6e8d9e13faf17924756c8a"
+    },
+    {
+      "bytes": 422772,
+      "path": "fase_01.contract.json",
+      "sha256": "38d12a958c0bd31ec41f5b819068c15bcbcc6ad72fcf49943ddfc1f708256fa8"
+    },
+    {
+      "bytes": 303539,
+      "path": "fase_02.contract.json",
+      "sha256": "d91e01cd719bc7e2535ece8c3747fd3fcee410bb615d7052b34edd82f2799055"
+    },
+    {
+      "bytes": 644345,
+      "path": "fase_03.contract.json",
+      "sha256": "04864470f60e58e8c6f1a6767124860f93972fdeb1b972b605076481486ecd15"
+    },
+    {
+      "bytes": 775572,
+      "path": "fase_04.contract.json",
+      "sha256": "d3b537bb193e1526bcd76c8557453f59a67030827949b9e757ba2be072a0c8b5"
+    },
+    {
+      "bytes": 897309,
+      "path": "fase_05.contract.json",
+      "sha256": "5af9d81ee4ab283ed26fa90b45c1a8ddb46e70c4fa9deb5101148e763eb4e0dd"
+    },
+    {
+      "bytes": 767285,
+      "path": "fase_06.contract.json",
+      "sha256": "d77aef39a55f85dc2418e89b508e579e15b7bd1fa207d92a4f8e36d799eea15b"
+    },
+    {
+      "bytes": 302860,
+      "path": "fase_07.contract.json",
+      "sha256": "e7a7a5b04eea81d9d1ef43d0ab650bc431bd258875b7c5f7104d086a795b1a2e"
+    },
+    {
+      "bytes": 236814,
+      "path": "fase_08.contract.json",
+      "sha256": "7a715fed692684048f9c6928d2e7d2a56ae27459debc59f14a03d4bbbe6517ee"
+    },
+    {
+      "bytes": 571999,
+      "path": "fase_09.contract.json",
+      "sha256": "41a890c3d25c96b2d1b965c5cbfaf0807a71d2f65717032537ad8ad8008857ff"
+    },
+    {
+      "bytes": 430037,
+      "path": "fase_10.contract.json",
+      "sha256": "c3901af3f8884d31230e025e21ea41b8cb5cf8bdaf9714317d783027039e83f1"
+    },
+    {
+      "bytes": 1611090,
+      "path": "source_mappings.json",
+      "sha256": "97dd5eb0f6f33cdc15d84bfaf9aca627dd25f6ce651d99a7bc3661d98b10f635"
+    }
+  ],
+  "base_commit": "147dc68b81169f66b0ba3802fa2f26e5130923a3",
+  "branch": "migracao-estrutura",
+  "contract_schema_version": "trilhacode.intermediate/1.2",
+  "encoding": "UTF-8",
+  "global_counts": {
+    "active_units": 131,
+    "authorized_structural_files_outside_mapped_destinations": 11,
+    "block_types": {
+      "acceptance_criteria": 17,
+      "answer_key": 501,
+      "checklist": 89,
+      "completion_criteria": 130,
+      "feedback": 181,
+      "flashcard": 45,
+      "instructor_note": 1,
+      "objective": 131,
+      "practice": 327,
+      "project_decision": 1,
+      "project_review": 1,
+      "project_scenario": 1,
+      "quiz": 506,
+      "reference": 608,
+      "rubric": 178,
+      "solution": 212,
+      "summary": 123,
+      "theory": 379
+    },
+    "blocks": 3431,
+    "diagnostics": {
+      "info": 1159,
+      "warning": 66
+    },
+    "editorial_pendings": 214,
+    "legacy_json_path": "docs/courses/trilhacode/trilha-code-bulk-import.json",
+    "legacy_json_sha256": "43125c5902168def6359e514ad80602a1f7579157e1a0bb16f1f2212ee4c18e7",
+    "migrated_files": 2890,
+    "migration_mapping_rows": 4311,
+    "migration_removal_sentinels": 2,
+    "nodes": 572,
+    "phases": 10,
+    "projects": 15,
+    "relations": 55,
+    "shared_placements": 1001,
+    "source_mapping_records": 2889,
+    "source_markdown_files_found": 133,
+    "unique_entity_ids": 5344,
+    "unique_physical_migration_destinations": 2879
+  },
+  "output_artifact_count_including_this_manifest": 13,
+  "phase_summaries": [
+    {
+      "blocks": 263,
+      "contract_sha256": "38d12a958c0bd31ec41f5b819068c15bcbcc6ad72fcf49943ddfc1f708256fa8",
+      "editorial_pendings": 32,
+      "files": 221,
+      "nodes": 43,
+      "phase": "Fase_1",
+      "projects": 1,
+      "relations": 21,
+      "shared_placements": 95,
+      "units": 10
+    },
+    {
+      "blocks": 189,
+      "contract_sha256": "d91e01cd719bc7e2535ece8c3747fd3fcee410bb615d7052b34edd82f2799055",
+      "editorial_pendings": 15,
+      "files": 144,
+      "nodes": 27,
+      "phase": "Fase_2",
+      "projects": 0,
+      "relations": 9,
+      "shared_placements": 95,
+      "units": 7
+    },
+    {
+      "blocks": 378,
+      "contract_sha256": "04864470f60e58e8c6f1a6767124860f93972fdeb1b972b605076481486ecd15",
+      "editorial_pendings": 48,
+      "files": 313,
+      "nodes": 60,
+      "phase": "Fase_3",
+      "projects": 2,
+      "relations": 25,
+      "shared_placements": 202,
+      "units": 14
+    },
+    {
+      "blocks": 508,
+      "contract_sha256": "d3b537bb193e1526bcd76c8557453f59a67030827949b9e757ba2be072a0c8b5",
+      "editorial_pendings": 19,
+      "files": 395,
+      "nodes": 77,
+      "phase": "Fase_4",
+      "projects": 2,
+      "relations": 0,
+      "shared_placements": 205,
+      "units": 17
+    },
+    {
+      "blocks": 617,
+      "contract_sha256": "5af9d81ee4ab283ed26fa90b45c1a8ddb46e70c4fa9deb5101148e763eb4e0dd",
+      "editorial_pendings": 22,
+      "files": 483,
+      "nodes": 88,
+      "phase": "Fase_5",
+      "projects": 2,
+      "relations": 0,
+      "shared_placements": 113,
+      "units": 20
+    },
+    {
+      "blocks": 503,
+      "contract_sha256": "d77aef39a55f85dc2418e89b508e579e15b7bd1fa207d92a4f8e36d799eea15b",
+      "editorial_pendings": 23,
+      "files": 449,
+      "nodes": 85,
+      "phase": "Fase_6",
+      "projects": 2,
+      "relations": 0,
+      "shared_placements": 100,
+      "units": 20
+    },
+    {
+      "blocks": 181,
+      "contract_sha256": "e7a7a5b04eea81d9d1ef43d0ab650bc431bd258875b7c5f7104d086a795b1a2e",
+      "editorial_pendings": 8,
+      "files": 156,
+      "nodes": 36,
+      "phase": "Fase_7",
+      "projects": 0,
+      "relations": 0,
+      "shared_placements": 25,
+      "units": 7
+    },
+    {
+      "blocks": 143,
+      "contract_sha256": "7a715fed692684048f9c6928d2e7d2a56ae27459debc59f14a03d4bbbe6517ee",
+      "editorial_pendings": 11,
+      "files": 124,
+      "nodes": 25,
+      "phase": "Fase_8",
+      "projects": 2,
+      "relations": 0,
+      "shared_placements": 15,
+      "units": 8
+    },
+    {
+      "blocks": 331,
+      "contract_sha256": "41a890c3d25c96b2d1b965c5cbfaf0807a71d2f65717032537ad8ad8008857ff",
+      "editorial_pendings": 19,
+      "files": 301,
+      "nodes": 71,
+      "phase": "Fase_9",
+      "projects": 2,
+      "relations": 0,
+      "shared_placements": 123,
+      "units": 16
+    },
+    {
+      "blocks": 318,
+      "contract_sha256": "c3901af3f8884d31230e025e21ea41b8cb5cf8bdaf9714317d783027039e83f1",
+      "editorial_pendings": 17,
+      "files": 304,
+      "nodes": 60,
+      "phase": "Fase_10",
+      "projects": 2,
+      "relations": 0,
+      "shared_placements": 28,
+      "units": 12
+    }
+  ],
+  "represented_source_files": 2889,
+  "schema_version": "trilhacode.intermediate.integrity/1.0",
+  "self_hash_policy": "This manifest excludes its own digest to avoid recursive self-reference; all other artifacts are hashed.",
+  "serialization": "canonical_json per phase; sorted deterministic JSON sidecars",
+  "unrepresented_structural_files": [
+    "docs/courses/trilhacode/Conteudos_migrado/Fase_2/Projeto_incremental.md"
+  ],
+  "validation": {
+    "blocking_errors": 0,
+    "ok": true,
+    "reported_text_losses": 0
+  },
+  "volatile_fields_excluded": true
+}

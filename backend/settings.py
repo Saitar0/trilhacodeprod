@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _RESERVED_PUBLIC_HOSTS = {
@@ -80,6 +80,13 @@ class Settings(BaseSettings):
     smtp_ssl: bool = False
     local_email_dir: str = ".local-emails"
 
+    # Shared Mongo-backed token-bucket limits for authenticated quiz routes.
+    quiz_read_limit_per_minute: int = Field(default=120, gt=0)
+    quiz_attempt_limit_per_minute: int = Field(default=10, gt=0)
+    quiz_history_limit_per_minute: int = Field(default=60, gt=0)
+    quiz_review_limit_per_minute: int = Field(default=30, gt=0)
+    quiz_publish_limit_per_minute: int = Field(default=10, gt=0)
+
     admin_email: str | None = None
     admin_password: str | None = None
     editor_email: str | None = None
@@ -150,7 +157,7 @@ class Settings(BaseSettings):
             return False
 
     def _email_configuration_problems(self) -> list[str]:
-        problems = []
+        problems: list[str] = []
         # Staging can use the local transport for disposable previews. It writes
         # messages to disk and never delivers them; production always requires SMTP.
         if self.email_transport == "local" and self.env == "staging":

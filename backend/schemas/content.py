@@ -1,5 +1,5 @@
 # ruff: noqa: EXE002
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -94,6 +94,7 @@ class BlockUpdate(BaseModel):
 class RelationUpdate(BaseModel):
     enforced: Optional[bool] = None
     note: Optional[str] = None
+    prerequisite_kind: Literal["content_completed", "quiz_passed"] | None = None
 
 
 class RelationIn(BaseModel):
@@ -102,6 +103,7 @@ class RelationIn(BaseModel):
     type: str
     enforced: bool = False
     note: str = ""
+    prerequisite_kind: Literal["content_completed", "quiz_passed"] | None = None
 
 
 class ReorderIn(BaseModel):

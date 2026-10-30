@@ -35,6 +35,10 @@
     "index/restore_jobs/one_running_restore",
     "duplicates/restore_jobs/one_running_restore",
     "index/migrations/key_1",
-    "duplicates/migrations/key_1"
+    "duplicates/migrations/key_1",
+    "index/quiz_versions/one_quiz_content_version",
+    "duplicates/quiz_versions/one_quiz_content_version",
+    "index/quiz_progress/one_user_quiz_version_progress",
+    "duplicates/quiz_progress/one_user_quiz_version_progress"
   ]
 }

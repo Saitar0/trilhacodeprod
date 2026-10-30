@@ -63,6 +63,15 @@ def validate_import_shape(payload: dict) -> list[dict]:
     def add(path, message):
         errors.append({"path": path, "message": message})
 
+    # The lossless curriculum bundle is intentionally not interpreted as a legacy
+    # {track, nodes, relations} payload. Refuse it here so the old importer cannot
+    # silently create an empty/partial track by ignoring its phase contracts.
+    if "schema_version" in payload:
+        add(
+            "schema_version",
+            "pacote curricular versionado requer adaptador explícito; o importador legado recusou a carga para evitar importação parcial",
+        )
+
     track = payload.get("track")
     if not isinstance(track, dict):
         add("track", "deve ser um objeto")

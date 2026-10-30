@@ -14,8 +14,12 @@ from core_utils import now
 from database import db
 
 log = logging.getLogger(__name__)
-EXPECTED_MIGRATION_VERSION = 2
-MIGRATIONS = ("0001_legacy_snapshots", "0002_block_submission_capabilities")
+EXPECTED_MIGRATION_VERSION = 3
+MIGRATIONS = (
+    "0001_legacy_snapshots",
+    "0002_block_submission_capabilities",
+    "0003_quiz_attempts",
+)
 LEGACY_MIGRATION_MARKERS = {"block_types_submission_v1"}
 LOCK_ID = "schema-migrations"
 MIGRATION_LEASE = timedelta(minutes=15)

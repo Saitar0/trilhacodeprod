@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from constants import PROGRESS_STATUSES
 from core_utils import now
 from database import db
-from learning import assert_unlocked, track_locks
+from learning import assert_unlocked, track_prerequisite_evaluation
 from serialization import oid, ser
 
 
@@ -93,11 +93,13 @@ async def get_track_progress(track_id: str, user: dict, limit: int, skip: int) -
             blocks[record["block_id"]] = item
         else:
             nodes[record["node_id"]] = item
+    locks, prerequisite_states = await track_prerequisite_evaluation(track_id, user)
     return {
         "nodes": nodes,
         "blocks": blocks,
         "state": ser(state) if state else None,
-        "locks": await track_locks(track_id, user),
+        "locks": locks,
+        "prerequisite_states": prerequisite_states,
     }
 
 

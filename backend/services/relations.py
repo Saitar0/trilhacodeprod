@@ -10,6 +10,8 @@ from services.common import ancestors, descendants, get_document
 
 
 async def create_relation(data: dict, user: dict) -> dict:
+    if data.get("prerequisite_kind") is not None and data.get("type") != "prerequisite":
+        raise HTTPException(status_code=400, detail="O tipo de pré-requisito só se aplica a relações prerequisite")
     if data["node_id"] == data["target_id"]:
         raise HTTPException(status_code=400, detail="Um nó não pode se relacionar consigo mesmo")
     source = await get_document("nodes", data["node_id"])
@@ -38,6 +40,8 @@ async def create_relation(data: dict, user: dict) -> dict:
 
 async def update_relation(relation_id: str, data: dict, user: dict) -> dict:
     relation = await get_document("relations", relation_id)
+    if data.get("prerequisite_kind") is not None and relation.get("type") != "prerequisite":
+        raise HTTPException(status_code=400, detail="O tipo de pré-requisito só se aplica a relações prerequisite")
     await db.relations.update_one({"_id": oid(relation_id)}, {"$set": data})
     await audit(user, "relation", relation_id, "updated", relation["track_id"], relation["type"])
     return await db.relations.find_one({"_id": oid(relation_id)})

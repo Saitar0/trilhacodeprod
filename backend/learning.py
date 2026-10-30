@@ -1,6 +1,9 @@
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 from typing import Optional
 
+from bson import ObjectId
+from bson.decimal128 import Decimal128
 from fastapi import APIRouter, Depends, HTTPException
 from pymongo.errors import DuplicateKeyError
 
@@ -36,10 +39,34 @@ def visible_nodes(nodes):
     return [n for n in nodes if visible(n)]
 
 
-def compute_locks(track, nodes, relations, block_counts, completed):
-    """Returns {node_id: {pending: [ids], via: ancestor_id|None}} for blocked nodes."""
+def _quiz_progress_passed(progress: dict | None) -> bool:
+    """Require both the server-set pass marker and the persisted best score."""
+    if not progress or progress.get("passed") is not True:
+        return False
+    score = progress.get("best_score_percent")
+    try:
+        if isinstance(score, Decimal128):
+            value = score.to_decimal()
+        elif isinstance(score, Decimal):
+            value = score
+        else:
+            return False
+        return value.is_finite() and value >= Decimal("70")
+    except (InvalidOperation, TypeError, ValueError):
+        return False
+
+
+def compute_prerequisite_states(
+    track,
+    nodes,
+    relations,
+    block_counts,
+    completed,
+    quiz_states=None,
+):
+    """Return server-evaluated prerequisite states and locks for one learner."""
     if not (track.get("settings") or {}).get("enforce_prerequisites"):
-        return {}
+        return {}, {}
     ids = {str(n["_id"]) for n in nodes}
     by_id = {str(n["_id"]): n for n in nodes}
     children = {}
@@ -62,29 +89,140 @@ def compute_locks(track, nodes, relations, block_counts, completed):
         return memo[nid]
 
     direct = {}
+    states = {}
+    quiz_states = quiz_states or {}
     for r in relations:
-        if r["type"] == "prerequisite" and r.get("enforced") and r["node_id"] in ids and r["target_id"] in ids:
-            if not done(r["target_id"]):
-                direct.setdefault(r["node_id"], []).append(r["target_id"])
+        if r.get("type") != "prerequisite" or not r.get("enforced") or r.get("node_id") not in ids:
+            continue
+        target_id = r.get("target_id")
+        raw_kind = r.get("prerequisite_kind")
+        if raw_kind is None:
+            # Relations authored before typed prerequisites retain the existing
+            # content-completion behavior, including its missing-target rule.
+            if target_id not in ids:
+                continue
+            kind = "legacy"
+            state = "satisfied" if done(target_id) else "pending"
+        elif raw_kind == "content_completed":
+            kind = raw_kind
+            state = (
+                "satisfied"
+                if target_id in ids and done(target_id)
+                else ("pending" if target_id in ids else "unavailable")
+            )
+        elif raw_kind == "quiz_passed":
+            kind = raw_kind
+            state = quiz_states.get(target_id, "unavailable")
+        else:
+            # Corrupt or future unrecognized relation types must fail closed.
+            kind = "unavailable"
+            state = "unavailable"
+
+        requirement = {
+            "target_id": target_id,
+            "prerequisite_kind": kind,
+            "status": state,
+        }
+        states.setdefault(r["node_id"], []).append(requirement)
+        if state != "satisfied":
+            direct.setdefault(r["node_id"], []).append(requirement)
+
     locks = {}
     for nid in ids:
         if nid in direct:
-            locks[nid] = {"pending": direct[nid], "via": None}
+            locks[nid] = {
+                "pending": [item["target_id"] for item in direct[nid]],
+                "pending_requirements": direct[nid],
+                "via": None,
+            }
             continue
         cur, seen = by_id[nid].get("parent_id"), set()
         while cur and cur in by_id and cur not in seen:
             seen.add(cur)
             if cur in direct:
-                locks[nid] = {"pending": direct[cur], "via": cur}
+                locks[nid] = {
+                    "pending": [item["target_id"] for item in direct[cur]],
+                    "pending_requirements": direct[cur],
+                    "via": cur,
+                }
                 break
             cur = by_id[cur].get("parent_id")
+    return locks, states
+
+
+def compute_locks(track, nodes, relations, block_counts, completed, quiz_states=None):
+    """Compatibility wrapper returning only the existing lock mapping."""
+    locks, _states = compute_prerequisite_states(
+        track, nodes, relations, block_counts, completed, quiz_states
+    )
     return locks
 
 
-async def track_locks(track_id: str, user: dict):
+async def _published_quiz_states(track_id: str, user_id: str, quiz_ids: set[str]) -> dict[str, str]:
+    """Return pending/passed only for each target's active published quiz version."""
+    if not quiz_ids:
+        return {}
+    catalogs = await db.quiz_catalog.find(
+        {"_id": {"$in": list(quiz_ids)}, "track_id": track_id},
+        {"_id": 1, "active_version_id": 1},
+    ).to_list(len(quiz_ids))
+    active_versions = {
+        catalog["_id"]: str(catalog["active_version_id"])
+        for catalog in catalogs
+        if catalog.get("active_version_id") is not None
+    }
+    if not active_versions:
+        return {quiz_id: "unavailable" for quiz_id in quiz_ids}
+
+    active_version_ids = [
+        ObjectId(version_id)
+        for version_id in active_versions.values()
+        if ObjectId.is_valid(version_id)
+    ]
+    if not active_version_ids:
+        return {quiz_id: "unavailable" for quiz_id in quiz_ids}
+    versions = await db.quiz_versions.find(
+        {
+            "_id": {"$in": active_version_ids},
+            "quiz_id": {"$in": list(quiz_ids)},
+            "node_id": {"$in": list(quiz_ids)},
+            "track_id": track_id,
+            "status": "published",
+        },
+        {"_id": 1, "quiz_id": 1},
+    ).to_list(len(active_versions))
+    valid_versions = {
+        version["quiz_id"]: version["_id"]
+        for version in versions
+        if active_versions.get(version["quiz_id"]) == str(version["_id"])
+    }
+    valid_versions = {quiz_id: str(version_id) for quiz_id, version_id in valid_versions.items()}
+    states = {quiz_id: "unavailable" for quiz_id in quiz_ids}
+    if not valid_versions:
+        return states
+
+    progress = await db.quiz_progress.find(
+        {
+            "user_id": user_id,
+            "quiz_id": {"$in": list(valid_versions)},
+            "version_id": {"$in": list(valid_versions.values())},
+        },
+        {"quiz_id": 1, "version_id": 1, "passed": 1, "best_score_percent": 1},
+    ).to_list(len(valid_versions))
+    states.update({quiz_id: "pending" for quiz_id in valid_versions})
+    for record in progress:
+        quiz_id = record.get("quiz_id")
+        if valid_versions.get(quiz_id) == record.get("version_id") and _quiz_progress_passed(
+            record
+        ):
+            states[quiz_id] = "satisfied"
+    return states
+
+
+async def track_prerequisite_evaluation(track_id: str, user: dict):
     track = await db.tracks.find_one({"_id": oid(track_id)})
     if not track:
-        return {}
+        return {}, {}
     nodes = await db.nodes.find({"track_id": track_id}).to_list(10000)
     nodes = [n for n in nodes if n["status"] != "archived"] if is_staff(user) else visible_nodes(nodes)
     relations = await db.relations.find({"track_id": track_id}).to_list(10000)
@@ -93,9 +231,34 @@ async def track_locks(track_id: str, user: dict):
         {"$match": bq}, {"$group": {"_id": "$node_id", "n": {"$sum": 1}}}
     ])
     counts = await cursor.to_list(10000)
-    done = await db.progress.find({"user_id": user["id"], "track_id": track_id, "block_id": None,
-                                   "status": "completed"}, {"node_id": 1}).to_list(20000)
-    return compute_locks(track, nodes, relations, {c["_id"]: c["n"] for c in counts}, {d["node_id"] for d in done})
+    done = await db.progress.find(
+        {"user_id": user["id"], "track_id": track_id, "block_id": None, "status": "completed"},
+        {"node_id": 1},
+    ).to_list(20000)
+    visible_ids = {str(node["_id"]) for node in nodes}
+    quiz_ids = {
+        relation["target_id"]
+        for relation in relations
+        if relation.get("type") == "prerequisite"
+        and relation.get("enforced")
+        and relation.get("prerequisite_kind") == "quiz_passed"
+        and relation.get("node_id") in visible_ids
+        and relation.get("target_id") in visible_ids
+    }
+    quiz_states = await _published_quiz_states(track_id, user["id"], quiz_ids)
+    return compute_prerequisite_states(
+        track,
+        nodes,
+        relations,
+        {c["_id"]: c["n"] for c in counts},
+        {d["node_id"] for d in done},
+        quiz_states,
+    )
+
+
+async def track_locks(track_id: str, user: dict):
+    locks, _states = await track_prerequisite_evaluation(track_id, user)
+    return locks
 
 
 async def assert_visible(node: dict, user: dict):

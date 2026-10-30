@@ -69,6 +69,7 @@ export interface Relation {
   target_id: string;
   type: string;
   enforced: boolean;
+  prerequisite_kind?: "content_completed" | "quiz_passed" | null;
   note: string;
   direction?: "outgoing" | "incoming";
   other?: { id: string; title: string; kind: string };
@@ -162,6 +163,13 @@ export interface TrackProgress {
   blocks: Record<string, ProgressRecord>;
   state: { last_node_id?: string; last_node_title?: string; last_at?: string } | null;
   locks: Record<string, Lock>;
+  prerequisite_states?: Record<string, PrerequisiteRequirementState[]>;
+}
+
+export interface PrerequisiteRequirementState {
+  target_id: string;
+  prerequisite_kind: "legacy" | "content_completed" | "quiz_passed" | "unavailable";
+  status: "satisfied" | "pending" | "unavailable";
 }
 
 export interface HistoryItem {
@@ -191,6 +199,7 @@ export interface TrackVersion {
 export interface Lock {
   pending: string[];
   via: string | null;
+  pending_requirements?: PrerequisiteRequirementState[];
 }
 
 export type SubmissionStatus = "draft" | "submitted" | "in_review" | "graded" | "returned";

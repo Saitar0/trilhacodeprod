@@ -40,11 +40,12 @@ if settings.sentry_dsn:
 
 from database import client, db  # noqa: E402
 from learning import router as learning_router  # noqa: E402
-from migrations import check_schema_version, current_version  # noqa: E402
+from migrations import EXPECTED_MIGRATION_VERSION, check_schema_version, current_version  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
 from routes_content import router as content_router  # noqa: E402
 from routes_import import router as import_router  # noqa: E402
 from routes_progress import router as progress_router  # noqa: E402
+from routes_quizzes import router as quizzes_router  # noqa: E402
 from routes_submissions import router as submissions_router  # noqa: E402
 from routes_taxonomy import router as taxonomy_router  # noqa: E402
 from routes_versions import router as versions_router  # noqa: E402
@@ -95,8 +96,13 @@ app = FastAPI(
 
 def _error_code(status_code: int) -> str:
     return {
-        400: "bad_request", 401: "unauthorized", 403: "forbidden", 404: "not_found",
-        409: "conflict", 422: "validation_error",
+        400: "bad_request",
+        401: "unauthorized",
+        403: "forbidden",
+        404: "not_found",
+        409: "conflict",
+        422: "validation_error",
+        429: "rate_limited",
     }.get(status_code, "request_error" if status_code < 500 else "internal_error")
 
 
@@ -162,11 +168,20 @@ async def ready():
     except Exception as exc:
         raise HTTPException(status_code=503, detail="Banco indisponível") from exc
     version = await current_version()
-    if version < 2:
+    if version < EXPECTED_MIGRATION_VERSION:
         raise HTTPException(status_code=503, detail="Banco sem as migrações esperadas")
     return {"ok": True, "migration_version": version}
-for r in (auth_router, taxonomy_router, content_router, progress_router, learning_router, submissions_router,
-          versions_router, import_router):
+for r in (
+    auth_router,
+    taxonomy_router,
+    content_router,
+    progress_router,
+    learning_router,
+    quizzes_router,
+    submissions_router,
+    versions_router,
+    import_router,
+):
     app.include_router(r)
 
 
@@ -180,6 +195,6 @@ app.add_middleware(
     allow_origins=settings.effective_cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
     expose_headers=["X-Request-ID"],
 )

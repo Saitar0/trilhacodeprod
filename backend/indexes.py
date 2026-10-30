@@ -1,10 +1,20 @@
 # ruff: noqa: EXE002
 """MongoDB index definitions and read-only release preflight."""
 
+from collections.abc import Mapping
+from typing import Any
+
 from database import db
 
 # (collection, keys, options, duplicate-check fields)
-INDEXES = [
+IndexKey = tuple[str, int | str]
+IndexDefinition = tuple[
+    str,
+    list[IndexKey],
+    dict[str, Any],
+    tuple[str, ...] | None,
+]
+INDEXES: list[IndexDefinition] = [
     ("users", [("email", 1)], {"unique": True}, ("email",)),
     ("login_attempts", [("identifier", 1)], {}, None),
     ("login_attempts", [("last", 1)], {"expireAfterSeconds": 3600}, None),
@@ -36,10 +46,22 @@ INDEXES = [
      {"unique": True, "name": "one_running_restore", "partialFilterExpression": {"status": "running"}},
      ("track_id",)),
     ("migrations", [("key", 1)], {"unique": True}, ("key",)),
+    (
+        "quiz_versions",
+        [("quiz_id", 1), ("content_hash", 1)],
+        {"unique": True, "name": "one_quiz_content_version"},
+        ("quiz_id", "content_hash"),
+    ),
+    (
+        "quiz_progress",
+        [("user_id", 1), ("quiz_id", 1), ("version_id", 1)],
+        {"unique": True, "name": "one_user_quiz_version_progress"},
+        ("user_id", "quiz_id", "version_id"),
+    ),
 ]
 
 
-def _options(index: dict) -> dict:
+def _options(index: Mapping[str, Any]) -> dict[str, Any]:
     return {key: index[key] for key in (
         "unique", "sparse", "expireAfterSeconds", "partialFilterExpression", "collation", "hidden",
         "wildcardProjection",
@@ -47,16 +69,19 @@ def _options(index: dict) -> dict:
             if key in index}
 
 
-def _same_keys(index: dict, expected_keys: tuple) -> bool:
+def _same_keys(index: Mapping[str, Any], expected_keys: tuple[IndexKey, ...]) -> bool:
     actual_keys = tuple(index["key"].items())
     if actual_keys == expected_keys:
         return True
     # MongoDB stores text index fields as an internal _fts key and a weights map.
-    return (expected_keys and all(direction == "text" for _, direction in expected_keys)
-            and actual_keys == (("_fts", "text"), ("_ftsx", 1)))
+    return bool(
+        expected_keys
+        and all(direction == "text" for _, direction in expected_keys)
+        and actual_keys == (("_fts", "text"), ("_ftsx", 1))
+    )
 
 
-def _keys_match(index: dict, expected_keys: tuple) -> bool:
+def _keys_match(index: Mapping[str, Any], expected_keys: tuple[IndexKey, ...]) -> bool:
     if not _same_keys(index, expected_keys):
         return False
     if expected_keys and all(direction == "text" for _, direction in expected_keys):
@@ -159,3 +184,9 @@ async def preflight_index_checks(database) -> list[dict[str, str]]:
 async def ensure_indexes() -> None:
     for collection_name, keys, options, _unique_fields in INDEXES:
         await db[collection_name].create_index(keys, **options)
+
+
+async def ensure_quiz_indexes() -> None:
+    for collection_name, keys, options, _unique_fields in INDEXES:
+        if collection_name.startswith("quiz_"):
+            await db[collection_name].create_index(keys, **options)

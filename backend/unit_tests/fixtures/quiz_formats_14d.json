@@ -1,0 +1,101 @@
+{
+  "purpose": "Prompt-only source-derived structural fixtures for Etapa 14D. No answer keys or explanations are included.",
+  "items": [
+    {
+      "fixture_kind": "case_distinct_options",
+      "phase": 3,
+      "question_ref": "f3-8-1-01-tipos-primitivos-anotacoes-02-quiz",
+      "source_id": "Q1",
+      "source_origin": "docs/courses/trilhacode/Conteudos/Fase_3/8.1_Fundamentos_de_tipagem.md",
+      "source_sha256": "f25881c19dd938bbe7dcda04bdf8dc39843c6bba6aced2b5944472475ad6763b",
+      "prompt": "\n## Verificação — quiz\n1. Qual tipo descreve um valor textual primitivo? **A)** `String`. **B)** `string`. **C)** `Text`. **D)** `object`. \n\n",
+      "classification": "multiple_choice_recoverable",
+      "source_format_signal": "multiple_choice",
+      "diagnostic_code": "UNAMBIGUOUS_MULTIPLE_CHOICE_CANDIDATE"
+    },
+    {
+      "fixture_kind": "incomplete_multiple_choice",
+      "phase": 9,
+      "question_ref": "f9-46-1-01-vaga-fonte-de-sinais-q01-quiz",
+      "source_id": "Q01",
+      "source_origin": "docs/courses/trilhacode/Conteudos/Fase_9/46.1_Realidade_de_mercado.md",
+      "source_sha256": "ea87369752f0e2a7b7af0faade61a641989df41aad53443a586f4c1d29f550ba",
+      "prompt": "\n\n1. **Múltipla escolha —** Uma vaga lista dez ferramentas e não diferencia obrigatórias e desejáveis. Qual leitura é mais responsável? ",
+      "classification": "multiple_choice_incomplete",
+      "source_format_signal": "multiple_choice_incomplete",
+      "diagnostic_code": "ALTERNATIVES_NOT_EXPLICIT"
+    },
+    {
+      "fixture_kind": "open_response",
+      "phase": 4,
+      "question_ref": "f4-10-1-02-ciclo-vida-portas-armazenamento-02-quiz-question-q1",
+      "source_id": "Q1",
+      "source_origin": "docs/courses/trilhacode/Conteudos/Fase_4/10.1_Containerizacao.md",
+      "source_sha256": "5a7bb786742be88d25e372fb7c1f95ed2d7c03ffe25fed1e18948b53c1bab0cc",
+      "prompt": "\n## Quiz\n1. O que é removido ao executar `docker rm` em um container que usa volume nomeado?",
+      "classification": "open_response",
+      "source_format_signal": "short_answer",
+      "diagnostic_code": "ALTERNATIVES_NOT_EXPLICIT"
+    },
+    {
+      "fixture_kind": "discursive",
+      "phase": 6,
+      "question_ref": "f6-30-1-01-medicao-baseline-memoizacao-q02-quiz-md",
+      "source_id": "Q02",
+      "source_origin": "docs/courses/trilhacode/Conteudos/Fase_6/30.1_Otimizacao.md",
+      "source_sha256": "aa3a5407706b7af0c67a3b58cc0b019a4378c4c135f206a758cd441ab2ab9075",
+      "prompt": "\n2. **Verdadeiro ou falso, justifique.** “`useMemo` é necessário para manter o resultado correto entre renders.”",
+      "classification": "discursive_exercise",
+      "source_format_signal": "discursive",
+      "diagnostic_code": "ALTERNATIVES_NOT_EXPLICIT"
+    },
+    {
+      "fixture_kind": "review_question",
+      "phase": 4,
+      "question_ref": "f4-16-2-01-projeto-incremental-q01-revisao-decisoes-question-r1",
+      "source_id": "R1",
+      "source_origin": "docs/courses/trilhacode/Conteudos/Fase_4/16.2_Projeto_incremental.md",
+      "source_sha256": "ed89eed014e5cbc2ae1bde4daf1107db5828be3216040d1fd1ce9e779df75787",
+      "prompt": "\n## Perguntas de revisão das decisões\n1. A atualização do registro deixa a chave Redis antiga válida. O que falta?",
+      "classification": "review_question",
+      "source_format_signal": "review",
+      "diagnostic_code": "ALTERNATIVES_NOT_EXPLICIT"
+    },
+    {
+      "fixture_kind": "matching",
+      "phase": 6,
+      "question_ref": "f6-29-1-03-interacao-assincrona-q02-quiz-md",
+      "source_id": "Q02",
+      "source_origin": "docs/courses/trilhacode/Conteudos/Fase_6/29.1_Base_de_testes.md",
+      "source_sha256": "d771a394bd27217bdaa60716dbe37ff0244f0fdc97d4951355a9addb3f78c9b1",
+      "prompt": "\n2. **Associe a necessidade à consulta.** Verificar que um aviso está ausente; localizar um campo que já deve estar renderizado; esperar o resultado de uma busca assíncrona.",
+      "classification": "unidentified",
+      "source_format_signal": "matching_unsupported",
+      "diagnostic_code": "ALTERNATIVES_NOT_EXPLICIT"
+    },
+    {
+      "fixture_kind": "ordering",
+      "phase": 9,
+      "question_ref": "f9-46-1-04-modernizar-ou-otimizar-q04-quiz",
+      "source_id": "Q04",
+      "source_origin": "docs/courses/trilhacode/Conteudos/Fase_9/46.1_Realidade_de_mercado.md",
+      "source_sha256": "5f8bcc66c90cf23cc2bbc0ffcd91553a238968ad06b0eee8eb40d57bb3f12f76",
+      "prompt": "\n\n4. **Ordenação —** Organize uma investigação de lentidão: (a) escolher uma solução como cache; (b) registrar requisito e medida; (c) localizar o gargalo; (d) comparar uma mudança e medir novamente. ",
+      "classification": "unidentified",
+      "source_format_signal": "ordering_unsupported",
+      "diagnostic_code": "ALTERNATIVES_NOT_EXPLICIT"
+    },
+    {
+      "fixture_kind": "ambiguous_answer_key",
+      "phase": 7,
+      "question_ref": "f7-32-1-01-workflow-reprodutibilidade-quality-gates-q01-quiz-md",
+      "source_id": "Q01",
+      "source_origin": "docs/courses/trilhacode/Conteudos/Fase_7/32.1_Automacao.md",
+      "source_sha256": "12dbdcc0d455afda10d9e6dc3c1ec8dc7f175f7298c9542e4ac0b9754c0ba216",
+      "prompt": "\n1. **Múltipla escolha:** qual configuração torna um check um requisito de merge em uma branch protegida?  \n   A. Adicionar uma badge ao README.  \n   B. Configurar a proteção da branch para exigir o status check correspondente.  \n   C. Rodar o workflow apenas em `push`.  \n   ",
+      "classification": "ambiguous_answer_key",
+      "source_format_signal": "multiple_choice",
+      "diagnostic_code": "ANSWER_KEY_NOT_UNAMBIGUOUS_OPTION_REFERENCE"
+    }
+  ]
+}

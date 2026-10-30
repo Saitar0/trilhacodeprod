@@ -39,7 +39,7 @@ export function BlockRenderer(props: BlockProps) {
           {done && <Check className="h-4 w-4 text-emerald-400" />}
         </span>
       </header>
-      <Renderer {...props} />
+      {props.contentOverride ?? <Renderer {...props} />}
       {props.footer}
     </section>
   );

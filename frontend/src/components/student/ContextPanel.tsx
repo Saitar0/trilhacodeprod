@@ -33,15 +33,32 @@ export function dependenciesOf(vm: ViewModel, nodeId: string) {
   const out = (t: string) => vm.relations.filter((r) => r.node_id === nodeId && r.type === t).map((r) => r.target_id);
   const inc = (t: string) => vm.relations.filter((r) => r.target_id === nodeId && r.type === t).map((r) => r.node_id);
   const prereqs = out("prerequisite");
-  const pending = prereqs.filter((id) => vm.statuses[id]?.status !== "completed");
+  const evaluated = new Map((vm.prerequisiteStates[nodeId] || []).map((item) => [item.target_id, item]));
+  const pending = prereqs.filter((id) => {
+    const state = evaluated.get(id);
+    if (state) return state.status !== "satisfied";
+    const relation = vm.relations.find((item) => item.node_id === nodeId && item.target_id === id
+      && item.type === "prerequisite");
+    return !relation?.prerequisite_kind && vm.statuses[id]?.status !== "completed";
+  });
   return { prereqs, pending, unlocks: inc("prerequisite"), complements: [...out("complement"), ...inc("complement")],
     revisits: [...out("revisit"), ...inc("revisit")], related: [...out("related"), ...inc("related")] };
+}
+
+function prerequisiteLabel(kind: string, status: string): string {
+  if (status === "unavailable") return "Verificação indisponível";
+  if (kind === "quiz_passed") return status === "satisfied" ? "Quiz aprovado" : "Quiz ainda não aprovado";
+  if (kind === "content_completed") return status === "satisfied" ? "Leitura concluída" : "Leitura pendente";
+  return status === "satisfied" ? "Pré-requisito concluído" : "Pré-requisito pendente";
 }
 
 export function ContextPanel({ vm, nodeId }: { vm: ViewModel; nodeId?: string }) {
   const total = progressFor(vm.learnables, vm.statuses);
   const next = nextLearnable(vm, nodeId);
   const deps = nodeId ? dependenciesOf(vm, nodeId) : null;
+  const enforcedPrereqs = nodeId ? vm.relations
+    .filter((relation) => relation.node_id === nodeId && relation.type === "prerequisite" && relation.enforced)
+    .map((relation) => relation.target_id) : [];
   const node = nodeId ? vm.byId.get(nodeId) : undefined;
   const local = node && node.children.length ? progressFor(learnablesOf(node, vm.lastKind, vm.blockCounts), vm.statuses) : null;
   return (
@@ -64,9 +81,28 @@ export function ContextPanel({ vm, nodeId }: { vm: ViewModel; nodeId?: string })
       )}
       {deps && (
         <div className="space-y-5">
+          {enforcedPrereqs.length > 0 && vm.track.settings.enforce_prerequisites && (
+            <section aria-label="Estado dos pré-requisitos" data-testid="context-prerequisite-states"
+              className="space-y-2 rounded-md border border-slate-700 bg-slate-900/50 p-3">
+              <p className="text-xs font-semibold text-slate-200">
+                {vm.locks[nodeId!] ? "Conteúdo bloqueado" : "Conteúdo liberado"}
+              </p>
+              <ul className="space-y-1">
+                {enforcedPrereqs.map((id) => {
+                  const requirement = vm.prerequisiteStates[nodeId!]?.find((item) => item.target_id === id);
+                  const label = requirement
+                    ? prerequisiteLabel(requirement.prerequisite_kind, requirement.status)
+                    : "Verificação indisponível";
+                  return <li key={id} className="text-xs text-slate-300">
+                    {vm.byId.get(id)?.title || "Pré-requisito"}: {label}
+                  </li>;
+                })}
+              </ul>
+            </section>
+          )}
           {vm.locks[nodeId!] ? (
             <p data-testid="context-locked" className="flex gap-2 rounded-md border border-rose-500/40 bg-rose-500/5 p-3 text-xs text-rose-200">
-              <AlertTriangle className="h-4 w-4 shrink-0" />Bloqueado até concluir: {vm.locks[nodeId!].pending.map((id) => vm.byId.get(id)?.title).join(", ")}.
+              <AlertTriangle className="h-4 w-4 shrink-0" />Bloqueado até atender: {vm.locks[nodeId!].pending.map((id) => vm.byId.get(id)?.title).join(", ")}.
             </p>
           ) : deps.pending.length > 0 && (
             <p data-testid="context-pending-prereqs" className={cn("flex gap-2 rounded-md border p-3 text-xs",
