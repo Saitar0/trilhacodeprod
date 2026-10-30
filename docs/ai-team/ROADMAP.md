@@ -1,5 +1,12 @@
 # Roadmap técnico
 
+## Atualização — integração progressiva Beta 1–9
+
+- PR #39 contém a primeira onda contract-only da Beta 5, baseada na branch de fundação do PR #38, sem merge automático.
+- O workflow `41082490518` passou integralmente no SHA `57f42bc1f20079afa815bdddd04e9e94531dbb5d`.
+- Beta 1–9 foram reconstruídas; Beta 9 permanece branch-only e bloqueada por ausência de relatório/CI verificável.
+- Relatório consolidado: `docs/ai-team/beta-integration-progressive-report.md`.
+
 ## Atualização — recuperação da fundação concluída
 
 - A branch `codex/foundation-ci-e2e-recovery` foi validada no commit `bd8cd204857bbc581d5d6137ab6325d4022e13d7`.
