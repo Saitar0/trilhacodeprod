@@ -13,7 +13,7 @@ Isso não contém globalmente os 17 writers C13 nem integra C12 ao IAM ativo. O 
 * Worktree exclusiva: `C:\Users\Joao\.codex\worktrees\trilhacode-beta8-editorial-security\trilhacodeprod`.
 * Nenhum commit de origem foi reescrito; sem push, PR, merge, pull, cherry-pick, rebase ou deploy.
 * Worktrees existentes foram listadas em modo de inspeção. O checkout original tem alterações locais não relacionadas; não foi tocado. Branch Beta 7.2 permaneceu intacta.
-* Commits locais Beta 8 estão no histórico indicado na entrega. Não houve alteração de referência remota.
+* Commit local de implementação/harness: `9de52aac`; o commit documental final está no `git log` desta branch. Não houve alteração de referência remota.
 
 ## C. Arquitetura do IAM
 
@@ -109,7 +109,7 @@ Ao terminar, o marcador foi revalidado; DB e contêiner foram removidos, rede re
 * PowerShell parser: passed.
 * `docker compose config --quiet`: passed com valores sintéticos; script repetiu o contrato durante a prova persistente.
 * Validação JSON dos inventários C13, grants C13 e contrato C15: passed.
-* Varredura de links relativos, segredos e `git diff --check`: registrar antes do commit.
+* Varredura de links relativos: nenhum link relativo não verificado. Varredura de padrões de segredos: passed. `git diff --cached --check`: passed antes do commit.
 * Suíte completa pytest, regressões persistentes históricas, HTTP e frontend: not run.
 
 Detalhes: `beta8-regression-results.md`.
