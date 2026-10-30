@@ -44,7 +44,9 @@ _ROLE_PERMISSIONS = {
     "student": frozenset({"progress.write"}),
 }
 _OPERATION_PERMISSION = {
+    "block.create": "content.write",
     "block.update": "content.write",
+    "node.update": "content.write",
     "content.publish": "content.publish",
     "content.delete": "content.delete",
 }

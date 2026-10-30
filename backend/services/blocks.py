@@ -1,4 +1,8 @@
 # ruff: noqa: EXE002
+import hashlib
+import json
+
+from bson import ObjectId
 from fastapi import HTTPException
 
 from audit import audit
@@ -9,11 +13,72 @@ from serialization import oid
 from services.common import check_status, get_document, next_order, validate_reorder
 
 
-async def create_block(data: dict, user: dict) -> dict:
+async def create_block(
+    data: dict,
+    user: dict,
+    *,
+    editorial_boundary=None,
+    session_id: str | None = None,
+    expected_revision: int | None = None,
+    operation_id: str | None = None,
+    requested_track_id: str | None = None,
+    transaction_guard=None,
+    before_commit=None,
+) -> dict:
     check_status(data["status"])
     node = await get_document("nodes", data["node_id"])
     if not await db.block_types.find_one({"key": data["type"]}):
         raise HTTPException(status_code=400, detail="Tipo de bloco desconhecido")
+    if editorial_boundary is not None:
+        if (
+            data["status"] != "draft"
+            or not isinstance(session_id, str)
+            or expected_revision is None
+            or not isinstance(operation_id, str)
+        ):
+            raise HTTPException(status_code=422, detail="Criação editorial inválida")
+        try:
+            encoded_data = json.dumps(
+                data.get("data", {}), ensure_ascii=False, separators=(",", ":"), allow_nan=False,
+            )
+        except (TypeError, ValueError, UnicodeEncodeError) as exc:
+            raise HTTPException(status_code=422, detail="Criação editorial inválida") from exc
+        if len(encoded_data.encode("utf-8")) > 100_000:
+            raise HTTPException(status_code=413, detail="Conteúdo excede o limite permitido")
+        block_id = ObjectId(hashlib.sha256(operation_id.encode("utf-8")).digest()[:12])
+        document = {
+            "_id": block_id,
+            **data,
+            "track_id": node["track_id"],
+            "schema_version": 1,
+            "created_by": user["id"],
+            "created_at": now(),
+            "updated_at": now(),
+        }
+        try:
+            prepared = await editorial_boundary.prepare_draft_block_create(
+                actor_id=user["id"],
+                session_id=session_id,
+                node_id=data["node_id"],
+                block_id=block_id,
+                operation_id=operation_id,
+                expected_revision=expected_revision,
+                document=document,
+                requested_track_id=requested_track_id,
+            )
+            receipt = await editorial_boundary.commit_draft_block_create(
+                prepared,
+                actor_id=user["id"],
+                session_id=session_id,
+                transaction_guard=transaction_guard,
+                before_commit=before_commit,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail="Criação editorial inválida") from exc
+        stored = await db.content_blocks.find_one({"_id": block_id})
+        if stored is None:
+            raise HTTPException(status_code=409, detail="Bloco não disponível após a operação")
+        return {"document": stored, "receipt": receipt}
     doc = {
         **data,
         "track_id": node["track_id"],

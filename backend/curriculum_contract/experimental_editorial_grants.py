@@ -24,7 +24,9 @@ class GrantState(str, Enum):
 
 
 _ATOM = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
-EDITORIAL_OPERATIONS = frozenset({"block.update", "content.publish", "content.delete"})
+EDITORIAL_OPERATIONS = frozenset({
+    "block.create", "block.update", "content.publish", "content.delete", "node.update",
+})
 _GRANT_FIELDS = frozenset({
     "_id", "schema_version", "actor_id", "track_id", "scope_kind",
     "global_admin_scope", "allowed_operations", "state", "authorization_epoch",

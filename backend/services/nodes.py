@@ -157,7 +157,51 @@ async def get_node(node_id: str, user: dict, blocks_limit: int = 1000, blocks_sk
     return {"node": node, "blocks": blocks, "relations": result_relations, "ancestors": await ancestors(node), "lock": lock}
 
 
-async def update_node(node_id: str, data: dict, user: dict) -> dict:
+async def update_node(
+    node_id: str,
+    data: dict,
+    user: dict,
+    *,
+    editorial_boundary=None,
+    session_id: str | None = None,
+    expected_revision: int | None = None,
+    operation_id: str | None = None,
+    transaction_guard=None,
+    before_commit=None,
+) -> dict:
+    if editorial_boundary is not None:
+        if (
+            not isinstance(session_id, str)
+            or expected_revision is None
+            or not isinstance(operation_id, str)
+            or not data
+            or set(data) - {"title", "summary", "description", "guidance"}
+            or any(not isinstance(value, str) for value in data.values())
+        ):
+            raise HTTPException(status_code=422, detail="Alteração editorial inválida")
+        changes = dict(data)
+        try:
+            prepared = await editorial_boundary.prepare_draft_node_update(
+                actor_id=user["id"],
+                session_id=session_id,
+                node_id=node_id,
+                operation_id=operation_id,
+                expected_revision=expected_revision,
+                changes=changes,
+            )
+            receipt = await editorial_boundary.commit_draft_node_update(
+                prepared,
+                actor_id=user["id"],
+                session_id=session_id,
+                transaction_guard=transaction_guard,
+                before_commit=before_commit,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail="Alteração editorial inválida") from exc
+        stored = await db.nodes.find_one({"_id": oid(node_id)})
+        if stored is None:
+            raise HTTPException(status_code=409, detail="Unidade não disponível após a operação")
+        return {"document": stored, "receipt": receipt}
     node = await get_document("nodes", node_id)
     check_status(data.get("status"))
     if "parent_id" in data or "kind" in data:
