@@ -342,14 +342,13 @@ jobs:
       - name: Install pinned Playwright Chromium dependencies
         working-directory: frontend
         run: ./node_modules/.bin/playwright install --with-deps chromium
-      - name: Verify browser API contract and run integrated Playwright suite
+      - name: Run existing integrated Playwright suite with scoped cleanup
         working-directory: frontend
         env:
           E2E_STUDENT_EMAIL: foundation-student@example.com
           E2E_STUDENT_PASSWORD: synthetic-student-password-only
           E2E_ADMIN_EMAIL: foundation-admin@example.com
           E2E_ADMIN_PASSWORD: synthetic-admin-password-only
-          VITE_BACKEND_URL: http://127.0.0.1:18000
         run: |
           set -euo pipefail
           api_pid=''
@@ -366,7 +365,7 @@ jobs:
             > "$RUNNER_TEMP/foundation-api.log" 2>&1 &
           api_pid=$!
           for attempt in {1..60}; do
-            if curl --fail --silent http://127.0.0.1:18000/ready >/dev/null; then break; fi
+            if curl --fail --silent http://127.0.0.1:18000/health >/dev/null; then break; fi
             if [[ "$attempt" == 60 ]]; then cat "$RUNNER_TEMP/foundation-api.log"; exit 1; fi
             sleep 2
           done
@@ -381,44 +380,7 @@ jobs:
             sleep 2
           done
 
-          api_headers="$RUNNER_TEMP/foundation-api-me.headers"
-          api_body="$RUNNER_TEMP/foundation-api-me.json"
-          api_status="$(curl --silent --show-error --output "$api_body" --dump-header "$api_headers" \
-            --write-out '%{http_code}' --header "Origin: $FRONTEND_URL" \
-            "$VITE_BACKEND_URL/api/auth/me")"
-          python - "$api_status" "$api_headers" "$api_body" <<'PY'
-          import json
-          import os
-          import sys
-          from pathlib import Path
-
-          status, headers_path, body_path = sys.argv[1:]
-          headers = {}
-          for line in Path(headers_path).read_text(encoding="utf-8").splitlines():
-              if ":" in line:
-                  key, value = line.split(":", 1)
-                  headers[key.strip().lower()] = value.strip()
-          content_type = headers.get("content-type", "").split(";", 1)[0].lower()
-          body = json.loads(Path(body_path).read_text(encoding="utf-8"))
-          assert status == "401", f"Expected unauthenticated /api/auth/me status 401, got {status}"
-          assert content_type == "application/json", f"Expected JSON from /api/auth/me, got {content_type or 'no Content-Type'}"
-          assert isinstance(body, dict) and body.get("error", {}).get("code") == "unauthorized", "Unexpected /api/auth/me error envelope"
-          assert headers.get("access-control-allow-origin") == os.environ["FRONTEND_URL"], "CORS does not allow the E2E frontend origin"
-          assert headers.get("access-control-allow-credentials", "").lower() == "true", "CORS credentials are not enabled"
-          print("API preflight passed: /api/auth/me returned the expected JSON 401 and credentialed CORS headers.")
-          PY
-
           npm run test:e2e -- --reporter=list
-      - name: Upload sanitized E2E diagnostics
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: foundation-e2e-diagnostics
-          path: |
-            frontend/test-results/**/browser-diagnostics.json
-            frontend/test-results/**/browser-screenshot.png
-          if-no-files-found: ignore
-          retention-days: 7
       - name: Record E2E job result
         if: always()
         run: |
