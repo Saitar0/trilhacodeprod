@@ -2,6 +2,13 @@ name: Trilha Code Beta 6.1 validation (no deploy)
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/beta61-validation.yml"
+      - "backend/**"
+      - "frontend/**"
+      - "compose.qa.yaml"
+      - "ops/editorial-generations/requirements.lock"
 
 permissions:
   contents: read
