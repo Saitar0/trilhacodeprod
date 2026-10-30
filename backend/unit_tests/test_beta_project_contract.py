@@ -7,11 +7,11 @@ from pydantic import ValidationError
 from curriculum_contract.beta_project_contract import (
     ProjectArtifact,
     ProjectArtifactKind,
+    ProjectArtifactReference,
     ProjectCompletionRule,
     ProjectPackage,
     ProjectRubric,
     ProjectStep,
-    ProjectArtifactReference,
 )
 from curriculum_contract.beta_protected_content import DataClassification
 
