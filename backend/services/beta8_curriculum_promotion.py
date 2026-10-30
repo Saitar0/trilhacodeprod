@@ -51,6 +51,7 @@ class Beta8ExperimentalPromoter:
         actor_id: str,
         session_id: str,
         expected_previous_generation: str | None = None,
+        transaction_guard: Callable[[Any, RevisionReceipt], Awaitable[None]] | None = None,
         before_commit: Callable[[], Awaitable[None]] | None = None,
     ) -> RevisionReceipt:
         if not isinstance(candidate, ExperimentalPromotionCandidate) or not isinstance(
@@ -180,8 +181,13 @@ class Beta8ExperimentalPromoter:
                 session=session,
             )
 
+        async def guarded_participant(session: Any, receipt: RevisionReceipt) -> None:
+            if transaction_guard is not None:
+                await transaction_guard(session, receipt)
+            await promotion_participant(session, receipt)
+
         guarded = self._authority.transaction_participant(
-            decision.capability, promotion_participant
+            decision.capability, guarded_participant,
         )
         try:
             if before_commit is not None:

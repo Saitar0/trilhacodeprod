@@ -59,6 +59,24 @@ from services.versions import list_track_versions
 router = APIRouter(prefix="/api")
 
 
+async def _editorial_boundary_context(experimental, identity, user):
+    """Bind an existing local boundary or a per-request remote RPC facade."""
+
+    boundary = experimental.boundary
+    if callable(getattr(boundary, "for_identity", None)):
+        # The API gateway has already authenticated this identity. The remote
+        # authority independently checks the signed assertion, active session,
+        # persisted principal, resource grant, and commit guard.
+        return boundary.for_identity(identity), None, None
+    iam_bridge = getattr(experimental, "iam_bridge", None)
+    if iam_bridge is not None:
+        await iam_bridge.require_matching_projection(
+            identity, user, required_permission="content.write",
+        )
+        return boundary, iam_bridge.transaction_guard(identity), experimental.before_commit
+    raise HTTPException(status_code=503, detail="Autoridade editorial indisponível")
+
+
 # ---------- Tracks ----------
 @router.get("/tracks", response_model=list[TrackOut], response_model_exclude_unset=True)
 async def list_tracks(status: Optional[str] = None, q: Optional[str] = None, limit: int = 500, skip: int = 0,
@@ -159,8 +177,8 @@ async def update_node(
     from services.beta8_editorial_enforcement import DraftBlockNotFound, EditorialMutationDenied
 
     identity = identity_from_authenticated_request(request, user)
-    await experimental.iam_bridge.require_matching_projection(
-        identity, user, required_permission="content.write",
+    boundary, transaction_guard, before_commit = await _editorial_boundary_context(
+        experimental, identity, user,
     )
     expected_revision = parse_expected_revision(request.headers.get("If-Match"))
     idempotency_key = validate_idempotency_key(request.headers.get("Idempotency-Key"))
@@ -176,12 +194,12 @@ async def update_node(
             node_id,
             body.model_dump(exclude_unset=True),
             user,
-            editorial_boundary=experimental.boundary,
+            editorial_boundary=boundary,
             session_id=identity.session_id,
             expected_revision=expected_revision,
             operation_id=operation_id,
-            transaction_guard=experimental.iam_bridge.transaction_guard(identity),
-            before_commit=experimental.before_commit,
+            transaction_guard=transaction_guard,
+            before_commit=before_commit,
         )
     except HTTPException:
         raise
@@ -231,8 +249,8 @@ async def create_block(
     from services.beta8_editorial_enforcement import DraftBlockNotFound, EditorialMutationDenied
 
     identity = identity_from_authenticated_request(request, user)
-    await experimental.iam_bridge.require_matching_projection(
-        identity, user, required_permission="content.write",
+    boundary, transaction_guard, before_commit = await _editorial_boundary_context(
+        experimental, identity, user,
     )
     expected_revision = parse_expected_revision(request.headers.get("If-Match"))
     idempotency_key = validate_idempotency_key(request.headers.get("Idempotency-Key"))
@@ -247,12 +265,12 @@ async def create_block(
         result = await create_block_service(
             body.model_dump(),
             user,
-            editorial_boundary=experimental.boundary,
+            editorial_boundary=boundary,
             session_id=identity.session_id,
             expected_revision=expected_revision,
             operation_id=operation_id,
-            transaction_guard=experimental.iam_bridge.transaction_guard(identity),
-            before_commit=experimental.before_commit,
+            transaction_guard=transaction_guard,
+            before_commit=before_commit,
         )
     except HTTPException:
         raise
@@ -299,8 +317,8 @@ async def update_block(
     from services.beta8_editorial_enforcement import DraftBlockNotFound, EditorialMutationDenied
 
     identity = identity_from_authenticated_request(request, user)
-    await experimental.iam_bridge.require_matching_projection(
-        identity, user, required_permission="content.write",
+    boundary, transaction_guard, before_commit = await _editorial_boundary_context(
+        experimental, identity, user,
     )
     expected_revision = parse_expected_revision(request.headers.get("If-Match"))
     idempotency_key = validate_idempotency_key(request.headers.get("Idempotency-Key"))
@@ -317,12 +335,12 @@ async def update_block(
             block_id,
             changes,
             user,
-            editorial_boundary=experimental.boundary,
+            editorial_boundary=boundary,
             session_id=identity.session_id,
             expected_revision=expected_revision,
             operation_id=operation_id,
-            transaction_guard=experimental.iam_bridge.transaction_guard(identity),
-            before_commit=experimental.before_commit,
+            transaction_guard=transaction_guard,
+            before_commit=before_commit,
         )
     except HTTPException:
         raise

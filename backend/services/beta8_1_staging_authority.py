@@ -17,7 +17,7 @@ from curriculum_contract.beta8_promotion_contract import (
 from curriculum_contract.beta_staging_contract import StagingPackage
 from curriculum_contract.editorial_revision_protocol import RevisionReceipt
 from services.beta8_curriculum_promotion import Beta8ExperimentalPromoter
-from services.beta_curriculum_staging import CurriculumStagingService
+from services.beta_curriculum_staging import CurriculumStagingService, StagingError
 
 
 class StagingAuthorityError(RuntimeError):
@@ -65,7 +65,34 @@ class Beta8_1StagingAuthorityBridge:
             source_revision=f"synthetic:stage:{validated.manifest.payload_sha256}",
         )
 
-    async def prepare_and_promote(
+    async def verify_prepared_package(
+        self, package: StagingPackage,
+    ) -> ExperimentalPromotionCandidate:
+        """Re-read and validate a prepared Beta 5 batch through a read-only handle.
+
+        The caller may live in the staging writer process. The authority process
+        supplies a Mongo identity limited to reads on the staging collections;
+        this method never prepares or mutates staging data.
+        """
+
+        validated = StagingPackage.model_validate(package.model_dump(mode="python"))
+        candidate = self.candidate_for(validated)
+        await self._staging._verify_database_owner()
+        staged = await self._staging.inspect_batch(validated.manifest.batch_id)
+        try:
+            await self._staging._assert_complete(validated)
+        except StagingError as exc:
+            raise StagingAuthorityError("Lote staging não passou na verificação de integridade") from exc
+        if (
+            staged is None
+            or staged.get("status") != "PREPARED"
+            or staged.get("payload_sha256") != validated.manifest.payload_sha256
+            or staged.get("prepared_count") != len(validated.records)
+        ):
+            raise StagingAuthorityError("Lote staging incompleto ou divergente; transição negada")
+        return candidate
+
+    async def promote_prepared(
         self,
         package: StagingPackage,
         intent: ExperimentalPromotionIntent,
@@ -73,22 +100,13 @@ class Beta8_1StagingAuthorityBridge:
         actor_id: str,
         session_id: str,
         expected_previous_generation: str | None = None,
-        staging_fault_hook=None,
+        transaction_guard=None,
         before_commit: Callable[[], Awaitable[None]] | None = None,
         after_commit: Callable[[], Awaitable[None]] | None = None,
     ) -> RevisionReceipt:
-        candidate = self.candidate_for(package)
-        outcome = await self._staging.prepare(package, fault_hook=staging_fault_hook)
-        staged = await self._staging.inspect_batch(package.manifest.batch_id)
-        if (
-            outcome.state.value != "PREPARED"
-            or outcome.payload_sha256 != package.manifest.payload_sha256
-            or staged is None
-            or staged.get("status") != "PREPARED"
-            or staged.get("payload_sha256") != candidate.source_revision.removeprefix("synthetic:stage:")
-            or staged.get("prepared_count") != len(package.records)
-        ):
-            raise StagingAuthorityError("Lote staging incompleto ou divergente; transição negada")
+        """Promote only a batch already prepared by a separate staging writer."""
+
+        candidate = await self.verify_prepared_package(package)
         if (
             intent.batch_id != candidate.batch_id
             or intent.payload_sha256 != candidate.payload_sha256
@@ -102,10 +120,37 @@ class Beta8_1StagingAuthorityBridge:
             actor_id=actor_id,
             session_id=session_id,
             expected_previous_generation=expected_previous_generation,
+            transaction_guard=transaction_guard,
             before_commit=before_commit,
         )
-        # A caller may lose the response after the transaction has committed.
-        # The operation ID and C8 receipt make an identical retry recoverable.
         if after_commit is not None:
             await after_commit()
+        return receipt
+
+    async def prepare_and_promote(
+        self,
+        package: StagingPackage,
+        intent: ExperimentalPromotionIntent,
+        *,
+        actor_id: str,
+        session_id: str,
+        expected_previous_generation: str | None = None,
+        transaction_guard=None,
+        staging_fault_hook=None,
+        before_commit: Callable[[], Awaitable[None]] | None = None,
+        after_commit: Callable[[], Awaitable[None]] | None = None,
+    ) -> RevisionReceipt:
+        outcome = await self._staging.prepare(package, fault_hook=staging_fault_hook)
+        if outcome.state.value != "PREPARED" or outcome.payload_sha256 != package.manifest.payload_sha256:
+            raise StagingAuthorityError("Lote staging incompleto ou divergente; transição negada")
+        receipt = await self.promote_prepared(
+            package,
+            intent,
+            actor_id=actor_id,
+            session_id=session_id,
+            expected_previous_generation=expected_previous_generation,
+            transaction_guard=transaction_guard,
+            before_commit=before_commit,
+            after_commit=after_commit,
+        )
         return receipt

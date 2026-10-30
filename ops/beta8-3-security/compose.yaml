@@ -1,0 +1,201 @@
+services:
+  mongo:
+    image: mongo:7.0.43
+    entrypoint: ["/bin/bash", "-ec"]
+    command:
+      - |
+        umask 077
+        cp /run/secrets/beta8-mongo-keyfile /run/mongo/keyfile
+        chown mongodb:mongodb /run/mongo /run/mongo/keyfile
+        chmod 0400 /run/mongo/keyfile
+        exec /usr/local/bin/docker-entrypoint.sh mongod --replSet rsB83 --bind_ip_all --keyFile /run/mongo/keyfile
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${BETA8_3_ROOT_USERNAME:?synthetic root username required}
+      MONGO_INITDB_ROOT_PASSWORD: ${BETA8_3_ROOT_PASSWORD:?synthetic root password required}
+    secrets:
+      - source: beta8_3_mongo_keyfile
+        target: beta8-mongo-keyfile
+    tmpfs:
+      - /data/db
+      - /data/configdb
+      - /run/mongo:rw,noexec,nosuid,size=64k,mode=0700
+    networks: [beta8_3_private]
+    labels:
+      io.trilhacode.phase: beta8-3
+      io.trilhacode.run: ${BETA8_3_RUN_ID:?unique run id required}
+      io.trilhacode.role: mongo
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mongosh --quiet --username "$${MONGO_INITDB_ROOT_USERNAME}" --password "$${MONGO_INITDB_ROOT_PASSWORD}" --authenticationDatabase admin --eval 'db.adminCommand({ping:1}).ok' | grep 1
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
+    restart: "no"
+
+  rs-init:
+    image: mongo:7.0.43
+    entrypoint: ["/bin/bash", "-ec"]
+    command:
+      - |
+        mongosh --quiet --host mongo:27017 --username "$${BETA8_3_ROOT_USERNAME}" --password "$${BETA8_3_ROOT_PASSWORD}" --authenticationDatabase admin --eval 'try { rs.status(); } catch (e) { rs.initiate({_id:"rsB83",members:[{_id:0,host:"mongo:27017"}]}); } while (!db.hello().isWritablePrimary) { sleep(250); } print("BETA8_3_REPLICA_SET_READY");'
+    environment:
+      BETA8_3_ROOT_USERNAME: ${BETA8_3_ROOT_USERNAME:?synthetic root username required}
+      BETA8_3_ROOT_PASSWORD: ${BETA8_3_ROOT_PASSWORD:?synthetic root password required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks: [beta8_3_private]
+    labels:
+      io.trilhacode.phase: beta8-3
+      io.trilhacode.run: ${BETA8_3_RUN_ID:?unique run id required}
+      io.trilhacode.role: rs-init
+    restart: "no"
+
+  app-image:
+    image: ${BETA8_3_IMAGE_NAME:?unique local image required}
+    build:
+      context: ../..
+      dockerfile: ops/beta8-3-security/Dockerfile
+      args:
+        BETA8_3_RUN_ID: ${BETA8_3_RUN_ID:?unique run id required}
+    network_mode: "none"
+    profiles: [build-only]
+
+  provisioner:
+    image: ${BETA8_3_IMAGE_NAME:?unique local image required}
+    command: ["python", "/repo/backend/integration_tests/beta8_3_process_security.py"]
+    environment: &harness_environment
+      BETA8_3_DISPOSABLE: "1"
+      BETA8_3_DOCKER_PRECHECKED: ${BETA8_3_DOCKER_PRECHECKED:-false}
+      BETA8_3_DOCKER_CONTAINER_ID: ${BETA8_3_DOCKER_CONTAINER_ID:-}
+      BETA8_3_DOCKER_NETWORK_ID: ${BETA8_3_DOCKER_NETWORK_ID:-}
+      BETA8_3_RUN_ID: ${BETA8_3_RUN_ID:?unique run id required}
+      BETA8_3_DB_NAME: ${BETA8_3_DB_NAME:?unique database required}
+      BETA8_3_ROOT_URI: ${BETA8_3_ROOT_URI:?synthetic root URI required}
+      BETA8_3_ROOT_USERNAME: ${BETA8_3_ROOT_USERNAME:?synthetic root username required}
+      BETA8_3_ROOT_PASSWORD: ${BETA8_3_ROOT_PASSWORD:?synthetic root password required}
+      BETA8_3_API_PASSWORD: ${BETA8_3_API_PASSWORD:?synthetic API password required}
+      BETA8_3_AUTHORITY_PASSWORD: ${BETA8_3_AUTHORITY_PASSWORD:?synthetic authority password required}
+      BETA8_3_STAGE_RUN_ID: ${BETA8_3_STAGE_RUN_ID:?unique staging run id required}
+      BETA8_3_STAGE_OWNER_TOKEN: ${BETA8_3_STAGE_OWNER_TOKEN:?synthetic owner token required}
+      BETA8_3_STAGE_WRITE_PASSWORD: ${BETA8_3_STAGE_WRITE_PASSWORD:?synthetic staging password required}
+      BETA8_3_STAGE_READ_PASSWORD: ${BETA8_3_STAGE_READ_PASSWORD:?synthetic stage reader password required}
+      BETA8_3_EDITOR_ID: ${BETA8_3_EDITOR_ID:?synthetic editor id required}
+      BETA8_3_EDITOR_EMAIL: ${BETA8_3_EDITOR_EMAIL:?synthetic editor email required}
+      BETA8_3_NO_GRANT_ID: ${BETA8_3_NO_GRANT_ID:?synthetic user id required}
+      BETA8_3_NO_GRANT_EMAIL: ${BETA8_3_NO_GRANT_EMAIL:?synthetic user email required}
+      BETA8_3_ADMIN_ID: ${BETA8_3_ADMIN_ID:?synthetic admin id required}
+      BETA8_3_ADMIN_EMAIL: ${BETA8_3_ADMIN_EMAIL:?synthetic admin email required}
+      BETA8_3_NODE_ID: ${BETA8_3_NODE_ID:?synthetic node id required}
+      BETA8_3_BLOCK_ID: ${BETA8_3_BLOCK_ID:?synthetic block id required}
+      BETA8_3_SERVICE_SECRET_HEX: ${BETA8_3_SERVICE_SECRET_HEX:?ephemeral RPC key required}
+      BETA8_3_STAGER_SECRET_HEX: ${BETA8_3_STAGER_SECRET_HEX:?ephemeral stager key required}
+      BETA8_3_OPERATION_KEY_HEX: ${BETA8_3_OPERATION_KEY_HEX:?ephemeral operation key required}
+      BETA8_3_JWT_SECRET: ${BETA8_3_JWT_SECRET:?ephemeral JWT secret required}
+      BETA8_3_MODE: provision
+    networks: [beta8_3_private]
+    labels:
+      io.trilhacode.phase: beta8-3
+      io.trilhacode.run: ${BETA8_3_RUN_ID:?unique run id required}
+      io.trilhacode.role: provisioner
+    restart: "no"
+
+  authority:
+    image: ${BETA8_3_IMAGE_NAME:?unique local image required}
+    command: ["python", "-m", "uvicorn", "test_support.beta8_3_authority_server:app", "--host", "0.0.0.0", "--port", "8101", "--no-access-log"]
+    environment:
+      BETA8_3_DISPOSABLE: "1"
+      BETA8_3_TEST_AUTHORITY: "1"
+      BETA8_3_TRACK_ID: beta8-track-synthetic-runtime
+      DB_NAME: ${BETA8_3_DB_NAME:?unique database required}
+      MONGO_URL: ${BETA8_3_AUTHORITY_MONGO_URI:?authority-only Mongo URI required}
+      BETA8_3_SERVICE_SECRET_HEX: ${BETA8_3_SERVICE_SECRET_HEX:?ephemeral RPC key required}
+      BETA8_3_STAGER_SECRET_HEX: ${BETA8_3_STAGER_SECRET_HEX:?ephemeral stager key required}
+      BETA8_3_STAGE_READ_URI: ${BETA8_3_STAGE_READ_URI:?read-only staging URI required}
+      BETA8_3_STAGE_RUN_ID: ${BETA8_3_STAGE_RUN_ID:?unique staging run id required}
+      BETA8_3_STAGE_OWNER_TOKEN: ${BETA8_3_STAGE_OWNER_TOKEN:?synthetic staging owner token required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks: [beta8_3_private]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=16m"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    labels:
+      io.trilhacode.phase: beta8-3
+      io.trilhacode.run: ${BETA8_3_RUN_ID:?unique run id required}
+      io.trilhacode.role: authority
+    restart: "no"
+
+  api:
+    image: ${BETA8_3_IMAGE_NAME:?unique local image required}
+    command: ["python", "-m", "uvicorn", "test_support.beta8_3_api_server:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+    environment:
+      BETA8_3_DISPOSABLE: "1"
+      BETA8_3_TEST_API: "1"
+      DB_NAME: ${BETA8_3_DB_NAME:?unique database required}
+      MONGO_URL: ${BETA8_3_API_MONGO_URI:?common-only Mongo URI required}
+      JWT_SECRET: ${BETA8_3_JWT_SECRET:?ephemeral JWT secret required}
+      BETA8_3_AUTHORITY_URL: http://authority:8101
+      BETA8_3_SERVICE_SECRET_HEX: ${BETA8_3_SERVICE_SECRET_HEX:?ephemeral RPC key required}
+      BETA8_3_OPERATION_KEY_HEX: ${BETA8_3_OPERATION_KEY_HEX:?ephemeral operation key required}
+      ENV: development
+    depends_on:
+      mongo:
+        condition: service_healthy
+      authority:
+        condition: service_started
+    networks: [beta8_3_private]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=16m"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    labels:
+      io.trilhacode.phase: beta8-3
+      io.trilhacode.run: ${BETA8_3_RUN_ID:?unique run id required}
+      io.trilhacode.role: api
+    restart: "no"
+
+  verifier:
+    image: ${BETA8_3_IMAGE_NAME:?unique local image required}
+    command: ["python", "/repo/backend/integration_tests/beta8_3_process_security.py"]
+    environment:
+      <<: *harness_environment
+      BETA8_3_MODE: verify
+      BETA8_3_API_MONGO_URI: ${BETA8_3_API_MONGO_URI:?common-only Mongo URI required}
+      BETA8_3_AUTHORITY_MONGO_URI: ${BETA8_3_AUTHORITY_MONGO_URI:?authority-only Mongo URI required}
+      BETA8_3_STAGE_WRITE_URI: ${BETA8_3_STAGE_WRITE_URI:?synthetic staging writer URI required}
+      BETA8_3_STAGE_READ_URI: ${BETA8_3_STAGE_READ_URI:?read-only staging URI required}
+      BETA8_3_API_URL: http://api:8000
+      BETA8_3_AUTHORITY_URL: http://authority:8101
+    depends_on:
+      mongo:
+        condition: service_healthy
+      api:
+        condition: service_started
+      authority:
+        condition: service_started
+    networks: [beta8_3_private]
+    labels:
+      io.trilhacode.phase: beta8-3
+      io.trilhacode.run: ${BETA8_3_RUN_ID:?unique run id required}
+      io.trilhacode.role: verifier
+    restart: "no"
+
+networks:
+  beta8_3_private:
+    name: beta8-3-${BETA8_3_RUN_ID:?unique run id required}-net
+    driver: bridge
+    internal: true
+    labels:
+      io.trilhacode.phase: beta8-3
+      io.trilhacode.run: ${BETA8_3_RUN_ID:?unique run id required}
+
+secrets:
+  beta8_3_mongo_keyfile:
+    file: ${BETA8_3_MONGO_KEYFILE:?temporary replica set key file required}

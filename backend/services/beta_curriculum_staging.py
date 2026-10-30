@@ -310,11 +310,18 @@ class CurriculumStagingService:
             expected_hash = _canonical_hash(record.model_dump(mode="json"))
             stored = await self._database[self.RECORDS].find_one({"_id": document_id})
             checkpoint = await self._database[self.CHECKPOINTS].find_one({"_id": document_id})
+            stored_record = (
+                {key: stored.get(key) for key in record.model_dump(mode="json")}
+                if stored else None
+            )
             if (
                 not stored or stored.get("record_sha256") != expected_hash
+                or stored_record != record.model_dump(mode="json")
                 or not checkpoint or checkpoint.get("record_sha256") != expected_hash
             ):
-                raise StagingIntegrityError("Hash de registro ou checkpoint não corresponde ao pacote")
+                raise StagingIntegrityError(
+                    "Conteúdo, hash de registro ou checkpoint não corresponde ao pacote",
+                )
 
     async def inspect_batch(self, batch_id: str) -> dict[str, Any] | None:
         """Return a metadata-only job summary; no staged content is returned."""
