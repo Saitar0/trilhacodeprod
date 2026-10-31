@@ -1,5 +1,4 @@
-name: trilhacode-phase2r4-qa
-
+# For parallel QA runs, pass a unique --project-name and unique QA_API_PORT/QA_FRONTEND_PORT values.
 services:
   mongo:
     image: mongo:7
@@ -26,14 +25,14 @@ services:
       MONGO_URL: mongodb://${QA_MONGO_ROOT_USERNAME}:${QA_MONGO_ROOT_PASSWORD}@mongo:27017/?authSource=admin
       DB_NAME: trilhacode_phase2r4_qa
       JWT_SECRET: ${QA_JWT_SECRET:?Set QA_JWT_SECRET in .env.qa}
-      FRONTEND_URL: http://localhost:13000
-      CORS_ORIGINS: http://localhost:13000
+      FRONTEND_URL: http://localhost:${QA_FRONTEND_PORT:-13000}
+      CORS_ORIGINS: http://localhost:${QA_FRONTEND_PORT:-13000}
       COOKIE_SAMESITE: lax
       COOKIE_SECURE: "false"
     # Database bootstrap is run as explicit one-off commands before starting this service.
     command: ["uvicorn", "server:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
     ports:
-      - "127.0.0.1:18000:8000"
+      - "127.0.0.1:${QA_API_PORT:-18000}:8000"
     volumes:
       - ./backend:/app
     networks:
@@ -54,10 +53,10 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     environment:
-      VITE_BACKEND_URL: http://localhost:18000
+      VITE_BACKEND_URL: http://localhost:${QA_API_PORT:-18000}
       HOST: 0.0.0.0
     ports:
-      - "127.0.0.1:13000:3000"
+      - "127.0.0.1:${QA_FRONTEND_PORT:-13000}:3000"
     volumes:
       - ./frontend:/app
       - qa_frontend_node_modules:/app/node_modules
@@ -69,14 +68,10 @@ services:
 
 networks:
   qa_internal:
-    name: trilhacode_phase2r4_qa_internal
     internal: true
   qa_access:
-    name: trilhacode_phase2r4_qa_access
     driver: bridge
 
 volumes:
   qa_mongo_data:
-    name: trilhacode_phase2r4_qa_mongo_data
   qa_frontend_node_modules:
-    name: trilhacode_phase2r4_qa_frontend_node_modules

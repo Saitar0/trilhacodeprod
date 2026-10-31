@@ -1,0 +1,980 @@
+{
+  "schema_version": 1,
+  "phase": "2.1A.12C.13",
+  "source_commit": "ff9cf18d0751d06d3362716372b4ea88d143a0b6",
+  "status": "static_versioned_code_inventory_runtime_unverified",
+  "scope_note": "Repository-visible editorial paths only; external jobs, operator tools and deployed invocation are not proven.",
+  "classifications": {
+    "A": "Requires adaptation to the approved protocol before the affected scope is enabled.",
+    "B": "Must be blocked, constrained or removed from the cutover scope until safe behavior is demonstrated.",
+    "C": "May remain outside the editorial protocol only for the explicitly evidenced reason.",
+    "D": "Requires additional investigation before a safe disposition can be selected."
+  },
+  "writers": [
+    {
+      "id": "W-01",
+      "name": "Track create, update and reorder",
+      "file": "backend/services/tracks.py",
+      "symbols": [
+        "create_track",
+        "update_track",
+        "reorder_tracks"
+      ],
+      "evidence": {
+        "lines": [
+          69,
+          87
+        ],
+        "file": "backend/routes_content.py"
+      },
+      "entrypoint": "HTTP routes /tracks, /tracks/{track_id}, /tracks/reorder; service calls also exist as Python symbols.",
+      "collections": [
+        "tracks",
+        "edit_history"
+      ],
+      "operations": [
+        "insert_one",
+        "update_one"
+      ],
+      "permission": "content.write",
+      "track_scope": "No per-track grant verified; reorder route discards the principal.",
+      "audit": "Service audit occurs after mutations; no shared transaction demonstrated.",
+      "cas_fence_idempotency_transaction": "No common editorial CAS, fence, operation idempotency contract or transaction demonstrated.",
+      "risk": "HIGH",
+      "classification": "A",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-16"
+      ],
+      "invariants": [
+        "track revision",
+        "authorization by track",
+        "audit",
+        "ordering consistency"
+      ],
+      "strategy": "Resolve the track server-side and commit the operation, audit and revision through the single editorial authority.",
+      "acceptance": "Concurrent stale edits conflict; audit and revision commit atomically; reorder carries a trusted actor and operation identity.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/backend_test.py::test_reorder_tracks"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-02",
+      "name": "Track deletion cascade",
+      "file": "backend/services/tracks.py",
+      "symbols": [
+        "delete_track"
+      ],
+      "evidence": {
+        "lines": [
+          89,
+          92
+        ],
+        "file": "backend/routes_content.py"
+      },
+      "entrypoint": "DELETE /tracks/{track_id}.",
+      "collections": [
+        "tracks",
+        "nodes",
+        "content_blocks",
+        "relations",
+        "progress",
+        "learning_events",
+        "activity_publications",
+        "activity_attempts",
+        "user_track_state",
+        "version_chunks",
+        "track_versions",
+        "edit_history"
+      ],
+      "operations": [
+        "delete_many",
+        "delete_one"
+      ],
+      "permission": "content.delete",
+      "track_scope": "No per-track grant verified.",
+      "audit": "Audit is issued after cascade; no common transaction demonstrated.",
+      "cas_fence_idempotency_transaction": "No common CAS/fence/idempotency or multi-collection transaction demonstrated.",
+      "risk": "CRITICAL",
+      "classification": "B",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-12",
+        "W-16"
+      ],
+      "invariants": [
+        "editorial revision",
+        "audit",
+        "history",
+        "learner attempts and progress preservation",
+        "publication integrity"
+      ],
+      "strategy": "Block from any protocol cutover until deletion semantics, learner-data retention and recoverability receive explicit approval.",
+      "acceptance": "A reviewed deletion contract proves authorization, concurrency, audit and learner-history policy; failure cannot leave an undocumented partial cascade.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/backend_test.py::test_delete_cascade"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-03",
+      "name": "Track duplication",
+      "file": "backend/services/tracks.py",
+      "symbols": [
+        "duplicate_track"
+      ],
+      "evidence": {
+        "lines": [
+          94,
+          97
+        ],
+        "file": "backend/routes_content.py"
+      },
+      "entrypoint": "POST /tracks/{track_id}/duplicate.",
+      "collections": [
+        "tracks",
+        "nodes",
+        "content_blocks",
+        "relations",
+        "edit_history"
+      ],
+      "operations": [
+        "insert_one"
+      ],
+      "permission": "content.write",
+      "track_scope": "No source-track grant or destination-scope contract verified.",
+      "audit": "Audit follows sequential copy operations.",
+      "cas_fence_idempotency_transaction": "No atomic multi-document operation or replay key demonstrated.",
+      "risk": "HIGH",
+      "classification": "B",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-05",
+        "W-07",
+        "W-08",
+        "W-16"
+      ],
+      "invariants": [
+        "source read authorization",
+        "destination create authorization",
+        "revision",
+        "audit",
+        "idempotency"
+      ],
+      "strategy": "Constrain until a copy intent defines source and destination grants and a recoverable idempotent creation boundary.",
+      "acceptance": "Retry creates one destination only; partial copies are not exposed as complete; source and destination authorization are checked.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/backend_test.py::test_duplicate_track_deep"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-04",
+      "name": "Track publication",
+      "file": "backend/services/tracks.py",
+      "symbols": [
+        "publish_track"
+      ],
+      "evidence": {
+        "lines": [
+          99,
+          102
+        ],
+        "file": "backend/routes_content.py"
+      },
+      "entrypoint": "POST /tracks/{track_id}/publish.",
+      "collections": [
+        "tracks",
+        "nodes",
+        "content_blocks",
+        "activity_publications",
+        "track_versions",
+        "version_chunks",
+        "edit_history"
+      ],
+      "operations": [
+        "insert_many",
+        "update_many",
+        "update_one",
+        "snapshot helper writes"
+      ],
+      "permission": "content.publish",
+      "track_scope": "No per-track grant verified.",
+      "audit": "Audit after preparatory writes and final track CAS.",
+      "cas_fence_idempotency_transaction": "CAS on tracks.version occurs at the final step only; not one transaction; no common fence or full-operation idempotency demonstrated.",
+      "risk": "CRITICAL",
+      "classification": "B",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-12",
+        "W-16",
+        "immutable reader/head design"
+      ],
+      "invariants": [
+        "snapshot consistency",
+        "generation immutability",
+        "atomic public head",
+        "audit",
+        "learner sessions pinned to generation"
+      ],
+      "strategy": "Do not cut over publication until source revision, immutable generation, audit and public head protocol are separately validated against ADR-006.",
+      "acceptance": "Readers observe one complete generation; stale publishers cannot activate; audit and publication outcome are recoverable and idempotent.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/backend_test.py::test_create_update_publish_versions",
+          "backend/tests/test_activity_attempts.py::test_invalid_versioned_activity_does_not_activate_or_publish_partial_content"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-05",
+      "name": "Node create, update and reorder",
+      "file": "backend/services/nodes.py",
+      "symbols": [
+        "create_node",
+        "update_node",
+        "reorder_nodes"
+      ],
+      "evidence": {
+        "lines": [
+          122,
+          144
+        ],
+        "file": "backend/routes_content.py"
+      },
+      "entrypoint": "POST /nodes, PUT /nodes/{node_id}, POST /nodes/reorder.",
+      "collections": [
+        "nodes",
+        "edit_history"
+      ],
+      "operations": [
+        "insert_one",
+        "update_one"
+      ],
+      "permission": "content.write",
+      "track_scope": "Track relationship exists in node document; server-side authorization per track is absent/unverified; reorder discards actor.",
+      "audit": "Audit after mutation for actor-bearing operations; reorder has no actor argument.",
+      "cas_fence_idempotency_transaction": "No common editorial revision, fence, idempotency or transaction demonstrated.",
+      "risk": "HIGH",
+      "classification": "A",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-06",
+        "W-07",
+        "W-09",
+        "W-16"
+      ],
+      "invariants": [
+        "track revision",
+        "parent/child consistency",
+        "ordering",
+        "audit",
+        "generation snapshot"
+      ],
+      "strategy": "Resolve track from node and parent references, authorize exact scope and group all affected ordering writes under one intent.",
+      "acceptance": "Concurrent reorder/update conflicts safely; references remain valid; event is audited once and bound to a track revision.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/backend_test.py::test_hierarchy_validation"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-06",
+      "name": "Node deletion and duplication",
+      "file": "backend/services/nodes.py",
+      "symbols": [
+        "delete_node",
+        "duplicate_node",
+        "clone_nodes"
+      ],
+      "evidence": {
+        "lines": [
+          145,
+          153
+        ],
+        "file": "backend/routes_content.py"
+      },
+      "entrypoint": "DELETE /nodes/{node_id}; POST /nodes/{node_id}/duplicate.",
+      "collections": [
+        "nodes",
+        "content_blocks",
+        "relations",
+        "progress",
+        "edit_history"
+      ],
+      "operations": [
+        "delete_many",
+        "insert_one",
+        "update_one"
+      ],
+      "permission": "content.delete for delete; content.write for duplicate",
+      "track_scope": "No grant-by-track confirmed.",
+      "audit": "Audit after multi-document mutations.",
+      "cas_fence_idempotency_transaction": "No shared revision/fence/transaction; duplicate replay not explicitly idempotent.",
+      "risk": "CRITICAL",
+      "classification": "B",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-05",
+        "W-07",
+        "W-08",
+        "W-16"
+      ],
+      "invariants": [
+        "subtree integrity",
+        "learner progress/attempt preservation",
+        "audit",
+        "idempotency",
+        "track revision"
+      ],
+      "strategy": "Restrict delete pending student-history policy; treat duplicate as an idempotent source/destination-scoped compound operation.",
+      "acceptance": "No partial subtree, no implicit destruction of learner history, duplicate replay cannot multiply entities.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/backend_test.py::test_reorder_and_duplicate"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-07",
+      "name": "Block create, update, reorder and delete",
+      "file": "backend/services/blocks.py",
+      "symbols": [
+        "create_block",
+        "update_block",
+        "reorder_blocks",
+        "delete_block"
+      ],
+      "evidence": {
+        "lines": [
+          156,
+          175
+        ],
+        "file": "backend/routes_content.py"
+      },
+      "entrypoint": "POST/PUT/DELETE /blocks and POST /blocks/reorder.",
+      "collections": [
+        "content_blocks",
+        "edit_history"
+      ],
+      "operations": [
+        "insert_one",
+        "update_one",
+        "delete_one"
+      ],
+      "permission": "content.write, including the current DELETE block route",
+      "track_scope": "Block carries track_id; route does not resolve/check an explicit track grant.",
+      "audit": "Mutations call audit separately; C7 demonstrated partial state on audit failure.",
+      "cas_fence_idempotency_transaction": "No common CAS/fence/idempotency; no shared transaction in active writer.",
+      "risk": "CRITICAL",
+      "classification": "A",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-16",
+        "W-12",
+        "publication reader compatibility"
+      ],
+      "invariants": [
+        "track revision",
+        "fencing",
+        "required audit",
+        "idempotency",
+        "quiz and block schema compatibility"
+      ],
+      "strategy": "Use the single C8/C10 authority after exact track resolution; do not silently change current route permission semantics in this phase.",
+      "acceptance": "CAS/fence/audit/receipt share commit; nullable patch semantics and quiz compatibility are explicit; tests cover stale and replay cases.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/backend_test.py::test_block_crud_and_unknown_type",
+          "backend/integration_tests/test_editorial_block_atomicity.py::test_07_audit_insert_failure_leaves_real_writer_partial"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-08",
+      "name": "Relation create, update and delete",
+      "file": "backend/services/relations.py",
+      "symbols": [
+        "create_relation",
+        "update_relation",
+        "delete_relation"
+      ],
+      "evidence": {
+        "lines": [
+          177,
+          190
+        ],
+        "file": "backend/routes_content.py"
+      },
+      "entrypoint": "POST/PUT/DELETE /relations.",
+      "collections": [
+        "relations",
+        "nodes",
+        "edit_history"
+      ],
+      "operations": [
+        "insert_one",
+        "update_one",
+        "delete_one"
+      ],
+      "permission": "content.write",
+      "track_scope": "Create checks source and target nodes belong to same track; update/delete resource scope authorization is not demonstrated.",
+      "audit": "Audit after direct mutation.",
+      "cas_fence_idempotency_transaction": "Validation and write are separate; no common CAS/fence/transaction; create duplicate check may race.",
+      "risk": "HIGH",
+      "classification": "A",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-05",
+        "W-16"
+      ],
+      "invariants": [
+        "same-track references",
+        "cycle constraints",
+        "audit",
+        "revision"
+      ],
+      "strategy": "Resolve both endpoint tracks and include relation validation plus mutation in revision-scoped transaction.",
+      "acceptance": "Concurrent changes cannot invalidate the validated preconditions before commit; stale revision and duplicate intent are explicit.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/backend_test.py::test_relations_rules"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-09",
+      "name": "Taxonomies, tags and block types",
+      "file": "backend/services/taxonomy.py",
+      "symbols": [
+        "create_taxonomy",
+        "update_taxonomy",
+        "delete_taxonomy",
+        "create_tag",
+        "delete_tag",
+        "create_block_type",
+        "update_block_type"
+      ],
+      "evidence": {
+        "lines": [
+          47,
+          81
+        ],
+        "file": "backend/routes_taxonomy.py"
+      },
+      "entrypoint": "Taxonomy, tag and block-type administrative routes.",
+      "collections": [
+        "taxonomies",
+        "tags",
+        "block_types",
+        "nodes",
+        "tracks"
+      ],
+      "operations": [
+        "insert_one",
+        "update_one",
+        "delete_one",
+        "update_many"
+      ],
+      "permission": "taxonomy.manage for taxonomy/block types; content.write for tags",
+      "track_scope": "Taxonomy and tags are global/shared; no actor passed to services for these routes; tag delete updates all nodes/tracks.",
+      "audit": "Per-actor functional audit not demonstrated in this service.",
+      "cas_fence_idempotency_transaction": "No catalog revision, transaction or idempotency contract demonstrated.",
+      "risk": "HIGH",
+      "classification": "D",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-05",
+        "W-07",
+        "W-12"
+      ],
+      "invariants": [
+        "catalog compatibility",
+        "snapshot reproducibility",
+        "cross-track consistency",
+        "audit"
+      ],
+      "strategy": "Separate global catalog governance from per-track grants; first decide whether catalog changes create track revisions or immutable catalog versions.",
+      "acceptance": "Scope and blast radius are approved; changes are auditable and do not silently reinterpret existing generations.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/backend_test.py::test_admin_taxonomy_crud",
+          "backend/tests/backend_test.py::test_tag_and_block_type_endpoints",
+          "backend/tests/test_integrity_concurrency.py::test_delete_tag_failure_can_be_retried"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-10",
+      "name": "Track import",
+      "file": "backend/services/imports.py",
+      "symbols": [
+        "run_import",
+        "_execute",
+        "_acquire_import_lock"
+      ],
+      "evidence": {
+        "lines": [
+          13,
+          35
+        ],
+        "file": "backend/routes_import.py"
+      },
+      "entrypoint": "POST /api/import/track; import lock/job orchestration.",
+      "collections": [
+        "import_locks",
+        "import_jobs",
+        "tracks",
+        "tags",
+        "nodes",
+        "content_blocks",
+        "relations",
+        "track_versions",
+        "version_chunks",
+        "edit_history"
+      ],
+      "operations": [
+        "insert_one",
+        "update_one",
+        "delete_one",
+        "upsert",
+        "snapshot writes"
+      ],
+      "permission": "content.write plus a service-level permission check",
+      "track_scope": "Slug/track resolution and import-specific lock; not a common per-track editorial grant.",
+      "audit": "Import summary uses edit_history; content writes are sequential and not one editorial transaction.",
+      "cas_fence_idempotency_transaction": "Job/operation ID and lease provide import-local retry controls; no common fence across CRUD/publish/restore and no whole import transaction.",
+      "risk": "CRITICAL",
+      "classification": "B",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-05",
+        "W-07",
+        "W-08",
+        "W-09",
+        "W-12",
+        "W-16"
+      ],
+      "invariants": [
+        "all-or-recoverable import",
+        "track revision",
+        "authorization",
+        "audit",
+        "idempotency",
+        "generation consistency"
+      ],
+      "strategy": "Do not enable alongside migrated writers until every content write is coordinated or the import path is explicitly disabled for the scope.",
+      "acceptance": "Deterministic resume/rollback and concurrent-writer exclusion are proven across all touched collections; no lease-only fencing assumption.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/test_import_workflow.py::test_import_dry_run_persistence_and_reimport_are_idempotent",
+          "backend/tests/test_import_workflow.py::test_interrupted_published_import_is_hidden_and_same_payload_recovers"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-11",
+      "name": "Restore and restore-job resumption",
+      "file": "backend/services/versions.py",
+      "symbols": [
+        "restore_version",
+        "apply_snapshot",
+        "resume_restore_jobs",
+        "_claim_restore"
+      ],
+      "evidence": {
+        "lines": [
+          17,
+          19
+        ],
+        "file": "backend/routes_versions.py"
+      },
+      "entrypoint": "POST /tracks/{track_id}/versions/{version_id}/restore and manage command resume-restores.",
+      "collections": [
+        "restore_jobs",
+        "tracks",
+        "nodes",
+        "content_blocks",
+        "relations",
+        "track_versions",
+        "version_chunks",
+        "progress",
+        "edit_history"
+      ],
+      "operations": [
+        "find_one_and_update",
+        "delete_many",
+        "insert_many",
+        "update_one"
+      ],
+      "permission": "content.publish for initiating HTTP restore; resumed worker is a service path",
+      "track_scope": "Track argument exists; per-track grant and symmetrical exclusion with importer not demonstrated.",
+      "audit": "Job stores actor metadata; final audit is not atomic with replace-all snapshot sequence.",
+      "cas_fence_idempotency_transaction": "Lease/job identity and unique-running constraint exist; no common revision/fence applied to each batch; delete/reinsert is not one transaction.",
+      "risk": "CRITICAL",
+      "classification": "B",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-10",
+        "W-12",
+        "W-16"
+      ],
+      "invariants": [
+        "recoverable replacement",
+        "student history",
+        "revision",
+        "audit",
+        "snapshot consistency"
+      ],
+      "strategy": "Block from cutover until restore has a tested recoverable state machine and mutual exclusion with every writer family.",
+      "acceptance": "Injected failures at each batch recover to a defined old/new state; stale workers cannot write after lease loss; audit and revision are coherent.",
+      "test_evidence": {
+        "located": [
+          "No focused restore failure/recovery test located in the inspected test set; snapshot helpers are covered separately."
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-12",
+      "name": "Snapshots, versions and orphan reconciliation helpers",
+      "file": "backend/integrity.py",
+      "symbols": [
+        "store_snapshot",
+        "save_version",
+        "migrate_legacy_snapshots",
+        "reconcile_orphans"
+      ],
+      "evidence": {
+        "lines": [
+          142,
+          159
+        ],
+        "file": "backend/services/versions.py"
+      },
+      "entrypoint": "Called by publish/import/restore and management paths; no separate user route for helpers identified.",
+      "collections": [
+        "version_chunks",
+        "track_versions",
+        "tracks",
+        "nodes",
+        "content_blocks",
+        "relations",
+        "submissions",
+        "progress"
+      ],
+      "operations": [
+        "delete_many",
+        "insert_many",
+        "replace_one",
+        "update_one"
+      ],
+      "permission": "Inherited from caller; helper has no independent authorization boundary.",
+      "track_scope": "track_id is passed by some callers; helper does not own grant verification.",
+      "audit": "Depends on calling writer; no standalone audit contract demonstrated.",
+      "cas_fence_idempotency_transaction": "Snapshot count-before/after checks do not prove content consistency; chunk/manifest writes separate; no helper-level CAS/fence.",
+      "risk": "HIGH",
+      "classification": "A",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-04",
+        "W-10",
+        "W-11"
+      ],
+      "invariants": [
+        "snapshot corresponds to one revision",
+        "history recoverable",
+        "orphan reconciliation does not alter learner state unexpectedly"
+      ],
+      "strategy": "Make caller revision explicit and ensure snapshot and manifest are tied to that immutable source revision.",
+      "acceptance": "Concurrent same-cardinality edits cannot produce an undetected mixed snapshot; recovery and references are validated.",
+      "test_evidence": {
+        "located": [
+          "backend/unit_tests/test_snapshot_safety.py::test_snapshot_validation_rejects_count_mismatch",
+          "backend/tests/test_import_workflow.py::test_failure_after_track_creation_can_resume_without_duplicate_entities"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-13",
+      "name": "Seeded demo/editorial content",
+      "file": "backend/seed.py",
+      "symbols": [
+        "run_seed",
+        "_seed_track",
+        "_seed_topic",
+        "_insert_node"
+      ],
+      "evidence": {
+        "lines": [
+          18,
+          33
+        ],
+        "file": "backend/manage.py"
+      },
+      "entrypoint": "python -m backend.manage seed; compose entrypoint references seed before app launch under a non-production condition.",
+      "collections": [
+        "tracks",
+        "nodes",
+        "content_blocks",
+        "relations",
+        "taxonomies",
+        "block_types",
+        "tags",
+        "users"
+      ],
+      "operations": [
+        "insert_one",
+        "update_one with upsert"
+      ],
+      "permission": "No HTTP principal; command-level operational identity not verified.",
+      "track_scope": "Seed-specific identities/slugs; no grant protocol.",
+      "audit": "No per-editorial-mutation audit demonstrated.",
+      "cas_fence_idempotency_transaction": "Uses seed/upsert behavior but not C8 revision/fence or common transaction.",
+      "risk": "HIGH",
+      "classification": "B",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-09",
+        "W-12"
+      ],
+      "invariants": [
+        "must not overwrite live editorial scope",
+        "provenance",
+        "idempotency"
+      ],
+      "strategy": "Constrain to explicitly disposable or isolated seed namespace; prevent demo seed invocation in any cutover-relevant environment.",
+      "acceptance": "Preflight proves target scope and repeated invocation is safe; no operational default seed can bypass grant/revision.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/test_seed.py covers user-seed validation; full editorial seed path has no focused test located."
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-14",
+      "name": "Schema migrations and index administration",
+      "file": "backend/manage.py",
+      "symbols": [
+        "run",
+        "main"
+      ],
+      "evidence": {
+        "file": "backend/migrations/__init__.py",
+        "lines": [
+          54,
+          99
+        ],
+        "additional_file": "compose.yaml",
+        "additional_lines": [
+          48,
+          48
+        ]
+      },
+      "entrypoint": "Root compose.yaml line 48 and python -m manage commands; actual invocation in deployed runtime not verified.",
+      "collections": [
+        "migrations",
+        "block_types",
+        "indexes and unique constraints"
+      ],
+      "operations": [
+        "find_one_and_update",
+        "update_one",
+        "insert_one",
+        "delete_one",
+        "index management"
+      ],
+      "permission": "Operational process identity, not HTTP RBAC; not verified in deployed environment.",
+      "track_scope": "Generally global schema/catalog scope.",
+      "audit": "Migration ledger/lock; not editorial audit for content changes.",
+      "cas_fence_idempotency_transaction": "Migration lock is not an editorial writer fence; migration operations may alter block_types.",
+      "risk": "HIGH",
+      "classification": "B",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-09",
+        "W-12",
+        "cutover release procedure"
+      ],
+      "invariants": [
+        "schema compatibility",
+        "index assumptions",
+        "no hidden writer during cutover"
+      ],
+      "strategy": "Inventory each migration and constrain execution to reviewed release steps with compatibility and rollback evidence.",
+      "acceptance": "Migration set is classified by data effect; indexes are preflighted; no migration can mutate editorial content outside approved contract.",
+      "test_evidence": {
+        "located": [
+          "backend/tests/test_integrity_concurrency.py::test_ensure_indexes_refuses_legacy_duplicates_without_writing",
+          "backend/unit_tests/test_snapshot_safety.py::test_migration_ledger_accepts_only_a_contiguous_known_prefix"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-15",
+      "name": "Private immutable publication preparation",
+      "file": "backend/services/immutable_publications.py",
+      "symbols": [
+        "prepare_track_publication"
+      ],
+      "evidence": {
+        "lines": [
+          461,
+          503
+        ],
+        "file": "backend/services/immutable_publications.py"
+      },
+      "entrypoint": "Internal service symbol; no active route/caller was found in the repository search.",
+      "collections": [
+        "track_publications",
+        "activity_publications",
+        "version_chunks"
+      ],
+      "operations": [
+        "insert_one",
+        "update_one",
+        "delete_many"
+      ],
+      "permission": "Function accepts user metadata but an operational authorization entrypoint was not identified.",
+      "track_scope": "track_id argument; track grant enforcement not demonstrated.",
+      "audit": "Private manifest records operation state; current authorization/audit integration not established.",
+      "cas_fence_idempotency_transaction": "Own operation lease/idempotency helpers; source_consistency is unverified and activation_eligible is false; no public head activation.",
+      "risk": "MEDIUM",
+      "classification": "D",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-04",
+        "W-12",
+        "immutable readers/head"
+      ],
+      "invariants": [
+        "source revision consistency",
+        "privacy",
+        "no activation before complete readers"
+      ],
+      "strategy": "Keep activation blocked; resolve call graph and read ACL before any integration decision.",
+      "acceptance": "Caller and lifecycle are proven; candidate snapshots are tied to revision and remain unreachable unless separately approved.",
+      "test_evidence": {
+        "located": [
+          "backend/unit_tests/test_immutable_publications.py::test_preparation_is_private_inactive_and_does_not_mutate_editorial_source"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-16",
+      "name": "Functional edit-history helper",
+      "file": "backend/audit.py",
+      "symbols": [
+        "audit"
+      ],
+      "evidence": {
+        "lines": [
+          7,
+          11
+        ],
+        "file": "backend/audit.py"
+      },
+      "entrypoint": "Indirectly called by editorial services and other application services.",
+      "collections": [
+        "edit_history"
+      ],
+      "operations": [
+        "insert_one"
+      ],
+      "permission": "Inherited from caller; no independent grant check.",
+      "track_scope": "Optional track_id argument; no independent resource resolution.",
+      "audit": "This helper is the functional audit write itself; summary/user_name fields are stored.",
+      "cas_fence_idempotency_transaction": "No explicit session parameter; atomicity relies on caller but current callers do not pass a shared transaction session.",
+      "risk": "CRITICAL",
+      "classification": "A",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [
+        "W-01",
+        "W-02",
+        "W-03",
+        "W-05",
+        "W-06",
+        "W-07",
+        "W-08",
+        "W-09",
+        "W-10",
+        "W-11"
+      ],
+      "invariants": [
+        "required audit atomic with mutation",
+        "minimal private data",
+        "actor provenance"
+      ],
+      "strategy": "Add transaction participation only in a future authorized integration; distinguish this functional audit from passive C5 observability.",
+      "acceptance": "Every required writer commits exactly one audit record in its mutation transaction; field ACL/retention and sensitive summary policy are approved.",
+      "test_evidence": {
+        "located": [
+          "backend/integration_tests/test_editorial_block_atomicity.py::test_07_audit_insert_failure_leaves_real_writer_partial"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      }
+    },
+    {
+      "id": "W-17",
+      "name": "Append-only generation PoC",
+      "file": "backend/services/editorial_generations_poc.py",
+      "symbols": [
+        "EditorialGenerationsPoC"
+      ],
+      "evidence": {
+        "lines": [
+          1,
+          7
+        ],
+        "file": "backend/services/editorial_generations_poc.py"
+      },
+      "entrypoint": "Test-only PoC; repository references found in its tests, no application route path found.",
+      "collections": [
+        "poc_editorial_generation_* namespace"
+      ],
+      "operations": [
+        "insert_one",
+        "update_one"
+      ],
+      "permission": "Synthetic PoC capability, not active IAM.",
+      "track_scope": "PoC-only track identity.",
+      "audit": "PoC manifest/receipt, not active edit_history.",
+      "cas_fence_idempotency_transaction": "Experimental append-only protocol; not integrated with application writers.",
+      "risk": "LOW",
+      "classification": "C",
+      "runtime": "NOT_VERIFIED",
+      "dependencies": [],
+      "invariants": [
+        "namespace isolation"
+      ],
+      "strategy": "May remain outside active writer rollout because its code documents a distinct poc_ namespace and tests are isolated; recheck imports before reuse.",
+      "acceptance": "Any future use must retain an isolated namespace or undergo a separate integration review; current exclusion is not runtime proof.",
+      "test_evidence": {
+        "located": [
+          "backend/unit_tests/test_editorial_generations_poc.py"
+        ],
+        "execution_in_c13": "not_run; references describe repository tests only"
+      },
+      "risk_note": "Low only within isolated poc_ namespace; external/runtime absence is not proven."
+    }
+  ]
+}

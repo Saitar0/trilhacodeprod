@@ -1,0 +1,3750 @@
+{
+  "manifest_schema": "trilhacode.beta4.first-phase-manifest/1.0",
+  "phase_id": 1,
+  "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+  "contract_version": "trilhacode.beta4.first-phase/1.0",
+  "converter_version": "beta4-first-phase-batch/1.1",
+  "unit_count": 10,
+  "module_count": 3,
+  "counts": {
+    "topics": 30,
+    "theory_segments": 42,
+    "quiz_files": 30,
+    "quiz_questions": 44,
+    "manual_exercises": 26,
+    "project_materials": 11,
+    "references": 39,
+    "relations": 30,
+    "persisted_blocks": 161
+  },
+  "units": [
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "1.1",
+      "title": "1.1 — Computação e software",
+      "module_id": "1",
+      "module_order": 1,
+      "unit_order": 1,
+      "source": {
+        "source_id": "1.1",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "a1177bdc030db528d67bad76f8ee4c7670e616bf45b7780a9087c1283d7adc3c",
+        "source_sha256_lf": "a1177bdc030db528d67bad76f8ee4c7670e616bf45b7780a9087c1283d7adc3c",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-1-1-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/00_objetivo.md",
+          "sha256": "5e1cd4b19c17247efa31d3df032aa7a8d03cd4842fd7623db8ef042f7c4aab12",
+          "sha256_lf": "5e1cd4b19c17247efa31d3df032aa7a8d03cd4842fd7623db8ef042f7c4aab12",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-1-01-problema-programa-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/01_problema_programa/01_teoria.md",
+          "sha256": "1da86e96e1235bd102a9bec1f935e1ad61da000e65d0c3a421281a3dec25acd1",
+          "sha256_lf": "1da86e96e1235bd102a9bec1f935e1ad61da000e65d0c3a421281a3dec25acd1",
+          "order": 1,
+          "topic_key": "01_problema_programa",
+          "item_ids": [
+            "Do problema ao programa"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-01-problema-programa-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/01_problema_programa/02_quiz.md",
+          "sha256": "34829d5377ff2d6b2cddb441e57d57aab02ae2672aa862d958ad7d712e0b3ce9",
+          "sha256_lf": "34829d5377ff2d6b2cddb441e57d57aab02ae2672aa862d958ad7d712e0b3ce9",
+          "order": 1,
+          "topic_key": "01_problema_programa",
+          "item_ids": [
+            "Q1"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-01-problema-programa-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/01_problema_programa/03_gabarito_quiz.md",
+          "sha256": "dd988d61439f123bd53f42bcae9d3dc1b72cd5136e010ae467b03683c8f8088c",
+          "sha256_lf": "dd988d61439f123bd53f42bcae9d3dc1b72cd5136e010ae467b03683c8f8088c",
+          "order": 1,
+          "topic_key": "01_problema_programa",
+          "item_ids": [
+            "Q1"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/01_resumo.md",
+          "sha256": "8ef53f054be5028759ba01ea32e9a72354ebd357c50babbd9f2833ede10693f4",
+          "sha256_lf": "8ef53f054be5028759ba01ea32e9a72354ebd357c50babbd9f2833ede10693f4",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-1-02-aplicacoes-locais-web-camadas-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/02_aplicacoes_locais_web_camadas/01_teoria.md",
+          "sha256": "ff2b29c14063f24c881f1407572d6c0df3f25aa45fd0c5d15ed60e9ea7a8778e",
+          "sha256_lf": "ff2b29c14063f24c881f1407572d6c0df3f25aa45fd0c5d15ed60e9ea7a8778e",
+          "order": 2,
+          "topic_key": "02_aplicacoes_locais_web_camadas",
+          "item_ids": [
+            "Aplicações locais e aplicações web",
+            "Frontend, backend e banco de dados"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-02-aplicacoes-locais-web-camadas-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/02_aplicacoes_locais_web_camadas/02_quiz.md",
+          "sha256": "db5bf21646139c55edef5034cc476f0d018967a745a06a8db351649462a001c1",
+          "sha256_lf": "db5bf21646139c55edef5034cc476f0d018967a745a06a8db351649462a001c1",
+          "order": 2,
+          "topic_key": "02_aplicacoes_locais_web_camadas",
+          "item_ids": [
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-02-aplicacoes-locais-web-camadas-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/02_aplicacoes_locais_web_camadas/03_gabarito_quiz.md",
+          "sha256": "aa383be20a74fef87f0eb997639e6500d6ed565c1367f98b49f9d5aedc395a2f",
+          "sha256_lf": "aa383be20a74fef87f0eb997639e6500d6ed565c1367f98b49f9d5aedc395a2f",
+          "order": 2,
+          "topic_key": "02_aplicacoes_locais_web_camadas",
+          "item_ids": [
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/02_criterio_de_conclusao.md",
+          "sha256": "ca2d8f1ee3f7395be9b08ab00e4532d9ec9be85587600cc201b60dbbf21375b7",
+          "sha256_lf": "ca2d8f1ee3f7395be9b08ab00e4532d9ec9be85587600cc201b60dbbf21375b7",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-1-03-cliente-servidor-fluxo-pagina-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/03_cliente_servidor_fluxo_pagina/01_teoria.md",
+          "sha256": "fd392bb330efc112217757c482beb6c4896ff48f9bae8027c5ed27db406227a5",
+          "sha256_lf": "fd392bb330efc112217757c482beb6c4896ff48f9bae8027c5ed27db406227a5",
+          "order": 3,
+          "topic_key": "03_cliente_servidor_fluxo_pagina",
+          "item_ids": [
+            "Cliente e servidor",
+            "O que acontece ao abrir uma página"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-03-cliente-servidor-fluxo-pagina-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/03_cliente_servidor_fluxo_pagina/02_quiz.md",
+          "sha256": "443c29d33caf458dc97ce0f9f17c74fb4766d85fb233d95ddc65d20fd88be11a",
+          "sha256_lf": "443c29d33caf458dc97ce0f9f17c74fb4766d85fb233d95ddc65d20fd88be11a",
+          "order": 3,
+          "topic_key": "03_cliente_servidor_fluxo_pagina",
+          "item_ids": [
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-03-cliente-servidor-fluxo-pagina-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/03_cliente_servidor_fluxo_pagina/03_gabarito_quiz.md",
+          "sha256": "096501d1dcb93650ebc7063acbda229ed037d7853761452cb511344c7526e979",
+          "sha256_lf": "096501d1dcb93650ebc7063acbda229ed037d7853761452cb511344c7526e979",
+          "order": 3,
+          "topic_key": "03_cliente_servidor_fluxo_pagina",
+          "item_ids": [
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/03_conexoes.md",
+          "sha256": "59b21e735f3d400dc2d57c34f86bc0686af464decf5b0a2006e737d7e423dcd8",
+          "sha256_lf": "59b21e735f3d400dc2d57c34f86bc0686af464decf5b0a2006e737d7e423dcd8",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-1-04-http-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/04_http/01_teoria.md",
+          "sha256": "921793c93e8d54ef9a4e3e90f5f66500667bdac9ba5cebc457bfa5a19e20b5a7",
+          "sha256_lf": "921793c93e8d54ef9a4e3e90f5f66500667bdac9ba5cebc457bfa5a19e20b5a7",
+          "order": 4,
+          "topic_key": "04_http",
+          "item_ids": [
+            "Requisição e resposta HTTP"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-04-http-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/04_http/02_quiz.md",
+          "sha256": "8b2c8121cdb6d71494c2c8da786ba09c10fe2ff58ccaa81c8126720610a56134",
+          "sha256_lf": "8b2c8121cdb6d71494c2c8da786ba09c10fe2ff58ccaa81c8126720610a56134",
+          "order": 4,
+          "topic_key": "04_http",
+          "item_ids": [
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-04-http-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/04_http/03_gabarito_quiz.md",
+          "sha256": "41129af907a8061170e2bc0cda2ce9913bb45afc1dda152e135370791f83b254",
+          "sha256_lf": "41129af907a8061170e2bc0cda2ce9913bb45afc1dda152e135370791f83b254",
+          "order": 4,
+          "topic_key": "04_http",
+          "item_ids": [
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/04_referencias.md",
+          "sha256": "3c422699de74da3987038ca340f0c829a128d79d33d0011526f684ed93aa26c0",
+          "sha256_lf": "3c422699de74da3987038ca340f0c829a128d79d33d0011526f684ed93aa26c0",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-1-05-api-visao-integrada-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/05_api_visao_integrada/01_teoria.md",
+          "sha256": "2ab39ed9f97e4b899ee03d6ba0418051f4129fc581585f53a035b8de6ccc8538",
+          "sha256_lf": "2ab39ed9f97e4b899ee03d6ba0418051f4129fc581585f53a035b8de6ccc8538",
+          "order": 5,
+          "topic_key": "05_api_visao_integrada",
+          "item_ids": [
+            "APIs: uma interface de comunicação",
+            "Uma visão integrada"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-05-api-visao-integrada-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/05_api_visao_integrada/02_quiz.md",
+          "sha256": "5f1d5be9556a8d911e11b3e5a32b94afa1928e42319b9ee65525c33e1a1f27bd",
+          "sha256_lf": "5f1d5be9556a8d911e11b3e5a32b94afa1928e42319b9ee65525c33e1a1f27bd",
+          "order": 5,
+          "topic_key": "05_api_visao_integrada",
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-05-api-visao-integrada-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/05_api_visao_integrada/03_gabarito_quiz.md",
+          "sha256": "005f5a4864b86b3392c3fcccee2fa700d896675fa0e38a7b9d65207a0c85dbdf",
+          "sha256_lf": "005f5a4864b86b3392c3fcccee2fa700d896675fa0e38a7b9d65207a0c85dbdf",
+          "order": 5,
+          "topic_key": "05_api_visao_integrada",
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-90-integracao-01-pratica-guiada-identifique-papeis",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/90_integracao/01_pratica_guiada_identifique_papeis.md",
+          "sha256": "511a8378de86d636f686fcf2a33acdb85fe4c099200103390471a152c571114f",
+          "sha256_lf": "511a8378de86d636f686fcf2a33acdb85fe4c099200103390471a152c571114f",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-90-integracao-02-gabarito-pratica-guiada",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/90_integracao/02_gabarito_pratica_guiada.md",
+          "sha256": "b6df57dd08ba912bbe460a2635d2dd8effd7438b48f266908589af5650c8140d",
+          "sha256_lf": "b6df57dd08ba912bbe460a2635d2dd8effd7438b48f266908589af5650c8140d",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-90-integracao-03-pratica-independente-compare-fluxos",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/90_integracao/03_pratica_independente_compare_fluxos.md",
+          "sha256": "83f695e0f66c03571e7481b16caa674ffbebe9186489042249cf93cd8df84b51",
+          "sha256_lf": "83f695e0f66c03571e7481b16caa674ffbebe9186489042249cf93cd8df84b51",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-90-integracao-04-gabarito-pratica-independente",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/90_integracao/04_gabarito_pratica_independente.md",
+          "sha256": "fca10e14e6d582b7311c77e6f7b61381a81865211d0c9cb8128b807794673f67",
+          "sha256_lf": "fca10e14e6d582b7311c77e6f7b61381a81865211d0c9cb8128b807794673f67",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-90-integracao-05-rubrica-pratica-independente",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/90_integracao/05_rubrica_pratica_independente.md",
+          "sha256": "1a5ca03d9529e1df088236f4e57349480e2e17ffa788d0df8f640cd95439b00a",
+          "sha256_lf": "1a5ca03d9529e1df088236f4e57349480e2e17ffa788d0df8f640cd95439b00a",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-90-integracao-06-pratica-transferencia-pagina-real",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/90_integracao/06_pratica_transferencia_pagina_real.md",
+          "sha256": "86a4259aec02a70321a59cb6c38d53be772c6ac30b7f91a689bc4e3e3f2f37e1",
+          "sha256_lf": "86a4259aec02a70321a59cb6c38d53be772c6ac30b7f91a689bc4e3e3f2f37e1",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-90-integracao-07-verificacao-final",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/90_integracao/07_verificacao_final.md",
+          "sha256": "a42682a2d243c50ca00080671597ed43eba1574e768a6cac5d43708f3ae18dc6",
+          "sha256_lf": "a42682a2d243c50ca00080671597ed43eba1574e768a6cac5d43708f3ae18dc6",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-1-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.1_Computacao_e_software/README.md",
+          "sha256": "c8a7a7e227db655a3fe39a4aadbf85f5ad3132403d67d8f214f05fda37250bd5",
+          "sha256_lf": "c8a7a7e227db655a3fe39a4aadbf85f5ad3132403d67d8f214f05fda37250bd5",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        }
+      ],
+      "counts": {
+        "topics": 5,
+        "theory_segments": 8,
+        "quiz_files": 5,
+        "quiz_questions": 5,
+        "manual_exercises": 3,
+        "project_materials": 0,
+        "references": 2,
+        "relations": 3,
+        "persisted_blocks": 19
+      },
+      "generated_ids": [
+        "1-1-summary-001",
+        "unit-1-1-exercise-p1",
+        "unit-1-1-exercise-p2",
+        "unit-1-1-exercise-p3",
+        "unit-1-1-reference-001",
+        "unit-1-1-reference-002",
+        "unit-1-1-topic-01-problema-programa-segment-01",
+        "unit-1-1-quiz-q1",
+        "unit-1-1-topic-02-aplicacoes-locais-web-camadas-segment-01",
+        "unit-1-1-topic-02-aplicacoes-locais-web-camadas-segment-02",
+        "unit-1-1-quiz-q3",
+        "unit-1-1-topic-03-cliente-servidor-fluxo-pagina-segment-01",
+        "unit-1-1-topic-03-cliente-servidor-fluxo-pagina-segment-02",
+        "unit-1-1-quiz-q2",
+        "unit-1-1-topic-04-http-segment-01",
+        "unit-1-1-quiz-q4",
+        "unit-1-1-topic-05-api-visao-integrada-segment-01",
+        "unit-1-1-topic-05-api-visao-integrada-segment-02",
+        "unit-1-1-quiz-q5",
+        "unit-1-1",
+        "unit-1-1-topic-01-problema-programa",
+        "unit-1-1-topic-02-aplicacoes-locais-web-camadas",
+        "unit-1-1-topic-03-cliente-servidor-fluxo-pagina",
+        "unit-1-1-topic-04-http",
+        "unit-1-1-topic-05-api-visao-integrada"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "restricted",
+          "reason": "Persistido apenas no banco descartável; publicação e endpoint real não foram exercitados."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "SOURCE_ABSENT",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 0,
+      "warnings": [],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    },
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "1.2",
+      "title": "1.2 — Ambiente de desenvolvimento",
+      "module_id": "1",
+      "module_order": 1,
+      "unit_order": 2,
+      "source": {
+        "source_id": "1.2",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "e7aa639a0b2184082848dfea3d08d1d57d9499da59d1841a1cb2c13775a4e24e",
+        "source_sha256_lf": "e7aa639a0b2184082848dfea3d08d1d57d9499da59d1841a1cb2c13775a4e24e",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-1-2-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/00_objetivo.md",
+          "sha256": "84f2b215754e087a628f565bc982ec460436d99657bcf18658b3d2158a6a205a",
+          "sha256_lf": "84f2b215754e087a628f565bc982ec460436d99657bcf18658b3d2158a6a205a",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-2-01-arquivos-e-pastas-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/01_arquivos_e_pastas/01_teoria.md",
+          "sha256": "355baf96a0e6bd100c3aea08a1c88dc3c054494f6942c0bd3d40ab889fdab923",
+          "sha256_lf": "355baf96a0e6bd100c3aea08a1c88dc3c054494f6942c0bd3d40ab889fdab923",
+          "order": 1,
+          "topic_key": "01_arquivos_e_pastas",
+          "item_ids": [
+            "Arquivos e pastas"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-01-arquivos-e-pastas-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/01_arquivos_e_pastas/02_quiz.md",
+          "sha256": "4220357ca47c2727273865d7c681349a45e60c11ba381cc20378111674332d14",
+          "sha256_lf": "4220357ca47c2727273865d7c681349a45e60c11ba381cc20378111674332d14",
+          "order": 1,
+          "topic_key": "01_arquivos_e_pastas",
+          "item_ids": [
+            "Q1",
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-01-arquivos-e-pastas-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/01_arquivos_e_pastas/03_gabarito_quiz.md",
+          "sha256": "8a797464b9998b031a33fe847b824dfebbae93ece92c35b727de549624d18ac0",
+          "sha256_lf": "8a797464b9998b031a33fe847b824dfebbae93ece92c35b727de549624d18ac0",
+          "order": 1,
+          "topic_key": "01_arquivos_e_pastas",
+          "item_ids": [
+            "Q1",
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/01_resumo.md",
+          "sha256": "cb87fc9a4764363cc4491f6496fc42d8efb32175bdb947ddd358a4d321863a09",
+          "sha256_lf": "cb87fc9a4764363cc4491f6496fc42d8efb32175bdb947ddd358a4d321863a09",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-2-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/02_criterio_de_conclusao.md",
+          "sha256": "937e6f58fb27335218eb74b61aff62e143d5adb710979b7bcb6f282a694564a5",
+          "sha256_lf": "937e6f58fb27335218eb74b61aff62e143d5adb710979b7bcb6f282a694564a5",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-2-02-editor-e-terminal-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/02_editor_e_terminal/01_teoria.md",
+          "sha256": "48952ebe26b2bae4326888379e0b697942ed9aa0bbda2c79abba655cbc3dc49e",
+          "sha256_lf": "48952ebe26b2bae4326888379e0b697942ed9aa0bbda2c79abba655cbc3dc49e",
+          "order": 2,
+          "topic_key": "02_editor_e_terminal",
+          "item_ids": [
+            "Editor e terminal"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-02-editor-e-terminal-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/02_editor_e_terminal/02_quiz.md",
+          "sha256": "db7f2ddc5650573986ab11db1b0c17de91f543a95f0cc5c99e75f9315e2ffc65",
+          "sha256_lf": "db7f2ddc5650573986ab11db1b0c17de91f543a95f0cc5c99e75f9315e2ffc65",
+          "order": 2,
+          "topic_key": "02_editor_e_terminal",
+          "item_ids": [
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-02-editor-e-terminal-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/02_editor_e_terminal/03_gabarito_quiz.md",
+          "sha256": "fe71427d54bcb27c1a89ac1248f13fe82c8f91b17c86d6050c4470f46d4cef51",
+          "sha256_lf": "fe71427d54bcb27c1a89ac1248f13fe82c8f91b17c86d6050c4470f46d4cef51",
+          "order": 2,
+          "topic_key": "02_editor_e_terminal",
+          "item_ids": [
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/03_conexoes.md",
+          "sha256": "843fc46b5710ea415b9e6d8d322b5f3dac95a8a2685399db70ff58a50fea11da",
+          "sha256_lf": "843fc46b5710ea415b9e6d8d322b5f3dac95a8a2685399db70ff58a50fea11da",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-2-03-instalacao-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/03_instalacao/01_teoria.md",
+          "sha256": "85f8ed651adb871098243f23c643ab0d804aa690c64776cb1a8ffeab927968e2",
+          "sha256_lf": "85f8ed651adb871098243f23c643ab0d804aa690c64776cb1a8ffeab927968e2",
+          "order": 3,
+          "topic_key": "03_instalacao",
+          "item_ids": [
+            "Instalação e ambiente reproduzível"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-03-instalacao-02-pratica-guiada-instalacao",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/03_instalacao/02_pratica_guiada_instalacao.md",
+          "sha256": "44b4f89e24d4503f1eda2bd8b591781ace4162d2a80bdd49c80aaef331e08792",
+          "sha256_lf": "44b4f89e24d4503f1eda2bd8b591781ace4162d2a80bdd49c80aaef331e08792",
+          "order": 1,
+          "topic_key": "03_instalacao",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-03-instalacao-03-gabarito-pratica-guiada",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/03_instalacao/03_gabarito_pratica_guiada.md",
+          "sha256": "500a8f58f73acda75253aea50c4ca568b18bf3d217b68766b3e2fa60e728c9c0",
+          "sha256_lf": "500a8f58f73acda75253aea50c4ca568b18bf3d217b68766b3e2fa60e728c9c0",
+          "order": 1,
+          "topic_key": "03_instalacao",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/04_referencias.md",
+          "sha256": "2d4ce4f26a8aab6ba336a0853d4da6968b5bd8d16de97b6b322c696f786bab67",
+          "sha256_lf": "2d4ce4f26a8aab6ba336a0853d4da6968b5bd8d16de97b6b322c696f786bab67",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-1-2-04-variaveis-de-ambiente-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/04_variaveis_de_ambiente/01_teoria.md",
+          "sha256": "305257023fccec376cfc6f7029aea08d500377c3627ec7eba30f208959d92d95",
+          "sha256_lf": "305257023fccec376cfc6f7029aea08d500377c3627ec7eba30f208959d92d95",
+          "order": 4,
+          "topic_key": "04_variaveis_de_ambiente",
+          "item_ids": [
+            "Variáveis de ambiente"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-04-variaveis-de-ambiente-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/04_variaveis_de_ambiente/02_quiz.md",
+          "sha256": "6e9c0e542338ff54acf8f6baf2cdb8caeea87936e6ca2b48975f46160a6612f4",
+          "sha256_lf": "6e9c0e542338ff54acf8f6baf2cdb8caeea87936e6ca2b48975f46160a6612f4",
+          "order": 3,
+          "topic_key": "04_variaveis_de_ambiente",
+          "item_ids": [
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-04-variaveis-de-ambiente-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/04_variaveis_de_ambiente/03_gabarito_quiz.md",
+          "sha256": "4b1c306f483c00ec9068bd44cf1cff2ad80acefc148dc6898ee38d9009110952",
+          "sha256_lf": "4b1c306f483c00ec9068bd44cf1cff2ad80acefc148dc6898ee38d9009110952",
+          "order": 3,
+          "topic_key": "04_variaveis_de_ambiente",
+          "item_ids": [
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-05-documentacao-e-validacao-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/05_documentacao_e_validacao/01_teoria.md",
+          "sha256": "f7bc119c95f5cf7da85aef79d61d706ae4424e069a93057e350b7f7c79a884ce",
+          "sha256_lf": "f7bc119c95f5cf7da85aef79d61d706ae4424e069a93057e350b7f7c79a884ce",
+          "order": 5,
+          "topic_key": "05_documentacao_e_validacao",
+          "item_ids": [
+            "Ler documentação técnica"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-05-documentacao-e-validacao-02-pratica-transferencia-documente-ambiente",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/05_documentacao_e_validacao/02_pratica_transferencia_documente_ambiente.md",
+          "sha256": "9ca8a39e71af09c6437007bb34f963e796f510cdfabf6572dc3aafc6c4de4c16",
+          "sha256_lf": "9ca8a39e71af09c6437007bb34f963e796f510cdfabf6572dc3aafc6c4de4c16",
+          "order": 3,
+          "topic_key": "05_documentacao_e_validacao",
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-05-documentacao-e-validacao-03-criterios-pratica-transferencia",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/05_documentacao_e_validacao/03_criterios_pratica_transferencia.md",
+          "sha256": "cd53cf1d56966d2915a691bb2cbaabef1612f2f7d3f58122df560e39576f332f",
+          "sha256_lf": "cd53cf1d56966d2915a691bb2cbaabef1612f2f7d3f58122df560e39576f332f",
+          "order": 3,
+          "topic_key": "05_documentacao_e_validacao",
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-90-integracao-01-quiz-integrador",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/90_integracao/01_quiz_integrador.md",
+          "sha256": "074e7d03a01487a24fa0f0dd48cb8a23bf390658b6ffbce692f4c92f9364400b",
+          "sha256_lf": "074e7d03a01487a24fa0f0dd48cb8a23bf390658b6ffbce692f4c92f9364400b",
+          "order": 90,
+          "topic_key": null,
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-90-integracao-02-gabarito-quiz-integrador",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/90_integracao/02_gabarito_quiz_integrador.md",
+          "sha256": "6835e3b4df4c27d08d108c76ce4f760f3060e846eb8da8ac3d3810a2de4c41c7",
+          "sha256_lf": "6835e3b4df4c27d08d108c76ce4f760f3060e846eb8da8ac3d3810a2de4c41c7",
+          "order": 90,
+          "topic_key": null,
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-90-integracao-03-pratica-independente-setup",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/90_integracao/03_pratica_independente_setup.md",
+          "sha256": "3643bb2d68d77a9312892a90fea2e5ccd98d305abe50f7b0a2570e6ff135dfb9",
+          "sha256_lf": "3643bb2d68d77a9312892a90fea2e5ccd98d305abe50f7b0a2570e6ff135dfb9",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-90-integracao-04-gabarito-pratica-independente",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/90_integracao/04_gabarito_pratica_independente.md",
+          "sha256": "29b144931bd420c093811368652fbe0fd6620bda44fa9b22115a325ec91a58c5",
+          "sha256_lf": "29b144931bd420c093811368652fbe0fd6620bda44fa9b22115a325ec91a58c5",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-90-integracao-05-rubrica-pratica-independente",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/90_integracao/05_rubrica_pratica_independente.md",
+          "sha256": "cde2c04f57e1206f63e25802856f583d446c4286df3769ced610018d0d2306db",
+          "sha256_lf": "cde2c04f57e1206f63e25802856f583d446c4286df3769ced610018d0d2306db",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-1-2-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/README.md",
+          "sha256": "4fb13d167a085472866a9f1df9d7502617fba5ee4ac4bc0a7777812b214ef2fa",
+          "sha256_lf": "4fb13d167a085472866a9f1df9d7502617fba5ee4ac4bc0a7777812b214ef2fa",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        }
+      ],
+      "counts": {
+        "topics": 5,
+        "theory_segments": 5,
+        "quiz_files": 4,
+        "quiz_questions": 5,
+        "manual_exercises": 3,
+        "project_materials": 0,
+        "references": 3,
+        "relations": 3,
+        "persisted_blocks": 17
+      },
+      "generated_ids": [
+        "unit-1-2-quiz-q5",
+        "1-2-summary-001",
+        "unit-1-2-exercise-p1",
+        "unit-1-2-exercise-p2",
+        "unit-1-2-exercise-p3",
+        "unit-1-2-reference-001",
+        "unit-1-2-reference-002",
+        "unit-1-2-reference-003",
+        "unit-1-2-topic-01-arquivos-e-pastas-segment-01",
+        "unit-1-2-quiz-q1",
+        "unit-1-2-quiz-q2",
+        "unit-1-2-topic-02-editor-e-terminal-segment-01",
+        "unit-1-2-quiz-q3",
+        "unit-1-2-topic-03-instalacao-segment-01",
+        "unit-1-2-topic-04-variaveis-de-ambiente-segment-01",
+        "unit-1-2-quiz-q4",
+        "unit-1-2-topic-05-documentacao-e-validacao-segment-01",
+        "unit-1-2",
+        "unit-1-2-topic-01-arquivos-e-pastas",
+        "unit-1-2-topic-02-editor-e-terminal",
+        "unit-1-2-topic-03-instalacao",
+        "unit-1-2-topic-04-variaveis-de-ambiente",
+        "unit-1-2-topic-05-documentacao-e-validacao"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "restricted",
+          "reason": "Persistido apenas no banco descartável; publicação e endpoint real não foram exercitados."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "SOURCE_ABSENT",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 0,
+      "warnings": [
+        "quiz integrador sem assunto teórico: docs/courses/trilhacode/Conteudos_migrado/Fase_1/1.2_Ambiente_de_desenvolvimento/90_integracao/01_quiz_integrador.md"
+      ],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    },
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "2.1",
+      "title": "2.1 — Terminal e navegação",
+      "module_id": "2",
+      "module_order": 2,
+      "unit_order": 1,
+      "source": {
+        "source_id": "2.1",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "41df0119619e2f7ba44ffbfebb27edc310ac7f5c930cb036614084bacc527319",
+        "source_sha256_lf": "41df0119619e2f7ba44ffbfebb27edc310ac7f5c930cb036614084bacc527319",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-2-1-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/00_objetivo.md",
+          "sha256": "1eab0f3d895aff037b1e42709f0dfc4e6f9cf61ca388aeea751634c741dad701",
+          "sha256_lf": "1eab0f3d895aff037b1e42709f0dfc4e6f9cf61ca388aeea751634c741dad701",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-1-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/01_resumo.md",
+          "sha256": "4a70bef4503cfd2697526c4cbe4fef2dee56b432e3247ea6f84c9f2968aae943",
+          "sha256_lf": "4a70bef4503cfd2697526c4cbe4fef2dee56b432e3247ea6f84c9f2968aae943",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-1-01-terminal-e-caminhos-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/01_terminal_e_caminhos/01_teoria.md",
+          "sha256": "60f049a77b34965421dbb0bd0f75ce0d10962e02a0e133f3b7f3b3904faa963f",
+          "sha256_lf": "60f049a77b34965421dbb0bd0f75ce0d10962e02a0e133f3b7f3b3904faa963f",
+          "order": 1,
+          "topic_key": "01_terminal_e_caminhos",
+          "item_ids": [
+            "O terminal e o diretório atual"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-01-terminal-e-caminhos-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/01_terminal_e_caminhos/02_quiz.md",
+          "sha256": "a9eec262a86608000fa8a0c47b9dea78577c5cc239d681b0eb9ee6fd27359ff7",
+          "sha256_lf": "a9eec262a86608000fa8a0c47b9dea78577c5cc239d681b0eb9ee6fd27359ff7",
+          "order": 1,
+          "topic_key": "01_terminal_e_caminhos",
+          "item_ids": [
+            "Q1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-01-terminal-e-caminhos-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/01_terminal_e_caminhos/03_gabarito_quiz.md",
+          "sha256": "636eedd4b3d2897f62947a4d5bc04b31eb68d86378c01c63899198cc589beff1",
+          "sha256_lf": "636eedd4b3d2897f62947a4d5bc04b31eb68d86378c01c63899198cc589beff1",
+          "order": 1,
+          "topic_key": "01_terminal_e_caminhos",
+          "item_ids": [
+            "Q1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/02_criterio_de_conclusao.md",
+          "sha256": "a9fcd20e8bf545b9978f4480e5150d12f9cd5da49397b33b8fd434ef9f7cf964",
+          "sha256_lf": "a9fcd20e8bf545b9978f4480e5150d12f9cd5da49397b33b8fd434ef9f7cf964",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-1-02-operacoes-de-arquivo-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/02_operacoes_de_arquivo/01_teoria.md",
+          "sha256": "e7437ed7b08331b27511e8a0c74d5c27271d1aa1d7315de91ccb6b5e6f3219ca",
+          "sha256_lf": "e7437ed7b08331b27511e8a0c74d5c27271d1aa1d7315de91ccb6b5e6f3219ca",
+          "order": 2,
+          "topic_key": "02_operacoes_de_arquivo",
+          "item_ids": [
+            "Criar, copiar, mover e remover"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/03_conexoes.md",
+          "sha256": "d07b08954d63a29a81835101722e51fbc8cca9ab73d4acf3aac383e74e92540a",
+          "sha256_lf": "d07b08954d63a29a81835101722e51fbc8cca9ab73d4acf3aac383e74e92540a",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-1-03-inspecao-e-busca-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/03_inspecao_e_busca/01_teoria.md",
+          "sha256": "b65e47fcbe6d07121d6a1e72d9aca3ad577e2a456408955d7ad98b88e119f0fd",
+          "sha256_lf": "b65e47fcbe6d07121d6a1e72d9aca3ad577e2a456408955d7ad98b88e119f0fd",
+          "order": 3,
+          "topic_key": "03_inspecao_e_busca",
+          "item_ids": [
+            "Ver conteúdo e buscar arquivos"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-03-inspecao-e-busca-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/03_inspecao_e_busca/02_quiz.md",
+          "sha256": "1eefa5a18d96f99cf52480af73764b75a6983b56132233b6fe5c80fe81367213",
+          "sha256_lf": "1eefa5a18d96f99cf52480af73764b75a6983b56132233b6fe5c80fe81367213",
+          "order": 3,
+          "topic_key": "03_inspecao_e_busca",
+          "item_ids": [
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-03-inspecao-e-busca-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/03_inspecao_e_busca/03_gabarito_quiz.md",
+          "sha256": "060427a6d69375b8d747cade2e4f7cc3dd4580a712180b16e6d6c153a42377fb",
+          "sha256_lf": "060427a6d69375b8d747cade2e4f7cc3dd4580a712180b16e6d6c153a42377fb",
+          "order": 3,
+          "topic_key": "03_inspecao_e_busca",
+          "item_ids": [
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-04-entrada-saida-e-pipes-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/04_entrada_saida_e_pipes/01_teoria.md",
+          "sha256": "2f0ce1bffa9f02d3e320b39c082a873d28d2773f528da3640c520dfe47a4aa97",
+          "sha256_lf": "2f0ce1bffa9f02d3e320b39c082a873d28d2773f528da3640c520dfe47a4aa97",
+          "order": 4,
+          "topic_key": "04_entrada_saida_e_pipes",
+          "item_ids": [
+            "Entrada, saída, redirecionamento e pipes"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-04-entrada-saida-e-pipes-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/04_entrada_saida_e_pipes/02_quiz.md",
+          "sha256": "6d02860b4ccd53f7f3db8df6b09b85e087a23e7b6d659f45868373c74d69659d",
+          "sha256_lf": "6d02860b4ccd53f7f3db8df6b09b85e087a23e7b6d659f45868373c74d69659d",
+          "order": 4,
+          "topic_key": "04_entrada_saida_e_pipes",
+          "item_ids": [
+            "Q2",
+            "Q4",
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-04-entrada-saida-e-pipes-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/04_entrada_saida_e_pipes/03_gabarito_quiz.md",
+          "sha256": "06b1594ac3a4c3e16fc1a955b8540e396cbf42a2be7931eb22c5ba56775de4ee",
+          "sha256_lf": "06b1594ac3a4c3e16fc1a955b8540e396cbf42a2be7931eb22c5ba56775de4ee",
+          "order": 4,
+          "topic_key": "04_entrada_saida_e_pipes",
+          "item_ids": [
+            "Q2",
+            "Q4",
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/04_referencias.md",
+          "sha256": "16bf436e412e53c8623bb49342c1fc522a1b6864cace818bb64052630f031dab",
+          "sha256_lf": "16bf436e412e53c8623bb49342c1fc522a1b6864cace818bb64052630f031dab",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-1-90-integracao-01-pratica-guiada-caminhos",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/90_integracao/01_pratica_guiada_caminhos.md",
+          "sha256": "7352d99fa14e231778c3570f2b96ef92af6518e7c0f3bc9d539f6bbebc23820e",
+          "sha256_lf": "7352d99fa14e231778c3570f2b96ef92af6518e7c0f3bc9d539f6bbebc23820e",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-90-integracao-02-gabarito-pratica-guiada",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/90_integracao/02_gabarito_pratica_guiada.md",
+          "sha256": "5617ef4c963c44211652a321df6de8b3b5a61476ce20b03d14d01851bed77e8a",
+          "sha256_lf": "5617ef4c963c44211652a321df6de8b3b5a61476ce20b03d14d01851bed77e8a",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-90-integracao-03-pratica-independente-busca",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/90_integracao/03_pratica_independente_busca.md",
+          "sha256": "5ea3d12061d85f19b7efa1452ec41b3907a274f135c2dbcec43b84b419e45a5b",
+          "sha256_lf": "5ea3d12061d85f19b7efa1452ec41b3907a274f135c2dbcec43b84b419e45a5b",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-90-integracao-04-gabarito-pratica-independente",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/90_integracao/04_gabarito_pratica_independente.md",
+          "sha256": "4540f50166332e5a25d9564ab68e5cfa068ad1fc9eed97d8302712e551a22eb3",
+          "sha256_lf": "4540f50166332e5a25d9564ab68e5cfa068ad1fc9eed97d8302712e551a22eb3",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-90-integracao-05-rubrica-pratica-independente",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/90_integracao/05_rubrica_pratica_independente.md",
+          "sha256": "a02a2fec39ce1b663a8f025351db2d3ea4dc8b2f1ca2aac670b5608e7d7f5c3b",
+          "sha256_lf": "a02a2fec39ce1b663a8f025351db2d3ea4dc8b2f1ca2aac670b5608e7d7f5c3b",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-90-integracao-06-pratica-transferencia-pasta-estudo",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/90_integracao/06_pratica_transferencia_pasta_estudo.md",
+          "sha256": "268cb41ae8d327f958be25d7eb9057051f9f8e83782760c6073fec1d0a02d02d",
+          "sha256_lf": "268cb41ae8d327f958be25d7eb9057051f9f8e83782760c6073fec1d0a02d02d",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-90-integracao-07-checklist-pratica-transferencia",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/90_integracao/07_checklist_pratica_transferencia.md",
+          "sha256": "c023d43d7ab834099d9a3150aec03bb94b48c5aa149d1b2a490777a68c31f03e",
+          "sha256_lf": "c023d43d7ab834099d9a3150aec03bb94b48c5aa149d1b2a490777a68c31f03e",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-1-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.1_Terminal_e_navegacao/README.md",
+          "sha256": "b6b64f8df5c6ff79ae1b1e82862fa1a5df030f5fa68be01b0cf6d5b9a75a0769",
+          "sha256_lf": "b6b64f8df5c6ff79ae1b1e82862fa1a5df030f5fa68be01b0cf6d5b9a75a0769",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        }
+      ],
+      "counts": {
+        "topics": 4,
+        "theory_segments": 4,
+        "quiz_files": 3,
+        "quiz_questions": 5,
+        "manual_exercises": 3,
+        "project_materials": 0,
+        "references": 4,
+        "relations": 2,
+        "persisted_blocks": 17
+      },
+      "generated_ids": [
+        "2-1-summary-001",
+        "unit-2-1-exercise-p1",
+        "unit-2-1-exercise-p2",
+        "unit-2-1-exercise-p3",
+        "unit-2-1-reference-001",
+        "unit-2-1-reference-002",
+        "unit-2-1-reference-003",
+        "unit-2-1-reference-004",
+        "unit-2-1-topic-01-terminal-e-caminhos-segment-01",
+        "unit-2-1-quiz-q1",
+        "unit-2-1-topic-02-operacoes-de-arquivo-segment-01",
+        "unit-2-1-topic-03-inspecao-e-busca-segment-01",
+        "unit-2-1-quiz-q3",
+        "unit-2-1-topic-04-entrada-saida-e-pipes-segment-01",
+        "unit-2-1-quiz-q2",
+        "unit-2-1-quiz-q4",
+        "unit-2-1-quiz-q5",
+        "unit-2-1",
+        "unit-2-1-topic-01-terminal-e-caminhos",
+        "unit-2-1-topic-02-operacoes-de-arquivo",
+        "unit-2-1-topic-03-inspecao-e-busca",
+        "unit-2-1-topic-04-entrada-saida-e-pipes"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "restricted",
+          "reason": "Persistido apenas no banco descartável; publicação e endpoint real não foram exercitados."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "SOURCE_ABSENT",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 0,
+      "warnings": [],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    },
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "2.2",
+      "title": "2.2 — Sistema e operação",
+      "module_id": "2",
+      "module_order": 2,
+      "unit_order": 2,
+      "source": {
+        "source_id": "2.2",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "443cd3f2cafd2e85e6528afb19cf1ee51ef109cdbae004776091d66e8f8b4575",
+        "source_sha256_lf": "443cd3f2cafd2e85e6528afb19cf1ee51ef109cdbae004776091d66e8f8b4575",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-2-2-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/00_objetivo.md",
+          "sha256": "fcebbf0690cad27baa1f0bbf770d70f1a8d6ea4c6da26e5a81d7c2825677bfc5",
+          "sha256_lf": "fcebbf0690cad27baa1f0bbf770d70f1a8d6ea4c6da26e5a81d7c2825677bfc5",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-2-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/01_resumo.md",
+          "sha256": "661c08d055c7b6bdfde38172a0d611727c7b67a8e69e5ce9523d1e8948e71c50",
+          "sha256_lf": "661c08d055c7b6bdfde38172a0d611727c7b67a8e69e5ce9523d1e8948e71c50",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-2-01-usuarios-e-permissoes-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/01_usuarios_e_permissoes/01_teoria.md",
+          "sha256": "458245291984717196eacd5f6320118c18ece32769fff2268dc323813d0dcaca",
+          "sha256_lf": "458245291984717196eacd5f6320118c18ece32769fff2268dc323813d0dcaca",
+          "order": 1,
+          "topic_key": "01_usuarios_e_permissoes",
+          "item_ids": [
+            "Usuários e permissões"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-01-usuarios-e-permissoes-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/01_usuarios_e_permissoes/02_quiz.md",
+          "sha256": "1ebb7f0ceba7de5c6bbf96889de753510f24f88ee761fedd152bca3541f6bcea",
+          "sha256_lf": "1ebb7f0ceba7de5c6bbf96889de753510f24f88ee761fedd152bca3541f6bcea",
+          "order": 1,
+          "topic_key": "01_usuarios_e_permissoes",
+          "item_ids": [
+            "Q1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-01-usuarios-e-permissoes-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/01_usuarios_e_permissoes/03_gabarito_quiz.md",
+          "sha256": "1a8fa6638a12089a203dc58d2f429c4dc15efc70fd842bfc8614950dca493afd",
+          "sha256_lf": "1a8fa6638a12089a203dc58d2f429c4dc15efc70fd842bfc8614950dca493afd",
+          "order": 1,
+          "topic_key": "01_usuarios_e_permissoes",
+          "item_ids": [
+            "Q1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/02_criterio_de_conclusao.md",
+          "sha256": "d7ec7f52bab60541b2b8928e817d278faf862e5e8c230fdc09a0237dea71c661",
+          "sha256_lf": "d7ec7f52bab60541b2b8928e817d278faf862e5e8c230fdc09a0237dea71c661",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-2-02-processos-e-servicos-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/02_processos_e_servicos/01_teoria.md",
+          "sha256": "afc9b0b9178570476d6d8ae398e008d40dbc2c48371cf22a5677e8e308e18b9d",
+          "sha256_lf": "afc9b0b9178570476d6d8ae398e008d40dbc2c48371cf22a5677e8e308e18b9d",
+          "order": 2,
+          "topic_key": "02_processos_e_servicos",
+          "item_ids": [
+            "Processos e serviços"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-02-processos-e-servicos-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/02_processos_e_servicos/02_quiz.md",
+          "sha256": "a466dd86b76403d8d488096b101300b58f076222b0f34ebe34fc12e6dadf3dc6",
+          "sha256_lf": "a466dd86b76403d8d488096b101300b58f076222b0f34ebe34fc12e6dadf3dc6",
+          "order": 2,
+          "topic_key": "02_processos_e_servicos",
+          "item_ids": [
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-02-processos-e-servicos-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/02_processos_e_servicos/03_gabarito_quiz.md",
+          "sha256": "6e624ce0712ff52d871a6de9ccde82feaa181ec1804b3017e64a4e8cae8c6ea0",
+          "sha256_lf": "6e624ce0712ff52d871a6de9ccde82feaa181ec1804b3017e64a4e8cae8c6ea0",
+          "order": 2,
+          "topic_key": "02_processos_e_servicos",
+          "item_ids": [
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/03_conexoes.md",
+          "sha256": "d19a6b8c8c4ebd37b4b2e149e87260cd9d6842c58f7471b53422b6ef75bd12e0",
+          "sha256_lf": "d19a6b8c8c4ebd37b4b2e149e87260cd9d6842c58f7471b53422b6ef75bd12e0",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-2-03-logs-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/03_logs/01_teoria.md",
+          "sha256": "bb8aa186546314c4b9e88e402d1d4ac8fe95e98117b265975ee7fe0b3040d569",
+          "sha256_lf": "bb8aa186546314c4b9e88e402d1d4ac8fe95e98117b265975ee7fe0b3040d569",
+          "order": 3,
+          "topic_key": "03_logs",
+          "item_ids": [
+            "Logs"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-03-logs-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/03_logs/02_quiz.md",
+          "sha256": "a946a8c21cce8e7b63121b0c6997da02fd35161cec499a1fc1e980e1623c3924",
+          "sha256_lf": "a946a8c21cce8e7b63121b0c6997da02fd35161cec499a1fc1e980e1623c3924",
+          "order": 3,
+          "topic_key": "03_logs",
+          "item_ids": [
+            "Q3",
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-03-logs-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/03_logs/03_gabarito_quiz.md",
+          "sha256": "d402c8173e6f5eed1e1fc2c27bab913103638c365055b74d44eff5065f71288b",
+          "sha256_lf": "d402c8173e6f5eed1e1fc2c27bab913103638c365055b74d44eff5065f71288b",
+          "order": 3,
+          "topic_key": "03_logs",
+          "item_ids": [
+            "Q3",
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-03-logs-04-pratica-transferencia-log",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/03_logs/04_pratica_transferencia_log.md",
+          "sha256": "6e70efcf91832c64a1baa243d6bcf4b2d268b48c8b25cccc2f5a321b019e1057",
+          "sha256_lf": "6e70efcf91832c64a1baa243d6bcf4b2d268b48c8b25cccc2f5a321b019e1057",
+          "order": 3,
+          "topic_key": "03_logs",
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-03-logs-05-criterios-pratica-transferencia",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/03_logs/05_criterios_pratica_transferencia.md",
+          "sha256": "284b043fff767b8c908a2f7e5ecc703eee5e63b38305588b3bf134ae9843c003",
+          "sha256_lf": "284b043fff767b8c908a2f7e5ecc703eee5e63b38305588b3bf134ae9843c003",
+          "order": 3,
+          "topic_key": "03_logs",
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/04_referencias.md",
+          "sha256": "0cdf364b686ca57bd7a9114958b023128c227121c016738ee10ba63fe241b81e",
+          "sha256_lf": "0cdf364b686ca57bd7a9114958b023128c227121c016738ee10ba63fe241b81e",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-2-90-integracao-01-quiz-integrador",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/90_integracao/01_quiz_integrador.md",
+          "sha256": "e55c51c8cb2724575aadd2b8c481556916ddb43d8125285193b644a6bb8ef91a",
+          "sha256_lf": "e55c51c8cb2724575aadd2b8c481556916ddb43d8125285193b644a6bb8ef91a",
+          "order": 90,
+          "topic_key": null,
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-90-integracao-02-gabarito-quiz-integrador",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/90_integracao/02_gabarito_quiz_integrador.md",
+          "sha256": "90bfb932d113e917c26f60141a9cbdf47e97abe5d5a81f89c3f6f01641152eac",
+          "sha256_lf": "90bfb932d113e917c26f60141a9cbdf47e97abe5d5a81f89c3f6f01641152eac",
+          "order": 90,
+          "topic_key": null,
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-90-integracao-03-pratica-guiada-evidencias",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/90_integracao/03_pratica_guiada_evidencias.md",
+          "sha256": "f90e3a0c55b35562b8c8b0c7f79e4d147731dbe8a0f1d2f0056f040ff2773673",
+          "sha256_lf": "f90e3a0c55b35562b8c8b0c7f79e4d147731dbe8a0f1d2f0056f040ff2773673",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-90-integracao-04-gabarito-pratica-guiada",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/90_integracao/04_gabarito_pratica_guiada.md",
+          "sha256": "a779aa9811f074036500bc86f7d90e7578769e5eeda2fd8b1c8345358015a5e3",
+          "sha256_lf": "a779aa9811f074036500bc86f7d90e7578769e5eeda2fd8b1c8345358015a5e3",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-90-integracao-05-pratica-independente-falha-escrita",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/90_integracao/05_pratica_independente_falha_escrita.md",
+          "sha256": "86c928d990eb977fb75cefa3181c7b8620d0830a0266ce92db6662812d205580",
+          "sha256_lf": "86c928d990eb977fb75cefa3181c7b8620d0830a0266ce92db6662812d205580",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-90-integracao-06-gabarito-pratica-independente",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/90_integracao/06_gabarito_pratica_independente.md",
+          "sha256": "d7520eacefb3ec24516e9e560c0226f1f534151629ab3cba406b375d95a88720",
+          "sha256_lf": "d7520eacefb3ec24516e9e560c0226f1f534151629ab3cba406b375d95a88720",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-90-integracao-07-rubrica-pratica-independente",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/90_integracao/07_rubrica_pratica_independente.md",
+          "sha256": "a238e50dee079f251bbf888a64c99bf2f052cf0405e53aeaf17998168a733f66",
+          "sha256_lf": "a238e50dee079f251bbf888a64c99bf2f052cf0405e53aeaf17998168a733f66",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-2-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/README.md",
+          "sha256": "02e967f890188ad167758f2793934e4942b7ff387377cfe7543624aacbb5fd51",
+          "sha256_lf": "02e967f890188ad167758f2793934e4942b7ff387377cfe7543624aacbb5fd51",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        }
+      ],
+      "counts": {
+        "topics": 3,
+        "theory_segments": 3,
+        "quiz_files": 4,
+        "quiz_questions": 5,
+        "manual_exercises": 3,
+        "project_materials": 0,
+        "references": 4,
+        "relations": 4,
+        "persisted_blocks": 16
+      },
+      "generated_ids": [
+        "unit-2-2-quiz-q5",
+        "2-2-summary-001",
+        "unit-2-2-exercise-p1",
+        "unit-2-2-exercise-p2",
+        "unit-2-2-exercise-p3",
+        "unit-2-2-reference-001",
+        "unit-2-2-reference-002",
+        "unit-2-2-reference-003",
+        "unit-2-2-reference-004",
+        "unit-2-2-topic-01-usuarios-e-permissoes-segment-01",
+        "unit-2-2-quiz-q1",
+        "unit-2-2-topic-02-processos-e-servicos-segment-01",
+        "unit-2-2-quiz-q2",
+        "unit-2-2-topic-03-logs-segment-01",
+        "unit-2-2-quiz-q3",
+        "unit-2-2-quiz-q4",
+        "unit-2-2",
+        "unit-2-2-topic-01-usuarios-e-permissoes",
+        "unit-2-2-topic-02-processos-e-servicos",
+        "unit-2-2-topic-03-logs"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "restricted",
+          "reason": "Persistido apenas no banco descartável; publicação e endpoint real não foram exercitados."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "SOURCE_ABSENT",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 0,
+      "warnings": [
+        "quiz integrador sem assunto teórico: docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.2_Sistema_e_operacao/90_integracao/01_quiz_integrador.md"
+      ],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    },
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "2.3",
+      "title": "2.3 — Acesso remoto",
+      "module_id": "2",
+      "module_order": 2,
+      "unit_order": 3,
+      "source": {
+        "source_id": "2.3",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "4c31d3600578f0bb5b4a98b254fc989ac5a77f3fd78bb2d4b9727d06f44f41bb",
+        "source_sha256_lf": "4c31d3600578f0bb5b4a98b254fc989ac5a77f3fd78bb2d4b9727d06f44f41bb",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-2-3-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/00_objetivo.md",
+          "sha256": "9a2b453eb25e465d75933092305f84bad3f98e0cf54f1bb3d4bf3381d5ff0aa2",
+          "sha256_lf": "9a2b453eb25e465d75933092305f84bad3f98e0cf54f1bb3d4bf3381d5ff0aa2",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-3-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/01_resumo.md",
+          "sha256": "096320f7bd56f8d849abc185f13683b4de0eaff035f33238338a43ef2e577259",
+          "sha256_lf": "096320f7bd56f8d849abc185f13683b4de0eaff035f33238338a43ef2e577259",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-3-01-ssh-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/01_ssh/01_teoria.md",
+          "sha256": "9dcc429f9e413697d5190ab0c13aa515e6e840b346c7c56ead9124cb1994c91b",
+          "sha256_lf": "9dcc429f9e413697d5190ab0c13aa515e6e840b346c7c56ead9124cb1994c91b",
+          "order": 1,
+          "topic_key": "01_ssh",
+          "item_ids": [
+            "O que é SSH"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-01-ssh-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/01_ssh/02_quiz.md",
+          "sha256": "fe3a2b418a5832e458d9ebb54132c528bcf9d732b9625c36df1e124199d26f1a",
+          "sha256_lf": "fe3a2b418a5832e458d9ebb54132c528bcf9d732b9625c36df1e124199d26f1a",
+          "order": 1,
+          "topic_key": "01_ssh",
+          "item_ids": [
+            "Q3",
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-01-ssh-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/01_ssh/03_gabarito_quiz.md",
+          "sha256": "cf9031b1b6f65cba6994377947345bafb6874fa21f997120de7b9aa4a9963b8a",
+          "sha256_lf": "cf9031b1b6f65cba6994377947345bafb6874fa21f997120de7b9aa4a9963b8a",
+          "order": 1,
+          "topic_key": "01_ssh",
+          "item_ids": [
+            "Q3",
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-02-chaves-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/02_chaves/01_teoria.md",
+          "sha256": "a7e254f5be4669e8f077351f133d60a3f1737338608ade4ff4786d756d71723e",
+          "sha256_lf": "a7e254f5be4669e8f077351f133d60a3f1737338608ade4ff4786d756d71723e",
+          "order": 2,
+          "topic_key": "02_chaves",
+          "item_ids": [
+            "Chaves pública e privada"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-02-chaves-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/02_chaves/02_quiz.md",
+          "sha256": "c59dc478aabdd19e20a5388149b0840baed95332dffe39d445852ba039972a48",
+          "sha256_lf": "c59dc478aabdd19e20a5388149b0840baed95332dffe39d445852ba039972a48",
+          "order": 2,
+          "topic_key": "02_chaves",
+          "item_ids": [
+            "Q1",
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-02-chaves-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/02_chaves/03_gabarito_quiz.md",
+          "sha256": "11e6a6f3e054261895fedce7b1e5074a032b9b06060a9eec1b30c1398c1b2e5c",
+          "sha256_lf": "11e6a6f3e054261895fedce7b1e5074a032b9b06060a9eec1b30c1398c1b2e5c",
+          "order": 2,
+          "topic_key": "02_chaves",
+          "item_ids": [
+            "Q1",
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/02_criterio_de_conclusao.md",
+          "sha256": "44d99c1bb9bc673483f5e7cfcd139906a5c274bf8087f4048f22ef585c9aecf9",
+          "sha256_lf": "44d99c1bb9bc673483f5e7cfcd139906a5c274bf8087f4048f22ef585c9aecf9",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-3-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/03_conexoes.md",
+          "sha256": "6fc176773c9c381cad055171312f6e71b17ded527492d6e1b0426e931ac8a493",
+          "sha256_lf": "6fc176773c9c381cad055171312f6e71b17ded527492d6e1b0426e931ac8a493",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-3-03-ssh-com-github-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/03_ssh_com_github/01_teoria.md",
+          "sha256": "9d60750b0e6e06583ebc204cc0145d5fa3a78e8f8c9fe4c9dec7c18ec10b05c7",
+          "sha256_lf": "9d60750b0e6e06583ebc204cc0145d5fa3a78e8f8c9fe4c9dec7c18ec10b05c7",
+          "order": 3,
+          "topic_key": "03_ssh_com_github",
+          "item_ids": [
+            "Usar SSH com GitHub"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-03-ssh-com-github-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/03_ssh_com_github/02_quiz.md",
+          "sha256": "42c7089bb6db7d73344d3ad226a61b7d5754365571011b4d4d1c6e5441564231",
+          "sha256_lf": "42c7089bb6db7d73344d3ad226a61b7d5754365571011b4d4d1c6e5441564231",
+          "order": 3,
+          "topic_key": "03_ssh_com_github",
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-03-ssh-com-github-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/03_ssh_com_github/03_gabarito_quiz.md",
+          "sha256": "95182194409d275f12662224d0ef528cafb165ce4f121ebbc24a5ccfc4bb8fd7",
+          "sha256_lf": "95182194409d275f12662224d0ef528cafb165ce4f121ebbc24a5ccfc4bb8fd7",
+          "order": 3,
+          "topic_key": "03_ssh_com_github",
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/04_referencias.md",
+          "sha256": "0d747e7fa8351103122faa701f10782cd81153fb13787cb2df1e137c7f2b4653",
+          "sha256_lf": "0d747e7fa8351103122faa701f10782cd81153fb13787cb2df1e137c7f2b4653",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-2-3-90-integracao-01-pratica-guiada-conexao",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/90_integracao/01_pratica_guiada_conexao.md",
+          "sha256": "d9c66f1adac0201d2273c6683dfebf4cd2cb927b52821985a9c6deb6154d1576",
+          "sha256_lf": "d9c66f1adac0201d2273c6683dfebf4cd2cb927b52821985a9c6deb6154d1576",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-90-integracao-02-gabarito-pratica-guiada",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/90_integracao/02_gabarito_pratica_guiada.md",
+          "sha256": "9fb93e1ab6553cc7f11bc51663b2a49b817ad4db81f4b1ced94db8fc971efa6f",
+          "sha256_lf": "9fb93e1ab6553cc7f11bc51663b2a49b817ad4db81f4b1ced94db8fc971efa6f",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-90-integracao-03-pratica-independente-autenticacao",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/90_integracao/03_pratica_independente_autenticacao.md",
+          "sha256": "b1521b151a55bb047373c9aeb9e7850e2f9040cbf8b506dbead8ffd50a0eee2c",
+          "sha256_lf": "b1521b151a55bb047373c9aeb9e7850e2f9040cbf8b506dbead8ffd50a0eee2c",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-90-integracao-04-gabarito-pratica-independente",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/90_integracao/04_gabarito_pratica_independente.md",
+          "sha256": "c1b663ae87ce9de2e69e5bd67dc44eee90a2bcaec2e6ab6f02231772be98fb6a",
+          "sha256_lf": "c1b663ae87ce9de2e69e5bd67dc44eee90a2bcaec2e6ab6f02231772be98fb6a",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-90-integracao-05-rubrica-pratica-independente",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/90_integracao/05_rubrica_pratica_independente.md",
+          "sha256": "51254546297850a6a32f397fb8efb0ee0582ab9cf082ec6fa8bb4d7d85fa90fd",
+          "sha256_lf": "51254546297850a6a32f397fb8efb0ee0582ab9cf082ec6fa8bb4d7d85fa90fd",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-90-integracao-06-pratica-transferencia-ssh",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/90_integracao/06_pratica_transferencia_ssh.md",
+          "sha256": "d9d5d374da937ca97509d97982d3ba42d96ca0055fdf7e4832d0f44d9313f0ae",
+          "sha256_lf": "d9d5d374da937ca97509d97982d3ba42d96ca0055fdf7e4832d0f44d9313f0ae",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-90-integracao-07-checklist-pratica-transferencia",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/90_integracao/07_checklist_pratica_transferencia.md",
+          "sha256": "969b55aeccb05ebaa884eb2000ea02f02863488425d497a400af852ee14bfb0f",
+          "sha256_lf": "969b55aeccb05ebaa884eb2000ea02f02863488425d497a400af852ee14bfb0f",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-2-3-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/2.3_Acesso_remoto/README.md",
+          "sha256": "6457b8750fb2525b9459f5a04925215d4bac76b0e8cdb81d3f5d411baa50ce84",
+          "sha256_lf": "6457b8750fb2525b9459f5a04925215d4bac76b0e8cdb81d3f5d411baa50ce84",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        }
+      ],
+      "counts": {
+        "topics": 3,
+        "theory_segments": 3,
+        "quiz_files": 3,
+        "quiz_questions": 5,
+        "manual_exercises": 3,
+        "project_materials": 0,
+        "references": 3,
+        "relations": 5,
+        "persisted_blocks": 15
+      },
+      "generated_ids": [
+        "2-3-summary-001",
+        "unit-2-3-exercise-p1",
+        "unit-2-3-exercise-p2",
+        "unit-2-3-exercise-p3",
+        "unit-2-3-reference-001",
+        "unit-2-3-reference-002",
+        "unit-2-3-reference-003",
+        "unit-2-3-topic-01-ssh-segment-01",
+        "unit-2-3-quiz-q3",
+        "unit-2-3-quiz-q4",
+        "unit-2-3-topic-02-chaves-segment-01",
+        "unit-2-3-quiz-q1",
+        "unit-2-3-quiz-q2",
+        "unit-2-3-topic-03-ssh-com-github-segment-01",
+        "unit-2-3-quiz-q5",
+        "unit-2-3",
+        "unit-2-3-topic-01-ssh",
+        "unit-2-3-topic-02-chaves",
+        "unit-2-3-topic-03-ssh-com-github"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "restricted",
+          "reason": "Persistido apenas no banco descartável; publicação e endpoint real não foram exercitados."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "SOURCE_ABSENT",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 0,
+      "warnings": [],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    },
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "3.1",
+      "title": "3.1 — Git local",
+      "module_id": "3",
+      "module_order": 3,
+      "unit_order": 1,
+      "source": {
+        "source_id": "3.1",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "1ec59acae663cc26520e903d43b49efb7cd6ce414189b2543ef1eb9891259691",
+        "source_sha256_lf": "1ec59acae663cc26520e903d43b49efb7cd6ce414189b2543ef1eb9891259691",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-3-1-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/00_objetivo.md",
+          "sha256": "36dceabb3149116cb01fded0d5c0589a5e358876932f228823a6590b1007698c",
+          "sha256_lf": "36dceabb3149116cb01fded0d5c0589a5e358876932f228823a6590b1007698c",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-1-01-registrar-e-ignorar-mudancas-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/01_registrar_e_ignorar_mudancas/01_teoria.md",
+          "sha256": "4541263e5be85ad472426aacef3e3306f7d70d33a064cd4b0104764594d74ef0",
+          "sha256_lf": "4541263e5be85ad472426aacef3e3306f7d70d33a064cd4b0104764594d74ef0",
+          "order": 1,
+          "topic_key": "01_registrar_e_ignorar_mudancas",
+          "item_ids": [
+            "Repositório, working tree e staging area",
+            "`.gitignore`"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-01-registrar-e-ignorar-mudancas-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/01_registrar_e_ignorar_mudancas/02_quiz.md",
+          "sha256": "f435e7578b8930e34925580efca9373b2c8837db6e111a6610fec5974914c00b",
+          "sha256_lf": "f435e7578b8930e34925580efca9373b2c8837db6e111a6610fec5974914c00b",
+          "order": 1,
+          "topic_key": "01_registrar_e_ignorar_mudancas",
+          "item_ids": [
+            "Q1",
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-01-registrar-e-ignorar-mudancas-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/01_registrar_e_ignorar_mudancas/03_gabarito_quiz.md",
+          "sha256": "033145c471597208c59da563eba3ed3714ce5ac7543609d327472eea0f466d26",
+          "sha256_lf": "033145c471597208c59da563eba3ed3714ce5ac7543609d327472eea0f466d26",
+          "order": 1,
+          "topic_key": "01_registrar_e_ignorar_mudancas",
+          "item_ids": [
+            "Q1",
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/01_resumo.md",
+          "sha256": "8f56b8459ef43d3f1bcbd20093744764231dc88cfee860a47c63e23d5e6f6e63",
+          "sha256_lf": "8f56b8459ef43d3f1bcbd20093744764231dc88cfee860a47c63e23d5e6f6e63",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-1-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/02_criterio_de_conclusao.md",
+          "sha256": "61780d4a241fa47192bbf44405c7c3aea7e39c0d8f23d14f2d440d83d018c812",
+          "sha256_lf": "61780d4a241fa47192bbf44405c7c3aea7e39c0d8f23d14f2d440d83d018c812",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-1-02-inspecionar-e-recuperar-com-seguranca-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/02_inspecionar_e_recuperar_com_seguranca/01_teoria.md",
+          "sha256": "d8d83e0eb7ad2faf68eed79fe8d9319135c91b0d10a795c5a27c5f10a8d5a520",
+          "sha256_lf": "d8d83e0eb7ad2faf68eed79fe8d9319135c91b0d10a795c5a27c5f10a8d5a520",
+          "order": 2,
+          "topic_key": "02_inspecionar_e_recuperar_com_seguranca",
+          "item_ids": [
+            "Inspecionar o histórico",
+            "Branches",
+            "Desfazer com intenção"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-02-inspecionar-e-recuperar-com-seguranca-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/02_inspecionar_e_recuperar_com_seguranca/02_quiz.md",
+          "sha256": "808ee89235681126185128a0c3cdef89524805424a0e87c509df846c24b7385a",
+          "sha256_lf": "808ee89235681126185128a0c3cdef89524805424a0e87c509df846c24b7385a",
+          "order": 2,
+          "topic_key": "02_inspecionar_e_recuperar_com_seguranca",
+          "item_ids": [
+            "Q2",
+            "Q3",
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-02-inspecionar-e-recuperar-com-seguranca-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/02_inspecionar_e_recuperar_com_seguranca/03_gabarito_quiz.md",
+          "sha256": "37ef0286c524426dc076d8dcbb99eee8fb15e0d6649dc665019844d21619e6d3",
+          "sha256_lf": "37ef0286c524426dc076d8dcbb99eee8fb15e0d6649dc665019844d21619e6d3",
+          "order": 2,
+          "topic_key": "02_inspecionar_e_recuperar_com_seguranca",
+          "item_ids": [
+            "Q2",
+            "Q3",
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-02-inspecionar-e-recuperar-com-seguranca-04-pratica-guiada-estado",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/02_inspecionar_e_recuperar_com_seguranca/04_pratica_guiada_estado.md",
+          "sha256": "2a201bcc21bd074e723596999dcaf5e507b7dd4d4b4aa3869f6972f7c7d1e0d7",
+          "sha256_lf": "2a201bcc21bd074e723596999dcaf5e507b7dd4d4b4aa3869f6972f7c7d1e0d7",
+          "order": 1,
+          "topic_key": "02_inspecionar_e_recuperar_com_seguranca",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-02-inspecionar-e-recuperar-com-seguranca-05-gabarito-pratica-guiada",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/02_inspecionar_e_recuperar_com_seguranca/05_gabarito_pratica_guiada.md",
+          "sha256": "09c46fd6b59b92a0dfc000550675c6ef429e0f48123085157fed3d45aaa85b91",
+          "sha256_lf": "09c46fd6b59b92a0dfc000550675c6ef429e0f48123085157fed3d45aaa85b91",
+          "order": 1,
+          "topic_key": "02_inspecionar_e_recuperar_com_seguranca",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-02-inspecionar-e-recuperar-com-seguranca-06-pratica-independente-recuperacao",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/02_inspecionar_e_recuperar_com_seguranca/06_pratica_independente_recuperacao.md",
+          "sha256": "29da2362172a93c3120132ea0370ca9c1025f07673a18b84bee76be175466467",
+          "sha256_lf": "29da2362172a93c3120132ea0370ca9c1025f07673a18b84bee76be175466467",
+          "order": 2,
+          "topic_key": "02_inspecionar_e_recuperar_com_seguranca",
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-02-inspecionar-e-recuperar-com-seguranca-07-gabarito-pratica-independente",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/02_inspecionar_e_recuperar_com_seguranca/07_gabarito_pratica_independente.md",
+          "sha256": "51ba7562e6cf269432f93c0679e0e34b69200d71fb19dce3ef24ff910eb83b79",
+          "sha256_lf": "51ba7562e6cf269432f93c0679e0e34b69200d71fb19dce3ef24ff910eb83b79",
+          "order": 2,
+          "topic_key": "02_inspecionar_e_recuperar_com_seguranca",
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-02-inspecionar-e-recuperar-com-seguranca-08-rubrica-pratica-independente",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/02_inspecionar_e_recuperar_com_seguranca/08_rubrica_pratica_independente.md",
+          "sha256": "a679a323d59062bbadb6dff00a412e8e368c219489fa988a825ba91220524caa",
+          "sha256_lf": "a679a323d59062bbadb6dff00a412e8e368c219489fa988a825ba91220524caa",
+          "order": 2,
+          "topic_key": "02_inspecionar_e_recuperar_com_seguranca",
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/03_conexoes.md",
+          "sha256": "79bbd259fb882d579583a844086c4448a271d0f5da6f6bb354f799cb5f3b573b",
+          "sha256_lf": "79bbd259fb882d579583a844086c4448a271d0f5da6f6bb354f799cb5f3b573b",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-1-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/04_referencias.md",
+          "sha256": "0a2d22b75045228ed97a8a8d194843ee0c492d96c10fba6675e738b63318c940",
+          "sha256_lf": "0a2d22b75045228ed97a8a8d194843ee0c492d96c10fba6675e738b63318c940",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-1-90-integracao-01-desafio-integrador-historico-local",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/90_integracao/01_desafio_integrador_historico_local.md",
+          "sha256": "6232e62d8a7389f08422d61cd98cece6a22b22306df34e063568fb85a5812995",
+          "sha256_lf": "6232e62d8a7389f08422d61cd98cece6a22b22306df34e063568fb85a5812995",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-90-integracao-02-checklist-desafio-integrador",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/90_integracao/02_checklist_desafio_integrador.md",
+          "sha256": "21a6587158afc54c63d15338e27960fdb259d26a75c487bb1c75aae8ae37b0ea",
+          "sha256_lf": "21a6587158afc54c63d15338e27960fdb259d26a75c487bb1c75aae8ae37b0ea",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-1-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.1_Git_local/README.md",
+          "sha256": "ca93a6a59b33486c4e53047db40a734f7701858c14b1866a82627815edc72bd3",
+          "sha256_lf": "ca93a6a59b33486c4e53047db40a734f7701858c14b1866a82627815edc72bd3",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        }
+      ],
+      "counts": {
+        "topics": 2,
+        "theory_segments": 5,
+        "quiz_files": 2,
+        "quiz_questions": 5,
+        "manual_exercises": 3,
+        "project_materials": 0,
+        "references": 5,
+        "relations": 2,
+        "persisted_blocks": 19
+      },
+      "generated_ids": [
+        "3-1-summary-001",
+        "unit-3-1-exercise-p1",
+        "unit-3-1-exercise-p2",
+        "unit-3-1-exercise-p3",
+        "unit-3-1-reference-001",
+        "unit-3-1-reference-002",
+        "unit-3-1-reference-003",
+        "unit-3-1-reference-004",
+        "unit-3-1-reference-005",
+        "unit-3-1-topic-01-registrar-e-ignorar-mudancas-segment-01",
+        "unit-3-1-topic-01-registrar-e-ignorar-mudancas-segment-02",
+        "unit-3-1-quiz-q1",
+        "unit-3-1-quiz-q4",
+        "unit-3-1-topic-02-inspecionar-e-recuperar-com-seguranca-segment-01",
+        "unit-3-1-topic-02-inspecionar-e-recuperar-com-seguranca-segment-02",
+        "unit-3-1-topic-02-inspecionar-e-recuperar-com-seguranca-segment-03",
+        "unit-3-1-quiz-q2",
+        "unit-3-1-quiz-q3",
+        "unit-3-1-quiz-q5",
+        "unit-3-1",
+        "unit-3-1-topic-01-registrar-e-ignorar-mudancas",
+        "unit-3-1-topic-02-inspecionar-e-recuperar-com-seguranca"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "restricted",
+          "reason": "Persistido apenas no banco descartável; publicação e endpoint real não foram exercitados."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "SOURCE_ABSENT",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 0,
+      "warnings": [],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    },
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "3.2",
+      "title": "3.2 — Trabalho com histórico",
+      "module_id": "3",
+      "module_order": 3,
+      "unit_order": 2,
+      "source": {
+        "source_id": "3.2",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "a71894ea9ab502f467842a7ba24b08b7fff44e947f5a93793da3498ca32ef146",
+        "source_sha256_lf": "a71894ea9ab502f467842a7ba24b08b7fff44e947f5a93793da3498ca32ef146",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-3-2-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/00_objetivo.md",
+          "sha256": "c30b25fb23a0eee6bd85546aa4c6844079e4508a27810648aaa224a9662beb14",
+          "sha256_lf": "c30b25fb23a0eee6bd85546aa4c6844079e4508a27810648aaa224a9662beb14",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-2-01-integracao-e-mensagens-commit-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/01_integracao_e_mensagens_commit/01_teoria.md",
+          "sha256": "c203c7037c06bd0082a86fef33011da30e860050fc8a5cd4ae6cfa695346463d",
+          "sha256_lf": "c203c7037c06bd0082a86fef33011da30e860050fc8a5cd4ae6cfa695346463d",
+          "order": 1,
+          "topic_key": "01_integracao_e_mensagens_commit",
+          "item_ids": [
+            "Três formas de integrar mudanças",
+            "Mensagens de commit"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-01-integracao-e-mensagens-commit-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/01_integracao_e_mensagens_commit/02_quiz.md",
+          "sha256": "d5d88aec06d8ab356a413e3ecefdad55fa5c0b56e49bc0fe9b4943295fb269be",
+          "sha256_lf": "d5d88aec06d8ab356a413e3ecefdad55fa5c0b56e49bc0fe9b4943295fb269be",
+          "order": 1,
+          "topic_key": "01_integracao_e_mensagens_commit",
+          "item_ids": [
+            "Q1",
+            "Q2",
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-01-integracao-e-mensagens-commit-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/01_integracao_e_mensagens_commit/03_gabarito_quiz.md",
+          "sha256": "af5acdfa1d1c0c450a9de4bfc74ae2484a5ee470311624b12e03dcee8fc67381",
+          "sha256_lf": "af5acdfa1d1c0c450a9de4bfc74ae2484a5ee470311624b12e03dcee8fc67381",
+          "order": 1,
+          "topic_key": "01_integracao_e_mensagens_commit",
+          "item_ids": [
+            "Q1",
+            "Q2",
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-01-integracao-e-mensagens-commit-04-pratica-guiada-integracao",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/01_integracao_e_mensagens_commit/04_pratica_guiada_integracao.md",
+          "sha256": "f0e445e7b2e4018b75eb358808acb89d8a1cd9858768591d1a59d896c1734bdf",
+          "sha256_lf": "f0e445e7b2e4018b75eb358808acb89d8a1cd9858768591d1a59d896c1734bdf",
+          "order": 1,
+          "topic_key": "01_integracao_e_mensagens_commit",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-01-integracao-e-mensagens-commit-05-gabarito-pratica-guiada",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/01_integracao_e_mensagens_commit/05_gabarito_pratica_guiada.md",
+          "sha256": "c2fa0b26d5a9f691c4755c73fa0863e0eb82d4d9ce4eb04df248361da2eb9d07",
+          "sha256_lf": "c2fa0b26d5a9f691c4755c73fa0863e0eb82d4d9ce4eb04df248361da2eb9d07",
+          "order": 1,
+          "topic_key": "01_integracao_e_mensagens_commit",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-01-integracao-e-mensagens-commit-06-pratica-transferencia-integracao",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/01_integracao_e_mensagens_commit/06_pratica_transferencia_integracao.md",
+          "sha256": "667d842d0f79a82d302f754ac8dbfd507e568a048d4a2f619f5961b909f36cbc",
+          "sha256_lf": "667d842d0f79a82d302f754ac8dbfd507e568a048d4a2f619f5961b909f36cbc",
+          "order": 3,
+          "topic_key": "01_integracao_e_mensagens_commit",
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-01-integracao-e-mensagens-commit-07-checklist-pratica-transferencia",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/01_integracao_e_mensagens_commit/07_checklist_pratica_transferencia.md",
+          "sha256": "f58681485853146cff8ebbfdf61e1c6e16b87007d091f8c4031a45d979288ada",
+          "sha256_lf": "f58681485853146cff8ebbfdf61e1c6e16b87007d091f8c4031a45d979288ada",
+          "order": 3,
+          "topic_key": "01_integracao_e_mensagens_commit",
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/01_resumo.md",
+          "sha256": "a9a7600af3ac2c099b1c03fcc2d5ac7f1dc875dfb20d045dc1422d6386745e85",
+          "sha256_lf": "a9a7600af3ac2c099b1c03fcc2d5ac7f1dc875dfb20d045dc1422d6386745e85",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-2-02-conflitos-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/02_conflitos/01_teoria.md",
+          "sha256": "a47a18a739e016719c277c466ed84d6803943cf373a86410774df6514c3bd6cf",
+          "sha256_lf": "a47a18a739e016719c277c466ed84d6803943cf373a86410774df6514c3bd6cf",
+          "order": 2,
+          "topic_key": "02_conflitos",
+          "item_ids": [
+            "Conflitos"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-02-conflitos-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/02_conflitos/02_quiz.md",
+          "sha256": "1c917bb3bd2d2e4d07734027ffd1fd034e6873055bbcfa51c3ba9416e08594f2",
+          "sha256_lf": "1c917bb3bd2d2e4d07734027ffd1fd034e6873055bbcfa51c3ba9416e08594f2",
+          "order": 2,
+          "topic_key": "02_conflitos",
+          "item_ids": [
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-02-conflitos-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/02_conflitos/03_gabarito_quiz.md",
+          "sha256": "a3b7c498f0318dd18858bb2421732d16c7a080f1bd7a488c63e690652c6eb151",
+          "sha256_lf": "a3b7c498f0318dd18858bb2421732d16c7a080f1bd7a488c63e690652c6eb151",
+          "order": 2,
+          "topic_key": "02_conflitos",
+          "item_ids": [
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-02-conflitos-04-pratica-independente-conflito",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/02_conflitos/04_pratica_independente_conflito.md",
+          "sha256": "8ec69be56cb4a9dabef086d1f4174b0156ab916fcf99dfc0a311dd479cc224fa",
+          "sha256_lf": "8ec69be56cb4a9dabef086d1f4174b0156ab916fcf99dfc0a311dd479cc224fa",
+          "order": 2,
+          "topic_key": "02_conflitos",
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-02-conflitos-05-gabarito-pratica-independente",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/02_conflitos/05_gabarito_pratica_independente.md",
+          "sha256": "1acfef7aae08381558df7a9b3f646e7f5a1664b0410a13cba6b7285445421645",
+          "sha256_lf": "1acfef7aae08381558df7a9b3f646e7f5a1664b0410a13cba6b7285445421645",
+          "order": 2,
+          "topic_key": "02_conflitos",
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-02-conflitos-06-rubrica-pratica-independente",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/02_conflitos/06_rubrica_pratica_independente.md",
+          "sha256": "cfb3b471d77758551fba6972e576171aaa8c5ded1588940f80296b5ed05ea824",
+          "sha256_lf": "cfb3b471d77758551fba6972e576171aaa8c5ded1588940f80296b5ed05ea824",
+          "order": 2,
+          "topic_key": "02_conflitos",
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/02_criterio_de_conclusao.md",
+          "sha256": "e08fdd7b53e89afb1ec55d8cb72768540be7c35b5d3a1d2d9074a8797cc43c5b",
+          "sha256_lf": "e08fdd7b53e89afb1ec55d8cb72768540be7c35b5d3a1d2d9074a8797cc43c5b",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-2-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/03_conexoes.md",
+          "sha256": "a80909c98185a3cbc763a61dabc6d7b4e2187ae90158cc1bac5bb6fb14be394b",
+          "sha256_lf": "a80909c98185a3cbc763a61dabc6d7b4e2187ae90158cc1bac5bb6fb14be394b",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-2-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/04_referencias.md",
+          "sha256": "507a945015a7632f5228d7b5481cc5203364bbdbd222d763de48185cef335317",
+          "sha256_lf": "507a945015a7632f5228d7b5481cc5203364bbdbd222d763de48185cef335317",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-2-90-integracao-01-quiz-integrador",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/90_integracao/01_quiz_integrador.md",
+          "sha256": "c90745507dd8aa96971569b44f2ccf7c21a3d490e341315d7655f980bc108a28",
+          "sha256_lf": "c90745507dd8aa96971569b44f2ccf7c21a3d490e341315d7655f980bc108a28",
+          "order": 90,
+          "topic_key": null,
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-90-integracao-02-gabarito-quiz-integrador",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/90_integracao/02_gabarito_quiz_integrador.md",
+          "sha256": "ff33f2271a1c37f176504f0ac2d60598e0cec58e565d12a632887f620274c7fc",
+          "sha256_lf": "ff33f2271a1c37f176504f0ac2d60598e0cec58e565d12a632887f620274c7fc",
+          "order": 90,
+          "topic_key": null,
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-2-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/README.md",
+          "sha256": "f978a1ee69fdf855764a6f440f46bf1703cbaa69f29b81238474ba2c5be26d88",
+          "sha256_lf": "f978a1ee69fdf855764a6f440f46bf1703cbaa69f29b81238474ba2c5be26d88",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        }
+      ],
+      "counts": {
+        "topics": 2,
+        "theory_segments": 3,
+        "quiz_files": 3,
+        "quiz_questions": 5,
+        "manual_exercises": 3,
+        "project_materials": 0,
+        "references": 6,
+        "relations": 2,
+        "persisted_blocks": 18
+      },
+      "generated_ids": [
+        "unit-3-2-quiz-q5",
+        "3-2-summary-001",
+        "unit-3-2-exercise-p1",
+        "unit-3-2-exercise-p2",
+        "unit-3-2-exercise-p3",
+        "unit-3-2-reference-001",
+        "unit-3-2-reference-002",
+        "unit-3-2-reference-003",
+        "unit-3-2-reference-004",
+        "unit-3-2-reference-005",
+        "unit-3-2-reference-006",
+        "unit-3-2-topic-01-integracao-e-mensagens-commit-segment-01",
+        "unit-3-2-topic-01-integracao-e-mensagens-commit-segment-02",
+        "unit-3-2-quiz-q1",
+        "unit-3-2-quiz-q2",
+        "unit-3-2-quiz-q3",
+        "unit-3-2-topic-02-conflitos-segment-01",
+        "unit-3-2-quiz-q4",
+        "unit-3-2",
+        "unit-3-2-topic-01-integracao-e-mensagens-commit",
+        "unit-3-2-topic-02-conflitos"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "restricted",
+          "reason": "Persistido apenas no banco descartável; publicação e endpoint real não foram exercitados."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "SOURCE_ABSENT",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 0,
+      "warnings": [
+        "quiz integrador sem assunto teórico: docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.2_Trabalho_com_historico/90_integracao/01_quiz_integrador.md"
+      ],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    },
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "3.3",
+      "title": "3.3 — GitHub",
+      "module_id": "3",
+      "module_order": 3,
+      "unit_order": 3,
+      "source": {
+        "source_id": "3.3",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "bf7a454d0b2e2c1514dc02f527e45458df5bcb24c241c0b8344a33ec080dbabf",
+        "source_sha256_lf": "bf7a454d0b2e2c1514dc02f527e45458df5bcb24c241c0b8344a33ec080dbabf",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-3-3-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/00_objetivo.md",
+          "sha256": "fa16ab654073c02bb1b4647fe8159465a0fc343bfce530d47719e03e466f469e",
+          "sha256_lf": "fa16ab654073c02bb1b4647fe8159465a0fc343bfce530d47719e03e466f469e",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-3-01-local-e-remoto-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/01_local_e_remoto/01_teoria.md",
+          "sha256": "1406d09bb28921e72c74fd745dc4e836c25fc6fc2c694d2e7d6de5269f97f5aa",
+          "sha256_lf": "1406d09bb28921e72c74fd745dc4e836c25fc6fc2c694d2e7d6de5269f97f5aa",
+          "order": 1,
+          "topic_key": "01_local_e_remoto",
+          "item_ids": [
+            "Local e remoto"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-01-local-e-remoto-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/01_local_e_remoto/02_quiz.md",
+          "sha256": "981c0304fd8837cec808ac1f1d74733d353c460e983e34688ffe465c9efd6e5b",
+          "sha256_lf": "981c0304fd8837cec808ac1f1d74733d353c460e983e34688ffe465c9efd6e5b",
+          "order": 1,
+          "topic_key": "01_local_e_remoto",
+          "item_ids": [
+            "Q1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-01-local-e-remoto-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/01_local_e_remoto/03_gabarito_quiz.md",
+          "sha256": "bb038869fd98238c872dd7bd16978a0d9c3a8418e58f873bd34a2cd2a706fed4",
+          "sha256_lf": "bb038869fd98238c872dd7bd16978a0d9c3a8418e58f873bd34a2cd2a706fed4",
+          "order": 1,
+          "topic_key": "01_local_e_remoto",
+          "item_ids": [
+            "Q1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/01_resumo.md",
+          "sha256": "43b87d05d15c2e35d68ef2d27d7ebba1d242e12959d9249b70127c3696f1dc8e",
+          "sha256_lf": "43b87d05d15c2e35d68ef2d27d7ebba1d242e12959d9249b70127c3696f1dc8e",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-3-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/02_criterio_de_conclusao.md",
+          "sha256": "5f8d17f7b9fa4fd824f55f4cb3f6fd1f7c701db6372283a6b3ea1f68dd42d850",
+          "sha256_lf": "5f8d17f7b9fa4fd824f55f4cb3f6fd1f7c701db6372283a6b3ea1f68dd42d850",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-3-02-pull-request-code-review-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/02_pull_request_code_review/01_teoria.md",
+          "sha256": "e6cd609582b17fa948255841ea35e52ad0c45bf3e8ade2afe9fad881dbbc4aab",
+          "sha256_lf": "e6cd609582b17fa948255841ea35e52ad0c45bf3e8ade2afe9fad881dbbc4aab",
+          "order": 2,
+          "topic_key": "02_pull_request_code_review",
+          "item_ids": [
+            "Pull request e code review"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-02-pull-request-code-review-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/02_pull_request_code_review/02_quiz.md",
+          "sha256": "882b7f8e765b9f71d5fde638767e958cf0c68cfb135944be1b921ebb288aa885",
+          "sha256_lf": "882b7f8e765b9f71d5fde638767e958cf0c68cfb135944be1b921ebb288aa885",
+          "order": 2,
+          "topic_key": "02_pull_request_code_review",
+          "item_ids": [
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-02-pull-request-code-review-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/02_pull_request_code_review/03_gabarito_quiz.md",
+          "sha256": "8589fe3a652ecac226612ba797753278477a6070fa43ed44aac398435dd767f9",
+          "sha256_lf": "8589fe3a652ecac226612ba797753278477a6070fa43ed44aac398435dd767f9",
+          "order": 2,
+          "topic_key": "02_pull_request_code_review",
+          "item_ids": [
+            "Q2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-02-pull-request-code-review-04-pratica-guiada-review",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/02_pull_request_code_review/04_pratica_guiada_review.md",
+          "sha256": "b89fd9d30f7fd262c20c54a2ed2dc85036be5ac511fc2994432c04b959d1e9aa",
+          "sha256_lf": "b89fd9d30f7fd262c20c54a2ed2dc85036be5ac511fc2994432c04b959d1e9aa",
+          "order": 1,
+          "topic_key": "02_pull_request_code_review",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-02-pull-request-code-review-05-gabarito-pratica-guiada",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/02_pull_request_code_review/05_gabarito_pratica_guiada.md",
+          "sha256": "da940d1f3944c550e2963c2e989e3b67439b0e9eb99eed571edd38d1a59ffbfc",
+          "sha256_lf": "da940d1f3944c550e2963c2e989e3b67439b0e9eb99eed571edd38d1a59ffbfc",
+          "order": 1,
+          "topic_key": "02_pull_request_code_review",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/03_conexoes.md",
+          "sha256": "1f35b2caf9193e7a3eaecbbe6d1047d4bf8f956dc671d63945cd3085e62aa49f",
+          "sha256_lf": "1f35b2caf9193e7a3eaecbbe6d1047d4bf8f956dc671d63945cd3085e62aa49f",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-3-03-fluxo-colaborativo-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/03_fluxo_colaborativo/01_teoria.md",
+          "sha256": "a51145fa9a30a4ff703c9acea36edd2561fc85373a4313e6732bec516a84782e",
+          "sha256_lf": "a51145fa9a30a4ff703c9acea36edd2561fc85373a4313e6732bec516a84782e",
+          "order": 3,
+          "topic_key": "03_fluxo_colaborativo",
+          "item_ids": [
+            "Organização e fluxo"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-03-fluxo-colaborativo-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/03_fluxo_colaborativo/02_quiz.md",
+          "sha256": "cbf54d049e84ad4dbca814ff93ec25e7bbbd1324d34b5689d10a81fa9e2f374d",
+          "sha256_lf": "cbf54d049e84ad4dbca814ff93ec25e7bbbd1324d34b5689d10a81fa9e2f374d",
+          "order": 3,
+          "topic_key": "03_fluxo_colaborativo",
+          "item_ids": [
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-03-fluxo-colaborativo-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/03_fluxo_colaborativo/03_gabarito_quiz.md",
+          "sha256": "c9556f322f0ef242440a0723b87d69ffd655925bf1d20d50bd9c995f797cd43c",
+          "sha256_lf": "c9556f322f0ef242440a0723b87d69ffd655925bf1d20d50bd9c995f797cd43c",
+          "order": 3,
+          "topic_key": "03_fluxo_colaborativo",
+          "item_ids": [
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/04_referencias.md",
+          "sha256": "a88e33e5e6d49c00fdf4b619149265123cd4fe3dab08f7214147bd48cd20c023",
+          "sha256_lf": "a88e33e5e6d49c00fdf4b619149265123cd4fe3dab08f7214147bd48cd20c023",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-3-04-segredos-credenciais-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/04_segredos_credenciais/01_teoria.md",
+          "sha256": "be5a842f95cc82845a05df1d1ad6136cad98367fba5528391a266f2f4b978672",
+          "sha256_lf": "be5a842f95cc82845a05df1d1ad6136cad98367fba5528391a266f2f4b978672",
+          "order": 4,
+          "topic_key": "04_segredos_credenciais",
+          "item_ids": [
+            "Segredos e credenciais"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-04-segredos-credenciais-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/04_segredos_credenciais/02_quiz.md",
+          "sha256": "5ea3ef75aab48e5b99b9d2d4f6780ea6a811479e9ce3ea58a3a5704d28a642cb",
+          "sha256_lf": "5ea3ef75aab48e5b99b9d2d4f6780ea6a811479e9ce3ea58a3a5704d28a642cb",
+          "order": 4,
+          "topic_key": "04_segredos_credenciais",
+          "item_ids": [
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-04-segredos-credenciais-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/04_segredos_credenciais/03_gabarito_quiz.md",
+          "sha256": "b66ae62d9adad96d9da8d579db2fb5a7c1d6ac42bac24cf1aa55c57d27443f3e",
+          "sha256_lf": "b66ae62d9adad96d9da8d579db2fb5a7c1d6ac42bac24cf1aa55c57d27443f3e",
+          "order": 4,
+          "topic_key": "04_segredos_credenciais",
+          "item_ids": [
+            "Q3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-90-integracao-01-quiz-integrador",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/90_integracao/01_quiz_integrador.md",
+          "sha256": "203b1cca4f8b4424bbbb2f904487e56ddd58b24344a65b489d8e6a51daf82876",
+          "sha256_lf": "203b1cca4f8b4424bbbb2f904487e56ddd58b24344a65b489d8e6a51daf82876",
+          "order": 90,
+          "topic_key": null,
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-90-integracao-02-gabarito-quiz-integrador",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/90_integracao/02_gabarito_quiz_integrador.md",
+          "sha256": "0bcd283e6dfe31afd865766c2e6589ef92a1b297326146980c92f18572fe663e",
+          "sha256_lf": "0bcd283e6dfe31afd865766c2e6589ef92a1b297326146980c92f18572fe663e",
+          "order": 90,
+          "topic_key": null,
+          "item_ids": [
+            "Q5"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-90-integracao-03-pratica-independente-incidentes",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/90_integracao/03_pratica_independente_incidentes.md",
+          "sha256": "15b89d626c1eb88493f783a4c60640f749663eb4b3ca33c22ec0bed2760bb201",
+          "sha256_lf": "15b89d626c1eb88493f783a4c60640f749663eb4b3ca33c22ec0bed2760bb201",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-90-integracao-04-gabarito-pratica-independente",
+          "kind": "answer_key_pratica",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/90_integracao/04_gabarito_pratica_independente.md",
+          "sha256": "52569c6503ea685cb21012945eba1a2e71209b2ed29c143f40c3198abdf3ea0d",
+          "sha256_lf": "52569c6503ea685cb21012945eba1a2e71209b2ed29c143f40c3198abdf3ea0d",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-90-integracao-05-rubrica-pratica-independente",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/90_integracao/05_rubrica_pratica_independente.md",
+          "sha256": "2a0fa046be2e4a5b29e5a2ca85f43fce139d7c3468dd449722ebe22b61e2bb2e",
+          "sha256_lf": "2a0fa046be2e4a5b29e5a2ca85f43fce139d7c3468dd449722ebe22b61e2bb2e",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-90-integracao-06-pratica-transferencia-pull-request",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/90_integracao/06_pratica_transferencia_pull_request.md",
+          "sha256": "c843371c822c88d16de165a707d16b40b764d3d04d9dae7c13df92c472a025a5",
+          "sha256_lf": "c843371c822c88d16de165a707d16b40b764d3d04d9dae7c13df92c472a025a5",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-90-integracao-07-checklist-pratica-transferencia",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/90_integracao/07_checklist_pratica_transferencia.md",
+          "sha256": "8a17dcc33916640f905fffedc55813e0996909867359eb26f4e571a150dd556d",
+          "sha256_lf": "8a17dcc33916640f905fffedc55813e0996909867359eb26f4e571a150dd556d",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "P3"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-3-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/README.md",
+          "sha256": "0bfe0ee6b776e812e953d82e214ffe81f8b49f7b8f00a0179fbd37ef90a86cb9",
+          "sha256_lf": "0bfe0ee6b776e812e953d82e214ffe81f8b49f7b8f00a0179fbd37ef90a86cb9",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        }
+      ],
+      "counts": {
+        "topics": 4,
+        "theory_segments": 4,
+        "quiz_files": 5,
+        "quiz_questions": 5,
+        "manual_exercises": 3,
+        "project_materials": 0,
+        "references": 7,
+        "relations": 4,
+        "persisted_blocks": 20
+      },
+      "generated_ids": [
+        "unit-3-3-quiz-q5",
+        "3-3-summary-001",
+        "unit-3-3-exercise-p1",
+        "unit-3-3-exercise-p2",
+        "unit-3-3-exercise-p3",
+        "unit-3-3-reference-001",
+        "unit-3-3-reference-002",
+        "unit-3-3-reference-003",
+        "unit-3-3-reference-004",
+        "unit-3-3-reference-005",
+        "unit-3-3-reference-006",
+        "unit-3-3-reference-007",
+        "unit-3-3-topic-01-local-e-remoto-segment-01",
+        "unit-3-3-quiz-q1",
+        "unit-3-3-topic-02-pull-request-code-review-segment-01",
+        "unit-3-3-quiz-q2",
+        "unit-3-3-topic-03-fluxo-colaborativo-segment-01",
+        "unit-3-3-quiz-q4",
+        "unit-3-3-topic-04-segredos-credenciais-segment-01",
+        "unit-3-3-quiz-q3",
+        "unit-3-3",
+        "unit-3-3-topic-01-local-e-remoto",
+        "unit-3-3-topic-02-pull-request-code-review",
+        "unit-3-3-topic-03-fluxo-colaborativo",
+        "unit-3-3-topic-04-segredos-credenciais"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "restricted",
+          "reason": "Persistido apenas no banco descartável; publicação e endpoint real não foram exercitados."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "SOURCE_ABSENT",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 0,
+      "warnings": [
+        "quiz integrador sem assunto teórico: docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.3_GitHub/90_integracao/01_quiz_integrador.md"
+      ],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    },
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "3.4",
+      "title": "3.4 — Revisita contínua",
+      "module_id": "3",
+      "module_order": 3,
+      "unit_order": 4,
+      "source": {
+        "source_id": "3.4",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "6853cb1ca262cdc3276c7cbc7df505292cc4cf7cd3737b3e2cc38220556721b7",
+        "source_sha256_lf": "6853cb1ca262cdc3276c7cbc7df505292cc4cf7cd3737b3e2cc38220556721b7",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-3-4-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/00_objetivo.md",
+          "sha256": "f4e2d344d3e1cc83956c11ebe4a8151bdba91dc89f3dca1d62aae56da60a4b9e",
+          "sha256_lf": "f4e2d344d3e1cc83956c11ebe4a8151bdba91dc89f3dca1d62aae56da60a4b9e",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-4-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/01_resumo.md",
+          "sha256": "e77ef9548c4f535a0b4508213609f71ee6573605a357cbe90dbc63933857ffe8",
+          "sha256_lf": "e77ef9548c4f535a0b4508213609f71ee6573605a357cbe90dbc63933857ffe8",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-4-01-revisita-continua-01-teoria",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/01_revisita_continua/01_teoria.md",
+          "sha256": "c27c250bc996d3d1d5c71d53850587286524bb718880ceca2d907820a8fcb0dc",
+          "sha256_lf": "c27c250bc996d3d1d5c71d53850587286524bb718880ceca2d907820a8fcb0dc",
+          "order": 1,
+          "topic_key": "01_revisita_continua",
+          "item_ids": [
+            "Versionar como hábito",
+            "Revisar o histórico e as branches",
+            "README e escrita técnica em inglês"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-4-01-revisita-continua-02-quiz",
+          "kind": "quiz",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/01_revisita_continua/02_quiz.md",
+          "sha256": "38b9d9027d7ef4699e940905552fe3be810862f84219ebb7ae620b07144c4b84",
+          "sha256_lf": "38b9d9027d7ef4699e940905552fe3be810862f84219ebb7ae620b07144c4b84",
+          "order": 1,
+          "topic_key": "01_revisita_continua",
+          "item_ids": [
+            "Q1",
+            "Q2",
+            "Q3",
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-4-01-revisita-continua-03-gabarito-quiz",
+          "kind": "answer_key",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/01_revisita_continua/03_gabarito_quiz.md",
+          "sha256": "38eca272a88ce189ab4670ec353f0478120c07120b02b9157ab8c5d08393ae0a",
+          "sha256_lf": "38eca272a88ce189ab4670ec353f0478120c07120b02b9157ab8c5d08393ae0a",
+          "order": 1,
+          "topic_key": "01_revisita_continua",
+          "item_ids": [
+            "Q1",
+            "Q2",
+            "Q3",
+            "Q4"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-4-01-revisita-continua-04-pratica-revisao-periodica",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/01_revisita_continua/04_pratica_revisao_periodica.md",
+          "sha256": "0338ba2e868eb7b17934472a119efdf96274bfad77edf404cd4477fcd8410ff6",
+          "sha256_lf": "0338ba2e868eb7b17934472a119efdf96274bfad77edf404cd4477fcd8410ff6",
+          "order": 1,
+          "topic_key": "01_revisita_continua",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-4-01-revisita-continua-05-checklist-pratica-revisao",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/01_revisita_continua/05_checklist_pratica_revisao.md",
+          "sha256": "3c5d83f4c3115b7862c9a05e5de05d04b24ed97d78dbd048af4d203b4fc77175",
+          "sha256_lf": "3c5d83f4c3115b7862c9a05e5de05d04b24ed97d78dbd048af4d203b4fc77175",
+          "order": 1,
+          "topic_key": "01_revisita_continua",
+          "item_ids": [
+            "P1"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-4-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/02_criterio_de_conclusao.md",
+          "sha256": "1cf745659735a1a6dd4097037075a10ebbd570b572c25a207f4b8c5e24ac7733",
+          "sha256_lf": "1cf745659735a1a6dd4097037075a10ebbd570b572c25a207f4b8c5e24ac7733",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-4-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/03_conexoes.md",
+          "sha256": "de950355ed15e2876dd4b8ab515097535cb3d69b0926f54ffc7bdbee8190e6fa",
+          "sha256_lf": "de950355ed15e2876dd4b8ab515097535cb3d69b0926f54ffc7bdbee8190e6fa",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-4-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/04_referencias.md",
+          "sha256": "bbf39b05e3119d1fe69a26a35122be450f95c871c6d1e9fdb1ca20450aece235",
+          "sha256_lf": "bbf39b05e3119d1fe69a26a35122be450f95c871c6d1e9fdb1ca20450aece235",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-4-90-integracao-01-exercicio-integrador-recupere",
+          "kind": "practice",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/90_integracao/01_exercicio_integrador_recupere.md",
+          "sha256": "22b2bd020a60b46f0e07fbc80c7ff789f0f84e5e056429a395faad5c785da81e",
+          "sha256_lf": "22b2bd020a60b46f0e07fbc80c7ff789f0f84e5e056429a395faad5c785da81e",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-4-90-integracao-02-rubrica-exercicio-integrador",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/90_integracao/02_rubrica_exercicio_integrador.md",
+          "sha256": "ee40b740d7cb2aea4c878f06cb5a36be70aa573a29a6fb0c115cffc31876040b",
+          "sha256_lf": "ee40b740d7cb2aea4c878f06cb5a36be70aa573a29a6fb0c115cffc31876040b",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "P2"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-4-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.4_Revisita_continua/README.md",
+          "sha256": "12bc7f1e134becd301c19fca376e422f2b2b3fc54f421b6e40a242961f01f116",
+          "sha256_lf": "12bc7f1e134becd301c19fca376e422f2b2b3fc54f421b6e40a242961f01f116",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        }
+      ],
+      "counts": {
+        "topics": 1,
+        "theory_segments": 3,
+        "quiz_files": 1,
+        "quiz_questions": 4,
+        "manual_exercises": 2,
+        "project_materials": 0,
+        "references": 2,
+        "relations": 2,
+        "persisted_blocks": 12
+      },
+      "generated_ids": [
+        "3-4-summary-001",
+        "unit-3-4-exercise-p1",
+        "unit-3-4-exercise-p2",
+        "unit-3-4-reference-001",
+        "unit-3-4-reference-002",
+        "unit-3-4-topic-01-revisita-continua-segment-01",
+        "unit-3-4-topic-01-revisita-continua-segment-02",
+        "unit-3-4-topic-01-revisita-continua-segment-03",
+        "unit-3-4-quiz-q1",
+        "unit-3-4-quiz-q2",
+        "unit-3-4-quiz-q3",
+        "unit-3-4-quiz-q4",
+        "unit-3-4",
+        "unit-3-4-topic-01-revisita-continua"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "restricted",
+          "reason": "Persistido apenas no banco descartável; publicação e endpoint real não foram exercitados."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "SOURCE_ABSENT",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 0,
+      "warnings": [],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    },
+    {
+      "manifest_schema": "trilhacode.beta4.unit-manifest/1.0",
+      "unit_id": "3.5",
+      "title": "3.5 — Projeto incremental da fase",
+      "module_id": "3",
+      "module_order": 3,
+      "unit_order": 5,
+      "source": {
+        "source_id": "3.5",
+        "source_path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental",
+        "source_revision": "migration@147dc68:tracked-clean-first-phase-files",
+        "source_status": "rascunho",
+        "source_sha256": "f2b7ab9454591d5ed02a1e5e70b5331e21aaf36efa5490c147ca693d6d20b877",
+        "source_sha256_lf": "f2b7ab9454591d5ed02a1e5e70b5331e21aaf36efa5490c147ca693d6d20b877",
+        "converter_version": "beta4-first-phase-batch/1.1"
+      },
+      "source_artifacts": [
+        {
+          "artifact_id": "f1-3-5-00-brief-projeto",
+          "kind": "project_brief",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/00_brief_projeto.md",
+          "sha256": "d381f5d17f0b4a5d1773348cbd9b87a068821ba434b6af280d86997137b3479c",
+          "sha256_lf": "d381f5d17f0b4a5d1773348cbd9b87a068821ba434b6af280d86997137b3479c",
+          "order": 0,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-5-00-objetivo",
+          "kind": "objetivo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/00_objetivo.md",
+          "sha256": "672fb3f4b8e54b7d3af94ce027fd6e4995b453ba8eec6ec90372268df99826e6",
+          "sha256_lf": "672fb3f4b8e54b7d3af94ce027fd6e4995b453ba8eec6ec90372268df99826e6",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-5-01-resumo",
+          "kind": "resumo",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/01_resumo.md",
+          "sha256": "5c49feb7360d616df6bb64bbc1a8272b1f4fc140324d0b728a63f046de7473ae",
+          "sha256_lf": "5c49feb7360d616df6bb64bbc1a8272b1f4fc140324d0b728a63f046de7473ae",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-5-02-criterio-de-conclusao",
+          "kind": "criterio",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/02_criterio_de_conclusao.md",
+          "sha256": "41f5e5208f6ca816d5553d3df8141e814222c61d78a7b938a1f73f46ea7b4366",
+          "sha256_lf": "41f5e5208f6ca816d5553d3df8141e814222c61d78a7b938a1f73f46ea7b4366",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-5-03-conexoes",
+          "kind": "conexoes",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/03_conexoes.md",
+          "sha256": "68366afd04b4a87c98c812edd77a0212e231c9225b020f2810b5b5d36cc19b44",
+          "sha256_lf": "68366afd04b4a87c98c812edd77a0212e231c9225b020f2810b5b5d36cc19b44",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-5-04-referencias",
+          "kind": "referencias",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/04_referencias.md",
+          "sha256": "6193dada6a655eb21bcb5c10c5b4ca1a52f980f1764a84f01ee2d26e71be965d",
+          "sha256_lf": "6193dada6a655eb21bcb5c10c5b4ca1a52f980f1764a84f01ee2d26e71be965d",
+          "order": 5,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-5-checklist-marco-01-aceite",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_marco_01_aceite.md",
+          "sha256": "f956838abee9af4e11228eec7b61103e8e97cf6b31477f9d2547944476f23401",
+          "sha256_lf": "f956838abee9af4e11228eec7b61103e8e97cf6b31477f9d2547944476f23401",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "M01"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-checklist-marco-02-aceite",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_marco_02_aceite.md",
+          "sha256": "93044f19dfc0f10e505a7b2460ee5fe6c5e4abef582c051d9fe14dd2bbd582f3",
+          "sha256_lf": "93044f19dfc0f10e505a7b2460ee5fe6c5e4abef582c051d9fe14dd2bbd582f3",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "M02"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-checklist-marco-03-aceite",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_marco_03_aceite.md",
+          "sha256": "9523a19dedf6eb9865feae3102b956b15f75492eafab4f324bffa3cf47d575f7",
+          "sha256_lf": "9523a19dedf6eb9865feae3102b956b15f75492eafab4f324bffa3cf47d575f7",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "M03"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-checklist-marco-04-aceite",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_marco_04_aceite.md",
+          "sha256": "71e0484831e537369d2ccc1892f754e7fa3bc1821e12e9555d39fd9a0f1e69c0",
+          "sha256_lf": "71e0484831e537369d2ccc1892f754e7fa3bc1821e12e9555d39fd9a0f1e69c0",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": [
+            "M04"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-checklist-revisao-final",
+          "kind": "checklist",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/checklist_revisao_final.md",
+          "sha256": "78022069a1a5b5bdcc49d0488d838b47b5701ef0c193dbafabed7fc57e5034a3",
+          "sha256_lf": "78022069a1a5b5bdcc49d0488d838b47b5701ef0c193dbafabed7fc57e5034a3",
+          "order": 0,
+          "topic_key": null,
+          "item_ids": [
+            "revisao_final"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-marco-01-escopo",
+          "kind": "milestone",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/marco_01_escopo.md",
+          "sha256": "2541ab7ef86bec2e02f065fceb3fe8a581f6135aa5e03722f1120ac124663c0d",
+          "sha256_lf": "2541ab7ef86bec2e02f065fceb3fe8a581f6135aa5e03722f1120ac124663c0d",
+          "order": 1,
+          "topic_key": null,
+          "item_ids": [
+            "M01"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-marco-02-repositorio-setup",
+          "kind": "milestone",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/marco_02_repositorio_setup.md",
+          "sha256": "69ed88657b0b19796058b8c8d6816f6800965abd17d860ca3b4fcd3a6e3ac5f9",
+          "sha256_lf": "69ed88657b0b19796058b8c8d6816f6800965abd17d860ca3b4fcd3a6e3ac5f9",
+          "order": 2,
+          "topic_key": null,
+          "item_ids": [
+            "M02"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-marco-03-historico-seguro",
+          "kind": "milestone",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/marco_03_historico_seguro.md",
+          "sha256": "2df7903a472803d96a5a357a5fef5b1497bdb6bc20e233d79edc7b1a5fb942d8",
+          "sha256_lf": "2df7903a472803d96a5a357a5fef5b1497bdb6bc20e233d79edc7b1a5fb942d8",
+          "order": 3,
+          "topic_key": null,
+          "item_ids": [
+            "M03"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-marco-04-publicacao-remota",
+          "kind": "milestone",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/marco_04_publicacao_remota.md",
+          "sha256": "b922364218f2952c3c7785f70d53799ecd4d1267e302ef8cfac48e0613387e55",
+          "sha256_lf": "b922364218f2952c3c7785f70d53799ecd4d1267e302ef8cfac48e0613387e55",
+          "order": 4,
+          "topic_key": null,
+          "item_ids": [
+            "M04"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-readme",
+          "kind": "topic_index",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/README.md",
+          "sha256": "a48067d0b46957dd9315c9666255d987b4a504940e2478d0fcafbf0dcdcce9bf",
+          "sha256_lf": "a48067d0b46957dd9315c9666255d987b4a504940e2478d0fcafbf0dcdcce9bf",
+          "order": null,
+          "topic_key": null,
+          "item_ids": []
+        },
+        {
+          "artifact_id": "f1-3-5-rubrica-comum-marcos-0-4",
+          "kind": "rubric",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/rubrica_comum_marcos_0-4.md",
+          "sha256": "a1e1b7609fc7b12b56aebde687c2e858aea5d6c599567722ec10637c1c57fcd5",
+          "sha256_lf": "a1e1b7609fc7b12b56aebde687c2e858aea5d6c599567722ec10637c1c57fcd5",
+          "order": 0,
+          "topic_key": null,
+          "item_ids": [
+            "rubrica_comum"
+          ]
+        },
+        {
+          "artifact_id": "f1-3-5-teoria-contexto",
+          "kind": "theory",
+          "path": "docs/courses/trilhacode/Conteudos_migrado/Fase_1/3.5_Projeto_incremental/teoria_contexto.md",
+          "sha256": "91a28118da504e93b58f57627b4eb28ac80f10062a4ccd9df574cf25a2d08c70",
+          "sha256_lf": "91a28118da504e93b58f57627b4eb28ac80f10062a4ccd9df574cf25a2d08c70",
+          "order": 0,
+          "topic_key": null,
+          "item_ids": [
+            "O repositório como caderno de engenharia",
+            "Escolha de uma ideia para o Trilho A",
+            "Dotfiles e setup seguro",
+            "Critérios de um repositório sustentável"
+          ]
+        }
+      ],
+      "counts": {
+        "topics": 1,
+        "theory_segments": 4,
+        "quiz_files": 0,
+        "quiz_questions": 0,
+        "manual_exercises": 0,
+        "project_materials": 11,
+        "references": 3,
+        "relations": 3,
+        "persisted_blocks": 8
+      },
+      "generated_ids": [
+        "3-5-summary-001",
+        "unit-3-5-reference-001",
+        "unit-3-5-reference-002",
+        "unit-3-5-reference-003",
+        "unit-3-5-topic-f1-3-5-teoria-contexto-segment-01",
+        "unit-3-5-topic-f1-3-5-teoria-contexto-segment-02",
+        "unit-3-5-topic-f1-3-5-teoria-contexto-segment-03",
+        "unit-3-5-topic-f1-3-5-teoria-contexto-segment-04",
+        "unit-3-5",
+        "unit-3-5-topic-f1-3-5-teoria-contexto"
+      ],
+      "field_dispositions": [
+        {
+          "source": "Objetivo e corpo teórico/resumo",
+          "destination": "nodes.description/content_blocks",
+          "status": "SUPPORTED_WITH_TRANSFORMATION",
+          "privacy": "public",
+          "reason": "Blocos e nós ficam em draft/private; hierarquia derivada dos IDs da Fase 1."
+        },
+        {
+          "source": "Gabarito e explicação do quiz",
+          "destination": "draft quiz.data + projeção de publicação existente",
+          "status": "SOURCE_ABSENT",
+          "privacy": "metadata",
+          "reason": "A fonte desta unidade não contém questões de quiz."
+        },
+        {
+          "source": "Critério de conclusão",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O importador não possui destino semântico para o critério; mantido no contrato intermediário."
+        },
+        {
+          "source": "Respostas de referência e rubricas de exercícios manuais",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não há ACL operacional comprovada para persistir esse material; excluído do payload."
+        },
+        {
+          "source": "Checklists e critérios de aceite",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "pending_policy",
+          "reason": "Classificação aluno/instrutor não está declarada de forma consistente; conteúdo mantido fora do payload."
+        },
+        {
+          "source": "Descrição de referências",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "public",
+          "reason": "O tipo reference aceita citation/url, sem campo tipado de descrição."
+        },
+        {
+          "source": "Conexões externas ou não resolvidas",
+          "destination": "contract intermediate only",
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "metadata",
+          "reason": "Relações internas são não-enforced; alvos externos permanecem textuais e não são importados."
+        },
+        {
+          "source": "Brief, marcos e rubricas de projeto",
+          "destination": null,
+          "status": "REQUIRES_ADAPTER",
+          "privacy": "restricted",
+          "reason": "Não existe contrato operacional de projeto por marcos no importador C16."
+        }
+      ],
+      "unresolved_connection_line_count": 2,
+      "warnings": [
+        "materiais de projeto aguardam adaptador"
+      ],
+      "conversion_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+      "private_source_bodies_in_manifest": false
+    }
+  ],
+  "aggregate_status": "CONVERSION_SUCCESS_WITH_WARNINGS",
+  "duplicate_generated_ids": [],
+  "payload_sha256": "0c0ba5e5db5c0d18d03383657cd87d17ea599547e3cc261c61a1186e5d84410f",
+  "canonical_manifest_sha256": "7228f727a21ea38493456edd5cbcb63c8299349242be35555672cef854a6f191",
+  "private_content_in_manifest": false,
+  "all_sources_read_only": true,
+  "draft_and_private_only": true
+}

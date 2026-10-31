@@ -63,7 +63,7 @@ jobs:
           with MongoClient(os.environ["MONGO_URL_TEST"], serverSelectionTimeoutMS=5000) as client:
               version = client.admin.command("buildInfo")["version"]
           print(f"PyMongo={pymongo.version}; MongoDB={version}")
-          assert pymongo.version == "4.18.2", "Unexpected PyMongo version"
+          assert pymongo.version == "4.18.3", "Unexpected PyMongo version"
           assert version.split(".", 1)[0] == "7", "Expected MongoDB major version 7"
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
               summary.write(f"### Runtime versions\n- Python: {sys.version.split()[0]}\n- PyMongo: {pymongo.version}\n- MongoDB: {version}\n")
@@ -83,7 +83,7 @@ jobs:
         run: |
           {
             echo '## Backend and MongoDB 7'
-            echo "- Tested SHA: `$GITHUB_SHA`"
+            echo "- Tested SHA: \`$GITHUB_SHA\`"
             echo "- Python: $(python --version 2>&1 || echo unavailable)"
             echo "- Job result: ${{ job.status }}"
             echo '- Pytest logs include pass/fail/skip details via `-ra`; no test artifacts are uploaded.'
@@ -150,7 +150,7 @@ jobs:
         run: |
           {
             echo '## Frontend on Node 20'
-            echo "- Tested SHA: `$GITHUB_SHA`"
+            echo "- Tested SHA: \`$GITHUB_SHA\`"
             echo "- Node: $(node --version 2>&1 || echo unavailable)"
             echo "- Job result: ${{ job.status }}"
             echo '- npm uses `npm ci` and the committed `frontend/package-lock.json`.'
@@ -217,7 +217,7 @@ jobs:
         run: |
           {
             echo '## Docker and G2 contracts'
-            echo "- Tested SHA: `$GITHUB_SHA`"
+            echo "- Tested SHA: \`$GITHUB_SHA\`"
             echo "- Job result: ${{ job.status }}"
             echo '- Docker resources are ephemeral and uniquely named by the existing contract test; cleanup targets only those generated names.'
             echo '- No Compose services, persistent volumes, staging preflight, SSH, or global cleanup are run.'
@@ -293,7 +293,7 @@ jobs:
             echo "LOCAL_EMAIL_DIR=$mail_dir"
             echo "AUTH_TEST_MAIL_DIR=$mail_dir"
           } >> "$GITHUB_ENV"
-      - name: Verify PyMongo 4.18.2 and MongoDB 7
+      - name: Verify PyMongo 4.18.3 and MongoDB 7
         run: |
           set -euo pipefail
           python --version
@@ -306,7 +306,7 @@ jobs:
           with MongoClient(os.environ["MONGO_URL"], serverSelectionTimeoutMS=5000) as client:
               version = client.admin.command("buildInfo")["version"]
           print(f"PyMongo={pymongo.version}; MongoDB={version}")
-          assert pymongo.version == "4.18.2", "Unexpected PyMongo version"
+          assert pymongo.version == "4.18.3", "Unexpected PyMongo version"
           assert version.split(".", 1)[0] == "7", "Expected MongoDB major version 7"
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
               summary.write(f"### Runtime versions\n- Python: {sys.version.split()[0]}\n- PyMongo: {pymongo.version}\n- MongoDB: {version}\n")
@@ -370,7 +370,8 @@ jobs:
             sleep 2
           done
 
-          ./node_modules/.bin/vite --host 127.0.0.1 --port 5173 \
+          VITE_BACKEND_URL=http://127.0.0.1:18000 \
+            ./node_modules/.bin/vite --host 127.0.0.1 --port 5173 \
             > "$RUNNER_TEMP/foundation-frontend.log" 2>&1 &
           frontend_pid=$!
           for attempt in {1..60}; do
@@ -385,8 +386,8 @@ jobs:
         run: |
           {
             echo '## Integrated E2E'
-            echo "- Tested SHA: `$GITHUB_SHA`"
-            echo '- Runtime: Python 3.11, PyMongo 4.18.2, MongoDB 7, Node 20, local email sink.'
+            echo "- Tested SHA: \`$GITHUB_SHA\`"
+            echo '- Runtime: Python 3.11, PyMongo 4.18.3, MongoDB 7, Node 20, local email sink.'
             echo "- Job result: ${{ job.status }}"
             echo '- Playwright logs remain in the job output; no traces or user data are uploaded as artifacts.'
             echo '- This runs the Playwright coverage already present in `frontend/e2e`; backend tests separately cover API note conflicts and import recovery.'
@@ -411,8 +412,8 @@ jobs:
           set -euo pipefail
           {
             echo '## Trilha Code foundation validation — no deploy'
-            echo "- Tested SHA: `$GITHUB_SHA`"
-            echo "- Ref: `$GITHUB_REF`"
+            echo "- Tested SHA: \`$GITHUB_SHA\`"
+            echo "- Ref: \`$GITHUB_REF\`"
             echo "- Backend: $BACKEND_RESULT"
             echo "- Frontend: $FRONTEND_RESULT"
             echo "- Docker/G2: $DOCKER_G2_RESULT"

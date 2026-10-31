@@ -1,0 +1,62 @@
+name: Trilha Code Beta 6.1 validation (no deploy)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/beta61-validation.yml"
+      - "backend/**"
+      - "frontend/**"
+      - "compose.qa.yaml"
+      - "ops/editorial-generations/requirements.lock"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta61-validation-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI: "true"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  beta61:
+    name: Beta 6.1 HTTP and Chromium (ephemeral)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out tested commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Install locked backend dependencies
+        run: python -m pip install -r backend/requirements-dev.txt
+      - name: Verify disposable Docker runtime
+        run: |
+          set -euo pipefail
+          docker version --format 'Docker client={{.Client.Version}} server={{.Server.Version}}'
+          docker info --format 'Engine={{.Name}} OS={{.OSType}} Arch={{.Architecture}}'
+          docker context show
+          docker compose version
+      - name: Run Beta 6.1 HTTP and Chromium journey
+        working-directory: backend
+        run: PYTHONPATH=. python test_support/run_beta6_1_journey.py
+      - name: Record Beta 6.1 result
+        if: always()
+        run: |
+          {
+            echo '## Beta 6.1 HTTP and Chromium validation'
+            echo "- Tested SHA: \`$GITHUB_SHA\`"
+            echo "- Job result: ${{ job.status }}"
+            echo '- MongoDB, API, Vite, Chromium, and test data are created only by the owned ephemeral harness.'
+            echo '- This workflow does not deploy, publish images, use SSH, or access repository secrets.'
+          } >> "$GITHUB_STEP_SUMMARY"

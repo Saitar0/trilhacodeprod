@@ -10,7 +10,7 @@ from audit import audit
 from constants import PERMISSIONS, ROLES
 from core_utils import now
 from database import db
-from security import hash_password, verify_password
+from security import account_is_active, hash_password, verify_password
 from serialization import oid, ser
 
 _DUMMY_PASSWORD_HASH = hash_password("a-fixed-dummy-password-used-for-login-timing")
@@ -111,7 +111,7 @@ async def authenticate_user(email: str, password: str, identifier: str) -> dict:
         raise HTTPException(status_code=429, detail="Muitas tentativas. Tente novamente em 15 minutos.")
     user = await db.users.find_one({"email": email})
     password_matches = verify_password(password, user["password_hash"] if user else _DUMMY_PASSWORD_HASH)
-    if not user or not password_matches:
+    if not user or not password_matches or not account_is_active(user):
         await _record_failed_login(identifier)
         raise HTTPException(status_code=401, detail="Email ou senha inválidos")
     if user.get("email_verified") is False:
@@ -125,6 +125,8 @@ async def get_refresh_user(user_id: str, token_version: int = 0) -> dict:
     user = await db.users.find_one({"_id": oid(user_id)})
     if not user:
         raise HTTPException(status_code=401, detail="Usuário não encontrado")
+    if not account_is_active(user):
+        raise HTTPException(status_code=401, detail="Conta desativada")
     if user.get("email_verified") is False:
         raise HTTPException(status_code=403, detail="Confirme seu e-mail para acessar a plataforma")
     if token_version != user.get("token_version", 0):

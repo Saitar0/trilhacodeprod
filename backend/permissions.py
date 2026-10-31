@@ -25,5 +25,7 @@ def is_staff(user: dict) -> bool:
 def can_view_track(track: dict, user: dict) -> bool:
     """Return whether a user may read a track's metadata and content tree."""
     return is_staff(user) or (
-        track.get("status") == "published" and track.get("visibility") == "public"
+        track.get("status") == "published"
+        and track.get("visibility") == "public"
+        and "_import_state" not in track
     )

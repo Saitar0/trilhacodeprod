@@ -1,0 +1,51 @@
+services:
+  mongo:
+    image: mongo:7
+    command: ["mongod", "--bind_ip_all"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${EDITORIAL_POC_ROOT_USERNAME:?Required ephemeral root user}
+      MONGO_INITDB_ROOT_PASSWORD: ${EDITORIAL_POC_ROOT_PASSWORD:?Required ephemeral root password}
+    tmpfs:
+      - /data/db
+    networks:
+      editorial_poc:
+        aliases:
+          - mongo
+    labels:
+      io.trilhacode.editorial-poc.run: ${EDITORIAL_POC_RUN_ID:?Required unique run id}
+      io.trilhacode.editorial-poc.role: mongo
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ping: 1}).ok"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+    restart: "no"
+
+  harness:
+    build:
+      context: ../..
+      dockerfile: ops/editorial-generations/Dockerfile
+    environment:
+      EDITORIAL_POC_DISPOSABLE: "1"
+      EDITORIAL_POC_RUN_ID: ${EDITORIAL_POC_RUN_ID:?Required unique run id}
+      EDITORIAL_POC_PROJECT: ${EDITORIAL_POC_PROJECT:?Required unique project}
+      EDITORIAL_POC_MONGO_HOST: mongo
+      EDITORIAL_POC_MONGO_PORT: "27017"
+      EDITORIAL_POC_ROOT_USERNAME: ${EDITORIAL_POC_ROOT_USERNAME:?Required ephemeral root user}
+      EDITORIAL_POC_ROOT_PASSWORD: ${EDITORIAL_POC_ROOT_PASSWORD:?Required ephemeral root password}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - editorial_poc
+    labels:
+      io.trilhacode.editorial-poc.run: ${EDITORIAL_POC_RUN_ID:?Required unique run id}
+      io.trilhacode.editorial-poc.role: harness
+    restart: "no"
+
+networks:
+  editorial_poc:
+    internal: true
+    labels:
+      io.trilhacode.editorial-poc.run: ${EDITORIAL_POC_RUN_ID:?Required unique run id}
