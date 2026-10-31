@@ -1,0 +1,75 @@
+name: Editorial generations MongoDB 7 homologation (no deploy)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: editorial-generations-mongodb-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  standalone-homologation:
+    name: MongoDB 7 standalone — PoC integration suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out selected ref without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Create ephemeral harness identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          root_password="$(python3 - <<'PY'
+          import secrets
+          print(secrets.token_urlsafe(36))
+          PY
+          )"
+          printf '::add-mask::%s\n' "$root_password"
+          run_id="$(python3 -c 'import secrets; print(secrets.token_hex(16))')"
+          {
+            printf 'EDITORIAL_POC_RUN_ID=%s\n' "$run_id"
+            printf 'EDITORIAL_POC_PROJECT=editorial-poc-%s\n' "$run_id"
+            printf 'EDITORIAL_POC_DISPOSABLE=1\n'
+            printf 'EDITORIAL_POC_MONGO_HOST=mongo\n'
+            printf 'EDITORIAL_POC_MONGO_PORT=27017\n'
+            printf 'EDITORIAL_POC_ROOT_USERNAME=pocroot\n'
+            printf 'EDITORIAL_POC_ROOT_PASSWORD=%s\n' "$root_password"
+          } >> "$GITHUB_ENV"
+          unset root_password run_id
+
+      - name: Verify disposable Docker runtime
+        run: |
+          set -euo pipefail
+          python3 ops/editorial-generations/test_docker_context.py
+          python3 ops/editorial-generations/verify_docker_context.py
+          docker compose version
+
+      - name: Run PoC and real MongoDB 7 integration tests
+        run: |
+          set -euo pipefail
+          docker compose --project-name "$EDITORIAL_POC_PROJECT" --file ops/editorial-generations/compose.yaml config --format json \
+            | python3 ops/editorial-generations/validate_compose.py
+          if [[ -n "$(docker ps --all --quiet --filter "label=com.docker.compose.project=$EDITORIAL_POC_PROJECT")" \
+             || -n "$(docker network ls --quiet --filter "label=com.docker.compose.project=$EDITORIAL_POC_PROJECT")" \
+             || -n "$(docker volume ls --quiet --filter "label=com.docker.compose.project=$EDITORIAL_POC_PROJECT")" ]]; then
+            echo "A identidade aleatória já possui recursos; execução recusada."
+            exit 2
+          fi
+          docker compose --project-name "$EDITORIAL_POC_PROJECT" --file ops/editorial-generations/compose.yaml up --build --abort-on-container-exit --exit-code-from harness harness
+
+      - name: Remove only resources labeled for this run
+        if: always()
+        run: |
+          set -euo pipefail
+          if [[ -z "${EDITORIAL_POC_PROJECT:-}" || -z "${EDITORIAL_POC_RUN_ID:-}" ]]; then
+            echo "No project identity was created; nothing to clean."
+            exit 0
+          fi
+          python3 ops/editorial-generations/cleanup_compose.py \
+            --compose-file ops/editorial-generations/compose.yaml

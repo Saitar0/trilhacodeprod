@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CheckCircle2, MessageSquare, Send, Save, XCircle } from "lucide-react";
 import { api, apiError } from "@/lib/api";
 import { useMySubmissions } from "@/hooks/useStudy";
+import { createOperationId } from "@/lib/operationId";
 import { ContentBlock, Submission } from "@/types";
 import { cn, formatDate } from "@/lib/utils";
 import { Markdown } from "@/components/common/Markdown";
@@ -14,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 function Feedback({ sub }: { sub: Submission }) {
   const g = sub.grading;
   if (!g) return null;
+  const criteria = g.criteria || [];
   return (
     <div data-testid={`submission-feedback-${sub.id}`} className="space-y-3 rounded-lg border border-slate-700 bg-slate-950/60 p-4">
       <p className={cn("flex items-center gap-2 text-sm font-semibold", RESULT_META[g.result]?.cls)}>
@@ -21,9 +23,9 @@ function Feedback({ sub }: { sub: Submission }) {
         {g.score != null && <span className="ml-auto font-mono text-xs">nota {g.score}</span>}
       </p>
       {g.feedback && <Markdown className="text-sm">{g.feedback}</Markdown>}
-      {g.criteria.length > 0 && (
+      {criteria.length > 0 && (
         <ul className="space-y-1.5">
-          {g.criteria.map((c, i) => (
+          {criteria.map((c, i) => (
             <li key={i} className="flex gap-2 text-sm">
               {c.met === false ? <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-400" /> : <CheckCircle2 className={cn("mt-0.5 h-4 w-4 shrink-0", c.met ? "text-emerald-400" : "text-slate-600")} />}
               <span className="text-slate-300">{c.criterion}{c.comment && <span className="text-slate-500"> — {c.comment}</span>}</span>
@@ -78,12 +80,22 @@ export function ExerciseSubmission({ block }: { block: ContentBlock }) {
   const editable = !current || ["draft", "submitted", "returned"].includes(current.status);
   const [answer, setAnswer] = useState<Submission["answer"]>({});
   const [retrying, setRetrying] = useState(false);
+  const submitOperation = useRef<{ fingerprint: string; id: string } | null>(null);
   useEffect(() => { if (current && editable) setAnswer(current.answer || {}); }, [current?.id, current?.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const send = async (kind: "draft" | "submit") => {
     try {
       if (kind === "draft") await api.put("/submissions/draft", { block_id: block.id, answer });
-      else await api.post("/submissions/submit", { block_id: block.id, answer });
+      else {
+        const fingerprint = JSON.stringify(answer);
+        if (submitOperation.current?.fingerprint !== fingerprint) {
+          submitOperation.current = { fingerprint, id: createOperationId() };
+        }
+        await api.post("/submissions/submit", { block_id: block.id, answer }, {
+          headers: { "Idempotency-Key": submitOperation.current.id },
+        });
+        submitOperation.current = null;
+      }
       qc.invalidateQueries({ queryKey: ["submissions", "mine"] });
       setRetrying(false);
       toast.success(kind === "draft" ? "Rascunho salvo" : "Resposta enviada para correção");

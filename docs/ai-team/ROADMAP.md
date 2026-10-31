@@ -60,3 +60,10 @@ Nenhuma escrita ou operação em Mongo real, migration, seed real, backup/restor
 - Coolify 4.4.6: `trilhacode-staging-api` consta `exited:unhealthy`, sem container presente; Mongo de staging `running:healthy`. Nenhuma ação de ciclo de vida foi executada.
 - Bundle build da CI #39036366799: 1.611 arquivos JavaScript em `dist/assets`; 1.867,01 kB bruto somado (874,12 kB gzip se todos fossem baixados). O entry `index` tem 493,75 kB (159,36 kB gzip); `IconCatalog` tem 213,07 kB (50,83 kB gzip). O build levou 11,75 s. Esses valores descrevem o build, não requests carregadas em uma rota real; não foi aplicada otimização. Contagem de requests em runtime segue pendente.
 - Próxima retomada: PRs #19 e #20 estão revisadas e com CI verde, prontas para integração manual. A PR #21 documenta este checkpoint. Manter as branches abertas e não fazer merge automático. Para G2, responsável compara em canal privado host, porta 22 e fingerprint com `G2_STAGING_SSH_KNOWN_HOSTS`; nenhuma secret ou workflow deve ser alterado/acionado sem aprovação específica.
+
+## 26/10/2026 — Fase 1.2: notas e progresso confiáveis
+
+- Implementação isolada na branch `codex/fase1-2-persistencia`, baseada no commit aprovado da Fase 1.1 `d2824aa6b910f747a29cbbbf8a2f123a5ad51d5c`.
+- Concluídos localmente: versionamento/conflito de notas, recuperação em memória de rascunhos pendentes, barreira de navegação, CAS de progresso, eventos com outbox reconciliável, retries idempotentes e identificador explícito de tentativa de quiz.
+- Validação local: pytest 112/112, Vitest 21/21, Ruff, typecheck, ESLint e build passaram. E2E não executado sem ambiente de aplicação e conta descartáveis preconfigurados.
+- Não houve integração, push ou deploy. O conteúdo editorial permaneceu excluído da worktree.

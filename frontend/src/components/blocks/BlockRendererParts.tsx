@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, Copy, ExternalLink, Info, RotateCcw, X } from "lucide-react";
+import { Copy, ExternalLink, Info } from "lucide-react";
 import { Markdown } from "@/components/common/Markdown";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -39,42 +39,19 @@ export function ChecklistBlock({ block, progress, onProgress }: BlockProps) {
   );
 }
 
-export function QuizBlock({ block, progress, onProgress }: BlockProps) {
+export function QuizBlock({ block }: BlockProps) {
   const options = list(block.data.options);
-  const correct = Number(block.data.correct_index ?? -1);
-  const [selected, setSelected] = useState<number | null>((progress?.data?.selected as number) ?? null);
-  const pick = (i: number) => {
-    setSelected(i);
-    onProgress?.("completed", { selected: i, correct: i === correct });
-  };
   return (
     <div className="space-y-3">
-      <p className="font-medium text-slate-100">{block.data.question}</p>
-      <div className="grid gap-2">
-        {options.map((o, i) => {
-          const state = selected === null ? "" : i === correct ? "ok" : i === selected ? "bad" : "";
-          return (
-            <button key={i} data-testid={`quiz-option-${block.id}-${i}`} onClick={() => pick(i)}
-              className={cn("flex items-center justify-between rounded-lg border px-4 py-2.5 text-left text-sm transition-colors",
-                state === "ok" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200"
-                  : state === "bad" ? "border-rose-500/60 bg-rose-500/10 text-rose-200"
-                    : "border-slate-800 bg-slate-950/40 text-slate-200 hover:border-slate-600")}>
-              {o}
-              {state === "ok" && <Check className="h-4 w-4" />}
-              {state === "bad" && <X className="h-4 w-4" />}
-            </button>
-          );
-        })}
-      </div>
-      {selected !== null && (
-        <div data-testid={`quiz-feedback-${block.id}`} className="rounded-md bg-slate-950/60 p-3 text-sm">
-          <p className={selected === correct ? "text-emerald-400" : "text-rose-400"}>{selected === correct ? "Correto." : "Ainda não."}</p>
-          <Markdown className="text-sm">{block.data.explanation}</Markdown>
-          <button onClick={() => setSelected(null)} className="mt-2 inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200">
-            <RotateCcw className="h-3 w-3" /> Tentar de novo
-          </button>
-        </div>
-      )}
+      <p className="font-medium text-slate-100">{block.data.prompt || block.data.question || "Atividade"}</p>
+      <ul className="grid gap-2" aria-label="Alternativas">
+        {options.map((option, index) => (
+          <li key={`${block.id}-static-option-${index}`} className="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-2.5 text-sm text-slate-200">
+            {option}
+          </li>
+        ))}
+      </ul>
+      <p className="text-sm text-slate-400">Esta atividade ainda não tem uma avaliação publicada.</p>
     </div>
   );
 }
@@ -149,6 +126,7 @@ export function ExerciseBlock({ block }: BlockProps) {
   return (
     <div className="space-y-3">
       <Markdown>{block.data.prompt}</Markdown>
+      {block.data.instructions && <Markdown className="text-sm text-slate-300">{block.data.instructions}</Markdown>}
       {options.length > 0 && (
         <ol className="list-[upper-alpha] space-y-1 pl-6 text-sm text-slate-300">{options.map((o, i) => <li key={i}>{o}</li>)}</ol>
       )}

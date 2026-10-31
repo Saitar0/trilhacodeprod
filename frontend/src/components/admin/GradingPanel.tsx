@@ -43,7 +43,7 @@ export function GradingPanel({ id, onDone }: { id: string; onDone: () => void })
     const names: string[] = (data.block?.data.criteria as string[]) || [];
     setFeedback(g?.feedback || "");
     setScore(g?.score != null ? String(g.score) : "");
-    setCriteria(names.map((n) => g?.criteria.find((c) => c.criterion === n) || { criterion: n, met: null, comment: "" }));
+    setCriteria(names.map((n) => g?.criteria?.find((c) => c.criterion === n) || { criterion: n, met: null, comment: "" }));
   }, [data]);
   if (isLoading || !data) return <Loader />;
   const { submission: s, block, attempts } = data;

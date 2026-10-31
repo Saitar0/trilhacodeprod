@@ -6,6 +6,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn, ROLE_LABELS } from "@/lib/utils";
+import { discardPendingNoteDrafts, flushPendingNoteSaves, navigateAfterNoteSave } from "@/hooks/useStudy";
 
 export function Logo() {
   return (
@@ -59,10 +60,17 @@ export function TopBar() {
           <DropdownMenuContent align="end" className="w-52 border-slate-800 bg-slate-900">
             <DropdownMenuLabel className="text-xs text-slate-400">{user.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem data-testid="user-menu-profile" onClick={() => navigate("/perfil")}>
+            <DropdownMenuItem data-testid="user-menu-profile" onClick={() => void navigateAfterNoteSave((to) => navigate(to), "/perfil", user.id)}>
               <UserRound className="mr-2 h-4 w-4" /> Perfil
             </DropdownMenuItem>
-            <DropdownMenuItem data-testid="user-menu-logout" onClick={async () => { await logout(); navigate("/login"); }}>
+            <DropdownMenuItem data-testid="user-menu-logout" onClick={async () => {
+              const saved = await flushPendingNoteSaves(user.id);
+              if (!saved && !window.confirm("Há uma anotação pendente ou em conflito. Sair agora descartará a edição local. Deseja continuar?")) return;
+              if (!saved) discardPendingNoteDrafts(user.id);
+              await logout();
+              discardPendingNoteDrafts(user.id);
+              navigate("/login");
+            }}>
               <LogOut className="mr-2 h-4 w-4" /> Sair
             </DropdownMenuItem>
           </DropdownMenuContent>

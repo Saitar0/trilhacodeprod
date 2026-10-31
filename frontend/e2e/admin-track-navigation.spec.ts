@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("administrator can open the seeded track editor", async ({ page }) => {
   await page.route("https://**/*", (route) => route.abort());

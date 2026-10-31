@@ -41,6 +41,7 @@ if settings.sentry_dsn:
 from database import client, db  # noqa: E402
 from learning import router as learning_router  # noqa: E402
 from migrations import check_schema_version, current_version  # noqa: E402
+from routes_activities import router as activities_router  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
 from routes_content import router as content_router  # noqa: E402
 from routes_import import router as import_router  # noqa: E402
@@ -96,7 +97,7 @@ app = FastAPI(
 def _error_code(status_code: int) -> str:
     return {
         400: "bad_request", 401: "unauthorized", 403: "forbidden", 404: "not_found",
-        409: "conflict", 422: "validation_error",
+        409: "conflict", 413: "payload_too_large", 422: "validation_error",
     }.get(status_code, "request_error" if status_code < 500 else "internal_error")
 
 
@@ -104,10 +105,22 @@ def _error_code(status_code: int) -> str:
 async def http_exception_handler(request: Request, exc: HTTPException):
     message = exc.detail if isinstance(exc.detail, str) else "Requisição inválida"
     request_id = getattr(request.state, "request_id", "")
-    return JSONResponse(status_code=exc.status_code, content={"error": {
+    error = {
         "code": _error_code(exc.status_code), "message": message,
         "request_id": request_id,
-    }}, headers={**(exc.headers or {}), "X-Request-ID": request_id})
+    }
+    # Preserve only the structured version-conflict payloads needed by clients
+    # to resolve concurrent note/progress writes. Other exception details stay
+    # behind the established generic error envelope.
+    if exc.status_code == 409 and isinstance(exc.detail, dict) and exc.detail.get("code") in {
+        "note_version_conflict", "progress_version_conflict", "progress_idempotency_conflict",
+        "activity_idempotency_conflict", "activity_version_conflict", "activity_active_attempt",
+        "activity_attempt_limit", "activity_attempt_conflict", "activity_revision_conflict",
+        "activity_state_conflict",
+    }:
+        error["details"] = exc.detail
+    return JSONResponse(status_code=exc.status_code, content={"error": error},
+                        headers={**(exc.headers or {}), "X-Request-ID": request_id})
 
 
 @app.exception_handler(RequestValidationError)
@@ -166,6 +179,7 @@ async def ready():
         raise HTTPException(status_code=503, detail="Banco sem as migrações esperadas")
     return {"ok": True, "migration_version": version}
 for r in (auth_router, taxonomy_router, content_router, progress_router, learning_router, submissions_router,
+          activities_router,
           versions_router, import_router):
     app.include_router(r)
 
@@ -180,6 +194,6 @@ app.add_middleware(
     allow_origins=settings.effective_cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
     expose_headers=["X-Request-ID"],
 )

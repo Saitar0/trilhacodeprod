@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "phase": "2.1A.12C.13",
+  "status": "proposed_not_operational_or_approved",
+  "source_commit": "ff9cf18d0751d06d3362716372b4ea88d143a0b6",
+  "current_backend_roles_and_permissions": {
+    "admin": [
+      "content.delete",
+      "content.publish",
+      "content.read",
+      "content.write",
+      "progress.write",
+      "submissions.grade",
+      "taxonomy.manage",
+      "users.manage"
+    ],
+    "editor": [
+      "content.delete",
+      "content.publish",
+      "content.read",
+      "content.write",
+      "progress.write",
+      "submissions.grade"
+    ],
+    "student": [
+      "progress.write"
+    ]
+  },
+  "current_authorization_facts": {
+    "permission_matrix_source": "backend/constants.py:10-16",
+    "write_permission_is_global_by_role": true,
+    "track_write_grants_exist_in_active_backend": false,
+    "track_read_visibility_is_write_authorization": false,
+    "users_manage_implies_track_grant_management": false,
+    "created_by_implies_track_ownership": false,
+    "admin_role_implies_universal_track_write": false,
+    "runtime_iam_verified": false
+  },
+  "operations": {
+    "track_create_update_reorder": {
+      "current_route_permission": "content.write",
+      "future_grant_operation": "track.edit",
+      "grant_scope": "resolved_track"
+    },
+    "track_delete": {
+      "current_route_permission": "content.delete",
+      "future_grant_operation": "track.delete",
+      "grant_scope": "resolved_track",
+      "additional_approval": "retention_and_student_state_decision_required"
+    },
+    "track_duplicate": {
+      "current_route_permission": "content.write",
+      "future_grant_operation": "track.duplicate",
+      "grant_scope": "source_and_new_track_creation"
+    },
+    "track_publish": {
+      "current_route_permission": "content.publish",
+      "future_grant_operation": "track.publish",
+      "grant_scope": "resolved_track"
+    },
+    "node_create_update_reorder_duplicate": {
+      "current_route_permission": "content.write",
+      "future_grant_operation": "structure.edit",
+      "grant_scope": "resolved_track"
+    },
+    "node_delete": {
+      "current_route_permission": "content.delete",
+      "future_grant_operation": "structure.delete",
+      "grant_scope": "resolved_track",
+      "additional_approval": "student_state_retention_decision_required"
+    },
+    "block_create_update_reorder_delete": {
+      "current_route_permission": "content.write",
+      "future_grant_operation": "block.edit",
+      "grant_scope": "resolved_track",
+      "note": "The active delete route also uses content.write; do not infer content.delete."
+    },
+    "relation_create_update_delete": {
+      "current_route_permission": "content.write",
+      "future_grant_operation": "relation.edit",
+      "grant_scope": "resolved_track"
+    },
+    "taxonomy_and_block_type_management": {
+      "current_route_permission": "taxonomy.manage",
+      "future_grant_operation": "catalog.manage",
+      "grant_scope": "global_catalog",
+      "note": "Global catalog authority must not be represented as an arbitrary track grant."
+    },
+    "tag_create_delete": {
+      "current_route_permission": "content.write",
+      "future_grant_operation": "tag.manage",
+      "grant_scope": "global_catalog",
+      "note": "Tag deletion currently updates nodes and tracks across the database."
+    },
+    "import": {
+      "current_route_permission": "content.write",
+      "future_grant_operation": "track.import",
+      "grant_scope": "resolved_track"
+    },
+    "restore": {
+      "current_route_permission": "content.publish",
+      "future_grant_operation": "track.restore",
+      "grant_scope": "resolved_track"
+    },
+    "grant_management": {
+      "current_route_permission": null,
+      "future_grant_operation": "grant.manage",
+      "grant_scope": "explicitly_delegated_track_or_global_authority",
+      "decision": "no_active_permission_exists"
+    },
+    "history_and_audit_read": {
+      "current_route_permission": "content.read",
+      "future_grant_operation": null,
+      "grant_scope": "acl_policy_pending"
+    }
+  },
+  "proposed_governance_rules": {
+    "require_authenticated_principal": true,
+    "require_current_session": true,
+    "require_global_role_permission": true,
+    "require_explicit_track_grant_for_track_write": true,
+    "resolve_track_from_resource_server_side": true,
+    "deny_client_selected_track_mismatch": true,
+    "admin_global_scope_is_implicit": false,
+    "global_admin_scope_requires_explicit_provisioning": true,
+    "fencing_token_is_authorization": false,
+    "idempotency_key_is_authorization": false,
+    "capability_is_accepted_from_client": false,
+    "authorization_lookup_failure_fails_closed": true,
+    "grantor_can_self_grant": false,
+    "grantor_can_delegate_beyond_own_scope": false,
+    "delegated_operations_must_be_subset_of_grantor_authority": true,
+    "grant_change_increments_authorization_epoch": true,
+    "grant_change_requires_durable_authorization_audit": true,
+    "grant_ownership_inferred_from_created_by": false,
+    "automatic_expiration_seconds": null,
+    "automatic_expiration_decision": "pending_human_approval"
+  },
+  "proposed_governance_roles_not_backend_roles": {
+    "track_steward": {
+      "scope": "only_tracks_explicitly_delegated_by_governance_authority",
+      "may_grant": "subset_of_own_delegated_operations",
+      "may_revoke": "grants_in_own_delegated_scope",
+      "may_self_grant": false,
+      "is_existing_role": false
+    },
+    "iam_governance_authority": {
+      "scope": "grant_administration_and_appointment_of_track_stewards",
+      "may_grant_global_scope": "only_after_explicit_human_approval_and_separate_audit",
+      "may_self_grant": false,
+      "is_existing_role": false
+    },
+    "emergency_revoker": {
+      "scope": "deny_or_revoke_only; no implicit grant capability",
+      "is_existing_role": false,
+      "activation_and_recovery_policy": "pending_human_approval"
+    },
+    "automated_service": {
+      "scope": "dedicated_principal_and_explicit_operation_grants_only",
+      "may_use_human_session": false,
+      "is_existing_role": false
+    }
+  },
+  "grant_lifecycle": {
+    "identity": ["actor_id", "track_id"],
+    "scope": "track_or_explicit_global_admin_scope",
+    "operations": "closed_set_approved_per_grant",
+    "state": "active_or_revoked",
+    "epoch": "monotonic_on_scope_or_operation_change",
+    "transfer": "revoke_old_delegation_then_issue_new_grant; created_by_is_not_ownership",
+    "regrant_after_revocation": "new_epoch_and_new_audit_event",
+    "retention_period": null,
+    "retention_decision": "pending_human_approval"
+  },
+  "revocation_ordering": {
+    "revocation_before_editorial_commit": "reject_editorial_commit",
+    "editorial_commit_before_revocation": "preserve_confirmed_historical_operation",
+    "states_requiring_commit_boundary_participation": [
+      "user_active_and_role_or_policy_epoch",
+      "session_active_and_session_epoch",
+      "track_grant_state_scope_operations_and_epoch",
+      "explicit_global_admin_scope_and_epoch"
+    ],
+    "external_check_or_eventual_projection_sufficient": false,
+    "same_transaction_proof_scope": "only_tested C11/C12 synthetic MongoDB replica sets"
+  },
+  "audit_contract": {
+    "required_for": [
+      "grant.created",
+      "grant.operations_changed",
+      "grant.delegated",
+      "grant.revoked",
+      "admin_scope.granted",
+      "admin_scope.revoked",
+      "privilege_escalation.denied",
+      "editorial.write.denied",
+      "editorial.write.confirmed"
+    ],
+    "minimum_fields": [
+      "event_kind",
+      "actor_id",
+      "target_actor_id",
+      "track_scope_or_catalog_scope",
+      "operations_before_and_after",
+      "authorization_epoch_before_and_after",
+      "decision",
+      "timestamp_utc",
+      "reason_code"
+    ],
+    "forbidden_fields": [
+      "JWT",
+      "session_secret",
+      "capability_secret",
+      "fencing_token",
+      "content_payload",
+      "student_data",
+      "raw_exception_message"
+    ],
+    "grant_change_audit_is_best_effort": false,
+    "denial_event_delivery_and_availability_policy": "pending_human_approval"
+  },
+  "authority_recommendation": {
+    "candidate": "one_authoritative_grant_record_per_actor_and_scope",
+    "ordering_requirement": "grant_and_other_revocable_authorization_facts_must_be_conditionally_participating_in_the_editorial_commit_boundary",
+    "operational_collection_name_selected": false,
+    "operational_schema_selected": false,
+    "same_mongodb_topology_verified": false,
+    "duplicate_independent_grant_authorities_allowed": false
+  }
+}
