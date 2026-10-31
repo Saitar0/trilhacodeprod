@@ -89,18 +89,42 @@ async def _finish_restore(job: dict, owner: str, version: dict, snapshot: dict, 
     if not backup:
         await save_version(
             track_id, track.get("version", 0), "backup", backup_note, user, await snapshot_track(track_id),
+            extra={
+                "published_activity_version_id": track.get("published_activity_version_id"),
+                "published_activity_count": await db.activity_publications.count_documents({
+                    "track_id": track_id, "published_version_id": track.get("published_activity_version_id"),
+                }) if track.get("published_activity_version_id") else 0,
+            },
             version_id=backup_version_id,
         )
 
     await apply_snapshot(track_id, snapshot)
     fields = {field: snapshot["track"].get(field) for field in TRACK_FIELDS if field in snapshot["track"]}
     fields.update(status="published", version=new_version, published_at=now(), updated_at=now())
-    await db.tracks.update_one({"_id": track["_id"]}, {"$set": fields})
+    restored_activity_version_id = version.get("published_activity_version_id")
+    if restored_activity_version_id:
+        expected_activity_count = version.get("published_activity_count", 0)
+        actual_activity_count = await db.activity_publications.count_documents({
+            "track_id": track_id, "published_version_id": restored_activity_version_id,
+        })
+        if actual_activity_count != expected_activity_count:
+            raise HTTPException(status_code=409, detail="A publicação de atividades desta versão está incompleta")
+        fields["published_activity_version_id"] = restored_activity_version_id
+    else:
+        fields.pop("published_activity_version_id", None)
+    track_update = {"$set": fields}
+    if not restored_activity_version_id:
+        track_update["$unset"] = {"published_activity_version_id": ""}
+    await db.tracks.update_one({"_id": track["_id"]}, track_update)
 
     version_note = job.get("note") or f"Restaurada a partir da v{version['version']}"
     await save_version(
         track_id, new_version, "restore", version_note, user, await snapshot_track(track_id),
-        {"restored_from": str(version["_id"]), "restored_from_version": version["version"]},
+        {"restored_from": str(version["_id"]), "restored_from_version": version["version"],
+         "published_activity_version_id": restored_activity_version_id,
+         "published_activity_count": await db.activity_publications.count_documents({
+             "track_id": track_id, "published_version_id": restored_activity_version_id,
+         }) if restored_activity_version_id else 0},
         version_id=restore_version_id,
     )
     status = "recovered" if recovered else "done"

@@ -56,3 +56,14 @@ Antes de staging/produção, forneça os valores SMTP pelo gerenciador de segred
 Os limitadores reutilizam `login_attempts.last` e não exigem um novo índice nem mudança do manifesto G2. Em rollout, mantenha a etapa de índices já existente, aguarde health/ready e confirme os checks G2 vigentes. Para reversão de código, mantenha a configuração SMTP; registros hashados de limite expiram pelo índice TTL existente e são ignorados por versões antigas.
 
 Uma senha redefinida revoga cookies antigos ao aumentar `token_version`; peça login novamente. Tokens expirados/consumidos podem ser substituídos por nova solicitação dentro dos limites. O procedimento de suporte não deve ler tokens ou senhas pelo banco; use reenvio/recuperação por e-mail.
+
+
+## Sessões autenticadas
+
+Cada login cria uma sessão independente no MongoDB. Os JWTs incluem o identificador aleatório dessa sessão; o banco guarda somente o SHA-256 do identificador, nunca os JWTs. Tanto o access token quanto o refresh token precisam corresponder a um registro ativo e não expirado. O logout revoga somente a sessão apresentada e limpa os dois cookies. Repetir o logout é seguro.
+
+A coleção `auth_sessions` usa o índice TTL `auth_session_expiry` sobre `expires_at`. Inclua esse índice no procedimento operacional existente de `python -m backend.manage ensure-indexes`. A consulta de validade também compara a expiração, portanto a sessão vencida deixa de funcionar mesmo antes da limpeza assíncrona do TTL.
+
+Tokens emitidos antes da inclusão do claim `sid` são rejeitados. Após a atualização, pessoas com cookies legados precisarão entrar novamente. O `token_version` existente continua revogando sessões de uma conta após confirmação de e-mail, recuperação ou alteração de senha. Mudanças de papel continuam refletidas pela leitura atual do usuário e de suas permissões em cada requisição.
+
+A validação consulta o MongoDB em cada requisição autenticada e falha com erro temporário quando o estado da sessão não pode ser confirmado. Se o MongoDB falhar durante o logout, a API limpa os cookies e retorna 503; esse resultado significa que a revogação não pôde ser confirmada. Não considere esse logout concluído até resolver a indisponibilidade. Não existe, nesta etapa, uma rota administrativa para desativar contas; o backend rejeita o acesso quando um registro de usuário contém `is_active: false` ou `disabled: true`.

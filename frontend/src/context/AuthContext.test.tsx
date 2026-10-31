@@ -37,4 +37,19 @@ describe("AuthContext", () => {
     await act(async () => result.current.logout());
     expect(result.current.user).toBe(false);
   });
+
+  it("rejects an incompatible successful /auth/me response instead of authenticating it", async () => {
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.spyOn(api, "get").mockResolvedValue({ data: "<!doctype html><html></html>" } as never);
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: ({ children }) => <AuthProvider>{children}</AuthProvider>,
+    });
+
+    await waitFor(() => expect(result.current.user).toBe(false));
+    expect(result.current.can("content.write")).toBe(false);
+    expect(errorLog).toHaveBeenCalledWith(
+      "A API /auth/me retornou um formato inválido; sessão não aceita.",
+    );
+    errorLog.mockRestore();
+  });
 });

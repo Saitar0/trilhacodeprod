@@ -316,9 +316,10 @@ class TestCyclesValidate:
 class TestSubmissions:
     @pytest.fixture(scope="class")
     @classmethod
-    def ctx(cls, login):
-        admin = login("admin@example.com")
+    def ctx(cls, login, grant_track_review):
+        admin = login("editor@example.com")
         tid = admin.post(f"{API}/tracks", json={"title": "TEST_subs"}).json()["id"]
+        grant_track_review(admin, tid)
         node = admin.post(f"{API}/nodes", json={"track_id": tid, "kind": "topic", "title": "T"}).json()
         # find submittable block type
         meta = admin.get(f"{API}/meta").json()
@@ -450,7 +451,9 @@ class TestNotes:
         assert up.status_code == 200
         lst = student.get(f"{API}/notes", params={"node_id": node_id}).json()
         assert any(n["body"] == "my note" for n in lst)
-        d = student.put(f"{API}/notes", json={"node_id": node_id, "body": "   "})
+        d = student.put(f"{API}/notes", json={
+            "node_id": node_id, "body": "   ", "expected_version": up.json()["version"],
+        })
         assert d.status_code == 200 and d.json().get("deleted") is True
 
 

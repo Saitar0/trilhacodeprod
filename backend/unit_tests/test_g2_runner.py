@@ -1,5 +1,6 @@
 import json
 import os
+import shlex
 import shutil
 import subprocess
 from pathlib import Path
@@ -20,8 +21,8 @@ def _runner_tools():
     return bash, jq, flock
 
 
-def _fake_docker(path: Path) -> None:
-    path.write_text(r'''#!/usr/bin/env bash
+def _fake_docker(path: Path, jq: str) -> None:
+    script = r'''#!/usr/bin/env bash
 set -eu
 state="$G2_TEST_STATE"
 id='0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
@@ -133,7 +134,11 @@ case "$1" in
     ;;
   *) exit 125 ;;
 esac
-''')
+'''
+    # The production runner deliberately fixes PATH. Call the jq executable
+    # discovered by the test harness explicitly so the fake Docker API remains
+    # usable when jq is provisioned only inside a disposable test environment.
+    path.write_text(script.replace("jq -cn", f"{shlex.quote(jq)} -cn"))
     path.chmod(0o755)
 
 
@@ -161,7 +166,7 @@ def runner_harness(tmp_path):
     manifest.write_bytes(MANIFEST_PATH.read_bytes())
     manifest.chmod(0o600)
     docker = tmp_path / "docker"
-    _fake_docker(docker)
+    _fake_docker(docker, jq)
     flock = tmp_path / "flock"
     _fake_flock(flock, real_flock)
     lock_dir = tmp_path / "lockdir"

@@ -33,8 +33,10 @@ jobs:
           printf '%s\n' \
             'QA_MONGO_ROOT_USERNAME=ci_qa_user' \
             'QA_MONGO_ROOT_PASSWORD=ci-only-password' \
-            'QA_JWT_SECRET=ci-only-jwt-secret-for-compose-validation' > "$qa_env"
-          docker compose --env-file "$qa_env" -f compose.qa.yaml config --quiet
+            'QA_JWT_SECRET=ci-only-jwt-secret-for-compose-validation' \
+            'QA_API_PORT=18080' \
+            'QA_FRONTEND_PORT=13080' > "$qa_env"
+          docker compose --project-name "trilhacode-compose-ci-${GITHUB_RUN_ID}" --env-file "$qa_env" -f compose.qa.yaml config --quiet
 
   backend:
     runs-on: ubuntu-latest

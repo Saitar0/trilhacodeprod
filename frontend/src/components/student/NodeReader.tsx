@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Check, Clock3, Compass, Lock, NotebookPen, RotateCcw } from "lucide-react";
@@ -14,6 +14,7 @@ import { BlockNote, NoteEditor, ReviewMenu, useNodeNotes } from "./StudyTools";
 import { ExerciseSubmission } from "@/components/blocks/ExerciseSubmission";
 import { Breadcrumbs, ChildrenList, LockedPanel } from "./NodeReaderParts";
 import { isLearnable } from "@/lib/tree";
+import { createOperationId } from "@/lib/operationId";
 export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nodeId: string; progress?: TrackProgress; staff: boolean }) {
   const { data, isLoading } = useNodeDetail(nodeId);
   const { data: meta } = useMeta();
@@ -22,13 +23,17 @@ export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nod
   const tn = vm.byId.get(nodeId);
   const learnable = tn ? isLearnable(tn, vm.lastKind, vm.blockCounts) : false;
   const lock = vm.locks[nodeId];
-  const noteFor = useNodeNotes(nodeId);
+  const noteQuery = useNodeNotes(nodeId);
+  const noteFor = noteQuery.noteFor;
   const [showNotes, setShowNotes] = useState(false);
+  const visitOperationId = useMemo(() => `${nodeId}_${createOperationId()}`, [nodeId]);
 
   useEffect(() => {
     if (!learnable || (lock && !staff)) return;
-    api.post("/progress/visit", { node_id: nodeId }).then(() => qc.invalidateQueries({ queryKey: ["progress", vm.track.id] }));
-  }, [nodeId, learnable, qc, vm.track.id, lock, staff]);
+    api.post("/progress/visit", { node_id: nodeId, operation_id: visitOperationId })
+      .then(() => qc.invalidateQueries({ queryKey: ["progress", vm.track.id] }))
+      .catch(() => undefined);
+  }, [nodeId, learnable, qc, vm.track.id, lock, staff, visitOperationId]);
 
   if (isLoading || !data) return <Loader />;
   const { node, blocks, ancestors } = data;
@@ -55,11 +60,16 @@ export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nod
         {(!lock || staff) && (
           <div className="flex flex-wrap gap-2 pt-1">
             <Button variant="outline" size="sm" className={showNotes ? "rounded-full border-amber-500/40 text-amber-200" : "rounded-full"}
-              data-testid="topic-notes-toggle" onClick={() => setShowNotes(!showNotes)}><NotebookPen />{noteFor(null) ? "Minha anotação" : "Anotar"}</Button>
+              data-testid="topic-notes-toggle" onClick={() => setShowNotes(!showNotes)}><NotebookPen />{noteFor(null)?.body ? "Minha anotação" : "Anotar"}</Button>
             <ReviewMenu nodeId={nodeId} />
           </div>
         )}
-        {showNotes && <NoteEditor nodeId={nodeId} blockId={null} initial={noteFor(null)} testId="topic-note-editor" />}
+        {(!lock || staff) && (
+          <div hidden={!showNotes}>
+            <NoteEditor key={`${nodeId}:node`} nodeId={nodeId} blockId={null} initial={noteFor(null)} ready={noteQuery.isSuccess}
+              loadError={noteQuery.isError} onRetryLoad={() => void noteQuery.refetch()} testId="topic-note-editor" />
+          </div>
+        )}
       </header>
       {lock && <LockedPanel vm={vm} lock={lock} staff={staff} />}
       {node.description && <Markdown>{node.description}</Markdown>}
@@ -73,11 +83,15 @@ export function NodeReader({ vm, nodeId, progress, staff }: { vm: ViewModel; nod
         <div className="space-y-5">
           {blocks.map((b) => (
             <BlockRenderer key={b.id} block={b} type={blockType(b.type)} progress={progress?.blocks[b.id]}
-              onProgress={(s, d) => setProgress.mutate({ node_id: nodeId, block_id: b.id, status: s, data: d })}
+              isStaff={staff} trackId={vm.track.id}
+              onProgress={(s, d, attemptId) => setProgress.mutate({
+                node_id: nodeId, block_id: b.id, status: s, data: d, attempt_id: attemptId,
+              })}
               actions={<ReviewMenu nodeId={nodeId} blockId={b.id} compact />}
               footer={<>
                 {blockType(b.type)?.capabilities?.includes("submission") && <ExerciseSubmission block={b} />}
-                <BlockNote nodeId={nodeId} blockId={b.id} initial={noteFor(b.id)} />
+                <BlockNote nodeId={nodeId} blockId={b.id} initial={noteFor(b.id)} ready={noteQuery.isSuccess}
+                  loadError={noteQuery.isError} onRetryLoad={() => void noteQuery.refetch()} />
               </>} />
           ))}
         </div>
