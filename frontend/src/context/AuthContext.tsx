@@ -4,6 +4,17 @@ import { User } from "@/types";
 
 type AuthState = User | null | false;
 
+function isUserResponse(value: unknown): value is User {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Partial<User>;
+  return typeof candidate.id === "string"
+    && typeof candidate.email === "string"
+    && typeof candidate.name === "string"
+    && (candidate.role === "admin" || candidate.role === "editor" || candidate.role === "student")
+    && Array.isArray(candidate.permissions)
+    && candidate.permissions.every((permission) => typeof permission === "string");
+}
+
 interface AuthCtx {
   user: AuthState;
   login: (email: string, password: string) => Promise<User>;
@@ -19,7 +30,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUserState] = useState<AuthState>(null);
 
   useEffect(() => {
-    api.get<User>("/auth/me").then((r) => setUserState(r.data)).catch(() => setUserState(false));
+    api.get<unknown>("/auth/me").then((r) => {
+      if (!isUserResponse(r.data)) {
+        // A SPA fallback can return index.html with HTTP 200 for a misrouted API request.
+        // Never treat an incompatible response as an authenticated user.
+        console.error("A API /auth/me retornou um formato inválido; sessão não aceita.");
+        setUserState(false);
+        return;
+      }
+      setUserState(r.data);
+    }).catch((error: { response?: { status?: number } }) => {
+      const status = error?.response?.status;
+      if (status === undefined || status >= 500) {
+        console.error("Não foi possível validar a sessão em /auth/me.", {
+          status: status ?? "network_error",
+        });
+      }
+      setUserState(false);
+    });
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {

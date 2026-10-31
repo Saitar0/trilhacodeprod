@@ -5,13 +5,59 @@ from database import db
 
 # (collection, keys, options, duplicate-check fields)
 INDEXES = [
+    ("tracks", [("slug", 1)],
+     {"unique": True, "name": "one_track_slug", "partialFilterExpression": {"slug": {"$type": "string"}}},
+     ("slug",)),
     ("users", [("email", 1)], {"unique": True}, ("email",)),
+    (
+        "auth_sessions",
+        [("expires_at", 1)],
+        {"expireAfterSeconds": 0, "name": "auth_session_expiry"},
+        None,
+    ),
     ("login_attempts", [("identifier", 1)], {}, None),
     ("login_attempts", [("last", 1)], {"expireAfterSeconds": 3600}, None),
     ("nodes", [("track_id", 1), ("parent_id", 1), ("order", 1)], {}, None),
+    ("nodes", [("track_id", 1), ("meta.import_ref", 1)],
+     {"unique": True, "name": "one_node_import_ref", "partialFilterExpression": {"meta.import_ref": {"$type": "string"}}},
+     ("track_id", "meta.import_ref")),
     ("nodes", [("title", "text"), ("summary", "text")], {"name": "node_search_text"}, None),
     ("content_blocks", [("node_id", 1), ("order", 1)], {}, None),
+    ("content_blocks", [("track_id", 1), ("meta.import_ref", 1)],
+     {"unique": True, "name": "one_block_import_ref", "partialFilterExpression": {"meta.import_ref": {"$type": "string"}}},
+     ("track_id", "meta.import_ref")),
+    ("activity_publications", [("track_id", 1), ("published_version_id", 1), ("activity_id", 1)],
+     {"unique": True, "name": "one_activity_per_published_version"},
+     ("track_id", "published_version_id", "activity_id")),
+    ("activity_publications", [("activity_id", 1), ("published_version_id", 1)],
+     {"name": "activity_publication_lookup"}, None),
+    ("activity_attempts", [("user_id", 1), ("create_operation_key", 1)],
+     {"unique": True, "name": "one_activity_attempt_create_operation",
+      "partialFilterExpression": {"create_operation_key": {"$type": "string"}}},
+     ("user_id", "create_operation_key")),
+    ("activity_attempts", [("user_id", 1), ("draft_operations.id", 1)],
+     {"unique": True, "name": "one_activity_draft_operation",
+      "partialFilterExpression": {"draft_operations.id": {"$type": "string"}}},
+     ("user_id", "draft_operations.id")),
+    ("activity_attempts", [("user_id", 1), ("submit_operation_key", 1)],
+     {"unique": True, "name": "one_activity_submit_operation",
+      "partialFilterExpression": {"submit_operation_key": {"$type": "string"}}},
+     ("user_id", "submit_operation_key")),
+    ("activity_attempts", [("user_id", 1), ("activity_id", 1), ("published_version_id", 1),
+                            ("attempt_number", 1)],
+     {"unique": True, "name": "one_activity_attempt_number"},
+     ("user_id", "activity_id", "published_version_id", "attempt_number")),
+    ("activity_attempts", [("user_id", 1), ("activity_id", 1), ("published_version_id", 1)],
+     {"unique": True, "name": "one_open_activity_attempt",
+      "partialFilterExpression": {"state": {"$in": ["draft", "submitted"]}}},
+     ("user_id", "activity_id", "published_version_id")),
+    ("activity_attempts", [("user_id", 1), ("activity_id", 1), ("created_at", -1)],
+     {"name": "activity_attempt_history"}, None),
+    ("activity_attempts", [("projection_status", 1), ("updated_at", 1)],
+     {"name": "activity_attempt_reconciliation"}, None),
     ("relations", [("track_id", 1)], {}, None),
+    ("relations", [("track_id", 1), ("node_id", 1), ("target_id", 1), ("type", 1)],
+     {"unique": True, "name": "one_track_relation"}, ("track_id", "node_id", "target_id", "type")),
     ("progress", [("user_id", 1), ("track_id", 1)], {}, None),
     ("progress", [("user_id", 1), ("node_id", 1), ("block_id", 1)], {"unique": True},
      ("user_id", "node_id", "block_id")),
@@ -19,6 +65,9 @@ INDEXES = [
      {"unique": True, "name": "one_user_track_state"}, ("user_id", "track_id")),
     ("learning_events", [("user_id", 1), ("at", -1)], {}, None),
     ("edit_history", [("track_id", 1), ("at", -1)], {}, None),
+    ("edit_history", [("import_operation_id", 1)],
+     {"unique": True, "name": "one_import_audit", "partialFilterExpression": {"import_operation_id": {"$type": "string"}}},
+     ("import_operation_id",)),
     ("taxonomies", [("group", 1), ("key", 1)], {"unique": True}, ("group", "key")),
     ("block_types", [("key", 1)], {"unique": True}, ("key",)),
     ("tags", [("slug", 1)], {"unique": True, "name": "one_tag_slug"}, ("slug",)),
@@ -40,11 +89,16 @@ INDEXES = [
 
 
 def _options(index: dict) -> dict:
-    return {key: index[key] for key in (
+    options = {key: index[key] for key in (
         "unique", "sparse", "expireAfterSeconds", "partialFilterExpression", "collation", "hidden",
         "wildcardProjection",
     )
             if key in index}
+    # MongoDB may return its implicit default collation in listIndexes even when
+    # the index was created without an explicit collation.
+    if options.get("collation") == {"locale": "simple"}:
+        options.pop("collation")
+    return options
 
 
 def _same_keys(index: dict, expected_keys: tuple) -> bool:
@@ -66,7 +120,9 @@ def _keys_match(index: dict, expected_keys: tuple) -> bool:
 
 async def _duplicates(collection, fields: tuple[str, ...], partial_filter: dict | None = None) -> list[dict]:
     # Unique indexes treat missing and null as the same key value.
-    group_id = {field: {"$ifNull": [f"${field}", None]} for field in fields}
+    # Keep the key as an array: MongoDB field names in a $group _id object cannot
+    # contain dots, while indexed paths such as "meta.import_ref" are valid inputs.
+    group_id = [{"$ifNull": [f"${field}", None]} for field in fields]
     pipeline = ([{"$match": partial_filter}] if partial_filter else []) + [
         {"$group": {"_id": group_id, "count": {"$sum": 1}, "sample_id": {"$first": "$_id"}}},
         {"$match": {"count": {"$gt": 1}}},
@@ -74,8 +130,8 @@ async def _duplicates(collection, fields: tuple[str, ...], partial_filter: dict 
     ]
     cursor = await collection.aggregate(pipeline)
     rows = await cursor.to_list(20)
-    return [{"values": row["_id"], "count": row["count"], "sample_id": str(row["sample_id"])}
-            for row in rows]
+    return [{"values": dict(zip(fields, row["_id"], strict=True)),
+             "count": row["count"], "sample_id": str(row["sample_id"])} for row in rows]
 
 
 async def preflight_indexes() -> list[str]:
@@ -157,5 +213,9 @@ async def preflight_index_checks(database) -> list[dict[str, str]]:
 
 
 async def ensure_indexes() -> None:
+    findings = await preflight_indexes()
+    blockers = [finding for finding in findings if finding.startswith(("CONFLITO ", "DUPLICATAS "))]
+    if blockers:
+        raise RuntimeError("Preflight bloqueou criação de índices; reconciliação manual necessária: " + "; ".join(blockers))
     for collection_name, keys, options, _unique_fields in INDEXES:
         await db[collection_name].create_index(keys, **options)

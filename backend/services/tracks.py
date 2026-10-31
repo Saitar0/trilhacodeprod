@@ -1,6 +1,7 @@
 # ruff: noqa: EXE002
 import re
 
+from bson import ObjectId
 from fastapi import HTTPException
 
 from audit import audit
@@ -10,6 +11,7 @@ from integrity import reconcile_orphans, save_version
 from learning import find_cycles
 from permissions import can_view_track, is_staff
 from serialization import oid
+from services.activity_publications import ActivityDefinitionError, normalize_quiz
 from services.common import check_status, get_document, next_order, slugify, validate_reorder
 from services.nodes import clone_nodes, parents_first
 from services.versions import snapshot_track
@@ -20,7 +22,7 @@ async def list_tracks(
 ) -> list[dict]:
     query = {}
     if not is_staff(user):
-        query = {"status": "published", "visibility": "public"}
+        query = {"status": "published", "visibility": "public", "_import_state": {"$exists": False}}
     elif status:
         query["status"] = status
     if query_text:
@@ -95,7 +97,10 @@ async def update_track(track_id: str, data: dict, user: dict) -> dict:
 
 async def delete_track(track_id: str, user: dict) -> dict:
     track = await get_document("tracks", track_id)
-    for collection in ("nodes", "content_blocks", "relations", "progress", "learning_events"):
+    for collection in (
+        "nodes", "content_blocks", "relations", "progress", "learning_events",
+        "activity_publications", "activity_attempts",
+    ):
         await db[collection].delete_many({"track_id": track_id})
     await db.user_track_state.delete_many({"track_id": track_id})
     version_ids = [
@@ -146,15 +151,77 @@ async def duplicate_track(track_id: str, user: dict) -> dict:
 
 async def publish_track(track_id: str, note: str, publish_children: bool, user: dict) -> dict:
     track = await get_document("tracks", track_id)
+    if track.get("_import_state") is not None:
+        raise HTTPException(status_code=409, detail="A trilha possui uma importação pendente")
+
+    version = track.get("version", 0) + 1
+    published_version_id = str(ObjectId())
+    publishable_statuses = ["published", "draft"] if publish_children else ["published"]
+    snapshot = await snapshot_track(track_id)
+    eligible_node_ids = {
+        node["id"] for node in snapshot["nodes"] if node.get("status") in publishable_statuses
+    }
+    blocks = [
+        block for block in snapshot["blocks"]
+        if block.get("node_id") in eligible_node_ids
+        and block.get("type") == "quiz"
+        and block.get("status") in publishable_statuses
+    ]
+
+    # Validate all new-schema assessments before writing anything. Legacy quiz
+    # blocks are included only when they can be safely adapted; invalid legacy
+    # blocks remain ordinary static content.
+    publications = []
+    for block in blocks:
+        try:
+            definition = normalize_quiz(block, published_version_id, version)
+        except ActivityDefinitionError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        if definition is None:
+            continue
+        publications.append({
+            "_id": ObjectId(),
+            "track_id": track_id,
+            "node_id": str(block["node_id"]),
+            "activity_id": definition["activity_id"],
+            "published_version_id": published_version_id,
+            "definition": definition,
+            "created_at": now(),
+        })
+
+    # Prepare the exact snapshot and assessment read model first. The active
+    # pointer is swapped only after both are complete, so students keep using
+    # the previous immutable definition if preparation fails.
+    if publish_children:
+        for node in snapshot["nodes"]:
+            if node.get("status") == "draft":
+                node["status"] = "published"
+        for block in snapshot["blocks"]:
+            if block.get("status") == "draft":
+                block["status"] = "published"
+    timestamp = now()
+    snapshot["track"].update(
+        status="published", version=version, published_at=timestamp.isoformat(), updated_at=timestamp.isoformat(),
+    )
+    if publications:
+        await db.activity_publications.insert_many(publications, ordered=True)
+    await save_version(
+        track_id, version, "publish", note, user, snapshot,
+        extra={"published_activity_version_id": published_version_id,
+               "published_activity_count": len(publications)}, version_id=published_version_id,
+    )
+
     if publish_children:
         await db.nodes.update_many({"track_id": track_id, "status": "draft"}, {"$set": {"status": "published"}})
         await db.content_blocks.update_many(
             {"track_id": track_id, "status": "draft"}, {"$set": {"status": "published"}}
         )
-    version = track.get("version", 0) + 1
-    await db.tracks.update_one({"_id": oid(track_id)}, {"$set": {
-        "status": "published", "version": version, "published_at": now(), "updated_at": now()
+    current_version_filter = {"version": track.get("version", 0)} if "version" in track else {"version": {"$exists": False}}
+    activated = await db.tracks.update_one({"_id": oid(track_id), **current_version_filter}, {"$set": {
+        "status": "published", "version": version, "published_at": timestamp, "updated_at": timestamp,
+        "published_activity_version_id": published_version_id,
     }})
-    await save_version(track_id, version, "publish", note, user, await snapshot_track(track_id))
+    if not activated.matched_count:
+        raise HTTPException(status_code=409, detail="A trilha mudou durante a publicação; tente novamente")
     await audit(user, "track", track_id, "published", track_id, f"v{version} {note}".strip())
     return await db.tracks.find_one({"_id": oid(track_id)})

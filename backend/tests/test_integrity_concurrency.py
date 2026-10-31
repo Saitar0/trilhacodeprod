@@ -2,16 +2,17 @@ import asyncio
 import uuid
 from types import SimpleNamespace
 
+import pytest
 from bson import ObjectId
 
 from database import db
-from indexes import INDEXES, _keys_match, preflight_indexes
+from indexes import INDEXES, _duplicates, _keys_match, _options, ensure_indexes, preflight_indexes
 from services.progress import visit_node
 from services.taxonomy import create_block_type, create_tag, create_taxonomy
 
 
 def test_preflight_compound_and_text_index_key_matching():
-    assert len(INDEXES) == 23
+    assert len(INDEXES) == 38
     assert _keys_match(
         {"key": {"user_id": 1, "at": -1}},
         (("user_id", 1), ("at", -1)),
@@ -31,6 +32,41 @@ def test_preflight_compound_and_text_index_key_matching():
         {**mongo_text_index, "weights": {"title": 1}},
         expected_text_keys,
     )
+    assert _options({"collation": {"locale": "simple"}}) == {}
+    assert _options({"collation": {"locale": "en", "strength": 2}}) == {
+        "collation": {"locale": "en", "strength": 2},
+    }
+
+
+def test_live_duplicate_scan_supports_nested_index_paths(event_loop):
+    collection = db[f"preflight-probe-{uuid.uuid4().hex}"]
+
+    async def scan():
+        await collection.insert_many([
+            {"track_id": "synthetic-track", "meta": {"import_ref": "same-ref"}},
+            {"track_id": "synthetic-track", "meta": {"import_ref": "same-ref"}},
+        ])
+        try:
+            return await _duplicates(
+                collection, ("track_id", "meta.import_ref"),
+                {"meta.import_ref": {"$type": "string"}},
+            )
+        finally:
+            await collection.drop()
+
+    duplicates = event_loop.run_until_complete(scan())
+    assert len(duplicates) == 1
+    assert duplicates[0]["values"] == {
+        "track_id": "synthetic-track", "meta.import_ref": "same-ref",
+    }
+    assert duplicates[0]["count"] == 2
+
+
+def test_live_index_preflight_accepts_existing_indexes(event_loop):
+    findings = event_loop.run_until_complete(preflight_indexes())
+    assert findings
+    assert all(finding.startswith("OK ") for finding in findings), findings
+    event_loop.run_until_complete(ensure_indexes())
 
 
 def test_concurrent_user_registration_is_private_and_creates_one_account(async_client, event_loop):
@@ -185,7 +221,7 @@ def test_unique_index_preflight_reports_duplicates_and_respects_partial_indexes(
 
         async def aggregate(self, pipeline):
             self.pipelines.append(pipeline)
-            rows = ([{"_id": {"slug": "same"}, "count": 2, "sample_id": "id-1"}]
+            rows = ([{"_id": ["same"], "count": 2, "sample_id": "id-1"}]
                     if self.name == "tags" else [])
             return AggregationCursor(rows)
 
@@ -211,7 +247,7 @@ def test_unique_index_preflight_reports_duplicates_and_respects_partial_indexes(
     observed = []
     for collection, fields, partial_filter in unique_indexes:
         pipeline = fake_db.collections[collection].pipelines.pop(0)
-        expected_group = {field: {"$ifNull": [f"${field}", None]} for field in fields}
+        expected_group = [{"$ifNull": [f"${field}", None]} for field in fields]
         expected = ([{"$match": partial_filter}] if partial_filter else []) + [
             {"$group": {"_id": expected_group, "count": {"$sum": 1},
                          "sample_id": {"$first": "$_id"}}},
@@ -244,4 +280,25 @@ def test_unique_index_preflight_reports_duplicates_and_respects_partial_indexes(
     else:
         raise AssertionError("duplicate findings must fail the public preflight command")
     assert closed == [True]
+
+
+def test_ensure_indexes_refuses_legacy_duplicates_without_writing(monkeypatch, event_loop):
+    writes = []
+
+    class Collection:
+        async def create_index(self, *args, **kwargs):
+            writes.append((args, kwargs))
+
+    class FakeDatabase:
+        def __getitem__(self, _name):
+            return Collection()
+
+    async def duplicate_findings():
+        return ["DUPLICATAS tracks.one_track_slug: legado duplicado"]
+
+    monkeypatch.setattr("indexes.db", FakeDatabase())
+    monkeypatch.setattr("indexes.preflight_indexes", duplicate_findings)
+    with pytest.raises(RuntimeError, match="reconciliação manual"):
+        event_loop.run_until_complete(ensure_indexes())
+    assert writes == []
 

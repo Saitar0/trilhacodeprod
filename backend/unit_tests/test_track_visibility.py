@@ -9,6 +9,8 @@ def test_students_can_view_only_published_non_private_tracks():
     assert not can_view_track({"status": "published", "visibility": "unlisted"}, student)
     assert not can_view_track({"status": "published"}, student)
     assert not can_view_track({"status": "draft", "visibility": "public"}, student)
+    assert not can_view_track({"status": "published", "visibility": "public", "_import_state": {"status": "applying"}}, student)
+    assert not can_view_track({"status": "published", "visibility": "public", "_import_state": {}}, student)
 
 
 def test_staff_can_view_private_tracks():

@@ -2,6 +2,7 @@ import React from "react";
 import { Check } from "lucide-react";
 import { DynamicIcon } from "@/components/common";
 import { BlockProps } from "./BlockProps";
+import { ActivityRenderer } from "@/components/activities/ActivityRenderer";
 import { CalloutBlock, ChecklistBlock, CodeBlock, ExerciseBlock, FlashcardBlock, GenericBlock, LinkBlock, MarkdownBlock, QuizBlock, VideoBlock } from "./BlockRendererParts";
 
 const forType = (Renderer: React.FC<BlockProps>): React.FC<BlockProps> => function TypeBlock(props) {
@@ -39,7 +40,9 @@ export function BlockRenderer(props: BlockProps) {
           {done && <Check className="h-4 w-4 text-emerald-400" />}
         </span>
       </header>
-      <Renderer {...props} />
+      {props.block.type === "quiz" && props.block.activity
+        ? <ActivityRenderer activity={props.block.activity} trackId={props.trackId || ""} blockId={props.block.id} />
+        : <Renderer {...props} />}
       {props.footer}
     </section>
   );
